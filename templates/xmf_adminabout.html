@@ -1,0 +1,240 @@
+<table>
+    <tr>
+        <td width="50%">
+            <img src='<{$module_url}><{$module_image}>' alt='<{$module_name}>'
+                 style='float: left; margin-right: 10px;'/>
+            <div style='margin-top: 1px; color: #33538e; margin-bottom: 4px; font-size: 18px; line-height: 18px; font-weight: bold;'>
+                <{$module_name}> version <{$module_version}> <{if $module_status}>(<{$module_status}>)<{/if}>
+            </div>
+
+            <{if $module_author_name}>
+            <div style='line-height: 16px; font-weight: bold;'>
+                <{$smarty.const._AB_XMF_BY}> <{$module_author_name}>
+            </div>
+            <{/if}>
+
+            <{if $module_license}>
+            <div style='line-height: 16px;'>
+                <{if $module_license_url}>
+                <a href='<{$module_license_url}>'><{$module_license}></a>
+                <{else}>
+                <{$module_license}>
+                <{/if}>
+            </div>
+            <{/if}>
+
+            <{if $module_paypal}>
+            <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+                <input type="hidden" name="cmd" value="_s-xclick">
+                <input type="hidden" name="hosted_button_id" value="<{$module_paypal}>">
+                <input type="image" src="https://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit"
+                       alt="PayPal - The safer, easier way to pay online!">
+                <img alt="" border="0" src="https://www.paypal.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+            </form>
+            <{/if}>
+
+            <fieldset>
+                <legend class="label"><{$smarty.const._AB_XMF_AUTHOR_INFO}></legend>
+                <table>
+                <{if $module_developer_lead}>
+                    <tr>
+                        <td class='head2' ><{$smarty.const._AB_XMF_AUTHOR}></td>
+                        <td class='even'><{$module_author_name}></td>
+                    </tr>
+                    <{/if}>
+                <{if $module_developer_lead}>
+                    <tr>
+                        <td class='head2' ><{$smarty.const._AB_XMF_DEVELOPER_LEAD}></td>
+                        <td class='even'><{$module_developer_lead}></td>
+                    </tr>
+                    <{/if}>
+
+                    <{if $module_developer_contributor}>
+                    <tr>
+                        <td class='head2'><{$smarty.const._AB_XMF_DEVELOPER_CONTRIBUTOR}></td>
+                        <td class='even'><{$module_developer_contributor}></td>
+                    </tr>
+                    <{/if}>
+
+                    <{if $module_people_developers}>
+                    <tr>
+                        <td class='head2' style="vertical-align: top;" >
+                            <{$smarty.const._AB_XMF_PEOPLE_DEVELOPERS}>
+                        </td>
+                        <td class='even'>
+                            <{foreach item=person from=$module_people_developers}>
+                            <div><{$person}></div>
+                            <{/foreach}>
+                        </td>
+                    </tr>
+                    <{/if}>
+
+                    <{if $module_people_testers}>
+                    <tr>
+                        <td class='head2' style="vertical-align: top;" >
+                            <{$smarty.const._AB_XMF_PEOPLE_TESTERS}>
+                        </td>
+                        <td class='even'>
+                            <{foreach item=person from=$module_people_testers}>
+                            <div><{$person}></div>
+                            <{/foreach}>
+                        </td>
+                    </tr>
+                    <{/if}>
+
+                    <{if $module_people_translaters}>
+                    <tr>
+                        <td class='head2' style="vertical-align: top;" >
+                            <{$smarty.const._AB_XMF_PEOPLE_TRANSLATERS}>
+                        </td>
+                        <td class='even'>
+                            <{foreach item=person from=$module_people_translaters}>
+                            <div><{$person}></div>
+                            <{/foreach}>
+                        </td>
+                    </tr>
+                    <{/if}>
+
+                    <{if $module_people_documenters}>
+                    <tr>
+                        <td class='head2' style="vertical-align: top;" >
+                            <{$smarty.const._AB_XMF_PEOPLE_DOCUMENTERS}>
+                        </td>
+                        <td class='even'>
+                            <{foreach item=person from=$module_people_documenters}>
+                            <div><{$person}></div>
+                            <{/foreach}>
+                        </td>
+                    </tr>
+                    <{/if}>
+
+                    <{if $module_people_other}>
+                    <tr>
+                        <td class='head2' style="vertical-align: top;" >
+                            <{$smarty.const._AB_XMF_PEOPLE_OTHER}>
+                        </td>
+                        <td class='even'>
+                            <{foreach item=person from=$module_people_other}>
+                            <div><{$person}></div>
+                            <{/foreach}>
+                        </td>
+                    </tr>
+                    <{/if}>
+
+                    <{if $module_developer_website_url}>
+                    <tr>
+                        <td class='head2' ><{$smarty.const._AB_XMF_DEVELOPER_WEBSITE}></td>
+                        <td class='even'><a href="<{$module_developer_website_url}>" target="_blank"><{$module_developer_website_name}></a>
+                        </td>
+                    </tr>
+                    <{/if}>
+
+                    <{if $module_developer_email}>
+                    <tr>
+                        <td class='head2' ><{$smarty.const._AB_XMF_DEVELOPER_EMAIL}></td>
+                        <td class='even'><a href="mailto:<{$module_developer_email}>" target="_blank"><{$module_developer_email}></a>
+                        </td>
+                    </tr>
+                    <{/if}>
+                </table>
+            </fieldset>
+
+
+            <fieldset>
+                <legend class="label"><{$smarty.const._AB_XMF_MODULE_INFO}></legend>
+                <table>
+                    <{if $module_release_date}>
+                    <tr>
+                        <td class='head2' ><{$smarty.const._AB_XMF_MODULE_RELEASE_DATE}></td>
+                        <td class='even'><{$module_release_date}></td>
+                    </tr>
+                    <{/if}>
+
+                    <{if $module_status}>
+                    <tr>
+                        <td class='head2' ><{$smarty.const._AB_XMF_MODULE_STATUS}></td>
+                        <td class='even'><{$module_status}></td>
+                    </tr>
+                    <{/if}>
+
+                    <{if $module_demo_site_name}>
+                    <tr>
+                        <td class='head2' ><{$smarty.const._AB_XMF_MODULE_DEMO}></td>
+                        <td class='even'><a href="<{$module_demo_site_url}>" target="_blank"><{$module_demo_site_name}></a>
+                        </td>
+                    </tr>
+                    <{/if}>
+
+                    <{if $module_support_site_name}>
+                    <tr>
+                        <td class='head2' ><{$smarty.const._AB_XMF_MODULE_SUPPORT}></td>
+                        <td class='even'><a href="<{$module_support_site_url}>" target="_blank"><{$module_support_site_name}></a>
+                        </td>
+                    </tr>
+                    <{/if}>
+
+                    <{if $module_submit_bug}>
+                    <tr>
+                        <td class='head2' ><{$smarty.const._AB_XMF_MODULE_BUG}></td>
+                        <td class='even'><a href="<{$module_submit_bug}>" target="_blank"><{$smarty.const._AB_XMF_MODULE_SUBMIT_BUG}></a>
+                        </td>
+                    </tr>
+                    <{/if}>
+
+                    <{if $module_submit_feature}>
+                    <tr>
+                        <td class='head2' ><{$smarty.const._AB_XMF_MODULE_FEATURE}></td>
+                        <td class='even'><a href="<{$module_submit_feature}>" target="_blank"><{$smarty.const._AB_XMF_MODULE_SUBMIT_FEATURE}></a>
+                        </td>
+                    </tr>
+                    <{/if}>
+
+                </table>
+            </fieldset>
+
+            <{if $module_warning}>
+            <fieldset>
+                <legend class="label"><{$smarty.const._AB_XMF_MODULE_DISCLAIMER}></legend>
+                <text><{$module_warning}></text>
+            </fieldset>
+            <{/if}>
+
+            <{if $module_author_word}>
+            <fieldset>
+                <legend class="label"><{$smarty.const._AB_XMF_MODULE_AUTHOR_WORD}></legend>
+                <text><{$module_author_word}></text>
+            </fieldset>
+            <{/if}>
+        </td>
+        <td>
+            <{if $module_description}>
+            <fieldset>
+                <legend class="label"><{$smarty.const._AB_XMF_MODULE_DESCRIPTION}></legend>
+                <text><{$module_description}></text>
+            </fieldset>
+            <{/if}>
+
+            <{if $module_credits}>
+            <fieldset>
+                <legend class="label"><{$smarty.const._AB_XMF_DEVELOPER_CREDITS}></legend>
+                <text><{$module_credits}></text>
+            </fieldset>
+            <{/if}>
+
+            <{if $module_version_history}>
+            <fieldset>
+                <legend class="label"><{$smarty.const._AB_XMF_VERSION_HISTORY}></legend>
+                <br>
+                <div class="txtchangelog"><{$module_version_history}></div>
+            </fieldset>
+            <{/if}>
+        </td>
+    </tr>
+    <{if $logo_link_url}>
+    <tr>
+        <td colspan="2" align="center">
+            <a href="<{$logo_link_url}>" target="blank"><img src="<{$logo_image_url}>"/></a>
+        </td>
+    </tr>
+    <{/if}>
+</table>
