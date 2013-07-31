@@ -138,7 +138,7 @@ class Xmf_Filter_Input
      * @return  mixed   'Cleaned' version of input parameter
      * @static
      */
-    public function clean($source, $type = 'string')
+    static public function clean($source, $type = 'string')
     {
         // Handle the type constraint
         switch (strtoupper($type)) {
@@ -183,7 +183,7 @@ class Xmf_Filter_Input
                 if (isset($this) && is_a($this, 'Xmf_Filter_Input')) {
                     $filter =& $this;
                 } else {
-                    $filter =& Xmf_Filter_Input::getInstance();
+                    $filter = Xmf_Filter_Input::getInstance();
                 }
                 $result = (string)$filter->_remove($filter->_decode((string)$source));
                 break;
@@ -204,10 +204,10 @@ class Xmf_Filter_Input
 
             default :
                 // Check for static usage and assign $filter the proper variable
-                if (is_object($this) && get_class($this) == 'Xmf_Filter_Input') {
+                if (isset($this) && is_object($this) && get_class($this) == 'Xmf_Filter_Input') {
                     $filter =& $this;
                 } else {
-                    $filter =& Xmf_Filter_Input::getInstance();
+                    $filter = Xmf_Filter_Input::getInstance();
                 }
                 // Are we dealing with an array?
                 if (is_array($source)) {
