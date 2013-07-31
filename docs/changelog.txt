@@ -1,0 +1,7 @@
+xmf ChangeLog
+
+=== xmf ===
+Unreleased produce
+
+* initial checkout: svn checkout http://svn.code.sf.net/p/xoops/svn/XMF/xmf/trunk/xmf
+
