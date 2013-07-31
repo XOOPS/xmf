@@ -71,7 +71,7 @@ class Xmf_Request
      * @param   string  $name       Variable name
      * @param   string  $default    Default value if the variable does not exist
      * @param   string  $hash       Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
-     * @param   string  $type       Return type for the variable, for valid values see {@link JFilterInput::clean()}
+     * @param   string  $type       Return type for the variable, for valid values see {@link Xmf_Filter_Input::clean()}.
      * @param   int     $mask       Filter mask for the variable
      * @return  mixed               Requested variable
      */
@@ -237,7 +237,7 @@ class Xmf_Request
      */
     static function getString($name, $default = '', $hash = 'default', $mask = 0)
     {
-        // Cast to string, in case JREQUEST_ALLOWRAW was specified for mask
+        // Cast to string, in case XMF_REQUEST_ALLOWRAW was specified for mask
         return (string)Xmf_Request::getVar($name, $default, $hash, 'string', $mask);
     }
 
@@ -266,7 +266,7 @@ class Xmf_Request
     }
 
     /**
-     * Set a variable in on of the request variables
+     * Set a variable in one of the request variables
      *
      * @access    public
      * @param     string    $name         Name
@@ -378,12 +378,12 @@ class Xmf_Request
                 break;
         }
 
-        $result = Xmf_Request::_cleanVar($input, $mask);
-
         // Handle magic quotes compatability
         if (get_magic_quotes_gpc() && ($hash != 'FILES')) {
             $result = Xmf_Request::_stripSlashesRecursive($result);
         }
+
+        $result = Xmf_Request::_cleanVars($input, $mask);
 
         return $result;
     }
@@ -402,93 +402,16 @@ class Xmf_Request
         }
     }
 
-
-    /**
-     * Cleans the request from script injection.
-     *
-     * @static
-     * @return    void
-     */
-    static public function clean()
-    {
-        Xmf_Request::_cleanArray($_FILES);
-        Xmf_Request::_cleanArray($_ENV);
-        Xmf_Request::_cleanArray($_GET);
-        Xmf_Request::_cleanArray($_POST);
-        Xmf_Request::_cleanArray($_COOKIE);
-        Xmf_Request::_cleanArray($_SERVER);
-
-        if (isset($_SESSION)) {
-            Xmf_Request::_cleanArray($_SESSION);
-        }
-
-        $REQUEST = $_REQUEST;
-        $GET = $_GET;
-        $POST = $_POST;
-        $COOKIE = $_COOKIE;
-        $FILES = $_FILES;
-        $ENV = $_ENV;
-        $SERVER = $_SERVER;
-
-        if (isset ($_SESSION)) {
-            $SESSION = $_SESSION;
-        }
-
-        foreach ($GLOBALS as $key => $value) {
-            if ($key != 'GLOBALS') {
-                unset($GLOBALS[$key]);
-            }
-        }
-        $_REQUEST = $REQUEST;
-        $_GET = $GET;
-        $_POST = $POST;
-        $_COOKIE = $COOKIE;
-        $_FILES = $FILES;
-        $_ENV = $ENV;
-        $_SERVER = $SERVER;
-
-        if (isset($SESSION)) {
-            $_SESSION = $SESSION;
-        }
-    }
-
-    /**
-     * Adds an array to the GLOBALS array and checks that the GLOBALS variable is not being attacked
-     *
-     * @access    protected
-     * @param    array    $array      Array to clean
-     * @param    boolean  $globalise  True if the array is to be added to the GLOBALS
-     */
-    static protected function _cleanArray(&$array, $globalise = false)
-    {
-        static $banned = array('_files', '_env', '_get', '_post', '_cookie', '_server', '_session', 'globals');
-
-        foreach ($array as $key => $value) {
-            // PHP GLOBALS injection bug
-            $failed = in_array(strtolower($key), $banned);
-
-            // PHP Zend_Hash_Del_Key_Or_Index bug
-            $failed |= is_numeric($key);
-            if ($failed) {
-                exit('Illegal variable <b>' . implode('</b> or <b>', $banned) . '</b> passed to script.');
-            }
-            if ($globalise) {
-                $GLOBALS[$key] = $value;
-            }
-        }
-    }
-
     /**
      * Clean up an input variable.
      *
      * @param mixed $var The input variable.
-     * @param int $mask Filter bit mask. 1=no trim: If this flag is cleared and the
-     * input is a string, the string will have leading and trailing whitespace
-     * trimmed. 2=allow_raw: If set, no more filtering is performed, higher bits
-     * are ignored. 4=allow_html: HTML is allowed, but passed through a safe
-     * HTML filter first. If set, no more filtering is performed. If no bits
-     * other than the 1 bit is set, a strict filter is applied.
-     * @param string $type The variable type {@see JFilterInput::clean()}.
+     * @param int $mask Filter bit mask.
+     *  - 1=no trim: If this flag is cleared and the input is a string, the string will have leading and trailing whitespace trimmed.
+     *  - 2=allow_raw: If set, no more filtering is performed, higher bits are ignored.
+     *  - 4=allow_html: HTML is allowed, but passed through a safe HTML filter first. If set, no more filtering is performed.
+     *  - If no bits other than the 1 bit is set, a strict filter is applied.
+     * @param string $type The variable type. See {@link Xmf_Filter_Input::clean()}.
      *
      * @return string
      */
@@ -523,6 +446,29 @@ class Xmf_Request
         }
         return $var;
     }
+
+    /**
+     * Clean up an array of variables.
+     *
+     * @param mixed $var The input variable.
+     * @param int $mask Filter bit mask. See {@link Xmf_Request::_cleanVar()}
+     * @param string $type The variable type. See {@link Xmf_Filter_Input::clean()}.
+     *
+     * @return string
+     */
+    static protected function _cleanVars($var, $mask = 0, $type = null)
+    {
+		if(is_string($var)) {
+			$var=Xmf_Request::_cleanVar($var, $mask, $type);
+		}
+		else {
+			foreach($var as $key => &$value) {
+				$value=Xmf_Request::_cleanVars($value, $mask, $type);
+			}
+		}
+        return $var;
+    }
+
 
     /**
      * Strips slashes recursively on an array
