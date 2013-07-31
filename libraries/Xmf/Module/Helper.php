@@ -79,7 +79,7 @@ class Xmf_Module_Helper
     /**
      * @return XoopsModule
      */
-    public function getObject()
+    public function getModule()
     {
         if ($this->_object == null) {
             $this->_initObject();
@@ -89,6 +89,8 @@ class Xmf_Module_Helper
         }
         return $this->_object;
     }
+    /** TODO eliminate this and replace with 2.6 style getModule **/
+    public function getObject() { return $this->getModule(); }
 
     /**
      * @param string $name
