@@ -109,7 +109,7 @@ class Xmf_Database_Table
     public function exists()
     {
         $ret = false;
-        $result = $this->_db->query("SHOW TABLES FROM " . XOOPS_DB_NAME);
+        $result = $this->_db->queryF("SHOW TABLES FROM " . XOOPS_DB_NAME);
         while (list ($m_table) = $this->_db->fetchRow($result)) {
             if ($m_table == $this->name()) {
                 $ret = true;
@@ -125,7 +125,7 @@ class Xmf_Database_Table
     public function getExistingFieldsArray()
     {
         $fields = array();
-        $result = $this->_db->query("SHOW COLUMNS FROM " . $this->name());
+        $result = $this->_db->queryF("SHOW COLUMNS FROM " . $this->name());
         while ($existing_field = $this->_db->fetchArray($result)) {
             $fields[$existing_field['Field']] = $existing_field['Type'];
             if ($existing_field['Null'] != "YES") {
