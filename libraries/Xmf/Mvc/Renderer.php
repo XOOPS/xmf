@@ -1,6 +1,7 @@
 <?php
 
 namespace Xmf\Mvc;
+use Xmf\Mvc;
 
 /**
  * This file has its roots as part of the Mojavi package which was
@@ -85,7 +86,7 @@ class Renderer extends ContextAware
         $this->attributes = array();
         $this->dir        = NULL;
         $this->engine     = NULL;
-        $this->mode       = \Xmf\Mvc::RENDER_CLIENT;
+        $this->mode       = Mvc::RENDER_CLIENT;
         $this->result     = NULL;
         $this->template   = NULL;
 
@@ -152,8 +153,8 @@ class Renderer extends ContextAware
             $mojavi   =& $this->Controller()->getMojavi();
             $template =& $this->attributes;
 
-            if ($this->mode == Xmf\Mvc::RENDER_VAR ||
-                $this->controller()->getRenderMode() == \Xmf\Mvc::RENDER_VAR)
+            if ($this->mode == Mvc::RENDER_VAR ||
+                $this->controller()->getRenderMode() == Mvc::RENDER_VAR)
             {
 
                 ob_start();
@@ -193,8 +194,8 @@ class Renderer extends ContextAware
     public function & fetchResult ()
     {
 
-        if ($this->mode == \Xmf\Mvc::RENDER_VAR ||
-            $this->Controller()->getRenderMode() == \Xmf\Mvc::RENDER_VAR)
+        if ($this->mode == Mvc::RENDER_VAR ||
+            $this->Controller()->getRenderMode() == Mvc::RENDER_VAR)
         {
 
             if ($this->result == NULL) {
