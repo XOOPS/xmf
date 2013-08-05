@@ -48,8 +48,10 @@ define('XMF_NEWLINE', "\n");
 define('_GLOBAL_LEFT', 'left');
 define('_GLOBAL_RIGHT', 'right');
 
-require dirname(dirname(__FILE__)) . '/libraries/Xmf/Loader.php';
-spl_autoload_register(array('Xmf_Loader', 'loadClass'));
+//require dirname(dirname(__FILE__)) . '/libraries/Xmf/Loader.php';
+//spl_autoload_register(array('Xmf_Loader', 'loadClass'));
+
+require dirname(dirname(__FILE__)) . '/vendor/autoload.php';
 
 require dirname(__FILE__) . '/functions.php';
-Xmf_Language::load('global', 'xmf');
+Xmf\Language::load('global', 'xmf');

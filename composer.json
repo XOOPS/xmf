@@ -1,0 +1,14 @@
+{
+    "name": "xmf/xoops-module-framework",
+    "license": "GPL-2.0+",
+    "type": "project",
+    "description": "The \"XOOPS Module Framework\" distribution",
+    "autoload": {
+        "psr-0": {
+            "Xmf\\": "libraries/"
+        }
+    },
+    "require": {
+        "php": ">=5.3.3"
+    }
+}
