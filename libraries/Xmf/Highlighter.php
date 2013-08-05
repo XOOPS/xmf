@@ -1,4 +1,7 @@
 <?php
+
+namespace Xmf;
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -21,7 +24,7 @@
 
 defined('XMF_EXEC') or die('Xmf was not detected');
 
-class Xmf_Highlighter
+class Highlighter
 {
     /**
      * @var string
@@ -43,14 +46,13 @@ class Xmf_Highlighter
      */
     private $_replace_callback = null;
 
-
     /**
      * Main constructor
      *
-     * This is the main constructor of keyhighlighter class. <br />
-     * It's the only public method of the class.
-     * @param string $keywords the keywords you want to highlight
-     * @param boolean $single_words specify if it has to highlight also the single words.
+     * This is the main constructor of keyhighlighter class.
+     * It is the only public method of the class.
+     * @param string   $keywords         the keywords you want to highlight
+     * @param boolean  $single_words     specify if it has to highlight also the single words.
      * @param callback $replace_callback a custom callback for keyword highlight.
      */
     public function __construct($keywords, $single_words = false, $replace_callback = null)
@@ -61,7 +63,7 @@ class Xmf_Highlighter
     }
 
     /**
-     * @param array $replace_matches
+     * @param  array $replace_matches
      * @return mixed
      */
     private function _replace($replace_matches)
@@ -90,7 +92,7 @@ class Xmf_Highlighter
     }
 
     /**
-     * @param string $buffer
+     * @param  string       $buffer
      * @return mixed|string
      */
     private function _highlight($buffer)
@@ -99,6 +101,7 @@ class Xmf_Highlighter
         $this->_preg_keywords = preg_replace('/[^\w ]/si', '', $this->_keywords);
         $buffer = preg_replace_callback("/(\>(((?" . ">[^><]+)|(?R))*)\<)/is", array(&$this, '_replace'), $buffer);
         $buffer = substr($buffer, 1, -1);
+
         return $buffer;
     }
 }

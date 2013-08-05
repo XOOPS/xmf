@@ -1,4 +1,7 @@
 <?php
+
+namespace Xmf\Module\Helper;
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -22,7 +25,7 @@ defined('XMF_EXEC') or die('Xmf was not detected');
 
 include_once XOOPS_ROOT_PATH . '/kernel/groupperm.php';
 
-class Xmf_Module_Helper_Permission extends Xmf_Module_Helper_Abstract
+class Permission extends AbstractHelper
 {
     /**
      * @var int
@@ -53,7 +56,7 @@ class Xmf_Module_Helper_Permission extends Xmf_Module_Helper_Abstract
      * Returns permissions for a certain type
      *
      * @param string $type "global", "forum" or "topic" (should perhaps have "post" as well - but I don't know)
-     * @param int $id id of the item (forum, topic or possibly post) to get permissions for
+     * @param int    $id   id of the item (forum, topic or possibly post) to get permissions for
      *
      * @return array
      */
@@ -72,7 +75,7 @@ class Xmf_Module_Helper_Permission extends Xmf_Module_Helper_Abstract
 
     /**
      * @param $itemsObj_array_keys
-     * @param bool $gperm_name
+     * @param  bool  $gperm_name
      * @return array
      */
     public function getGrantedGroupsForIds($itemsObj_array_keys, $gperm_name = false)
@@ -80,7 +83,7 @@ class Xmf_Module_Helper_Permission extends Xmf_Module_Helper_Abstract
         static $groups;
         static $all_permissions_fetched;
 
-        if ($gperm_name){
+        if ($gperm_name) {
             if (isset($groups[$gperm_name])) {
                 return $groups[$gperm_name];
             }
@@ -126,11 +129,12 @@ class Xmf_Module_Helper_Permission extends Xmf_Module_Helper_Abstract
      * Returns permissions for a certain type
      *
      * @param string $gperm_name "global", "forum" or "topic" (should perhaps have "post" as well - but I don't know)
-     * @param int $id id of the item (forum, topic or possibly post) to get permissions for
+     * @param int    $id         id of the item (forum, topic or possibly post) to get permissions for
      *
      * @return array
      */
-    public function getGrantedItems($gperm_name, $id = null) {
+    public function getGrantedItems($gperm_name, $id = null)
+    {
         global $xoopsUser;
 
         static $permissions;
@@ -146,7 +150,7 @@ class Xmf_Module_Helper_Permission extends Xmf_Module_Helper_Abstract
             //Get user's groups
             $groups = is_object($xoopsUser) ? $xoopsUser->getGroups() : array(XOOPS_GROUP_ANONYMOUS);
             $criteria2 = new CriteriaCompo();
-            foreach($groups as $gid) {
+            foreach ($groups as $gid) {
                 $criteria2->add(new Criteria('gperm_groupid', $gid), 'OR');
             }
             $criteria->add($criteria2);
@@ -168,11 +172,12 @@ class Xmf_Module_Helper_Permission extends Xmf_Module_Helper_Abstract
     }
 
     /**
-     * @param string $gperm_name
-     * @param int $id
+     * @param  string $gperm_name
+     * @param  int    $id
      * @return bool
      */
-    public function isGranted($gperm_name, $id = null) {
+    public function isGranted($gperm_name, $id = null)
+    {
         static $permissions;
 
         if ($id == null) return false;
@@ -190,12 +195,12 @@ class Xmf_Module_Helper_Permission extends Xmf_Module_Helper_Abstract
      *
      * updatePermissions()
      *
-     * @param array $groups : group with granted permission
-     * @param int $itemid : itemid on which we are setting permissions
-     * @param string $perm_name : name of the permission
+     * @param  array   $groups    : group with granted permission
+     * @param  int     $itemid    : itemid on which we are setting permissions
+     * @param  string  $perm_name : name of the permission
      * @return boolean : TRUE if the no errors occured
      */
-    function updatePermissions($groups, $itemid, $perm_name)
+    public function updatePermissions($groups, $itemid, $perm_name)
     {
         // First, if the permissions are already there, delete them
         if (!$this->_perm->deleteByModule($this->_mid, $perm_name, $itemid)) {
@@ -210,16 +215,18 @@ class Xmf_Module_Helper_Permission extends Xmf_Module_Helper_Abstract
                 }
             }
         }
+
         return true;
     }
 
     /**
-     * @param array $groups
-     * @param id $itemid
-     * @param string $perm_name
+     * @param  array  $groups
+     * @param  id     $itemid
+     * @param  string $perm_name
      * @return bool
      */
-    function saveItem_Permissions($groups, $itemid, $perm_name) {
+    public function saveItem_Permissions($groups, $itemid, $perm_name)
+    {
         $result = true;
 
         // First, if the permissions are already there, delete them
@@ -232,6 +239,7 @@ class Xmf_Module_Helper_Permission extends Xmf_Module_Helper_Abstract
                 echo $this->_perm->addRight($perm_name, $itemid, $group_id, $this->_mid);
             }
         }
+
         return $result;
     }
 
@@ -239,8 +247,8 @@ class Xmf_Module_Helper_Permission extends Xmf_Module_Helper_Abstract
     /**
      * Delete all permissions for a specific item and/or name
      *
-     * @param int $itemid : id of the item for which to delete the permissions
-     * @param string $gperm_name
+     * @param  int     $itemid     : id of the item for which to delete the permissions
+     * @param  string  $gperm_name
      * @return boolean : TRUE if the no errors occured
      */
     public function deletePermissions($itemid = null, $gperm_name = null)
@@ -251,13 +259,14 @@ class Xmf_Module_Helper_Permission extends Xmf_Module_Helper_Abstract
     /**
      * Checks if the user has access to a specific permission on a given object
      *
-     * @param string $gperm_name name of the permission to test
-     * @param int $gperm_itemid id of the object to check
+     * @param  string  $gperm_name   name of the permission to test
+     * @param  int     $gperm_itemid id of the object to check
      * @return boolean : TRUE if user has access, FALSE if not
      **/
     public function accessGranted($gperm_name, $gperm_itemid)
     {
         $gperm_groupid = is_object($GLOBALS['xoopsUser']) ? $GLOBALS['xoopsUser']->getGroups() : array(XOOPS_GROUP_ANONYMOUS);
+
         return $this->_perm->checkRight($gperm_name, $gperm_itemid, $gperm_groupid, $this->_mid);
     }
 }

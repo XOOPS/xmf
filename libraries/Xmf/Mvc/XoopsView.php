@@ -1,5 +1,7 @@
 <?php
 
+namespace Xmf\Mvc;
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -15,7 +17,7 @@
  *
  * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
  * @license         http://www.fsf.org/copyleft/gpl.html GNU private license
- * @package         Xmf_Mvc
+ * @package         Xmf\Mvc
  * @since           1.0
  * @author          Richard Griffith
  */
@@ -27,28 +29,28 @@
  * - (more to come)
  *
  */
-abstract class Xmf_Mvc_XoopsView extends Xmf_Mvc_View
+abstract class XoopsView extends View
 {
 
-	private static $renderer = null;
-	private static $form = null;
+    private static $renderer = null;
+    private static $form = null;
 
-	public function & Renderer()
-	{
-		if(is_null(self::$renderer)) {
-			self::$renderer = new Xmf_Mvc_XoopsSmartyRenderer();
-		}
-		return self::$renderer;
-	}
+    public function & Renderer()
+    {
+        if (is_null(self::$renderer)) {
+            self::$renderer = new XoopsSmartyRenderer();
+        }
 
-	public function & Form()
-	{
-		if(is_null(self::$form)) {
-			self::$form = new Xmf_Mvc_Lib_Form();
-		}
-		return self::$form;
-	}
+        return self::$renderer;
+    }
+
+    public function & Form()
+    {
+        if (is_null(self::$form)) {
+            self::$form = new Lib\Form();
+        }
+
+        return self::$form;
+    }
 
 }
-
-?>

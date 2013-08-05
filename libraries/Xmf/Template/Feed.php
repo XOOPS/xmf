@@ -1,4 +1,7 @@
 <?php
+
+namespace Xmf\Template;
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -21,7 +24,7 @@
 
 defined('XMF_EXEC') or die('Xmf was not detected');
 
-class Xmf_Template_Feed extends Xmf_Template_Abstract
+class Feed extends AbstractTemplate
 {
     /**
      * @var string
@@ -117,7 +120,6 @@ class Xmf_Template_Feed extends Xmf_Template_Abstract
      * @var array
      */
     private $_items = array();
-
 
     /**
      * @return void

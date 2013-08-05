@@ -1,4 +1,7 @@
 <?php
+
+namespace Xmf\Database;
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -21,9 +24,9 @@
 
 defined('XMF_EXEC') or die('Xmf was not detected');
 
-Xmf_Language::load('database', 'xmf');
+Xmf\Language::load('database', 'xmf');
 
-class Xmf_Database_Table
+class Table
 {
     /**
      * @var XoopsDatabase
@@ -75,7 +78,7 @@ class Xmf_Database_Table
      */ //felix
     private $_updatedWhere;
 
-    var $_existingFieldsArray = false;
+    public $_existingFieldsArray = false;
 
     /**
      * Constructor
@@ -116,6 +119,7 @@ class Xmf_Database_Table
                 break;
             }
         }
+
         return $ret;
     }
 
@@ -138,16 +142,18 @@ class Xmf_Database_Table
                 $fields[$existing_field['Field']] .= " default '" . $existing_field['Default'] . "'";
             }
         }
+
         return $fields;
     }
 
     /**
-     * @param string $field
+     * @param  string $field
      * @return bool
      */
     public function fieldExists($field)
     {
         $existingFields = $this->getExistingFieldsArray();
+
         return isset ($existingFields[$field]);
     }
 
@@ -165,7 +171,7 @@ class Xmf_Database_Table
      *                   `currency` varchar(100) NOT NULL default '',
      *                   PRIMARY KEY  (`transactionid`)");
      *
-     * @param  string $structure table structure
+     * @param string $structure table structure
      *
      */
     public function setStructure($structure)
@@ -225,16 +231,17 @@ class Xmf_Database_Table
                 echo "&nbsp;&nbsp;" . sprintf(_DB_XMF_MSG_ADD_DATA, $this->name()) . "<br />";
             }
         }
+
         return $ret;
     }
 
     /**
      * Add a field to be added
      *
-     * @param string $name name of the field
-     * @param string $properties properties of the field
-     * @param bool $newname
-     * @param bool $showerror
+     * @param  string $name       name of the field
+     * @param  string $properties properties of the field
+     * @param  bool   $newname
+     * @param  bool   $showerror
      * @return void
      */
     public function addAlteredField($name, $properties, $newname = false, $showerror = true)
@@ -249,7 +256,7 @@ class Xmf_Database_Table
     /**
      * Invert values 0 to 1 and 1 to 0
      *
-     * @param string $name name of the field
+     * @param string $name     name of the field
      * @param string $oldValue old propertie
      * @param string $newValue new propertie
      *
@@ -265,7 +272,7 @@ class Xmf_Database_Table
     /**
      * Add new field of a record to be added
      *
-     * @param string $name name of the field
+     * @param string $name       name of the field
      * @param string $properties properties of the field
      *
      */
@@ -290,7 +297,7 @@ class Xmf_Database_Table
     /**
      * Add field for which the value will be updated
      *
-     * @param string $name name of the field
+     * @param string $name  name of the field
      * @param string $value value to be set
      *
      */
@@ -383,6 +390,7 @@ class Xmf_Database_Table
         } else {
             echo "&nbsp;&nbsp;" . sprintf(_DB_XMF_MSG_CREATE_TABLE, $this->name()) . "<br />";
         }
+
         return $ret;
     }
 
@@ -399,9 +407,11 @@ class Xmf_Database_Table
 
         if (!$ret) {
             echo "&nbsp;&nbsp;" . sprintf(_DB_XMF_MSG_DROP_TABLE_ERR, $this->name()) . " (" . $this->_db->error() . ")<br />";
+
             return false;
         } else {
             echo "&nbsp;&nbsp;" . sprintf(_DB_XMF_MSG_DROP_TABLE, $this->name()) . "<br />";
+
             return true;
         }
     }
@@ -451,6 +461,7 @@ class Xmf_Database_Table
                 echo "&nbsp;&nbsp;" . sprintf(_DB_XMF_MSG_NEWFIELD, $newField['name'], $this->name()) . "<br />";
             }
         }
+
         return $ret;
     }
 
@@ -472,6 +483,7 @@ class Xmf_Database_Table
                 echo "&nbsp;&nbsp;" . sprintf(_DB_XMF_MSG_UPDATE_TABLE, $this->name()) . "<br />";
             }
         }
+
         return $ret;
     }
 
@@ -493,6 +505,7 @@ class Xmf_Database_Table
                 echo "&nbsp;&nbsp;" . sprintf(_DB_XMF_MSG_UPDATE_TABLE, $this->name()) . "<br />";
             }
         }
+
         return $ret;
     }
 
@@ -502,7 +515,7 @@ class Xmf_Database_Table
      * @return bool true if success, false if an error occured
      *
      */
-    function dropFields()
+    public function dropFields()
     {
         $ret = true;
         foreach ($this->getdropedFields() as $dropedField) {
@@ -514,6 +527,7 @@ class Xmf_Database_Table
                 echo "&nbsp;&nbsp;" . sprintf(_DB_XMF_MSG_DROPFIELD, $dropedField, $this->name()) . "<br />";
             }
         }
+
         return $ret;
     }
 

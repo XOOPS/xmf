@@ -1,4 +1,7 @@
 <?php
+
+namespace Xmf;
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -21,21 +24,20 @@
 
 defined('XMF_EXEC') or die('Xmf was not detected');
 
-class Xmf_Mvc
+class Mvc
 {
 
-	const RENDER_CLIENT = 1;
-	const RENDER_VAR    = 2;
-	const REQ_NONE      = 1;
-	const REQ_GET       = 2;
-	const REQ_POST      = 4;
-	const REQ_ALL       = 6;
-	const VIEW_ALERT    = 'alert';
-	const VIEW_ERROR    = 'error';
-	const VIEW_INDEX    = 'index';
-	const VIEW_INPUT    = 'input';
-	const VIEW_NONE     =  null;
-	const VIEW_SUCCESS  = 'success';
+    const RENDER_CLIENT = 1;
+    const RENDER_VAR    = 2;
+    const REQ_NONE      = 1;
+    const REQ_GET       = 2;
+    const REQ_POST      = 4;
+    const REQ_ALL       = 6;
+    const VIEW_ALERT    = 'alert';
+    const VIEW_ERROR    = 'error';
+    const VIEW_INDEX    = 'index';
+    const VIEW_INPUT    = 'input';
+    const VIEW_NONE     =  null;
+    const VIEW_SUCCESS  = 'success';
 
 }
-?>

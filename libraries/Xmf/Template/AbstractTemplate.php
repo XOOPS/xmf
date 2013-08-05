@@ -1,4 +1,7 @@
 <?php
+
+namespace Xmf\Template;
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -22,7 +25,7 @@ defined('XMF_EXEC') or die('Xmf was not detected');
 
 include_once XOOPS_ROOT_PATH . '/class/template.php';
 
-abstract class Xmf_Template_Abstract
+abstract class AbstractTemplate
 {
     /**
      * @var XoopsTpl
@@ -39,7 +42,7 @@ abstract class Xmf_Template_Abstract
      */
     public function __construct()
     {
-        $this->tpl = new XoopsTpl();
+        $this->tpl = new \XoopsTpl();
         $this->_template = "db:system_dummy.html";
         $this->init();
     }
@@ -61,7 +64,7 @@ abstract class Xmf_Template_Abstract
     /**
      * Used in init methods to set the template used by $_tpl
      *
-     * @param string $template Path to the template file
+     * @param  string $template Path to the template file
      * @return void
      */
     protected function setTemplate($template = '')
@@ -90,6 +93,7 @@ abstract class Xmf_Template_Abstract
     public function fetch()
     {
         $this->render();
+
         return $this->tpl->fetch($this->_template);
     }
 
@@ -102,6 +106,5 @@ abstract class Xmf_Template_Abstract
     {
         echo $this->fetch();
     }
-
 
 }

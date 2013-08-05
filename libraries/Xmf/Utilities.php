@@ -1,4 +1,7 @@
 <?php
+
+namespace Xmf;
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -20,10 +23,10 @@
 
 defined('XMF_EXEC') or die('Xmf was not detected');
 
-class Xmf_Utilities
+class Utilities
 {
 
-    static public function purifyText($text, $keyword = false)
+    public static function purifyText($text, $keyword = false)
     {
         $myts = MyTextSanitizer::getInstance();
         $text = str_replace('&nbsp;', ' ', $text);
@@ -46,7 +49,7 @@ class Xmf_Utilities
         $text = str_replace('\n', ' ', $text);
         $text = str_replace('&#8213;', ' ', $text);
 
-        if ($keyword){
+        if ($keyword) {
             $text = str_replace('.', ' ', $text);
             $text = str_replace(',', ' ', $text);
             $text = str_replace('\'', ' ', $text);
@@ -56,7 +59,7 @@ class Xmf_Utilities
         return $text;
     }
 
-    static public function html2text($document)
+    public static function html2text($document)
     {
         // PHP Manual:: function preg_replace
         // $document should contain an HTML document.
@@ -95,6 +98,7 @@ class Xmf_Utilities
         "chr(\\1)");
 
         $text = preg_replace($search, $replace, $document);
+
         return $text;
     }
 }

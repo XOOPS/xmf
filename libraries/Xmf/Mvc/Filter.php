@@ -1,5 +1,7 @@
 <?php
 
+namespace Xmf\Mvc;
+
 /**
  * This file has its roots as part of the Mojavi package which was
  * Copyright (c) 2003 Sean Kerr. It has been incorporated into this
@@ -11,7 +13,7 @@
  * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
  * @copyright       Portions Copyright (c) 2003 Sean Kerr
  * @license         (license terms)
- * @package         Xmf_Mvc
+ * @package         Xmf\Mvc
  * @since           1.0
  */
 
@@ -29,57 +31,55 @@
  * pre-process and post-process any Action.
  *
  */
-abstract class Xmf_Mvc_Filter extends Xmf_Mvc_ContextAware
+abstract class Filter extends ContextAware
 {
 
-	/**
-	 * An associative array of initialization parameters.
-	 *
-	 * @since  1.0
-	 * @type   array
-	 */
-	protected $params;
+    /**
+     * An associative array of initialization parameters.
+     *
+     * @since  1.0
+     * @type   array
+     */
+    protected $params;
 
-	/**
-	 * Create a new Filter instance.
-	 *
-	 * @since  1.0
-	 */
-	public function __construct ()
-	{
+    /**
+     * Create a new Filter instance.
+     *
+     * @since  1.0
+     */
+    public function __construct ()
+    {
 
-		$this->params = array();
+        $this->params = array();
 
-	}
+    }
 
-	/**
-	 * Execute the filter.
-	 *
-	 *  _This method should never be called manually._
-	 *
-	 * All filters must include this line to advance the FilterChain:
-	 * @code $filterChain->execute(); @endcode
-	 *
-	 * @since  1.0
-	 */
-	abstract public function execute (&$filterChain);
+    /**
+     * Execute the filter.
+     *
+     *  _This method should never be called manually._
+     *
+     * All filters must include this line to advance the FilterChain:
+     * @code $filterChain->execute(); @endcode
+     *
+     * @since  1.0
+     */
+    abstract public function execute (&$filterChain);
 
-	/**
-	 * Initialize the filter.
-	 *
-	 * @todo **This does not appear to be used anywhere.** Remove
-	 *
-	 * @param array $params  An associative array of initialization parameters.
-	 *
-	 * @since  1.0
-	 */
-	public function initialize ($params)
-	{
+    /**
+     * Initialize the filter.
+     *
+     * @todo **This does not appear to be used anywhere.** Remove
+     *
+     * @param array $params An associative array of initialization parameters.
+     *
+     * @since  1.0
+     */
+    public function initialize ($params)
+    {
 
-		$this->params = array_merge($this->params, $params);
+        $this->params = array_merge($this->params, $params);
 
-	}
+    }
 
 }
-
-?>

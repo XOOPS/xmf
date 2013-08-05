@@ -1,5 +1,7 @@
 <?php
 
+namespace Xmf\Mvc;
+
 /**
  * This file has its roots as part of the Mojavi package which was
  * Copyright (c) 2003 Sean Kerr. It has been incorporated into this
@@ -11,7 +13,7 @@
  * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
  * @copyright       Portions Copyright (c) 2003 Sean Kerr
  * @license         (license terms)
- * @package         Xmf_Mvc
+ * @package         Xmf\Mvc
  * @since           1.0
  */
 
@@ -20,497 +22,476 @@
  * consisting of PHP code.
  *
  */
-class Xmf_Mvc_Renderer extends Xmf_Mvc_ContextAware
+class Renderer extends ContextAware
 {
 
-	/**
-	 * An associative array of template attributes.
-	 *
-	 * @since  1.0
-	 * @type   array
-	 */
-	protected $attributes;
-
-	/**
-	 * An absolute file-system path where a template can be found.
-	 *
-	 * @since  1.0
-	 * @type   string
-	 */
-	protected $dir;
-
-	/**
-	 * The template engine instance.
-	 *
-	 * @since  1.0
-	 * @type   object
-	 */
-	protected $engine;
-
-	/**
-	 * The mode to be used for rendering, which is one of the following:
-	 *
-	 * - Xmf_Mvc::RENDER_CLIENT - render to client
-	 * - Xmf_Mvc::RENDER_VAR - render to variable
-	 *
-	 * @type   int
-	 */
-	protected $mode;
-
-	/**
-	 * The result of a render when render mode is Xmf_Mvc::RENDER_VAR.
-	 *
-	 * @type   string
-	 */
-	protected $result;
-
-	/**
-	 * A relative or absolute file-system path to a template.
-	 *
-	 * @since  1.0
-	 * @type   string
-	 */
-	protected $template;
-
-	/**
-	 * Create a new Renderer instance.
-	 *
-	 * @since  1.0
-	 */
-	public function __construct ()
-	{
-
-		$this->attributes = array();
-		$this->dir        = NULL;
-		$this->engine     = NULL;
-		$this->mode       = Xmf_Mvc::RENDER_CLIENT;
-		$this->result     = NULL;
-		$this->template   = NULL;
-
-	}
-
-	/**
-	 * Clear the rendered result.
-	 *
-	 * _This is only useful when render mode is_ Xmf_Mvc::RENDER_VAR
-	 *
-	 * @since  1.0
-	 */
-	public function clearResult ()
-	{
-		$this->result = NULL;
-	}
-
-	/**
-	 * Render the view.
-	 *
-	 *  _This method should never be called manually._
-	 *
-	 * @since  1.0
-	 */
-	public function execute ()
-	{
+    /**
+     * An associative array of template attributes.
+     *
+     * @since  1.0
+     * @type   array
+     */
+    protected $attributes;
+
+    /**
+     * An absolute file-system path where a template can be found.
+     *
+     * @since  1.0
+     * @type   string
+     */
+    protected $dir;
+
+    /**
+     * The template engine instance.
+     *
+     * @since  1.0
+     * @type   object
+     */
+    protected $engine;
+
+    /**
+     * The mode to be used for rendering, which is one of the following:
+     *
+     * - Xmf\Mvc::RENDER_CLIENT - render to client
+     * - Xmf\Mvc::RENDER_VAR - render to variable
+     *
+     * @type   int
+     */
+    protected $mode;
+
+    /**
+     * The result of a render when render mode is Xmf\Mvc::RENDER_VAR.
+     *
+     * @type   string
+     */
+    protected $result;
+
+    /**
+     * A relative or absolute file-system path to a template.
+     *
+     * @since  1.0
+     * @type   string
+     */
+    protected $template;
+
+    /**
+     * Create a new Renderer instance.
+     *
+     * @since  1.0
+     */
+    public function __construct ()
+    {
 
-		$dir = NULL;
-
-		if ($this->template == NULL)
-		{
+        $this->attributes = array();
+        $this->dir        = NULL;
+        $this->engine     = NULL;
+        $this->mode       = \Xmf\Mvc::RENDER_CLIENT;
+        $this->result     = NULL;
+        $this->template   = NULL;
 
-			$error = 'A template has not been specified';
+    }
+
+    /**
+     * Clear the rendered result.
+     *
+     * _This is only useful when render mode is_ Xmf\Mvc::RENDER_VAR
+     *
+     * @since  1.0
+     */
+    public function clearResult ()
+    {
+        $this->result = NULL;
+    }
 
-			trigger_error($error, E_USER_ERROR);
+    /**
+     * Render the view.
+     *
+     *  _This method should never be called manually._
+     *
+     * @since  1.0
+     */
+    public function execute ()
+    {
 
-			exit;
-
-		}
-
-		if ($this->isPathAbsolute($this->template))
-		{
+        $dir = NULL;
 
-			$dir            = dirname($this->template) . '/';
-			$this->template = basename($this->template);
+        if ($this->template == NULL) {
 
-		} else
-		{
+            $error = 'A template has not been specified';
 
-			$dir = ($this->dir == NULL)
-				   ? $this->Controller()->getModuleDir() . 'templates/'
-				   : $this->dir;
+            trigger_error($error, E_USER_ERROR);
 
-			if (!is_readable($dir . $this->template) &&
-				 is_readable(TEMPLATE_DIR . $this->template))
-			{
+            exit;
 
-				$dir = TEMPLATE_DIR;
+        }
 
-			}
+        if ($this->isPathAbsolute($this->template)) {
 
-		}
+            $dir            = dirname($this->template) . '/';
+            $this->template = basename($this->template);
 
-		if (is_readable($dir . $this->template))
-		{
+        } else {
 
-			// make it easier to access data directly in the template
-			$mojavi   =& $this->Controller()->getMojavi();
-			$template =& $this->attributes;
+            $dir = ($this->dir == NULL)
+                   ? $this->Controller()->getModuleDir() . 'templates/'
+                   : $this->dir;
 
-			if ($this->mode == Xmf_Mvc::RENDER_VAR ||
-				$this->controller()->getRenderMode() == Xmf_Mvc::RENDER_VAR)
-			{
+            if (!is_readable($dir . $this->template) &&
+                 is_readable(TEMPLATE_DIR . $this->template))
+            {
 
-				ob_start();
+                $dir = TEMPLATE_DIR;
 
-				require($dir . $this->template);
+            }
 
-				$this->result = ob_get_contents();
+        }
 
-				ob_end_clean();
+        if (is_readable($dir . $this->template)) {
 
-			} else
-			{
+            // make it easier to access data directly in the template
+            $mojavi   =& $this->Controller()->getMojavi();
+            $template =& $this->attributes;
 
-				require($dir . $this->template);
+            if ($this->mode == Xmf\Mvc::RENDER_VAR ||
+                $this->controller()->getRenderMode() == \Xmf\Mvc::RENDER_VAR)
+            {
 
-			}
+                ob_start();
 
-		} else
-		{
+                require($dir . $this->template);
 
-			$error = 'Template file ' . $dir . $this->template . ' does ' .
-					 'not exist or is not readable';
+                $this->result = ob_get_contents();
 
-			trigger_error($error, E_USER_ERROR);
+                ob_end_clean();
 
-			exit;
+            } else {
 
-		}
+                require($dir . $this->template);
 
-	}
+            }
 
-	/**
-	 * Retrieve the rendered result when render mode is Xmf_Mvc::RENDER_VAR.
-	 *
-	 * @return string A rendered view.
-	 *
-	 * @since  1.0
-	 */
-	public function & fetchResult ()
-	{
+        } else {
 
-		if ($this->mode == Xmf_Mvc::RENDER_VAR ||
-			$this->Controller()->getRenderMode() == Xmf_Mvc::RENDER_VAR)
-		{
+            $error = 'Template file ' . $dir . $this->template . ' does ' .
+                     'not exist or is not readable';
 
-			if ($this->result == NULL)
-			{
+            trigger_error($error, E_USER_ERROR);
 
-				$this->execute();
+            exit;
 
-			}
+        }
 
-			return $this->result;
+    }
 
-		}
-		$null=NULL;
-		return $null;
+    /**
+     * Retrieve the rendered result when render mode is Xmf\Mvc::RENDER_VAR.
+     *
+     * @return string A rendered view.
+     *
+     * @since  1.0
+     */
+    public function & fetchResult ()
+    {
 
-	}
+        if ($this->mode == \Xmf\Mvc::RENDER_VAR ||
+            $this->Controller()->getRenderMode() == \Xmf\Mvc::RENDER_VAR)
+        {
 
-	/**
-	 * Retrieve an attribute.
-	 *
-	 * @param string $name An attribute name.
-	 *
-	 * @return mixed An attribute value, if the given attribute exists, otherwise NULL.
-	 *
-	 * @since  1.0
-	 */
-	public function & getAttribute ($name)
-	{
+            if ($this->result == NULL) {
 
-		if (isset($this->attributes[$name]))
-		{
+                $this->execute();
 
-			return $this->attributes[$name];
+            }
 
-		}
-		$null=NULL;
-		return $null;
+            return $this->result;
 
-	}
+        }
+        $null=NULL;
 
-	/**
-	 * Retrieve the template engine instance.
-	 *
-	 * @return bool NULL because no template engine exists for PHP templates.
-	 *
-	 * @since  1.0
-	 */
-	public function & getEngine ()
-	{
+        return $null;
 
-		return $this->engine;
+    }
 
-	}
+    /**
+     * Retrieve an attribute.
+     *
+     * @param string $name An attribute name.
+     *
+     * @return mixed An attribute value, if the given attribute exists, otherwise NULL.
+     *
+     * @since  1.0
+     */
+    public function & getAttribute ($name)
+    {
 
-	/**
-	 * Retrieve the render mode, which is one of the following:
-	 *
-	 * - Xmf_Mvc::RENDER_CLIENT - render to client
-	 * - Xmf_Mvc::RENDER_VAR    - render to variable
-	 *
-	 * @return int A render mode.
-	 */
-	function getMode ()
-	{
+        if (isset($this->attributes[$name])) {
+            return $this->attributes[$name];
 
-		return $this->mode;
+        }
+        $null=NULL;
 
-	}
+        return $null;
 
-	/**
-	 * Retrieve an absolute file-system path to the template directory.
-	 *
-	 * This will return NULL unless a directory has been specified setTemplateDir().
-	 *
-	 * @return string A template directory.
-	 *
-	 * @since  1.0
-	 */
-	public function getTemplateDir ()
-	{
+    }
 
-		return $this->dir;
+    /**
+     * Retrieve the template engine instance.
+     *
+     * @return bool NULL because no template engine exists for PHP templates.
+     *
+     * @since  1.0
+     */
+    public function & getEngine ()
+    {
+        return $this->engine;
 
-	}
+    }
 
-	/**
-	 * Determine if a file-system path is absolute.
-	 *
-	 * @param string $path A file-system path.
-	 *
-	 * @since  1.0
-	 */
-	public function isPathAbsolute ($path)
-	{
+    /**
+     * Retrieve the render mode, which is one of the following:
+     *
+     * - Xmf\Mvc::RENDER_CLIENT - render to client
+     * - Xmf\Mvc::RENDER_VAR    - render to variable
+     *
+     * @return int A render mode.
+     */
+    public function getMode ()
+    {
+        return $this->mode;
 
-		if (strlen($path) >= 2)
-		{
+    }
 
-			if ($path{0} == '/' || $path{0} == "\\" || $path{1} == ':')
-			{
+    /**
+     * Retrieve an absolute file-system path to the template directory.
+     *
+     * This will return NULL unless a directory has been specified setTemplateDir().
+     *
+     * @return string A template directory.
+     *
+     * @since  1.0
+     */
+    public function getTemplateDir ()
+    {
+        return $this->dir;
 
-				return TRUE;
+    }
 
-			}
+    /**
+     * Determine if a file-system path is absolute.
+     *
+     * @param string $path A file-system path.
+     *
+     * @since  1.0
+     */
+    public function isPathAbsolute ($path)
+    {
 
-		}
+        if (strlen($path) >= 2) {
 
-		return FALSE;
+            if ($path{0} == '/' || $path{0} == "\\" || $path{1} == ':') {
+                return TRUE;
 
-	}
+            }
 
-	/**
-	 * Remove an attribute.
-	 *
-	 * @param string $name An attribute name.
-	 *
-	 * @since  1.0
-	 */
-	public function & removeAttribute ($name)
-	{
+        }
 
-		if (isset($this->attributes[$name]))
-		{
+        return FALSE;
 
-			unset($this->attributes[$name]);
+    }
 
-		}
+    /**
+     * Remove an attribute.
+     *
+     * @param string $name An attribute name.
+     *
+     * @since  1.0
+     */
+    public function & removeAttribute ($name)
+    {
 
-	}
-
-	/**
-	 * Set multiple attributes by using an associative array.
-	 *
-	 * @param array $array An associative array of attributes.
-	 *
-	 * @since  1.0
-	 */
-	public function setArray ($array)
-	{
-		if(is_array($array)) {
-			$this->attributes = array_merge($this->attributes, $array);
-		}
-
-	}
-
-	/**
-	 * Set multiple attributes by using a reference to an associative array.
-	 *
-	 * @param array $array An associative array of attributes.
-	 *
-	 * @since  1.0
-	 */
-	public function setArrayByRef (&$array)
-	{
-
-		$keys  = array_keys($array);
-		$count = sizeof($keys);
-
-		for ($i = 0; $i < $count; $i++)
-		{
-
-			$this->attributes[$keys[$i]] =& $array[$keys[$i]];
-
-		}
-
-	}
-
-	/**
-	 * Set an attribute.
-	 *
-	 * @param string $name  An attribute name.
-	 * @param mixed  $value An attribute value.
-	 *
-	 * @since  1.0
-	 */
-	public function setAttribute ($name, $value)
-	{
-
-		$this->attributes[$name] = $value;
-
-	}
-
-	/**
-	 * Set an element attribute array
-	 *
-	 * This allows an attribute which is an array to be built one
-	 * element at a time.
-	 *
-	 * @param string $stem  An attribute array name.
-	 * @param string $name  An attribute array item name. If empty, the
-	 *                      value will be appended to the end of the
-	 *                      array rather than added with the key $name.
-	 * @param mixed  $value An attribute array item value.
-	 *
-	 * @since  1.0
-	 */
-	public function setAttributeArrayItem ($stem, $name, $value)
-	{
-		if(!isset($this->attributes[$stem]) || !is_array($this->attributes[$stem])) {
-			$this->attributes[$stem]=array();
-		}
-		if(empty($name)) {
-			$this->attributes[$stem][] = $value;
-		} else {
-			$this->attributes[$stem][$name] = $value;
-		}
+        if (isset($this->attributes[$name])) {
 
-	}
+            unset($this->attributes[$name]);
 
-	/**
-	 * Set an attribute by reference.
-	 *
-	 * @param string $name  An attribute name.
-	 * @param mixed  $value An attribute value.
-	 *
-	 * @since  1.0
-	 */
-	public function setAttributeByRef ($name, &$value)
-	{
+        }
+
+    }
+
+    /**
+     * Set multiple attributes by using an associative array.
+     *
+     * @param array $array An associative array of attributes.
+     *
+     * @since  1.0
+     */
+    public function setArray ($array)
+    {
+        if (is_array($array)) {
+            $this->attributes = array_merge($this->attributes, $array);
+        }
+
+    }
+
+    /**
+     * Set multiple attributes by using a reference to an associative array.
+     *
+     * @param array $array An associative array of attributes.
+     *
+     * @since  1.0
+     */
+    public function setArrayByRef (&$array)
+    {
+
+        $keys  = array_keys($array);
+        $count = sizeof($keys);
+
+        for ($i = 0; $i < $count; $i++) {
+
+            $this->attributes[$keys[$i]] =& $array[$keys[$i]];
+
+        }
+
+    }
+
+    /**
+     * Set an attribute.
+     *
+     * @param string $name  An attribute name.
+     * @param mixed  $value An attribute value.
+     *
+     * @since  1.0
+     */
+    public function setAttribute ($name, $value)
+    {
+
+        $this->attributes[$name] = $value;
+
+    }
+
+    /**
+     * Set an element attribute array
+     *
+     * This allows an attribute which is an array to be built one
+     * element at a time.
+     *
+     * @param string $stem An attribute array name.
+     * @param string $name An attribute array item name. If empty, the
+     *                      value will be appended to the end of the
+     *                      array rather than added with the key $name.
+     * @param mixed $value An attribute array item value.
+     *
+     * @since  1.0
+     */
+    public function setAttributeArrayItem ($stem, $name, $value)
+    {
+        if (!isset($this->attributes[$stem]) || !is_array($this->attributes[$stem])) {
+            $this->attributes[$stem]=array();
+        }
+        if (empty($name)) {
+            $this->attributes[$stem][] = $value;
+        } else {
+            $this->attributes[$stem][$name] = $value;
+        }
 
-		$this->attributes[$name] =& $value;
+    }
 
-	}
+    /**
+     * Set an attribute by reference.
+     *
+     * @param string $name  An attribute name.
+     * @param mixed  $value An attribute value.
+     *
+     * @since  1.0
+     */
+    public function setAttributeByRef ($name, &$value)
+    {
 
-	/**
-	 * Set the render mode, which is one of the following:
-	 * - Xmf_Mvc::RENDER_CLIENT - render to client
-	 * - Xmf_Mvc::RENDER_VAR    - render to variable
-	 *
-	 * @param int $mode render mode.
-	 *
-	 * @since  1.0
-	 */
-	public function setMode ($mode)
-	{
+        $this->attributes[$name] =& $value;
 
-		$this->mode = $mode;
+    }
 
-	}
+    /**
+     * Set the render mode, which is one of the following:
+     * - Xmf\Mvc::RENDER_CLIENT - render to client
+     * - Xmf\Mvc::RENDER_VAR    - render to variable
+     *
+     * @param int $mode render mode.
+     *
+     * @since  1.0
+     */
+    public function setMode ($mode)
+    {
 
-	/**
-	 * Set the template.
-	 *
-	 * @param string $template A relative or absolute file-system path to a template.
-	 *
-	 * @since  1.0
-	 */
-	public function setTemplate ($template)
-	{
+        $this->mode = $mode;
 
-		$this->template = $template;
+    }
 
-	}
+    /**
+     * Set the template.
+     *
+     * @param string $template A relative or absolute file-system path to a template.
+     *
+     * @since  1.0
+     */
+    public function setTemplate ($template)
+    {
 
-	/**
-	 * Set the template directory.
-	 *
-	 * @param string $dir An absolute file-system path to the template directory.
-	 *
-	 * @since  1.0
-	 */
-	public function setTemplateDir ($dir)
-	{
+        $this->template = $template;
 
-		$this->dir = $dir;
+    }
 
-		if (substr($dir, -1) != '/')
-		{
+    /**
+     * Set the template directory.
+     *
+     * @param string $dir An absolute file-system path to the template directory.
+     *
+     * @since  1.0
+     */
+    public function setTemplateDir ($dir)
+    {
 
-			$this->dir .= '/';
+        $this->dir = $dir;
 
-		}
+        if (substr($dir, -1) != '/') {
 
-	}
+            $this->dir .= '/';
 
-	/**
-	 * Determine if a template exists.
-	 *
-	 * @param $template A relative or absolute file-system path to the template.
-	 * @param $dir      An absolute file-system path to the template directory.
-	 *
-	 * @return bool TRUE if the template exists and is readable, otherwise FALSE.
-	 *
-	 * @since  1.0
-	 */
-	public function templateExists ($template, $dir = NULL)
-	{
+        }
 
-		if ($this->isPathAbsolute($template))
-		{
+    }
 
-			$dir      = dirname($template) . '/';
-			$template = basename($template);
+    /**
+     * Determine if a template exists.
+     *
+     * @param $template A relative or absolute file-system path to the template.
+     * @param $dir      An absolute file-system path to the template directory.
+     *
+     * @return bool TRUE if the template exists and is readable, otherwise FALSE.
+     *
+     * @since  1.0
+     */
+    public function templateExists ($template, $dir = NULL)
+    {
 
-		} else if ($dir == NULL)
-		{
+        if ($this->isPathAbsolute($template)) {
 
-			$dir = $this->dir;
+            $dir      = dirname($template) . '/';
+            $template = basename($template);
 
-			if (substr($dir, -1) != '/')
-			{
+        } elseif ($dir == NULL) {
 
-				$dir .= '/';
+            $dir = $this->dir;
 
-			}
+            if (substr($dir, -1) != '/') {
 
-		}
+                $dir .= '/';
 
-		return (is_readable($dir . $template));
+            }
 
-	}
+        }
+
+        return (is_readable($dir . $template));
+
+    }
 
 }
-
-?>

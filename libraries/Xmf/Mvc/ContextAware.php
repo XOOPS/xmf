@@ -1,4 +1,7 @@
 <?php
+
+namespace Xmf\Mvc;
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -10,7 +13,7 @@
  */
 
 /**
- * Xmf_Mvc_ContextAware makes shared context available
+ * Xmf\Mvc\ContextAware makes shared context available
  *
  * Shared context makes the following available:
  * Controller() -
@@ -24,63 +27,62 @@
 
 defined('XMF_EXEC') or die('Xmf was not detected');
 
-abstract class Xmf_Mvc_ContextAware
+abstract class ContextAware
 {
 
    /**
-	* Instance of the full context. At present this is the controller
-	*
-	* @return object shared context
-	*
-	* @since      1.0
-	*/
-	protected function & Context()
-	{
-		return Xmf_Mvc_Context::get();
-	}
+    * Instance of the full context. At present this is the controller
+    *
+    * @return object shared context
+    *
+    * @since      1.0
+    */
+    protected function & Context()
+    {
+        return Context::get();
+    }
 
    /**
-	* Get the controller context
-	*
-	* @return object Xmf_Mvc_Controller instance
-	* @since      1.0
-	*/
-	public function & Controller()
-	{
-		return $this->Context();
-	}
+    * Get the controller context
+    *
+    * @return object Xmf\Mvc\Controller instance
+    * @since      1.0
+    */
+    public function & Controller()
+    {
+        return $this->Context();
+    }
 
    /**
-	* Get the request context
-	*
-	* @return object Xmf_Mvc_Request instance
-	* @since      1.0
-	*/
-	public function & Request()
-	{
-		return $this->Context()->getRequest();
-	}
+    * Get the request context
+    *
+    * @return object Xmf\Mvc\Request instance
+    * @since      1.0
+    */
+    public function & Request()
+    {
+        return $this->Context()->getRequest();
+    }
 
    /**
-	* Get the user context
-	*
-	* @return object Xmf_Mvc_User instance
-	* @since      1.0
-	*/
-	public function & User()
-	{
-		return $this->Context()-> getUser();
-	}
+    * Get the user context
+    *
+    * @return object Xmf\Mvc\User instance
+    * @since      1.0
+    */
+    public function & User()
+    {
+        return $this->Context()-> getUser();
+    }
 
    /**
-	* Get the ModelManager instance
-	*
-	* @return object Xmf_Mvc_ModelManager instance
-	* @since      1.0
-	*/
-	public function & Models()
-	{
-		return $this->Context()->getModels();
-	}
+    * Get the ModelManager instance
+    *
+    * @return object Xmf\Mvc\ModelManager instance
+    * @since      1.0
+    */
+    public function & Models()
+    {
+        return $this->Context()->getModels();
+    }
 }
-?>

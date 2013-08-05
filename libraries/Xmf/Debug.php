@@ -1,4 +1,7 @@
 <?php
+
+namespace Xmf;
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -20,19 +23,19 @@
 
 defined('XMF_EXEC') or die('Xmf was not detected');
 
-class Xmf_Debug
+class Debug
 {
     /**
      * Output a dump of a variable
      *
      * @static
      * @param $var variable which will be dumped
-     * @param bool $echo
-     * @param bool $html
-     * @param bool $exit
+     * @param  bool         $echo
+     * @param  bool         $html
+     * @param  bool         $exit
      * @return mixed|string
      */
-    static public function dump($var, $echo = true, $html = true, $exit = false)
+    public static function dump($var, $echo = true, $html = true, $exit = false)
     {
         if (!$html) {
             $msg = var_export($var, true);
@@ -48,6 +51,7 @@ class Xmf_Debug
         if ($exit) {
             die();
         }
+
         return false;
     }
 }

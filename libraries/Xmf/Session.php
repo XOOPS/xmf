@@ -1,4 +1,7 @@
 <?php
+
+namespace Xmf;
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -19,7 +22,7 @@
 
 defined('XMF_EXEC') or die('Xmf was not detected');
 
-class Xmf_Session
+class Session
 {
     /**
      * Session constructor<br />
@@ -35,8 +38,8 @@ class Xmf_Session
 
     /**
      * Sets a session variable
-     * @param string $name name of variable
-     * @param mixed $value value of variable
+     * @param  string $name  name of variable
+     * @param  mixed  $value value of variable
      * @return void
      * @access public
      */
@@ -47,8 +50,8 @@ class Xmf_Session
 
     /**
      * Fetches a session variable
-     * @param string $name name of variable
-     * @return mixed $value value of session variable
+     * @param  string $name name of variable
+     * @return mixed  $value value of session variable
      * @access public
      */
     public function get($name)
@@ -62,7 +65,7 @@ class Xmf_Session
 
     /**
      * Deletes a session variable
-     * @param string $name name of variable
+     * @param  string $name name of variable
      * @return void
      * @access public
      */
@@ -70,7 +73,6 @@ class Xmf_Session
     {
         unset($_SESSION[$name]);
     }
-
 
     /**
      * Destroys the whole session
@@ -85,15 +87,16 @@ class Xmf_Session
 
     /**
      * @static
-     * @return Xmf_Session
+     * @return Xmf\Session
      */
-    static public function getInstance()
+    public static function getInstance()
     {
         static $_sess;
         if (!isset($_sess)) {
             $class = __CLASS__;
             $_sess = new $class();
         }
+
         return $_sess;
     }
 }

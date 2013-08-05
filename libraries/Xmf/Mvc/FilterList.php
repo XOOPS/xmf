@@ -1,5 +1,7 @@
 <?php
 
+namespace Xmf\Mvc;
+
 /**
  * This file has its roots as part of the Mojavi package which was
  * Copyright (c) 2003 Sean Kerr. It has been incorporated into this
@@ -11,7 +13,7 @@
  * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
  * @copyright       Portions Copyright (c) 2003 Sean Kerr
  * @license         (license terms)
- * @package         Xmf_Mvc
+ * @package         Xmf\Mvc
  * @since           1.0
  */
 
@@ -25,52 +27,49 @@
  * FilterChain.
  *
  */
-class Xmf_Mvc_FilterList extends Xmf_Mvc_ContextAware
+class FilterList extends ContextAware
 {
 
-	/**
-	 * An associative array of filters.
-	 *
-	 * @since  1.0
-	 * @var    array
-	 */
-	protected $filters;
+    /**
+     * An associative array of filters.
+     *
+     * @since  1.0
+     * @var    array
+     */
+    protected $filters;
 
-	/**
-	 * Create a new FilterList instance.
-	 *
-	 * @since  1.0
-	 */
-	public function __construct ()
-	{
+    /**
+     * Create a new FilterList instance.
+     *
+     * @since  1.0
+     */
+    public function __construct ()
+    {
 
-		$this->filters = array();
+        $this->filters = array();
 
-	}
+    }
 
-	/**
-	 * Register filters.
-	 *
-	 *  _This method should never be called manually._
-	 *
-	 * @since  1.0
-	 */
-	public function registerFilters (&$filterChain)
-	{
+    /**
+     * Register filters.
+     *
+     *  _This method should never be called manually._
+     *
+     * @since  1.0
+     */
+    public function registerFilters (&$filterChain)
+    {
 
-		$keys  = array_keys($this->filters);
-		$count = sizeof($keys);
+        $keys  = array_keys($this->filters);
+        $count = sizeof($keys);
 
-		// loop through cached filters and register them
-		for ($i = 0; $i < $count; $i++)
-		{
+        // loop through cached filters and register them
+        for ($i = 0; $i < $count; $i++) {
 
-			$filterChain->register($this->filters[$keys[$i]]);
+            $filterChain->register($this->filters[$keys[$i]]);
 
-		}
+        }
 
-	}
+    }
 
 }
-
-?>

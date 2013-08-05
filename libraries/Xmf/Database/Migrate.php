@@ -1,4 +1,7 @@
 <?php
+
+namespace Xmf\Database;
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -28,7 +31,7 @@
  * already exists) no work is added. Then queueExecute() to process the
  * whole set.
  */
-class Xmf_Database_Migrate
+class Migrate
 {
     /**
      * for add/alter column position
@@ -67,9 +70,9 @@ class Xmf_Database_Migrate
     public function __construct()
     {
         if (!defined('XMF_EXEC')) { die('Xmf was not detected'); }
-        Xmf_Language::load('database', 'xmf');
+        \Xmf\Language::load('database', 'xmf');
 
-        $this->_db = XoopsDatabaseFactory::getDatabaseConnection();
+        $this->_db = \XoopsDatabaseFactory::getDatabaseConnection();
         $this->queueReset();
     }
 
@@ -89,9 +92,9 @@ class Xmf_Database_Migrate
     /**
      * Add new column for table to the work queue
      *
-     * @param string $table     table to contain the column
-     * @param string $column    name of column to add
-     * @param mixed  $position  FIRST, string of column name to add new
+     * @param string $table    table to contain the column
+     * @param string $column   name of column to add
+     * @param mixed  $position FIRST, string of column name to add new
      *                          column after, or null for natural append
      * @param array $attributes column_definition
      *
@@ -169,9 +172,9 @@ class Xmf_Database_Migrate
     /**
      * Add alter column operation to the work queue
      *
-     * @param string $table     table containing the column
-     * @param string $column    column to add
-     * @param mixed  $position  FIRST, string of column name to add new
+     * @param string $table    table containing the column
+     * @param string $column   column to add
+     * @param mixed  $position FIRST, string of column name to add new
      *                          column after, or null for no change
      * @param array $attributes column_definition
      *
@@ -230,11 +233,11 @@ class Xmf_Database_Migrate
     /**
      * Add new index definition for table to work queue
      *
-     * @param string $name    name of index to add
-     * @param string $table   table indexed
-     * @param string $column  column or comma separated list of columns
+     * @param string $name   name of index to add
+     * @param string $table  table indexed
+     * @param string $column column or comma separated list of columns
      *                        to use the key
-     * @param bool   $unique  true if index is to be unique
+     * @param bool $unique true if index is to be unique
      *
      * @return bool true if no errors, false if errors encountered
      */
@@ -344,7 +347,7 @@ class Xmf_Database_Migrate
      */
     public function setTableOptions($table, $options)
     {
-		// ENGINE=MEMORY DEFAULT CHARSET=utf8;
+        // ENGINE=MEMORY DEFAULT CHARSET=utf8;
         return false;
     }
 
@@ -509,13 +512,13 @@ AND t.TABLE_NAME = 'xtrc_config'
         $result = $this->_execSql($sql);
 
         while ($column=$this->_fetch($result)) {
-			$attributes = ' ' . $column['COLUMN_TYPE'] . ' '
-				. (($column['IS_NULLABLE'] == 'NO') ? ' NOT NULL ' : '' )
-				. (($column['COLUMN_DEFAULT'] === null) ? '' :
-						" DEFAULT '". $column['COLUMN_DEFAULT'] . "' ")
-				. $column['EXTRA'];
+            $attributes = ' ' . $column['COLUMN_TYPE'] . ' '
+                . (($column['IS_NULLABLE'] == 'NO') ? ' NOT NULL ' : '' )
+                . (($column['COLUMN_DEFAULT'] === null) ? '' :
+                        " DEFAULT '". $column['COLUMN_DEFAULT'] . "' ")
+                . $column['EXTRA'];
 
-			$columnDef=array('position'=>$column['ORDINAL_POSITION'], 'attributes'=>$attributes);
+            $columnDef=array('position'=>$column['ORDINAL_POSITION'], 'attributes'=>$attributes);
 
 //            $tableDef['columnorder'][$column['ORDINAL_POSITION']] = $column['COLUMN_NAME'];
             $tableDef['columns'][$column['COLUMN_NAME']] = $columnDef;

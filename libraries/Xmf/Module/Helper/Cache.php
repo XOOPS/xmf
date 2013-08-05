@@ -1,4 +1,7 @@
 <?php
+
+namespace Xmf\Module\Helper;
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -18,7 +21,7 @@
 
 defined('XMF_EXEC') or die('Xmf was not detected');
 
-class Xmf_Module_Helper_Cache extends Xmf_Module_Helper_Abstract
+class Cache extends AbstractHelper
 {
     /**
      * @var string
@@ -38,7 +41,7 @@ class Xmf_Module_Helper_Cache extends Xmf_Module_Helper_Abstract
     }
 
     /**
-     * @param string $value
+     * @param  string $value
      * @return string
      */
     private function _prefix($value)
@@ -47,9 +50,9 @@ class Xmf_Module_Helper_Cache extends Xmf_Module_Helper_Abstract
     }
 
     /**
-     * @param string $key
-     * @param mixed $value
-     * @param mixed $duration
+     * @param  string $key
+     * @param  mixed  $value
+     * @param  mixed  $duration
      * @return bool
      */
     public function write($key, $value, $duration = null)
@@ -58,7 +61,7 @@ class Xmf_Module_Helper_Cache extends Xmf_Module_Helper_Abstract
     }
 
     /**
-     * @param string $key
+     * @param  string $key
      * @return mixed
      */
     public function read($key)
@@ -67,7 +70,7 @@ class Xmf_Module_Helper_Cache extends Xmf_Module_Helper_Abstract
     }
 
     /**
-     * @param string $key
+     * @param  string $key
      * @return void
      */
     public function delete($key)
@@ -76,5 +79,3 @@ class Xmf_Module_Helper_Cache extends Xmf_Module_Helper_Abstract
     }
 
 }
-
-

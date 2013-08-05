@@ -1,4 +1,7 @@
 <?php
+
+namespace Xmf;
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -21,7 +24,7 @@
 
 defined('XMF_EXEC') or die('Xmf was not detected');
 
-class Xmf_Metagen
+class Metagen
 {
     /**
      * @var MyTextSanitizer
@@ -66,9 +69,9 @@ class Xmf_Metagen
     /**
      * Constructor
      *
-     * @param string $title Page title
-     * @param string $keywords List of meta keywords
-     * @param string $description Meta description
+     * @param string $title         Page title
+     * @param string $keywords      List of meta keywords
+     * @param string $description   Meta description
      * @param string $category_path
      */
     public function __construct($title, $keywords = '', $description = '', $category_path = '')
@@ -136,6 +139,7 @@ class Xmf_Metagen
             if ($withExt) {
                 $title .= '.html';
             }
+
             return $title;
         } else {
             return '';
@@ -225,13 +229,13 @@ class Xmf_Metagen
     /**
      * Cleans the provided text
      *
-     * @param string $text Text to be cleaned
-     * @param boolean $keyword Whether the provided string is a keyword, or not
-     * @return string The purified text
+     * @param  string  $text    Text to be cleaned
+     * @param  boolean $keyword Whether the provided string is a keyword, or not
+     * @return string  The purified text
      */
     public function purifyText($text, $keyword = false)
     {
-        return Xmf_Utilities::purifyText($text, $keyword);
+        return Utilities::purifyText($text, $keyword);
     }
 
     /**
@@ -241,12 +245,12 @@ class Xmf_Metagen
      */
     public function html2text($document)
     {
-        return Xmf_Utilities::html2text($document);
+        return Utilities::html2text($document);
     }
 
     /**
      * Creates a meta description
-     * @param int $maxWords Maximum number of words for the description
+     * @param  int    $maxWords Maximum number of words for the description
      * @return string
      */
     public function createMetaDescription($maxWords = 100)
@@ -268,9 +272,9 @@ class Xmf_Metagen
 
     /**
      * Generates a list of keywords from the provided text
-     * @param string $text Text to parse
-     * @param int $minChar Minimum word length for the keywords
-     * @return array An array of keywords
+     * @param  string $text    Text to parse
+     * @param  int    $minChar Minimum word length for the keywords
+     * @return array  An array of keywords
      */
     public function findMetaKeywords($text, $minChar)
     {
@@ -284,7 +288,6 @@ class Xmf_Metagen
         $text = ereg_replace("[ ]* [ ]*", ' ', $text);
         $text = StripSlashes($text);
 
-
         $originalKeywords = preg_split('/[^a-zA-Z\'"-]+/', $text, -1, PREG_SPLIT_NO_EMPTY);
 
         foreach ($originalKeywords as $originalKeyword) {
@@ -297,6 +300,7 @@ class Xmf_Metagen
                 }
             }
         }
+
         return $keywords;
     }
 
@@ -320,7 +324,6 @@ class Xmf_Metagen
 
         return $ret;
     }
-
 
     /**
      * @param $keywords

@@ -1,5 +1,7 @@
 <?php
 
+namespace Xmf\Mvc;
+
 /**
  * This file has its roots as part of the Mojavi package which was
  * Copyright (c) 2003 Sean Kerr. It has been incorporated into this
@@ -11,7 +13,7 @@
  * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
  * @copyright       Portions Copyright (c) 2003 Sean Kerr
  * @license         (license terms)
- * @package         Xmf_Mvc
+ * @package         Xmf\Mvc
  * @since           1.0
  */
 
@@ -20,132 +22,133 @@
  * authentication and XOOPS group permissions for privileges.
  * It implements a hasPrivilege() method consistent with the
  * PrivilegeUser object, but nothing else from that class.
- * Xmf_Mvc_XoopsUser is intended for use with Xmf_Mvc_XoopsAuthHandler.
+ * Xmf\Mvc\XoopsUser is intended for use with Xmf\Mvc\XoopsAuthHandler.
  *
  */
-class Xmf_Mvc_XoopsUser extends Xmf_Mvc_User
+class XoopsUser extends User
 {
 
-	// array of permissions that map mojavie namespace and name to
-	// xoops group permission name and id
-	private $permissons;
-	private $privilege_checked;
-	private $xoopsuser;
+    // array of permissions that map mojavie namespace and name to
+    // xoops group permission name and id
+    private $permissons;
+    private $privilege_checked;
+    private $xoopsuser;
 
-	public function __construct ()
-	{
-		global $xoopsUser;
+    public function __construct ()
+    {
+        global $xoopsUser;
 
-		$this->authenticated = false;
-		$this->xoopsuser = null;
-		if(is_object($xoopsUser)) {
-			$this->authenticated = true;
-			$this->xoopsuser =& $xoopsUser;
-		}
-		$this->attributes    = NULL;
-		$this->container     = NULL;
-		$this->secure        = NULL;
-		$this->permissions   = array();
-		$this->privilege_checked = NULL;
+        $this->authenticated = false;
+        $this->xoopsuser = null;
+        if (is_object($xoopsUser)) {
+            $this->authenticated = true;
+            $this->xoopsuser =& $xoopsUser;
+        }
+        $this->attributes    = NULL;
+        $this->container     = NULL;
+        $this->secure        = NULL;
+        $this->permissions   = array();
+        $this->privilege_checked = NULL;
 
-	}
+    }
 
-	/**
-	 * Determine the authenticated status of the user.
-	 *
-	 * @return bool TRUE if the user is authenticated, otherwise FALSE
-	 *
-	 * @since  1.0
-	 */
-	public function isAuthenticated ()
-	{
-		global $xoopsUser;
-		if(is_object($xoopsUser)) {
-			$this->authenticated = true;
-			$this->xoopsuser =& $xoopsUser;
-		}
-		return $this->authenticated;
-	}
+    /**
+     * Determine the authenticated status of the user.
+     *
+     * @return bool TRUE if the user is authenticated, otherwise FALSE
+     *
+     * @since  1.0
+     */
+    public function isAuthenticated ()
+    {
+        global $xoopsUser;
+        if (is_object($xoopsUser)) {
+            $this->authenticated = true;
+            $this->xoopsuser =& $xoopsUser;
+        }
 
-	/**
-	 * return privilege checked on last call to hasPrivilege
-	 *
-	 * @return array of name, namespace last checked
-	 */
-	public function lastPrivilegeChecked ()
-	{
-		return $this->privilege_checked;
-	}
+        return $this->authenticated;
+    }
 
-	/**
-	 * Determine if the user has a privilege.
-	 *
-	 * @param name      Privilege name.
-	 * @param namespace Privilege namespace.
-	 *
-	 * @return TRUE, if the user has the given privilege, otherwise FALSE.
-	 */
-	function hasPrivilege ($name, $namespace)
-	{
+    /**
+     * return privilege checked on last call to hasPrivilege
+     *
+     * @return array of name, namespace last checked
+     */
+    public function lastPrivilegeChecked ()
+    {
+        return $this->privilege_checked;
+    }
 
-		$this->privilege_checked=array($name, $namespace);
+    /**
+     * Determine if the user has a privilege.
+     *
+     * @param name      Privilege name.
+     * @param namespace Privilege namespace.
+     *
+     * @return TRUE, if the user has the given privilege, otherwise FALSE.
+     */
+    public function hasPrivilege ($name, $namespace)
+    {
 
-		if (is_object($this->xoopsuser)) {
-			$groups = $this->xoopsuser->getGroups();
-		} else {
-			$groups = XOOPS_GROUP_ANONYMOUS;
-		}
+        $this->privilege_checked=array($name, $namespace);
 
-		$module_id = $this->Controller()->modGetVar('mid');
-		$gperm_handler =& xoops_gethandler('groupperm');
+        if (is_object($this->xoopsuser)) {
+            $groups = $this->xoopsuser->getGroups();
+        } else {
+            $groups = XOOPS_GROUP_ANONYMOUS;
+        }
 
-		$privilege = false;
+        $module_id = $this->Controller()->modGetVar('mid');
+        $gperm_handler =& xoops_gethandler('groupperm');
 
-		if(isset($this->permissions[$namespace]['items'][$name]['id'])) {
-			$perm_id=$this->permissions[$namespace]['items'][$name]['id'];
+        $privilege = false;
 
-			$privilege = $gperm_handler->checkRight($namespace, $perm_id, $groups, $module_id);
-		} else {
-			// this could be a per item permission
-			if(is_numeric($name)) {
-				$privilege = $gperm_handler->checkRight($namespace, $name, $groups, $module_id);
-			}
-			if (is_object($this->xoopsuser)) {
-				$privilege = $this->xoopsuser->isAdmin();
-			}
-		}
+        if (isset($this->permissions[$namespace]['items'][$name]['id'])) {
+            $perm_id=$this->permissions[$namespace]['items'][$name]['id'];
 
-		return $privilege;
+            $privilege = $gperm_handler->checkRight($namespace, $perm_id, $groups, $module_id);
+        } else {
+            // this could be a per item permission
+            if (is_numeric($name)) {
+                $privilege = $gperm_handler->checkRight($namespace, $name, $groups, $module_id);
+            }
+            if (is_object($this->xoopsuser)) {
+                $privilege = $this->xoopsuser->isAdmin();
+            }
+        }
 
-	}
+        return $privilege;
 
-	/**
-	 * Set the permission map to give symbolic names to global permissions
-	 */
-	function setXoopsPermissionMap($permissions)
-	{
-		$this->permissions=$permissions;
-	}
+    }
 
-	// mimic a few common $xoopsUser calls for code brevity
-	function id($ignored='')
-	{
-		if($this->xoopsuser) {
-			return $this->xoopsuser->id();
-		}
-		return 0;
-	}
+    /**
+     * Set the permission map to give symbolic names to global permissions
+     */
+    public function setXoopsPermissionMap($permissions)
+    {
+        $this->permissions=$permissions;
+    }
 
-	function uname()
-	{
-		global $xoopsConfig;
+    // mimic a few common $xoopsUser calls for code brevity
+    public function id($ignored='')
+    {
+        if ($this->xoopsuser) {
+            return $this->xoopsuser->id();
+        }
 
-		if($this->xoopsuser) {
-			return $this->xoopsuser->uname();
-		}
-		return $xoopsConfig['anonymous'];
-	}
+        return 0;
+    }
+
+    public function uname()
+    {
+        global $xoopsConfig;
+
+        if ($this->xoopsuser) {
+            return $this->xoopsuser->uname();
+        }
+
+        return $xoopsConfig['anonymous'];
+    }
 
 }
-
-?>

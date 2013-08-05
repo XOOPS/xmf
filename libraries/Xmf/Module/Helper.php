@@ -1,4 +1,7 @@
 <?php
+
+namespace Xmf\Module;
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -20,7 +23,7 @@
 
 defined('XMF_EXEC') or die('Xmf was not detected');
 
-class Xmf_Module_Helper
+class Helper
 {
     /**
      * @var string
@@ -48,7 +51,7 @@ class Xmf_Module_Helper
     protected $_debug;
 
     /**
-     * @var array of Xmf_Module_Helper_Abstract
+     * @var array of Xmf\Module\Helper\AbstractHelper
      */
     protected $_helper;
 
@@ -62,8 +65,8 @@ class Xmf_Module_Helper
 
     /**
      * @static
-     * @param string $dirname
-     * @return Xmf_Module_Helper
+     * @param  string            $dirname
+     * @return Xmf\Module\Helper
      */
     public static function getInstance($dirname = 'notsetyet')
     {
@@ -72,6 +75,7 @@ class Xmf_Module_Helper
             $class = __CLASS__;
             $instance[$dirname] = new $class($dirname);
         }
+
         return $instance[$dirname];
 
     }
@@ -87,13 +91,14 @@ class Xmf_Module_Helper
         if (!is_object($this->_object)) {
             $this->addLog("ERROR :: Module '{$this->_dirname}' does not exist");
         }
+
         return $this->_object;
     }
     /** TODO eliminate this and replace with 2.6 style getModule **/
     public function getObject() { return $this->getModule(); }
 
     /**
-     * @param string $name
+     * @param  string $name
      * @return mixed
      */
     public function getConfig($name)
@@ -103,22 +108,25 @@ class Xmf_Module_Helper
         }
         if (!$name) {
             $this->addLog("Getting all config");
+
             return $this->_config;
         }
 
         if (!isset($this->_config[$name])) {
             $this->addLog("ERROR :: Config '{$name}' does not exist");
             $ret = null;
+
             return $ret;
         }
 
         $this->addLog("Getting config '{$name}' : " . $this->_config[$name]);
+
         return $this->_config[$name];
     }
 
     /**
      * @param string $name
-     * @param mixed $value
+     * @param mixed  $value
      * @return
      */
     public function setConfig($name, $value = null)
@@ -130,11 +138,12 @@ class Xmf_Module_Helper
         $this->_config[$name] = $value;
 
         $this->addLog("Setting config '{$name}' : " . $this->_config[$name]);
+
         return $this->_config[$name];
     }
 
     /**
-     * @param string $name
+     * @param  string                                                $name
      * @return bool|XoopsObjectHandler|XoopsPersistableObjectHandler
      */
     public function getHandler($name)
@@ -151,12 +160,13 @@ class Xmf_Module_Helper
             $this->addLog("Getting handler '{$name}'");
             $ret = $this->_handler[$name];
         }
+
         return $ret;
     }
 
     /**
-     * @param string $name
-     * @return bool|Xmf_Module_Helper_Abstract
+     * @param  string                                $name
+     * @return bool|Xmf\Module\Helper\AbstractHelper
      */
     public function getHelper($name)
     {
@@ -172,11 +182,12 @@ class Xmf_Module_Helper
             $this->addLog("Getting helper '{$name}'");
             $ret = $this->_helper[$name];
         }
+
         return $ret;
     }
 
     /**
-     * @param string $name
+     * @param  string $name
      * @return bool
      */
     protected function _initHelper($name)
@@ -185,14 +196,16 @@ class Xmf_Module_Helper
         $uname = ucfirst($name);
         if (file_exists($hnd_file = XMF_LIBRARIES_PATH . "/Xmf/Module/Helper/{$uname}.php")) {
             include_once $hnd_file;
-            $class = "Xmf_Module_Helper_{$uname}";
+            $class = '\Xmf\Module\Helper\\'.$uname;
             if (class_exists($class)) {
                 $this->_helper[$name] = new $class($this->getObject());
                 $this->addLog("Loading Helper '{$name}'");
+
                 return true;
             }
         }
         $this->addLog("ERROR :: Helper '{$name}' could not be loaded");
+
         return false;
     }
 
@@ -230,7 +243,7 @@ class Xmf_Module_Helper
     }
 
     /**
-     * @param string $name
+     * @param  string $name
      * @return void
      */
     protected function _initHandler($name)
@@ -243,7 +256,7 @@ class Xmf_Module_Helper
             }
             $class = ucfirst(strtolower($this->_dirname)) . ucfirst(strtolower($name)) . 'Handler';
             if (class_exists($class)) {
-                $db = XoopsDatabaseFactory::getDatabaseConnection();
+                $db = \XoopsDatabaseFactory::getDatabaseConnection();
                 $this->_handler[$name] = new $class($db);
                 $this->addLog("Loading class '{$class}'");
             } else {
@@ -253,31 +266,32 @@ class Xmf_Module_Helper
     }
 
     /**
-     * @param string $name
-     * @param null $language
+     * @param  string $name
+     * @param  null   $language
      * @return bool
      */
     public function loadLanguage($name, $language = null)
     {
-        if ($ret = Xmf_Language::load($name, $this->_dirname, $language)) {
+        if ($ret = \Xmf\Language::load($name, $this->_dirname, $language)) {
             $this->addLog("Loading language '{$name}'");
         } else {
             $this->addLog("ERROR :: Language '{$name}' could not be loaded");
         }
+
         return $ret;
     }
 
     /**
-     * @param bool $bool
+     * @param  bool $bool
      * @return void
      */
     public function setDebug($bool = true)
     {
-        $this->_debug = (bool)$bool;
+        $this->_debug = (bool) $bool;
     }
 
     /**
-     * @param string $log
+     * @param  string $log
      * @return void
      */
     public function addLog($log)

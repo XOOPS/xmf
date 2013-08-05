@@ -1,4 +1,7 @@
 <?php
+
+namespace Xmf\Template;
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -19,7 +22,7 @@
 
 defined('XMF_EXEC') or die('Xmf was not detected');
 
-class Xmf_Template_Buttonbox extends Xmf_Template_Abstract
+class Buttonbox extends AbstractTemplate
 {
     /**
      * @var array
@@ -44,7 +47,7 @@ class Xmf_Template_Buttonbox extends Xmf_Template_Abstract
     }
 
     /**
-     * @param string $position
+     * @param  string $position
      * @return void
      */
     public function setPosition($position)
@@ -53,7 +56,7 @@ class Xmf_Template_Buttonbox extends Xmf_Template_Abstract
     }
 
     /**
-     * @param string $delimiter
+     * @param  string $delimiter
      * @return void
      */
     public function setDelimiter($delimiter)
@@ -62,10 +65,10 @@ class Xmf_Template_Buttonbox extends Xmf_Template_Abstract
     }
 
     /**
-     * @param string $title
-     * @param string $link
-     * @param string $icon
-     * @param string $extra
+     * @param  string $title
+     * @param  string $link
+     * @param  string $icon
+     * @param  string $extra
      * @return void
      */
     public function addItem($title, $link, $icon = 'add', $extra = '')

@@ -1,4 +1,7 @@
 <?php
+
+namespace Xmf\Module\Helper;
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -18,8 +21,7 @@
 
 defined('XMF_EXEC') or die('Xmf was not detected');
 
-
-class Xmf_Module_Helper_Session extends Xmf_Module_Helper_Abstract
+class Session extends AbstractHelper
 {
     /**
      * @var string
@@ -27,7 +29,7 @@ class Xmf_Module_Helper_Session extends Xmf_Module_Helper_Abstract
     private $_prefix;
 
     /**
-     * @var Xmf_Session
+     * @var Xmf\Session
      */
     private $_session;
 
@@ -37,11 +39,11 @@ class Xmf_Module_Helper_Session extends Xmf_Module_Helper_Abstract
     public function init()
     {
         $this->_prefix = $this->module->getVar('dirname') . '_';
-        $this->_session = Xmf_Session::getInstance();
+        $this->_session = Xmf\Session::getInstance();
     }
 
     /**
-     * @param string $value
+     * @param  string $value
      * @return string
      */
     private function _prefix($value)
@@ -51,8 +53,8 @@ class Xmf_Module_Helper_Session extends Xmf_Module_Helper_Abstract
 
     /**
      * Sets a session variable
-     * @param string $name name of variable
-     * @param mixed $value value of variable
+     * @param  string $name  name of variable
+     * @param  mixed  $value value of variable
      * @return void
      * @access public
      */
@@ -63,8 +65,8 @@ class Xmf_Module_Helper_Session extends Xmf_Module_Helper_Abstract
 
     /**
      * Fetches a session variable
-     * @param string $name name of variable
-     * @return mixed $value value of variable
+     * @param  string $name name of variable
+     * @return mixed  $value value of variable
      * @access public
      */
     public function get($name)
@@ -74,7 +76,7 @@ class Xmf_Module_Helper_Session extends Xmf_Module_Helper_Abstract
 
     /**
      * Deletes a session variable
-     * @param string $name name of variable
+     * @param  string $name name of variable
      * @return void
      * @access public
      */

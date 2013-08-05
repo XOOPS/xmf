@@ -1,4 +1,7 @@
 <?php
+
+namespace Xmf;
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -20,14 +23,14 @@
 
 defined('XMF_EXEC') or die('Xmf was not detected');
 
-class Xmf_Language
+class Language
 {
     /**
      * Returns a translated string
      *
      * @static
-     * @param string $string
-     * @param string $default
+     * @param  string       $string
+     * @param  string       $default
      * @return mixed|string
      */
     public static function _($string, $default = null)
@@ -41,8 +44,8 @@ class Xmf_Language
 
     /**
      * @static
-     * @param string $string
-     * @param string $default
+     * @param  string $string
+     * @param  string $default
      * @return string
      */
     public static function translate($string, $default = null)
@@ -50,14 +53,15 @@ class Xmf_Language
         if (isset($default)) {
             $string = '';
         }
+
         return $string;
     }
 
     /**
      * @static
-     * @param string $name
-     * @param string $domain
-     * @param string $language
+     * @param  string $name
+     * @param  string $domain
+     * @param  string $language
      * @return bool
      */
     public static function load($name, $domain = '', $language = null)
@@ -65,9 +69,10 @@ class Xmf_Language
         $language = empty($language) ? $GLOBALS['xoopsConfig']['language'] : $language;
         $path = XOOPS_ROOT_PATH . '/' . ((empty($domain) || 'global' == $domain) ? ''
             : "modules/{$domain}/") . 'language';
-        if (!$ret = Xmf_Loader::loadFile("{$path}/{$language}/{$name}.php")) {
-            $ret = Xmf_Loader::loadFile("{$path}/english/{$name}.php");
+        if (!$ret = Loader::loadFile("{$path}/{$language}/{$name}.php")) {
+            $ret = Loader::loadFile("{$path}/english/{$name}.php");
         }
+
         return $ret;
     }
 }

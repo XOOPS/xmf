@@ -1,4 +1,7 @@
 <?php
+
+namespace Xmf;
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -29,22 +32,23 @@ define('XMF_REQUEST_ALLOWRAW', 2);
 define('XMF_REQUEST_ALLOWHTML', 4);
 
 /**
- * Xmf_Request Class
+ * Request Class
  *
  * This class serves to provide a common interface to access
  * request variables.  This includes $_POST, $_GET, and naturally $_REQUEST.  Variables
  * can be passed through an input filter to avoid injection or returned raw.
  */
-class Xmf_Request
+class Request
 {
     /**
      * Gets the request method
      *
      * @return string
      */
-    static public function getMethod()
+    public static function getMethod()
     {
         $method = strtoupper($_SERVER['REQUEST_METHOD']);
+
         return $method;
     }
 
@@ -68,14 +72,14 @@ class Xmf_Request
      *   default    $_REQUEST
      *
      * @static
-     * @param   string  $name       Variable name
-     * @param   string  $default    Default value if the variable does not exist
-     * @param   string  $hash       Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
-     * @param   string  $type       Return type for the variable, for valid values see {@link Xmf_Filter_Input::clean()}.
-     * @param   int     $mask       Filter mask for the variable
-     * @return  mixed               Requested variable
+     * @param  string $name    Variable name
+     * @param  string $default Default value if the variable does not exist
+     * @param  string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param  string $type    Return type for the variable, for valid values see {@link Xmf\Filter\Input::clean()}.
+     * @param  int    $mask    Filter mask for the variable
+     * @return mixed  Requested variable
      */
-    static public function getVar($name, $default = null, $hash = 'default', $type = 'none', $mask = 0)
+    public static function getVar($name, $default = null, $hash = 'default', $type = 'none', $mask = 0)
     {
         // Ensure hash and type are uppercase
         $hash = strtoupper($hash);
@@ -113,16 +117,16 @@ class Xmf_Request
 
         if (isset($input[$name]) && $input[$name] !== null) {
             // Get the variable from the input hash and clean it
-            $var = Xmf_Request::_cleanVar($input[$name], $mask, $type);
+            $var = Request::_cleanVar($input[$name], $mask, $type);
 
             // Handle magic quotes compatability
             if (get_magic_quotes_gpc() && ($var != $default) && ($hash != 'FILES')) {
-                $var = Xmf_Request::_stripSlashesRecursive($var);
+                $var = Request::_stripSlashesRecursive($var);
             }
         } else {
             if ($default !== null) {
                 // Clean the default value
-                $var = Xmf_Request::_cleanVar($default, $mask, $type);
+                $var = Request::_cleanVar($default, $mask, $type);
             } else {
                 $var = $default;
             }
@@ -139,14 +143,14 @@ class Xmf_Request
      * See getVar() for more in-depth documentation on the parameters.
      *
      * @static
-     * @param   string  $name       Variable name
-     * @param   int     $default    Default value if the variable does not exist
-     * @param   string  $hash       Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
-     * @return  int                 Requested variable
+     * @param  string $name    Variable name
+     * @param  int    $default Default value if the variable does not exist
+     * @param  string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @return int    Requested variable
      */
-    static public function getInt($name, $default = 0, $hash = 'default')
+    public static function getInt($name, $default = 0, $hash = 'default')
     {
-        return Xmf_Request::getVar($name, $default, $hash, 'int');
+        return Request::getVar($name, $default, $hash, 'int');
     }
 
     /**
@@ -157,14 +161,14 @@ class Xmf_Request
      * See getVar() for more in-depth documentation on the parameters.
      *
      * @static
-     * @param    string    $name        Variable name
-     * @param    float     $default     Default value if the variable does not exist
-     * @param    string    $hash        Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
-     * @return   float                  Requested variable
+     * @param  string $name    Variable name
+     * @param  float  $default Default value if the variable does not exist
+     * @param  string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @return float  Requested variable
      */
-    static public function getFloat($name, $default = 0.0, $hash = 'default')
+    public static function getFloat($name, $default = 0.0, $hash = 'default')
     {
-        return Xmf_Request::getVar($name, $default, $hash, 'float');
+        return Request::getVar($name, $default, $hash, 'float');
     }
 
     /**
@@ -175,14 +179,14 @@ class Xmf_Request
      * See getVar() for more in-depth documentation on the parameters.
      *
      * @static
-     * @param    string    $name        Variable name
-     * @param    bool      $default     Default value if the variable does not exist
-     * @param    string    $hash        Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
-     * @return   bool                   Requested variable
+     * @param  string $name    Variable name
+     * @param  bool   $default Default value if the variable does not exist
+     * @param  string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @return bool   Requested variable
      */
-    static function getBool($name, $default = false, $hash = 'default')
+    public static function getBool($name, $default = false, $hash = 'default')
     {
-        return Xmf_Request::getVar($name, $default, $hash, 'bool');
+        return Request::getVar($name, $default, $hash, 'bool');
     }
 
     /**
@@ -193,14 +197,14 @@ class Xmf_Request
      * See getVar() for more in-depth documentation on the parameters.
      *
      * @static
-     * @param    string    $name        Variable name
-     * @param    string    $default     Default value if the variable does not exist
-     * @param    string    $hash        Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
-     * @return   string                 Requested variable
+     * @param  string $name    Variable name
+     * @param  string $default Default value if the variable does not exist
+     * @param  string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @return string Requested variable
      */
-    static public function getWord($name, $default = '', $hash = 'default')
+    public static function getWord($name, $default = '', $hash = 'default')
     {
-        return Xmf_Request::getVar($name, $default, $hash, 'word');
+        return Request::getVar($name, $default, $hash, 'word');
     }
 
     /**
@@ -211,14 +215,14 @@ class Xmf_Request
      * See getVar() for more in-depth documentation on the parameters.
      *
      * @static
-     * @param    string    $name        Variable name
-     * @param    string    $default     Default value if the variable does not exist
-     * @param    string    $hash        Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
-     * @return   string                 Requested variable
+     * @param  string $name    Variable name
+     * @param  string $default Default value if the variable does not exist
+     * @param  string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @return string Requested variable
      */
-    static public function getCmd($name, $default = '', $hash = 'default')
+    public static function getCmd($name, $default = '', $hash = 'default')
     {
-        return Xmf_Request::getVar($name, $default, $hash, 'cmd');
+        return Request::getVar($name, $default, $hash, 'cmd');
     }
 
     /**
@@ -229,53 +233,53 @@ class Xmf_Request
      * See getVar() for more in-depth documentation on the parameters.
      *
      * @static
-     * @param    string    $name        Variable name
-     * @param    string    $default    Default value if the variable does not exist
-     * @param    string    $hash        Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
-     * @param    int        $mask        Filter mask for the variable
-     * @return    string    Requested variable
+     * @param  string $name    Variable name
+     * @param  string $default Default value if the variable does not exist
+     * @param  string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param  int    $mask    Filter mask for the variable
+     * @return string Requested variable
      */
-    static function getString($name, $default = '', $hash = 'default', $mask = 0)
+    public static function getString($name, $default = '', $hash = 'default', $mask = 0)
     {
         // Cast to string, in case XMF_REQUEST_ALLOWRAW was specified for mask
-        return (string)Xmf_Request::getVar($name, $default, $hash, 'string', $mask);
+        return (string) Request::getVar($name, $default, $hash, 'string', $mask);
     }
 
     /**
      * @static
-     * @param string $name
-     * @param array $default
-     * @param string $hash
+     * @param  string $name
+     * @param  array  $default
+     * @param  string $hash
      * @return array
      */
-    static public function getArray($name, $default = array(), $hash = 'default')
+    public static function getArray($name, $default = array(), $hash = 'default')
     {
-        return Xmf_Request::getVar($name, $default, $hash, 'array');
+        return Request::getVar($name, $default, $hash, 'array');
     }
 
     /**
      * @static
-     * @param string $name
-     * @param string $default
-     * @param string $hash
+     * @param  string $name
+     * @param  string $default
+     * @param  string $hash
      * @return string
      */
-    static function getText($name, $default = '', $hash = 'default')
+    public static function getText($name, $default = '', $hash = 'default')
     {
-        return (string)Xmf_Request::getVar($name, $default, $hash, 'string', XMF_REQUEST_ALLOWRAW);
+        return (string) Request::getVar($name, $default, $hash, 'string', XMF_REQUEST_ALLOWRAW);
     }
 
     /**
      * Set a variable in one of the request variables
      *
      * @access    public
-     * @param     string    $name         Name
-     * @param     string    $value        Value
-     * @param     string    $hash         Hash
-     * @param     boolean   $overwrite    Boolean
-     * @return    string                  Previous value
+     * @param  string  $name      Name
+     * @param  string  $value     Value
+     * @param  string  $hash      Hash
+     * @param  boolean $overwrite Boolean
+     * @return string  Previous value
      */
-    static public function setVar($name, $value = null, $hash = 'method', $overwrite = true)
+    public static function setVar($name, $value = null, $hash = 'method', $overwrite = true)
     {
         //If overwrite is true, makes sure the variable hasn't been set yet
         if (!$overwrite && array_key_exists($name, $_REQUEST)) {
@@ -336,11 +340,11 @@ class Xmf_Request
      *   default     $_REQUEST
      *
      * @static
-     * @param    string    $hash    to get (POST, GET, FILES, METHOD)
-     * @param    int       $mask    Filter mask for the variable
-     * @return   mixed              Request hash
+     * @param  string $hash to get (POST, GET, FILES, METHOD)
+     * @param  int    $mask Filter mask for the variable
+     * @return mixed  Request hash
      */
-    static public function get($hash = 'default', $mask = 0)
+    public static function get($hash = 'default', $mask = 0)
     {
         $hash = strtoupper($hash);
 
@@ -380,10 +384,10 @@ class Xmf_Request
 
         // Handle magic quotes compatability
         if (get_magic_quotes_gpc() && ($hash != 'FILES')) {
-            $result = Xmf_Request::_stripSlashesRecursive($result);
+            $result = Request::_stripSlashesRecursive($result);
         }
 
-        $result = Xmf_Request::_cleanVars($input, $mask);
+        $result = Request::_cleanVars($input, $mask);
 
         return $result;
     }
@@ -391,31 +395,31 @@ class Xmf_Request
     /**
      * Sets a request variable
      *
-     * @param    array   $array       An associative array of key-value pairs
-     * @param    string  $hash        The request variable to set (POST, GET, FILES, METHOD)
-     * @param    boolean $overwrite   If true and an existing key is found, the value is overwritten, otherwise it is ingored
+     * @param array   $array     An associative array of key-value pairs
+     * @param string  $hash      The request variable to set (POST, GET, FILES, METHOD)
+     * @param boolean $overwrite If true and an existing key is found, the value is overwritten, otherwise it is ingored
      */
-    static public function set($array, $hash = 'default', $overwrite = true)
+    public static function set($array, $hash = 'default', $overwrite = true)
     {
         foreach ($array as $key => $value) {
-            Xmf_Request::setVar($key, $value, $hash, $overwrite);
+            Request::setVar($key, $value, $hash, $overwrite);
         }
     }
 
     /**
      * Clean up an input variable.
      *
-     * @param mixed $var The input variable.
-     * @param int $mask Filter bit mask.
+     * @param mixed $var  The input variable.
+     * @param int   $mask Filter bit mask.
      *  - 1=no trim: If this flag is cleared and the input is a string, the string will have leading and trailing whitespace trimmed.
      *  - 2=allow_raw: If set, no more filtering is performed, higher bits are ignored.
      *  - 4=allow_html: HTML is allowed, but passed through a safe HTML filter first. If set, no more filtering is performed.
      *  - If no bits other than the 1 bit is set, a strict filter is applied.
-     * @param string $type The variable type. See {@link Xmf_Filter_Input::clean()}.
+     * @param string $type The variable type. See {@link Xmf\Filter\Input::clean()}.
      *
      * @return string
      */
-    static protected function _cleanVar($var, $mask = 0, $type = null)
+    protected static function _cleanVar($var, $mask = 0, $type = null)
     {
         // Static input filters for specific settings
         static $noHtmlFilter = null;
@@ -433,39 +437,40 @@ class Xmf_Request
             if ($mask & 4) {
                 // If the allow html flag is set, apply a safe html filter to the variable
                 if (is_null($safeHtmlFilter)) {
-                    $safeHtmlFilter = Xmf_Filter_Input::getInstance(null, null, 1, 1);
+                    $safeHtmlFilter = Filter\Input::getInstance(null, null, 1, 1);
                 }
                 $var = $safeHtmlFilter->clean($var, $type);
             } else {
                 // Since no allow flags were set, we will apply the most strict filter to the variable
                 if (is_null($noHtmlFilter)) {
-                    $noHtmlFilter = Xmf_Filter_Input::getInstance( /* $tags, $attr, $tag_method, $attr_method, $xss_auto */);
+                    $noHtmlFilter = Filter\Input::getInstance( /* $tags, $attr, $tag_method, $attr_method, $xss_auto */);
                 }
                 $var = $noHtmlFilter->clean($var, $type);
             }
         }
+
         return $var;
     }
 
     /**
      * Clean up an array of variables.
      *
-     * @param mixed $var The input variable.
-     * @param int $mask Filter bit mask. See {@link Xmf_Request::_cleanVar()}
-     * @param string $type The variable type. See {@link Xmf_Filter_Input::clean()}.
+     * @param mixed  $var  The input variable.
+     * @param int    $mask Filter bit mask. See {@link Xmf\Request::_cleanVar()}
+     * @param string $type The variable type. See {@link Xmf\Filter\Input::clean()}.
      *
      * @return string
      */
-    static protected function _cleanVars($var, $mask = 0, $type = null)
+    protected static function _cleanVars($var, $mask = 0, $type = null)
     {
-		if(is_string($var)) {
-			$var=Xmf_Request::_cleanVar($var, $mask, $type);
-		}
-		else {
-			foreach($var as $key => &$value) {
-				$value=Xmf_Request::_cleanVars($value, $mask, $type);
-			}
-		}
+        if (is_string($var)) {
+            $var = Request::_cleanVar($var, $mask, $type);
+        } else {
+            foreach ($var as $key => &$value) {
+                $value = Request::_cleanVars($value, $mask, $type);
+            }
+        }
+
         return $var;
     }
 
@@ -474,13 +479,14 @@ class Xmf_Request
      * Strips slashes recursively on an array
      *
      * @access    protected
-     * @param     array    $value        Array of (nested arrays of) strings
-     * @return    array                  The input array with stripshlashes applied to it
+     * @param  array $value Array of (nested arrays of) strings
+     * @return array The input array with stripshlashes applied to it
      */
-    static protected function _stripSlashesRecursive($value)
+    protected static function _stripSlashesRecursive($value)
     {
-        $value = is_array($value) ? array_map(array('XMF_REQUEST', '_stripSlashesRecursive'), $value)
+        $value = is_array($value) ? array_map(array('Xmf\Request', '_stripSlashesRecursive'), $value)
             : stripslashes($value);
+
         return $value;
     }
 }

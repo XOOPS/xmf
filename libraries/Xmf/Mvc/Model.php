@@ -1,4 +1,7 @@
 <?php
+
+namespace Xmf\Mvc;
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -10,7 +13,7 @@
  */
 
 /**
- * Xmf_Mvc_Model abstract model interface
+ * Xmf\Mvc\Model abstract model interface
  *
  * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
  * @license         http://www.fsf.org/copyleft/gpl.html GNU private license
@@ -22,7 +25,7 @@
 die('not ready');
 
 /**
- * A Xmf_Mvc_Model defines a business process rule set consisting of
+ * A Model defines a business process rule set consisting of
  * - business objects (one or more database objects and relating rules)
  * - presentation rules appropriate to input and display
  * - validation rules
@@ -35,36 +38,35 @@ die('not ready');
  * available to any ContextAware object (such as Action and View.)
  */
 
-abstract class Xmf_Mvc_Model extends Xmf_Mvc_ContextAware
+abstract class Model extends ContextAware
 {
-	protected $object;
+    protected $object;
 
-	public function __construct()
-	{
-		$object=null;
-	}
+    public function __construct()
+    {
+        $object=null;
+    }
 
-	/**
-	 * initialize the model
-	 *
-	 * concrete implementations should establish the data model
-	 *
-	 */
-	public function initalize()
-	{
-		return;
-	}
+    /**
+     * initialize the model
+     *
+     * concrete implementations should establish the data model
+     *
+     */
+    public function initalize()
+    {
+        return;
+    }
 
-	/**
-	 * cleanup the model
-	 *
-	 * concrete implementations should establish the data model
-	 *
-	 */
-	public function cleanup(&modelManager)
-	{
-		return;
-	}
+    /**
+     * cleanup the model
+     *
+     * concrete implementations should establish the data model
+     *
+     */
+    public function cleanup(&modelManager)
+    {
+        return;
+    }
 
 }
-?>

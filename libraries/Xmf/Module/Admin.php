@@ -1,4 +1,7 @@
 <?php
+
+namespace Xmf\Module;
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -10,22 +13,22 @@
  */
 
 /**
- * Xmf_Module_Admin provides helpful methods for module administration
+ * Xmf\Module\Admin provides helpful methods for module administration
  * uses.
  *
- * Xmf_Module_Admin also provides a method compatible subset of the
+ * Xmf\Module\Admin also provides a method compatible subset of the
  * Xoops 2.6 ModuleAdmin class for use in transition from 2.5 to 2.6
  *
  * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
  * @license         http://www.fsf.org/copyleft/gpl.html GNU private license
- * @package         Xmf_Mvc
+ * @package         Xmf
  * @since           1.0
  * @author          Richard Griffith
  */
 
 defined('XMF_EXEC') or die('Xmf was not detected');
 
-class Xmf_Module_Admin
+class Admin
 {
 
     /**
@@ -33,90 +36,88 @@ class Xmf_Module_Admin
      *
      * @var object
      */
-    static private $_ModuleAdmin = null;
+    private static $_ModuleAdmin = null;
     private $_version26 = null;
     private $_lastInfoBoxTitle = null;
-    static private $_paypal = '';
-
+    private static $_paypal = '';
 
     /**
      * Constructor
      */
     private function __construct()
     {
-        $this->_version26 = Xmf_Module_Admin::is26();
-	}
+        $this->_version26 = Xmf\Module\Admin::is26();
+    }
 
-	/**
-	 * Retrieve a module admin instance
-	 *
-	 * If we are on 2.6 this will be the a XoopsModuleAdmin instance.
-	 * Older systems with the Frameworks based admin class will get
-	 * an instance of this class which provides compatible methods
-	 * built from the old Frameworks version.
-	 *
-	 * **Always use this to get the ModuleAdmin instance if you use
-	 * anything (even the static methods) of this class.**
-	 *
-	 * @return object a ModuleAdmin instance.
-	 *
-	 * @since  1.0
-	 */
-	public static function & getInstance ()
-	{
+    /**
+     * Retrieve a module admin instance
+     *
+     * If we are on 2.6 this will be the a XoopsModuleAdmin instance.
+     * Older systems with the Frameworks based admin class will get
+     * an instance of this class which provides compatible methods
+     * built from the old Frameworks version.
+     *
+     * **Always use this to get the ModuleAdmin instance if you use
+     * anything (even the static methods) of this class.**
+     *
+     * @return object a ModuleAdmin instance.
+     *
+     * @since  1.0
+     */
+    public static function & getInstance ()
+    {
 
-		static $instance;
+        static $instance;
 
-		if ($instance === NULL)
-		{
-			if(class_exists('XoopsModuleAdmin',true)) {
-				$instance  = new XoopsModuleAdmin;
-				self::$_ModuleAdmin = $instance;
-			}
-			else {
-				Xmf_Loader::loadFile(XOOPS_ROOT_PATH . '/Frameworks/moduleclasses/moduleadmin/moduleadmin.php');
-				self::$_ModuleAdmin = new ModuleAdmin;
-				$instance  = new Xmf_Module_Admin;
-			}
+        if ($instance === NULL) {
+            if (class_exists('XoopsModuleAdmin',true)) {
+                $instance  = new XoopsModuleAdmin;
+                self::$_ModuleAdmin = $instance;
+            } else {
+                Xmf\Loader::loadFile(XOOPS_ROOT_PATH . '/Frameworks/moduleclasses/moduleadmin/moduleadmin.php');
+                self::$_ModuleAdmin = new ModuleAdmin;
+                $instance  = new Xmf\Module\Admin;
+            }
 
-		}
-		return $instance;
+        }
 
-	}
+        return $instance;
 
-	/**
-	 * Are we in a 2.6 environment?
-	 *
-	 * just to help with other admin things than ModuleAdmin
-	 *
-	 * not part of 2.6 module admin
-	 *
-	 * @return bool true if we are in a 2.6 environment
-	 */
-	static public function is26()
-	{
-		return class_exists('Xoops',false);
-	}
+    }
 
-	/**
-	 * Get an appropriate imagePath for menu.php use.
-	 *
-	 * just to help with other admin things than ModuleAdmin
-	 *
-	 * not part of 2.6 module admin
-	 *
-	 * @return bool true if we are in a 2.6 environment
-	 */
-	static public function menuIconPath($image)
-	{
-        if(Xmf_Module_Admin::is26()) {
-			return($image);
-		}
-		else {
-			$path='../../Frameworks/moduleclasses/icons/32/';
-			return($path.$image);
-		}
-	}
+    /**
+     * Are we in a 2.6 environment?
+     *
+     * just to help with other admin things than ModuleAdmin
+     *
+     * not part of 2.6 module admin
+     *
+     * @return bool true if we are in a 2.6 environment
+     */
+    public static function is26()
+    {
+        return class_exists('Xoops',false);
+    }
+
+    /**
+     * Get an appropriate imagePath for menu.php use.
+     *
+     * just to help with other admin things than ModuleAdmin
+     *
+     * not part of 2.6 module admin
+     *
+     * @return bool true if we are in a 2.6 environment
+     */
+    public static function menuIconPath($image)
+    {
+        if (Xmf\Module\Admin::is26()) {
+            return($image);
+        } else {
+            $path='../../Frameworks/moduleclasses/icons/32/';
+
+            return($path.$image);
+        }
+    }
 
     /**
      * Add config line
@@ -128,7 +129,7 @@ class Xmf_Module_Admin
      */
     public function addConfigBoxLine($value = '', $type = 'default')
     {
-		return self::$_ModuleAdmin->addConfigBoxLine($value, $type);
+        return self::$_ModuleAdmin->addConfigBoxLine($value, $type);
     }
 
     /**
@@ -142,8 +143,9 @@ class Xmf_Module_Admin
      */
     public function addInfoBox($title, $type = 'default', $extra = '')
     {
-		$this->_lastInfoBoxTitle = $title;
-		return self::$_ModuleAdmin->addInfoBox($title);
+        $this->_lastInfoBoxTitle = $title;
+
+        return self::$_ModuleAdmin->addInfoBox($title);
     }
 
     /**
@@ -157,7 +159,7 @@ class Xmf_Module_Admin
      */
     public function addInfoBoxLine($text = '', $type = 'default', $color = 'inherit')
     {
-		return self::$_ModuleAdmin->addInfoBoxLine($this->_lastInfoBoxTitle, $text, '', $color, $type);
+        return self::$_ModuleAdmin->addInfoBoxLine($this->_lastInfoBoxTitle, $text, '', $color, $type);
     }
 
     /**
@@ -172,7 +174,7 @@ class Xmf_Module_Admin
      */
     public function addItemButton($title, $link, $icon = 'add', $extra = '')
     {
-		return self::$_ModuleAdmin->addItemButton($title, $link, $icon, $extra);
+        return self::$_ModuleAdmin->addItemButton($title, $link, $icon, $extra);
     }
 
     /**
@@ -185,8 +187,9 @@ class Xmf_Module_Admin
      */
     public function renderButton($position = null, $delimiter = "&nbsp;")
     {
-		if($postion==null) $position = 'right';
-		return self::$_ModuleAdmin->renderButton($position, $delimeter);
+        if($postion==null) $position = 'right';
+
+        return self::$_ModuleAdmin->renderButton($position, $delimeter);
     }
 
     /**
@@ -229,7 +232,7 @@ class Xmf_Module_Admin
      */
     public function displayNavigation($menu = '')
     {
-		echo self::$_ModuleAdmin->addNavigation($menu);
+        echo self::$_ModuleAdmin->addNavigation($menu);
     }
 
     /**
@@ -241,7 +244,7 @@ class Xmf_Module_Admin
      */
     public function renderAbout($logo_xoops = true)
     {
-		return self::$_ModuleAdmin->renderAbout(self::$_paypal, $logo_xoops);
+        return self::$_ModuleAdmin->renderAbout(self::$_paypal, $logo_xoops);
     }
 
     /**
@@ -251,9 +254,9 @@ class Xmf_Module_Admin
      *
      * @return bool|mixed|string
      */
-    static public function setPaypal($paypal = '')
+    public static function setPaypal($paypal = '')
     {
-		self::$_paypal = $paypal;
+        self::$_paypal = $paypal;
     }
 
     /**
@@ -272,22 +275,22 @@ class Xmf_Module_Admin
      *
      * @return bool
      */
-    static public function addConfigError($value = '')
+    public static function addConfigError($value = '')
     {
-        if(Xmf_Module_Admin::is26()) {
-			$type='error';
-		}
-		else {
-			$path=XOOPS_URL.'/Frameworks/moduleclasses/icons/16/';
-			$line = "";
-			$line .= "<span style='color : red; font-weight : bold;'>";
-			$line .= "<img src='" . $path . "off.png' >";
-			$line .= $value;
-			$line .= "</span>";
-			$value=$line;
-			$type = 'default';
-		}
-		return self::$_ModuleAdmin->addConfigBoxLine($value, $type);
+        if (Xmf\Module\Admin::is26()) {
+            $type='error';
+        } else {
+            $path=XOOPS_URL.'/Frameworks/moduleclasses/icons/16/';
+            $line = "";
+            $line .= "<span style='color : red; font-weight : bold;'>";
+            $line .= "<img src='" . $path . "off.png' >";
+            $line .= $value;
+            $line .= "</span>";
+            $value=$line;
+            $type = 'default';
+        }
+
+        return self::$_ModuleAdmin->addConfigBoxLine($value, $type);
     }
 
     /**
@@ -297,55 +300,54 @@ class Xmf_Module_Admin
      *
      * @return bool
      */
-    static public function addConfigAccept($value = '')
+    public static function addConfigAccept($value = '')
     {
-        if(Xmf_Module_Admin::is26()) {
-			$type='accept';
-		}
-		else {
-			$path=XOOPS_URL.'/Frameworks/moduleclasses/icons/16/';
-			$line = "";
-			$line .= "<span style='color : green;'>";
-			$line .= "<img src='" . $path . "on.png' >";
-			$line .= $value;
-			$line .= "</span>";
-			$value=$line;
-			$type = 'default';
-		}
-		return self::$_ModuleAdmin->addConfigBoxLine($value, $type);
+        if (Xmf\Module\Admin::is26()) {
+            $type='accept';
+        } else {
+            $path=XOOPS_URL.'/Frameworks/moduleclasses/icons/16/';
+            $line = "";
+            $line .= "<span style='color : green;'>";
+            $line .= "<img src='" . $path . "on.png' >";
+            $line .= $value;
+            $line .= "</span>";
+            $value=$line;
+            $type = 'default';
+        }
+
+        return self::$_ModuleAdmin->addConfigBoxLine($value, $type);
     }
 
-	/**
-	 * Check for installed module and version and do addConfigBoxLine()
-	 *
-	 * @param string $moddir - module directory name
-	 * @param integer $minversion - minimum acceptable module version (100 = V1.00)
-	 *
-	 * @return bool true if requested version of the module is available
-	 */
-	static function checkModuleVersion($moddir,$minversion)
-	{
-		Xmf_Language::load('main', 'xmf');
-		$return=false;
-		$helper=Xmf_Module_Helper::getInstance($moddir);
-		if(is_object($helper) && is_object($helper->getModule())) {
-			$mod_modversion=$helper->getModule()->getVar('version');
-			$mod_version_f = $mod_modversion/100;
-			$min_version_f = $minversion/100;
-			$value = sprintf(_AM_XMF_DEMOMVC_MODULE_VERSION,strtoupper($moddir),$min_version_f, $mod_version_f);
-			if($mod_modversion>=$minversion) {
-				Xmf_Module_Admin::addConfigAccept($value);
-				$return=true;
-			} else {
-				Xmf_Module_Admin::addConfigError($value);
-			}
-		}
-		else {
-			$value = sprintf(_AM_XMF_DEMOMVC_MODULE_NOTFOUND,strtoupper($moddir),$minversion/100);
-			Xmf_Module_Admin::addConfigError($value);
-		}
-		return $return;
-	}
+    /**
+     * Check for installed module and version and do addConfigBoxLine()
+     *
+     * @param string  $moddir     - module directory name
+     * @param integer $minversion - minimum acceptable module version (100 = V1.00)
+     *
+     * @return bool true if requested version of the module is available
+     */
+    public static function checkModuleVersion($moddir,$minversion)
+    {
+        Xmf\Language::load('main', 'xmf');
+        $return=false;
+        $helper=Xmf\Module\Helper::getInstance($moddir);
+        if (is_object($helper) && is_object($helper->getModule())) {
+            $mod_modversion=$helper->getModule()->getVar('version');
+            $mod_version_f = $mod_modversion/100;
+            $min_version_f = $minversion/100;
+            $value = sprintf(_AM_XMF_DEMOMVC_MODULE_VERSION,strtoupper($moddir),$min_version_f, $mod_version_f);
+            if ($mod_modversion>=$minversion) {
+                Xmf\Module\Admin::addConfigAccept($value);
+                $return=true;
+            } else {
+                Xmf\Module\Admin::addConfigError($value);
+            }
+        } else {
+            $value = sprintf(_AM_XMF_DEMOMVC_MODULE_NOTFOUND,strtoupper($moddir),$minversion/100);
+            Xmf\Module\Admin::addConfigError($value);
+        }
+
+        return $return;
+    }
 
 }
-?>
