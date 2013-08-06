@@ -23,8 +23,8 @@ namespace Xmf\Mvc;
 defined('XMF_EXEC') or die('Xmf was not detected');
 
 /**
- * Xmf_MvcXoopsTplRender is used by the XoopsSmartyRenderer if a render
- * mode of Xmf_Mvc::RENDER_VAR (render to variable) is requested.
+ * Xmf\Mvc\XoopsTplRender is used by the XoopsSmartyRenderer if a render
+ * mode of Xmf\Mvc::RENDER_VAR (render to variable) is requested.
  */
 class XoopsTplRender extends \Xmf\Template\AbstractTemplate
 {

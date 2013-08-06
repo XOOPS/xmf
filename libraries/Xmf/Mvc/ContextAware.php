@@ -20,7 +20,7 @@ namespace Xmf\Mvc;
  *
  * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
  * @license         http://www.fsf.org/copyleft/gpl.html GNU private license
- * @package         Xmf_Mvc
+ * @package         Xmf\Mvc
  * @since           1.0
  * @author          Richard Griffith
  */

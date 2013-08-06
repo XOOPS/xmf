@@ -21,7 +21,7 @@ namespace Xmf\Database;
  */
 
 /**
- * Xmf_Database_Migrate
+ * Xmf\Database\Migrate
  *
  * inspired by Yii CDbMigration
  *
@@ -86,7 +86,7 @@ class Migrate
      */
     public function name($table)
     {
-        return $this->_db->quote($this->_db->prefix($table));
+        return $this->_db->prefix($table);
     }
 
     /**
@@ -102,26 +102,63 @@ class Migrate
      */
     public function addColumn($table, $column, $position, $attributes)
     {
-        $columnDef=array('position'=>$position, 'attributes'=>$attributes);
+        $columnDef=array('name'=>$column, 'position'=>$position, 'attributes'=>$attributes);
 
-        // Find table def. Is this on a table we are adding?
-        if (isset($this->_queue['createtables'][$table])) {
-            $this->_queue['createtables'][$table]['columns'][$column]=$columnDef;
-        } else {
-            // is this an existing table?
-            if (isset($this->_tables[$table])) {
-                $tableDef = &$this->_tables[$table];
-                // skip if this column is already on the table
-                if (!isset($tableDef['columns'][$column])) {
-                    $this->_queue['addcolumns'][$table][$column]=$columnDef;
+        // Find table def.
+        if (isset($this->_tables[$table])) {
+            $tableDef = &$this->_tables[$table];
+            // Is this on a table we are adding?
+            if(isset($tableDef['create']) && $tableDef['create']) {
+                switch($position) {
+                    case Migrate::POSITION_FIRST:
+                        array_unshift($tableDef['columns'],$columnDef);
+                        break;
+                    case '':
+                    case null:
+                    case false:
+                        array_push($tableDef['columns'],$columnDef);
+                        break;
+                    default:
+                        // should be a column name to add after
+                        // loop thru and find that column
+                        $i=0;
+                        foreach($tableDef['columns'] as $col) {
+                            ++$i;
+                            if(strcasecmp($col['name'],$position)==0) {
+                                array_splice($tableDef['columns'],$i,0,array($columnDef));
+                                break;
+                            }
+                        }
                 }
-             } else {
-                $this->lastError = 'Table is not defined';
-                $this->lastErrNo = -1;
-
-                return false;
+                return true;
             }
+            else {
+                foreach($tableDef['columns'] as $col) {
+                    if(strcasecmp($col['name'],$column)==0) {
+                        return true;
+                    }
+                }
+                switch($position) {
+                    case Migrate::POSITION_FIRST:
+                        $pos='FIRST';
+                        break;
+                    case '':
+                    case null:
+                    case false:
+                        $pos='';
+                        break;
+                    default:
+                        $pos='AFTER `$position`';
+                }
+                $this->_queue[]="ALTER TABLE `{$tableDef['attributes']['TABLE_NAME']}` ADD COLUMN {$column} {$columnDef['attributes']} {$pos} ";
 
+            }
+        }
+        else { // no table established
+            $this->lastError = 'Table is not defined';
+            $this->lastErrNo = -1;
+
+            return false;
         }
 
         return true; // exists or is added to queue
@@ -159,7 +196,15 @@ class Migrate
             return true;
         } else {
             if ($tableDef===true) {
-                $this->_queue['createtables'][$table] = array();
+                $tableDef=array();
+                $tableDef['attributes'] = array(
+                      'TABLE_NAME' => $this->_db->prefix($table)
+                    , 'ENGINE' => ''
+                    , 'CHARACTER_SET_NAME' => '');
+                $tableDef['create'] = true;
+                $this->_tables[$table] = $tableDef;
+
+                $this->_queue[]=array('createtable'=>$table);
 
                 return true;
             } else {
@@ -213,15 +258,28 @@ class Migrate
      *
      * @param string $table    existing table
      * @param string $newTable new table
+     * @param bool   $withData true to copy data, false for schema only
      *
      * @return bool true if no errors, false if errors encountered
      */
-    public function copyTable($table, $newTable)
+    public function copyTable($table, $newTable, $withData=false)
     {
         if(isset($this->_tables[$newTable])) return true;
         $tableDef=$this->_getTable($table);
+        $copy=$this->name($newTable);
+        $original=$this->name($table);
+
         if (is_array($tableDef)) {
-            $this->_queue['createtables'][$newTable] = $tableDef;
+            $tableDef['attributes']['TABLE_NAME']=$copy;
+            if($withData) {
+                $this->_queue[] = "CREATE TABLE {$copy} LIKE {$original} ;";
+                $this->_queue[] = "INSERT INTO {$copy} SELECT * FROM {$original} ;";
+            }
+            else {
+                $tableDef['create'] = true;
+                $this->_queue[]=array('createtable'=>$newTable);
+            }
+            $this->_tables[$newTable]=$tableDef;
 
             return true;
         } else {
@@ -264,7 +322,7 @@ class Migrate
      *
      * @param string $name  name of index to drop
      * @param string $table table indexed
-     *
+
      * @return bool true if no errors, false if errors encountered
      */
     public function dropIndex(string $name, string $table)
@@ -486,7 +544,7 @@ class Migrate
         $sql .= ' FROM `INFORMATION_SCHEMA`.`TABLES` t, ';
         $sql .= ' `INFORMATION_SCHEMA`.`CHARACTER_SETS` c ';
         $sql .= ' WHERE t.TABLE_SCHEMA = \'' . XOOPS_DB_NAME . '\' ';
-        $sql .= ' AND t.TABLE_NAME = ' . $this->name($table) . ' ';
+        $sql .= ' AND t.TABLE_NAME = \'' . $this->name($table) . '\' ';
         $sql .= ' AND t.TABLE_COLLATION  = c.DEFAULT_COLLATE_NAME ';
 /*
 SELECT TABLE_NAME, ENGINE, CHARACTER_SET_NAME
@@ -506,7 +564,7 @@ AND t.TABLE_NAME = 'xtrc_config'
         $sql  = 'SELECT * ';
         $sql .= ' FROM `INFORMATION_SCHEMA`.`COLUMNS` ';
         $sql .= ' WHERE TABLE_SCHEMA = \'' . XOOPS_DB_NAME . '\' ';
-        $sql .= ' AND TABLE_NAME = ' . $this->name($table) . ' ';
+        $sql .= ' AND TABLE_NAME = \'' . $this->name($table) . '\' ';
         $sql .= ' ORDER BY `ORDINAL_POSITION` ';
 
         $result = $this->_execSql($sql);
@@ -518,17 +576,18 @@ AND t.TABLE_NAME = 'xtrc_config'
                         " DEFAULT '". $column['COLUMN_DEFAULT'] . "' ")
                 . $column['EXTRA'];
 
-            $columnDef=array('position'=>$column['ORDINAL_POSITION'], 'attributes'=>$attributes);
+            $columnDef=array('name'=>$column['COLUMN_NAME'], 'position'=>$column['ORDINAL_POSITION'], 'attributes'=>$attributes);
 
 //            $tableDef['columnorder'][$column['ORDINAL_POSITION']] = $column['COLUMN_NAME'];
-            $tableDef['columns'][$column['COLUMN_NAME']] = $columnDef;
+//            $tableDef['columns'][$column['COLUMN_NAME']] = $columnDef;
+            $tableDef['columns'][] = $columnDef;
         };
 
         $sql  = 'SELECT `INDEX_NAME`, `SEQ_IN_INDEX`, `NON_UNIQUE`, ';
         $sql .= ' `COLUMN_NAME`, `SUB_PART` ';
         $sql .= ' FROM `INFORMATION_SCHEMA`.`STATISTICS` ';
         $sql .= ' WHERE TABLE_SCHEMA = \'' . XOOPS_DB_NAME . '\' ';
-        $sql .= ' AND TABLE_NAME = ' . $this->name($table) . ' ';
+        $sql .= ' AND TABLE_NAME = \'' . $this->name($table) . '\' ';
         $sql .= ' ORDER BY `INDEX_NAME`, `SEQ_IN_INDEX` ';
 /*
 SELECT `INDEX_NAME`, `SEQ_IN_INDEX`, `NON_UNIQUE`, `COLUMN_NAME`, `COLLATION`, `SUB_PART`

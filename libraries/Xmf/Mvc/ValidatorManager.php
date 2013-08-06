@@ -184,7 +184,7 @@ class ValidatorManager extends ContextAware
      *
      * @param string $name          A parameter name.
      * @param string $validatorName The name of the validator class (minus Xmf\Mvc\Validator_)
-     * @param mixed  $initParms     $params for a Xmf_Mvc_Validator::initialize()
+     * @param mixed  $initParms     $params for a Xmf\Mvc\Validator::initialize()
      *
      * @since  1.0
      */

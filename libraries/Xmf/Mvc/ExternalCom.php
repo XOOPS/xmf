@@ -33,7 +33,7 @@ namespace Xmf\Mvc;
  * -  $block = $externalCom->getAttributes();
  * but other uses are possible.
  *
- * Borrows heavily from Xmf_Mvc_Request
+ * Borrows heavily from Xmf\Mvc\Request
  *
  */
 class ExternalCom
