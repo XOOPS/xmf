@@ -110,7 +110,7 @@ class Input
      * @param  int              $tagsMethod WhiteList method = 0, BlackList method = 1
      * @param  int              $attrMethod WhiteList method = 0, BlackList method = 1
      * @param  int              $xssAuto    Only auto clean essentials = 0, Allow clean blacklisted tags/attr = 1
-     * @return Xmf_Filter_Input The Xmf_Filter_Input object.
+     * @return Xmf\Filter\Input The Xmf\Filter\Input object.
      * @since   1.5
      */
     public static function getInstance($tagsArray = array(), $attrArray =
@@ -528,9 +528,9 @@ class Input
         }
         $source = strtr($source, $ttr);
         // convert decimal
-        $source = preg_replace('/&#(\d+);/me', "chr(\\1)", $source); // decimal notation
+        $source = preg_replace_callback('/&#(\d+);/m', create_function('$matches',"return  chr(\$matches[1]);"),$source);
         // convert hex
-        $source = preg_replace('/&#x([a-f0-9]+);/mei', "chr(0x\\1)", $source); // hex notation
+        $source = preg_replace_callback('/&#x([a-f0-9]+);/mi', create_function('$matches',"return  chr('0x'.\$matches[1]);"),$source);
 
         return $source;
     }
