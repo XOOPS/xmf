@@ -40,7 +40,7 @@ class Debug
         if (!$html) {
             $msg = var_export($var, true);
         } else {
-            $ts = MyTextSanitizer::getInstance();
+            $ts = \MyTextSanitizer::getInstance();
             $msg = $ts->displayTarea(var_export($var, true));
             $msg = "<div style='padding: 5px; font-weight: bold'>{$msg}</div>";
         }

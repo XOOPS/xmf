@@ -179,7 +179,7 @@ class PermissionMap
             $perm_name = $key;
             $perm_desc = defined($perm['desc']) ? constant($perm['desc']) : $perm['desc'];
 
-            $forms[$key] = new XoopsGroupPermForm($title_of_form, $module_id, $perm_name, $perm_desc, '', false);
+            $forms[$key] = new \XoopsGroupPermForm($title_of_form, $module_id, $perm_name, $perm_desc, '', false);
             foreach ($perm['items'] as $item) {
                 $forms[$key]->addItem($item['id'],
                     defined($item['name']) ? constant($item['name']) : $item['name']);

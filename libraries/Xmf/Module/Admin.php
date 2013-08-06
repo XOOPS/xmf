@@ -46,7 +46,7 @@ class Admin
      */
     private function __construct()
     {
-        $this->_version26 = Xmf\Module\Admin::is26();
+        $this->_version26 = self::is26();
     }
 
     /**
@@ -71,12 +71,12 @@ class Admin
 
         if ($instance === NULL) {
             if (class_exists('XoopsModuleAdmin',true)) {
-                $instance  = new XoopsModuleAdmin;
+                $instance  = new \XoopsModuleAdmin;
                 self::$_ModuleAdmin = $instance;
             } else {
-                Xmf\Loader::loadFile(XOOPS_ROOT_PATH . '/Frameworks/moduleclasses/moduleadmin/moduleadmin.php');
-                self::$_ModuleAdmin = new ModuleAdmin;
-                $instance  = new Xmf\Module\Admin;
+                \Xmf\Loader::loadFile(XOOPS_ROOT_PATH . '/Frameworks/moduleclasses/moduleadmin/moduleadmin.php');
+                self::$_ModuleAdmin = new \ModuleAdmin;
+                $instance  = new \Xmf\Module\Admin;
             }
 
         }
@@ -110,7 +110,7 @@ class Admin
      */
     public static function menuIconPath($image)
     {
-        if (Xmf\Module\Admin::is26()) {
+        if (self::is26()) {
             return($image);
         } else {
             $path='../../Frameworks/moduleclasses/icons/32/';
@@ -277,7 +277,7 @@ class Admin
      */
     public static function addConfigError($value = '')
     {
-        if (Xmf\Module\Admin::is26()) {
+        if (self::is26()) {
             $type='error';
         } else {
             $path=XOOPS_URL.'/Frameworks/moduleclasses/icons/16/';
@@ -302,7 +302,7 @@ class Admin
      */
     public static function addConfigAccept($value = '')
     {
-        if (Xmf\Module\Admin::is26()) {
+        if (self::is26()) {
             $type='accept';
         } else {
             $path=XOOPS_URL.'/Frameworks/moduleclasses/icons/16/';
@@ -328,23 +328,23 @@ class Admin
      */
     public static function checkModuleVersion($moddir,$minversion)
     {
-        Xmf\Language::load('main', 'xmf');
+        \Xmf\Language::load('main', 'xmf');
         $return=false;
-        $helper=Xmf\Module\Helper::getInstance($moddir);
+        $helper=\Xmf\Module\Helper::getInstance($moddir);
         if (is_object($helper) && is_object($helper->getModule())) {
             $mod_modversion=$helper->getModule()->getVar('version');
             $mod_version_f = $mod_modversion/100;
             $min_version_f = $minversion/100;
             $value = sprintf(_AM_XMF_DEMOMVC_MODULE_VERSION,strtoupper($moddir),$min_version_f, $mod_version_f);
             if ($mod_modversion>=$minversion) {
-                Xmf\Module\Admin::addConfigAccept($value);
+                self::addConfigAccept($value);
                 $return=true;
             } else {
-                Xmf\Module\Admin::addConfigError($value);
+                self::addConfigError($value);
             }
         } else {
             $value = sprintf(_AM_XMF_DEMOMVC_MODULE_NOTFOUND,strtoupper($moddir),$minversion/100);
-            Xmf\Module\Admin::addConfigError($value);
+            self::addConfigError($value);
         }
 
         return $return;

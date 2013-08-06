@@ -100,7 +100,7 @@ class XoopsUser extends User
         }
 
         $module_id = $this->Controller()->modGetVar('mid');
-        $gperm_handler =& xoops_gethandler('groupperm');
+        $gperm_handler = xoops_gethandler('groupperm');
 
         $privilege = false;
 
