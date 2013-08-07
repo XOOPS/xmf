@@ -2,6 +2,8 @@
 
 namespace Xmf\Database;
 
+use Xmf\Language;
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -70,7 +72,7 @@ class Migrate
     public function __construct()
     {
         if (!defined('XMF_EXEC')) { die('Xmf was not detected'); }
-        \Xmf\Language::load('database', 'xmf');
+        Language::load('database', 'xmf');
 
         $this->_db = \XoopsDatabaseFactory::getDatabaseConnection();
         $this->queueReset();
@@ -148,9 +150,9 @@ class Migrate
                         $pos='';
                         break;
                     default:
-                        $pos='AFTER `$position`';
+                        $pos="AFTER `{$position}`";
                 }
-                $this->_queue[]="ALTER TABLE `{$tableDef['attributes']['TABLE_NAME']}` ADD COLUMN {$column} {$columnDef['attributes']} {$pos} ";
+                $this->_queue[]="ALTER TABLE `{$tableDef['name']}` ADD COLUMN {$column} {$columnDef['attributes']} {$pos} ";
 
             }
         }
@@ -175,7 +177,17 @@ class Migrate
      */
     public function addPrimaryKey($table, $column)
     {
-        return false;
+        if (isset($this->_tables[$table])) {
+            $this->_queue[]="ALTER TABLE `{$tableDef['name']}` ADD PRIMARY KEY({$column})";
+        }
+        else { // no table established
+            $this->lastError = 'Table is not defined';
+            $this->lastErrNo = -1;
+
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -197,10 +209,9 @@ class Migrate
         } else {
             if ($tableDef===true) {
                 $tableDef=array();
-                $tableDef['attributes'] = array(
-                      'TABLE_NAME' => $this->_db->prefix($table)
-                    , 'ENGINE' => ''
-                    , 'CHARACTER_SET_NAME' => '');
+                $tableDef = array(
+                      'name' => $this->_db->prefix($table)
+                    , 'options' => 'ENGINE=MyISAM');
                 $tableDef['create'] = true;
                 $this->_tables[$table] = $tableDef;
 
@@ -213,43 +224,74 @@ class Migrate
         }
     }
 
+    /**
+     * Alias for addTable
+     *
+     * @param string $table table
+     *
+     * @return bool true if no errors, false if errors encountered
+     */
+    public function useTable($table)
+    {
+        return $this->addTable($table);
+    }
+
 
     /**
      * Add alter column operation to the work queue
      *
      * @param string $table    table containing the column
-     * @param string $column   column to add
+     * @param string $column   column to alter
      * @param mixed  $position FIRST, string of column name to add new
      *                          column after, or null for no change
-     * @param array $attributes column_definition
+     * @param array $attributes new column_definition
+     * @param string $newName  new name for column, blank to keep same
      *
      * @return bool true if no errors, false if errors encountered
      */
-    public function alterColumn($table, $column, $position, $attributes)
+    public function alterColumn($table, $column, $position, $attributes, $newName='')
     {
-        $columnDef=array('position'=>$position, 'attributes'=>$attributes);
-
-        // Find table def. Is this on a table we are adding?
-        if (isset($this->_queue['createtables'][$table])) {
-            $this->_queue['createtables'][$table]['columns'][$column]=$columnDef;
-        } else {
-            // is this an existing table?
-            if (isset($this->_tables[$table])) {
-                $tableDef = &$this->_tables[$table];
-                // skip if this column is already on the table
-                if (!isset($tableDef['columns'][$column])) {
-                    $this->_queue['altercolumns'][$table][$column]=$columnDef;
+        if(empty($newName)) $newName=$column;
+        // Find table def.
+        if (isset($this->_tables[$table])) {
+            $tableDef = &$this->_tables[$table];
+            // Is this on a table we are adding?
+            if(isset($tableDef['create']) && $tableDef['create'] && empty($position)) {
+                // loop thru and find the column
+                foreach($tableDef['columns'] as &$col) {
+                    if(strcasecmp($col['name'],$column)==0) {
+                        $col['name']=$newName;
+                        $col['attributes']=$attributes;
+                        break;
+                    }
                 }
-            } else {
-                $this->lastError = 'Table is not defined';
-                $this->lastErrNo = -1;
-
-                return false;
+                return true;
             }
+            else {
+                switch($position) {
+                    case Migrate::POSITION_FIRST:
+                        $pos='FIRST';
+                        break;
+                    case '':
+                    case null:
+                    case false:
+                        $pos='';
+                        break;
+                    default:
+                        $pos="AFTER `{$position}`";
+                }
+                $this->_queue[]="ALTER TABLE `{$tableDef['name']}` CHANGE COLUMN `{$column}` `{$newName}` {$attributes} {$pos} ";
 
+            }
+        }
+        else { // no table established
+            $this->lastError = 'Table is not defined';
+            $this->lastErrNo = -1;
+
+            return false;
         }
 
-        return true; // exists or is added to queue
+        return true;
     }
 
     /**
@@ -270,10 +312,10 @@ class Migrate
         $original=$this->name($table);
 
         if (is_array($tableDef)) {
-            $tableDef['attributes']['TABLE_NAME']=$copy;
+            $tableDef['name']=$copy;
             if($withData) {
-                $this->_queue[] = "CREATE TABLE {$copy} LIKE {$original} ;";
-                $this->_queue[] = "INSERT INTO {$copy} SELECT * FROM {$original} ;";
+                $this->_queue[] = "CREATE TABLE `{$copy}` LIKE `{$original}` ;";
+                $this->_queue[] = "INSERT INTO `{$copy}` SELECT * FROM `{$original}` ;";
             }
             else {
                 $tableDef['create'] = true;
@@ -289,19 +331,31 @@ class Migrate
     }
 
     /**
-     * Add new index definition for table to work queue
+     * Add new index definition for index to work queue
      *
      * @param string $name   name of index to add
      * @param string $table  table indexed
      * @param string $column column or comma separated list of columns
-     *                        to use the key
-     * @param bool $unique true if index is to be unique
+     *                       to use as the key
+     * @param bool   $unique true if index is to be unique
      *
      * @return bool true if no errors, false if errors encountered
      */
     public function createIndex($name, $table, $column, $unique=false)
     {
-        return false;
+        if (isset($this->_tables[$table])) {
+            //ALTER TABLE `table` ADD INDEX `product_id` (`product_id`)
+            $add=($unique?'ADD UNIQUE INDEX':'ADD INDEX');
+            $this->_queue[]="ALTER TABLE `{$tableDef['name']}` {$add} {$name} ({$column})";
+        }
+        else { // no table established
+            $this->lastError = 'Table is not defined';
+            $this->lastErrNo = -1;
+
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -314,7 +368,19 @@ class Migrate
      */
     public function dropColumn($table, $column)
     {
-        return false;
+        // Find table def.
+        if (isset($this->_tables[$table])) {
+            $tableDef = &$this->_tables[$table];
+            $this->_queue[]="ALTER TABLE `{$tableDef['name']}` DROP COLUMN `{$column}`";
+        }
+        else { // no table established
+            $this->lastError = 'Table is not defined';
+            $this->lastErrNo = -1;
+
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -325,9 +391,20 @@ class Migrate
 
      * @return bool true if no errors, false if errors encountered
      */
-    public function dropIndex(string $name, string $table)
+    public function dropIndex($name, $table)
     {
-        return false;
+        if (isset($this->_tables[$table])) {
+            $tableDef = &$this->_tables[$table];
+            $this->_queue[]="ALTER TABLE `{$tableDef['name']}` DROP INDEX `{$name}`";
+        }
+        else { // no table established
+            $this->lastError = 'Table is not defined';
+            $this->lastErrNo = -1;
+
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -338,7 +415,7 @@ class Migrate
      *
      * @return bool true if no errors, false if errors encountered
      */
-    public function dropIndexes(string $table)
+    public function dropIndexes($table)
     {
         return false;
     }
@@ -350,9 +427,20 @@ class Migrate
      *
      * @return bool true if no errors, false if errors encountered
      */
-    public function dropPrimaryKey(string $table)
+    public function dropPrimaryKey($table)
     {
-        return false;
+        if (isset($this->_tables[$table])) {
+            $tableDef = &$this->_tables[$table];
+            $this->_queue[]="ALTER TABLE `{$tableDef['name']}` DROP PRIMARY KEY ";
+        }
+        else { // no table established
+            $this->lastError = 'Table is not defined';
+            $this->lastErrNo = -1;
+
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -362,24 +450,18 @@ class Migrate
      *
      * @return bool true if no errors, false if errors encountered
      */
-    public function dropTable(string $table)
+    public function dropTable($table)
     {
-        return false;
+        if (isset($this->_tables[$table])) {
+            $tableDef = &$this->_tables[$table];
+            $this->_queue[]="DROP TABLE `{$tableDef['name']}` ";
+            unset($this->_tables[$table]);
+        }
+        // no table is not an error since we are dropping it anyway
+
+        return true;
     }
 
-    /**
-     * Add rename column operation to the work queue
-     *
-     * @param string $table   table containing the column
-     * @param string $column  column to rename
-     * @param string $newName new column name
-     *
-     * @return bool true if no errors, false if errors encountered
-     */
-    public function renameColumn($table, $column, $newName)
-    {
-        return false;
-    }
 
     /**
      * Add rename table operation to the work queue
@@ -391,7 +473,20 @@ class Migrate
      */
     public function renameTable($table, $newName)
     {
-        return false;
+        if (isset($this->_tables[$table])) {
+            $tableDef = &$this->_tables[$table];
+            $newTable = $this->name($newName);
+            $this->_queue[]="ALTER TABLE `{$tableDef['name']}` RENAME TO `{$newTable}`";
+            $tableDef['name'] = $newTable;
+        }
+        else { // no table established
+            $this->lastError = 'Table is not defined';
+            $this->lastErrNo = -1;
+
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -406,7 +501,20 @@ class Migrate
     public function setTableOptions($table, $options)
     {
         // ENGINE=MEMORY DEFAULT CHARSET=utf8;
-        return false;
+        if (isset($this->_tables[$table])) {
+            $tableDef = &$this->_tables[$table];
+            $newTable = $this->name($newName);
+            $this->_queue[]="ALTER TABLE `{$tableDef['name']}` {$options} ";
+            $tableDef['options'] = $options;
+        }
+        else { // no table established
+            $this->lastError = 'Table is not defined';
+            $this->lastErrNo = -1;
+
+            return false;
+        }
+
+        return true;
     }
 
 
@@ -421,29 +529,89 @@ class Migrate
 
     /**
      * Execute the work queue
+     *
+     * @param $force true to force updates even if this is a 'GET' request
+     *
+     * @return bool true if no errors, false if errors encountered
      */
-    public function queueExecute()
+    public function queueExecute($force=false)
     {
+        $this->_expandQueue();
+        foreach ($this->_queue as &$ddl) {
+            if(is_array($ddl)) {
+                if(isset($ddl['createtable'])) {
+                    $ddl=$this->renderTableCreate($ddl['createtable']);
+                }
+            }
+            $result = $this->_execSql($ddl,$force);
+            if (!$result) {
+                $this->lastError = $this->_db->error();
+                $this->lastErrNo = $this->_db->errno();
+                return false;
+            }
+        }
+        return true;
     }
 
 
     /**
-     * Create and execute a DELETE SQL statement.
+     * Create DELETE statement and add to queue
      *
      * @param string $table    table
      * @param mixed  $criteria string where clause or object criteria
+     *
+     * @return bool true if no errors, false if errors encountered
      */
     public function delete($table, $criteria)
     {
+        if (isset($this->_tables[$table])) {
+            $tableDef = &$this->_tables[$table];
+            $where = '';
+            if(is_scalar($criteria)) $where = 'WHERE '.$criteria;
+            if(is_object($criteria)) $where = $criteria->renderWhere();
+            $this->_queue[]="DELETE FROM `{$tableDef['name']}` {$where}";
+        }
+        else { // no table established
+            $this->lastError = 'Table is not defined';
+            $this->lastErrNo = -1;
+
+            return false;
+        }
+
+        return true;
     }
 
-    /** Creates and executes an INSERT SQL statement.
+    /** Create an INSERT SQL statement and add to queue.
      *
      * @param string $table   table
      * @param array  $columns array of 'column'=>'value' entries
+     *
+     * @return bool true if no errors, false if errors encountered
      */
-    public function insert(string $table, array $columns)
+    public function insert($table, $columns)
     {
+        if (isset($this->_tables[$table])) {
+            $tableDef = &$this->_tables[$table];
+            $colsql = '';
+            $valsql = '';
+            foreach($tableDef['columns'] as $col) {
+                $comma=empty($colsql)?'':', ';
+                if(isset($columns[$col['name']])) {
+                    $colsql .= $comma.$col['name'];
+                    $valsql .= $comma.$this->_db->quote($columns[$col['name']]);
+                }
+            }
+            $sql = "INSERT INTO `{$tableDef['name']}` ({$colsql}) VALUES({$valsql})";
+            $this->_queue[]=$sql;
+
+            return true;
+        }
+        else { // no table established
+            $this->lastError = 'Table is not defined';
+            $this->lastErrNo = -1;
+
+            return null;
+        }
     }
 
     /**
@@ -452,39 +620,101 @@ class Migrate
      * @param string $table    table
      * @param array  $columns  array of 'column'=>'value' entries
      * @param mixed  $criteria string where clause or object criteria
+     *
+     * @return bool true if no errors, false if errors encountered
      */
-    public function update(string $table, array $columns, $criteria)
+    public function update($table, $columns, $criteria)
     {
+        if (isset($this->_tables[$table])) {
+            $tableDef = &$this->_tables[$table];
+            $where = '';
+            if(is_scalar($criteria)) $where = 'WHERE '.$criteria;
+            if(is_object($criteria)) $where = $criteria->renderWhere();
+            $colsql = '';
+            foreach($tableDef['columns'] as $col) {
+                $comma=empty($colsql)?'':', ';
+                if(isset($columns[$col['name']])) {
+                    $colsql .= $comma . $col['name'] . ' = ' . $this->_db->quote($columns[$col['name']]);
+                }
+            }
+            $sql = "UPDATE `{$tableDef['name']}` SET {$colsql} {$where}";
+            $this->_queue[]=$sql;
+
+            return true;
+        }
+        else { // no table established
+            $this->lastError = 'Table is not defined';
+            $this->lastErrNo = -1;
+
+            return null;
+        }
     }
 
     /**
-     * Empty a table
+     * Add statement to Empty a table to the queue
      *
      * @param string $table table
+     *
+     * @return bool true if no errors, false if errors encountered
      */
-    public function truncate(string $table)
+    public function truncate($table)
     {
+        if (isset($this->_tables[$table])) {
+            $tableDef = &$this->_tables[$table];
+            $this->_queue[]="TRUNCATE TABLE `{$tableDef['name']}`";
+        }
+        else { // no table established
+            $this->lastError = 'Table is not defined';
+            $this->lastErrNo = -1;
+
+            return false;
+        }
+
+        return true;
     }
 
 
-
-    /** return SQL to create the table
-     *
-     * @param string $table table
-     */
-    public function renderTableCreate(string $table)
-    {
-    }
 
     /**
-     * return a basic XoopsObject definition for the table
+     * return SQL to create the table
      *
-     * @param string $table table
+     * @param string $table    table
+     * @param bool   $prefixed true to return with table name prefixed
+     *
+     * @return mixed string SQL to create table, or null if errors encountered
      */
-    public function renderTableObject(string $table)
+    public function renderTableCreate($table,$prefixed=false)
     {
-    }
+        if (isset($this->_tables[$table])) {
+            $tableDef = &$this->_tables[$table];
+            $tablename=($prefixed?$tableDef['name']:$table);
+            $sql = "CREATE TABLE `{$tablename}` (\n";
+            foreach($tableDef['columns'] as $col) {
+                $sql .= "    {$col['name']}  {$col['attributes']},\n";
+            }
+            $keysql='';
+            foreach($tableDef['keys'] as $keyname => $key) {
+                $comma = empty($keysql)?'  ':', ';
+                if($keyname=='PRIMARY') {
+                    $keysql .= "  {$comma}PRIMARY KEY ({$key['columns']})\n";
+                } else {
+                    $unique=$key['unique']?'UNIQUE ':'';
+                    $keysql .= "  {$comma}{$unique}KEY {$keyname} ({$key['columns']})\n";
+                }
+            }
+            $sql .= $keysql;
+            $sql .= ") {$tableDef['options']};\n";
 
+            return $sql;
+        }
+        else { // no table established
+            $this->lastError = 'Table is not defined';
+            $this->lastErrNo = -1;
+
+            return null;
+        }
+
+    }
 
     /**
      * get table definition from INFORMATION_SCHEMA
@@ -546,20 +776,15 @@ class Migrate
         $sql .= ' WHERE t.TABLE_SCHEMA = \'' . XOOPS_DB_NAME . '\' ';
         $sql .= ' AND t.TABLE_NAME = \'' . $this->name($table) . '\' ';
         $sql .= ' AND t.TABLE_COLLATION  = c.DEFAULT_COLLATE_NAME ';
-/*
-SELECT TABLE_NAME, ENGINE, CHARACTER_SET_NAME
-FROM `INFORMATION_SCHEMA`.`TABLES` t,
-`INFORMATION_SCHEMA`.`CHARACTER_SETS` c
-WHERE
-t.TABLE_COLLATION  = c.DEFAULT_COLLATE_NAME
-AND t.TABLE_SCHEMA = 'xoopstest'
-AND t.TABLE_NAME = 'xtrc_config'
-*/
+
         $result = $this->_execSql($sql);
         if(!$result) return false;
 
-        $tableDef['attributes'] = $this->_fetch($result);
-        if(empty($tableDef['attributes'])) return true;
+        $tableSchema = $this->_fetch($result);
+        if(empty($tableSchema)) return true;
+        $tableDef['name'] =  $tableSchema['TABLE_NAME'];
+        $tableDef['options'] = 'ENGINE=' . $tableSchema['ENGINE'] . ' '
+            . 'DEFAULT CHARSET=' . $tableSchema['CHARACTER_SET_NAME'];
 
         $sql  = 'SELECT * ';
         $sql .= ' FROM `INFORMATION_SCHEMA`.`COLUMNS` ';
@@ -578,8 +803,6 @@ AND t.TABLE_NAME = 'xtrc_config'
 
             $columnDef=array('name'=>$column['COLUMN_NAME'], 'position'=>$column['ORDINAL_POSITION'], 'attributes'=>$attributes);
 
-//            $tableDef['columnorder'][$column['ORDINAL_POSITION']] = $column['COLUMN_NAME'];
-//            $tableDef['columns'][$column['COLUMN_NAME']] = $columnDef;
             $tableDef['columns'][] = $columnDef;
         };
 
@@ -589,27 +812,62 @@ AND t.TABLE_NAME = 'xtrc_config'
         $sql .= ' WHERE TABLE_SCHEMA = \'' . XOOPS_DB_NAME . '\' ';
         $sql .= ' AND TABLE_NAME = \'' . $this->name($table) . '\' ';
         $sql .= ' ORDER BY `INDEX_NAME`, `SEQ_IN_INDEX` ';
-/*
-SELECT `INDEX_NAME`, `SEQ_IN_INDEX`, `NON_UNIQUE`, `COLUMN_NAME`, `COLLATION`, `SUB_PART`
 
-FROM `STATISTICS`
-
-WHERE `TABLE_NAME` = 'xtrc_gwiki_pages'
-
-order by `INDEX_NAME`, `SEQ_IN_INDEX`
-*/
         $result = $this->_execSql($sql);
 
+        $lastkey = ''; $keycols=''; $keyunique = false;
         while ($key=$this->_fetch($result)) {
-            $tableDef['keys'][$key['INDEX_NAME']][$key['SEQ_IN_INDEX']] = $key;
+            if($lastkey != $key['INDEX_NAME']) {
+                if(!empty($lastkey)) {
+                    $tableDef['keys'][$lastkey]['columns'] = $keycols;
+                    $tableDef['keys'][$lastkey]['unique'] = $keyunique;
+                }
+                $lastkey = $key['INDEX_NAME'];
+                $keycols = $key['COLUMN_NAME'];
+                if(!empty($key['SUB_PART'])) {
+                    $keycols .= ' (' . $key['SUB_PART'] . ')';
+                }
+                $keyunique = !$key['NON_UNIQUE'];
+            } else {
+                $keycols .= ', ' . $key['COLUMN_NAME'];
+                if(!empty($key['SUB_PART'])) {
+                    $keycols .= ' ('.$key['SUB_PART'].')';
+                }
+            }
+            //$tableDef['keys'][$key['INDEX_NAME']][$key['SEQ_IN_INDEX']] = $key;
         };
+        if(!empty($lastkey)) {
+            $tableDef['keys'][$lastkey]['columns'] = $keycols;
+            $tableDef['keys'][$lastkey]['unique'] = $keyunique;
+        }
 
         return $tableDef;
 
     }
 
+    /**
+     * During processing, tables to be created are put in the queue as
+     * an array('createtable'=>tablename) since the definition is not
+     * complete. This method will expand those references to the full
+     * ddl to create the table;
+     */
+    private function _expandQueue()
+    {
+        foreach ($this->_queue as &$ddl) {
+            if(is_array($ddl)) {
+                if(isset($ddl['createtable'])) {
+                    $ddl=$this->renderTableCreate($ddl['createtable'],true);
+                }
+            }
+        }
+    }
+
     // for development debugging only
     public function dumpTables() { return $this->_tables; }
-    public function dumpQueue()  { return $this->_queue; }
+    public function dumpQueue()
+    {
+        $this->_expandQueue();
+        return $this->_queue;
+    }
 
 }
