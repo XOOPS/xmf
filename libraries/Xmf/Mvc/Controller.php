@@ -227,8 +227,8 @@ class Controller
      */
     public function dispatch ($modName = NULL, $actName = NULL)
     {
-        $logger=\XoopsLogger::getInstance();
-        $logger->startTime('MVC dispatch');
+//        $logger=\XoopsLogger::getInstance();
+//        $logger->startTime('MVC dispatch');
         // register error handler as default logger's standard() method
         //$logger =& LogManager::getLogger();
 
@@ -346,7 +346,7 @@ class Controller
         // cleanup loggers
         //$logManager =& LogManager::getInstance();
         //$logManager->cleanup();
-        $logger->stopTime('MVC dispatch');
+        //$logger->stopTime('MVC dispatch');
 
     }
 
