@@ -56,14 +56,14 @@ class Migrate
     private $_queue;
 
     /**
-     * @var string last error
+     * @var string last error message
      */
-    public $lastError;
+    protected $lastError;
 
     /**
-     * @var string last error
+     * @var int last error number
      */
-    public $lastErrNo;
+    protected $lastErrNo;
 
     /**
      * Constructor
@@ -417,7 +417,35 @@ class Migrate
      */
     public function dropIndexes($table)
     {
-        return false;
+        // Find table def.
+        if (isset($this->_tables[$table])) {
+            $tableDef = &$this->_tables[$table];
+            // Is this on a table we are adding?
+            if(isset($tableDef['create']) && $tableDef['create']) {
+                // strip everything but the PRIMARY from definition
+                foreach($tableDef['keys'] as $keyname => $key) {
+                    if($keyname!='PRIMARY') {
+                        unset($tableDef['keys'][$keyname]);
+                    }
+                }
+            }
+            else {
+                // build drops to strip everything but the PRIMARY
+                foreach($tableDef['keys'] as $keyname => $key) {
+                    if($keyname!='PRIMARY') {
+                        $this->_queue[]="ALTER TABLE `{$tableDef['name']}` DROP INDEX {$keyname}";
+                    }
+                }
+            }
+        }
+        else { // no table established
+            $this->lastError = 'Table is not defined';
+            $this->lastErrNo = -1;
+
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -860,6 +888,26 @@ class Migrate
                 }
             }
         }
+    }
+
+    /**
+     * Return message from last error encountered
+     *
+     * @return string last error message
+     */
+    public function getLastError()
+    {
+        return $this->lastError;
+    }
+
+    /**
+     * Return code from last error encountered
+     *
+     * @return int last error number
+     */
+    public function getLastErrNo()
+    {
+        return $this->lastErrNo;
     }
 
     // for development debugging only
