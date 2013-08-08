@@ -140,7 +140,7 @@ class PermissionMap
         $_dirname=null;
         $modhelper=null;
         $_dirname = $GLOBALS['xoopsModule']->getVar('dirname');
-        $modhelper = \Xmf\Module\Helper::getInstance($_dirname);
+        $modhelper = \Xmf\Module\Helper::getHelper($_dirname);
         $pathname=XOOPS_ROOT_PATH .'/modules/'.$_dirname.'/';
         // this will quietly ignore a missing config file
         $configfile=$pathname.'/config.php';
