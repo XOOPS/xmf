@@ -13,14 +13,19 @@ namespace Xmf\Module\Helper;
  */
 
 /**
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @license         http://www.fsf.org/copyleft/gpl.html GNU public license
- * @author          trabis <lusopoemas@gmail.com>
- * @version         $Id: Abstract.php 8065 2011-11-06 02:02:32Z beckmi $
+ * Xmf\Module\Helper\AbstractHelper defines the basis for various
+ * helpers that simplfy routine module tasks.
+ * uses.
+ *
+ * @category  Xmf\Module\Helper\AbstractHelper
+ * @package   Xmf
+ * @author    trabis <lusopoemas@gmail.com>
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @copyright 2011-2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @since     1.0
  */
-
-defined('XMF_EXEC') or die('Xmf was not detected');
-
 abstract class AbstractHelper
 {
     /**
@@ -31,10 +36,23 @@ abstract class AbstractHelper
     /**
      * @param XoopsModule $module
      */
-    public function __construct(XoopsModule $module)
+    public function __construct(XoopsModule $module = null)
     {
+        if (!is_object($module)) {
+            // check if we are running in 2.6
+            if (class_exists('Xoops', false)) {
+                $xoops=Xoops::getInstance();
+                if ($xoops->isModule()) {
+                    $module &= $xoops->module;
+                }
+            } else {
+                $module &= $GLOBALS['xoopsModule'];
+            }
+        }
         $this->module = $module;
-        $this->init();
+        if(is_object($module)) {
+            $this->init();
+        }
     }
 
     abstract public function init();
