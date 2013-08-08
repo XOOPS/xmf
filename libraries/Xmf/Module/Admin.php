@@ -1,7 +1,4 @@
 <?php
-
-namespace Xmf\Module;
-
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -12,6 +9,10 @@ namespace Xmf\Module;
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+namespace Xmf\Module;
+
+defined('XMF_EXEC') or die('Xmf was not detected');
+
 /**
  * Xmf\Module\Admin provides helpful methods for module administration
  * uses.
@@ -19,15 +20,14 @@ namespace Xmf\Module;
  * Xmf\Module\Admin also provides a method compatible subset of the
  * Xoops 2.6 ModuleAdmin class for use in transition from 2.5 to 2.6
  *
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @license         http://www.fsf.org/copyleft/gpl.html GNU private license
- * @package         Xmf
- * @since           1.0
- * @author          Richard Griffith
+ * @category  Xmf\Module\Admin
+ * @package   Xmf
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @copyright 2011-2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @since     1.0
  */
-
-defined('XMF_EXEC') or die('Xmf was not detected');
-
 class Admin
 {
 
@@ -69,12 +69,15 @@ class Admin
 
         static $instance;
 
-        if ($instance === NULL) {
-            if (class_exists('XoopsModuleAdmin',true)) {
+        if ($instance === null) {
+            if (class_exists('XoopsModuleAdmin', true)) {
                 $instance  = new \XoopsModuleAdmin;
                 self::$_ModuleAdmin = $instance;
             } else {
-                \Xmf\Loader::loadFile(XOOPS_ROOT_PATH . '/Frameworks/moduleclasses/moduleadmin/moduleadmin.php');
+                \Xmf\Loader::loadFile(
+                    XOOPS_ROOT_PATH .
+                    '/Frameworks/moduleclasses/moduleadmin/moduleadmin.php'
+                );
                 self::$_ModuleAdmin = new \ModuleAdmin;
                 $instance  = new \Xmf\Module\Admin;
             }
@@ -96,7 +99,7 @@ class Admin
      */
     public static function is26()
     {
-        return class_exists('Xoops',false);
+        return class_exists('Xoops', false);
     }
 
     /**
@@ -105,6 +108,8 @@ class Admin
      * just to help with other admin things than ModuleAdmin
      *
      * not part of 2.6 module admin
+     *
+     * @param string $image icon name to prepend with path
      *
      * @return bool true if we are in a 2.6 environment
      */
@@ -122,8 +127,8 @@ class Admin
     /**
      * Add config line
      *
-     * @param string $value
-     * @param string $type
+     * @param string $value message to include in config box
+     * @param string $type  type of line to add
      *
      * @return bool
      */
@@ -135,9 +140,9 @@ class Admin
     /**
      * Add Info box
      *
-     * @param        $title
-     * @param string $type
-     * @param string $extra
+     * @param string $title info box title
+     * @param string $type  for compatibility only
+     * @param string $extra for compatibility only
      *
      * @return bool
      */
@@ -151,24 +156,26 @@ class Admin
     /**
      * Add line to the info box
      *
-     * @param string $text
-     * @param string $type
-     * @param string $color
+     * @param string $text  text to add to info box
+     * @param string $type  type of infobox line
+     * @param string $color color for infobox line
      *
      * @return bool
      */
     public function addInfoBoxLine($text = '', $type = 'default', $color = 'inherit')
     {
-        return self::$_ModuleAdmin->addInfoBoxLine($this->_lastInfoBoxTitle, $text, '', $color, $type);
+        return self::$_ModuleAdmin->addInfoBoxLine(
+            $this->_lastInfoBoxTitle, $text, '', $color, $type
+        );
     }
 
     /**
      * Add Item button
      *
-     * @param        $title
-     * @param        $link
-     * @param string $icon
-     * @param string $extra
+     * @param string $title title of button
+     * @param string $link  link for button
+     * @param string $icon  icon for button
+     * @param string $extra extra
      *
      * @return bool
      */
@@ -180,21 +187,27 @@ class Admin
     /**
      * Render all items buttons
      *
-     * @param string $position
-     * @param string $delimiter
+     * @param string $position  button position (left, right)
+     * @param string $delimiter delimiter between buttons
      *
      * @return string
      */
     public function renderButton($position = null, $delimiter = "&nbsp;")
     {
-        if($postion==null) $position = 'right';
+        if ($postion==null) {
+            $position = 'right';
+        }
 
-        return self::$_ModuleAdmin->renderButton($position, $delimeter);
+        return self::$_ModuleAdmin->renderButton($position, $delimiter);
     }
 
     /**
-     * @param string $position
-     * @param string $delimiter
+     * Display all item buttons
+     *
+     * @param string $position  button position (left, right)
+     * @param string $delimiter delimiter between buttons
+     *
+     * @return void
      */
     public function displayButton($position = null, $delimiter = "&nbsp;")
     {
@@ -203,12 +216,19 @@ class Admin
 
     /**
      * Render InfoBox
+     *
+     * @return string HTML rendered info box
      */
     public function renderInfoBox()
     {
         return self::$_ModuleAdmin->renderInfoBox();
     }
 
+    /**
+     * Display InfoBox
+     *
+     * @return void
+     */
     public function displayInfoBox()
     {
         echo $this->renderInfoBox();
@@ -216,19 +236,30 @@ class Admin
 
     /**
      * Render index page for admin
+     *
+     * @return string HTML rendered info box
      */
     public function renderIndex()
     {
         return self::$_ModuleAdmin->renderIndex();
     }
 
+    /**
+     * Display index page for admin
+     *
+     * @return void
+     */
     public function displayIndex()
     {
         echo $this->renderIndex();
     }
 
     /**
-     * @param string $menu
+     * Display the navigation menu
+     *
+     * @param string $menu menu key (script name, i.e. index.php)
+     *
+     * @return void
      */
     public function displayNavigation($menu = '')
     {
@@ -238,7 +269,7 @@ class Admin
     /**
      * Render about page
      *
-     * @param bool $logo_xoops
+     * @param bool $logo_xoops display XOOPS logo
      *
      * @return bool|mixed|string
      */
@@ -250,9 +281,9 @@ class Admin
     /**
      * set paypal for 2.5 renderAbout
      *
-     * @param bool $logo_xoops
+     * @param string $paypal PayPal identifier for donate button
      *
-     * @return bool|mixed|string
+     * @return void
      */
     public static function setPaypal($paypal = '')
     {
@@ -260,14 +291,19 @@ class Admin
     }
 
     /**
-     * @param bool $logo_xoops
+     * Display about page
+     *
+     * @param bool $logo_xoops display XOOPS logo
+     *
+     * @return void
      */
     public function displayAbout($logo_xoops = true)
     {
         echo $this->renderAbout($logo_xoops);
     }
 
-// new
+    // not in regular ModuleAdmin
+
     /**
      * Add error to config box
      *
@@ -330,12 +366,15 @@ class Admin
     {
         \Xmf\Language::load('main', 'xmf');
         $return=false;
-        $helper=\Xmf\Module\Helper::getInstance($moddir);
+        $helper=\Xmf\Module\Helper::getHelper($moddir);
         if (is_object($helper) && is_object($helper->getModule())) {
             $mod_modversion=$helper->getModule()->getVar('version');
             $mod_version_f = $mod_modversion/100;
             $min_version_f = $minversion/100;
-            $value = sprintf(_AM_XMF_DEMOMVC_MODULE_VERSION,strtoupper($moddir),$min_version_f, $mod_version_f);
+            $value = sprintf(
+                _AM_XMF_DEMOMVC_MODULE_VERSION, strtoupper($moddir),
+                $min_version_f, $mod_version_f
+            );
             if ($mod_modversion>=$minversion) {
                 self::addConfigAccept($value);
                 $return=true;
@@ -343,7 +382,10 @@ class Admin
                 self::addConfigError($value);
             }
         } else {
-            $value = sprintf(_AM_XMF_DEMOMVC_MODULE_NOTFOUND,strtoupper($moddir),$minversion/100);
+            $value = sprintf(
+                _AM_XMF_DEMOMVC_MODULE_NOTFOUND, strtoupper($moddir),
+                $minversion/100
+            );
             self::addConfigError($value);
         }
 
