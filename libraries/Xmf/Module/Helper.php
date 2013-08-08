@@ -1,7 +1,4 @@
 <?php
-
-namespace Xmf\Module;
-
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -12,295 +9,46 @@ namespace Xmf\Module;
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+namespace Xmf\Module;
+
 /**
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @license         http://www.fsf.org/copyleft/gpl.html GNU public license
- * @package         Xmf
- * @since           0.1
- * @author          trabis <lusopoemas@gmail.com>
- * @version         $Id: Helper.php 8065 2011-11-06 02:02:32Z beckmi $
+ * Helper gets an instance of module helper for the specified module.
+ * The helper is defined by the Xoops 2.6 Xoops_Module_Helper_Abstract
+ * and in pre 2.6 systems we mimic that definition with using an
+ * instance of Xmf\Module\GenericHelper.
+ *
+ * @category  Xmf\Module\Helper
+ * @package   Xmf
+ * @author    trabis <lusopoemas@gmail.com>
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @copyright 2011-2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @since     1.0
  */
-
-defined('XMF_EXEC') or die('Xmf was not detected');
-
 class Helper
 {
     /**
-     * @var string
+     * Get an instance to a module helper for a module directory
+     *
+     * @param string $dirname module direcory
+     *
+     * @return bool|Xoops_Module_Helper_Abstract
      */
-    protected $_dirname;
-
-    /**
-     * @var XoopsModule
-     */
-    protected $_object;
-
-    /**
-     * @var array of XoopsObjectHandler|XoopsPersistableObjectHandler
-     */
-    protected $_handler;
-
-    /**
-     * @var array
-     */
-    protected $_config;
-
-    /**
-     * @var bool
-     */
-    protected $_debug;
-
-    /**
-     * @var array of Xmf\Module\Helper\AbstractHelper
-     */
-    protected $_helper;
-
-    /**
-     * @param $dirname
-     */
-    private function __construct($dirname)
+    public static function getHelper($dirname = 'system')
     {
-        $this->_dirname = $dirname;
-    }
-
-    /**
-     * @static
-     * @param  string            $dirname
-     * @return Xmf\Module\Helper
-     */
-    public static function getInstance($dirname = 'notsetyet')
-    {
-        static $instance = array();
-        if (!isset($instance[$dirname])) {
-            $class = __CLASS__;
-            $instance[$dirname] = new $class($dirname);
+        // if this is a 2.6 system turn everything over to the core
+        if (class_exists('Xoops', false)) {
+            return \Xoops_Module_Helper::getHelper($dirname);
         }
 
-        return $instance[$dirname];
-
-    }
-
-    /**
-     * @return XoopsModule
-     */
-    public function getModule()
-    {
-        if ($this->_object == null) {
-            $this->_initObject();
-        }
-        if (!is_object($this->_object)) {
-            $this->addLog("ERROR :: Module '{$this->_dirname}' does not exist");
+        // otherwise get a GenericHelper instance for dirname
+        $dirname = strtolower($dirname);
+        if (xoops_isActiveModule($dirname)) {
+            return GenericHelper::getInstance($dirname);
         }
 
-        return $this->_object;
-    }
-    /** TODO eliminate this and replace with 2.6 style getModule **/
-    public function getObject() { return $this->getModule(); }
-
-    /**
-     * @param  string $name
-     * @return mixed
-     */
-    public function getConfig($name)
-    {
-        if ($this->_config == null) {
-            $this->_initConfig();
-        }
-        if (!$name) {
-            $this->addLog("Getting all config");
-
-            return $this->_config;
-        }
-
-        if (!isset($this->_config[$name])) {
-            $this->addLog("ERROR :: Config '{$name}' does not exist");
-            $ret = null;
-
-            return $ret;
-        }
-
-        $this->addLog("Getting config '{$name}' : " . $this->_config[$name]);
-
-        return $this->_config[$name];
-    }
-
-    /**
-     * @param string $name
-     * @param mixed  $value
-     * @return
-     */
-    public function setConfig($name, $value = null)
-    {
-        if ($this->_config == null) {
-            $this->_initConfig();
-        }
-
-        $this->_config[$name] = $value;
-
-        $this->addLog("Setting config '{$name}' : " . $this->_config[$name]);
-
-        return $this->_config[$name];
-    }
-
-    /**
-     * @param  string                                                $name
-     * @return bool|XoopsObjectHandler|XoopsPersistableObjectHandler
-     */
-    public function getHandler($name)
-    {
-        $ret = false;
-        $name = strtolower($name);
-        if (!isset($this->_handler[$name])) {
-            $this->_initHandler($name);
-        }
-
-        if (!isset($this->_handler[$name])) {
-            $this->addLog("ERROR :: Handler '{$name}' does not exist");
-        } else {
-            $this->addLog("Getting handler '{$name}'");
-            $ret = $this->_handler[$name];
-        }
-
-        return $ret;
-    }
-
-    /**
-     * @param  string                                $name
-     * @return bool|Xmf\Module\Helper\AbstractHelper
-     */
-    public function getHelper($name)
-    {
-        $ret = false;
-        $name = strtolower($name);
-        if (!isset($this->_helper[$name])) {
-            $this->_initHelper($name);
-        }
-
-        if (!isset($this->_helper[$name])) {
-            $this->addLog("ERROR :: Helper '{$name}' does not exist");
-        } else {
-            $this->addLog("Getting helper '{$name}'");
-            $ret = $this->_helper[$name];
-        }
-
-        return $ret;
-    }
-
-    /**
-     * @param  string $name
-     * @return bool
-     */
-    protected function _initHelper($name)
-    {
-        $this->addLog('INIT ' . $name . ' HELPER');
-        $uname = ucfirst($name);
-        if (file_exists($hnd_file = XMF_LIBRARIES_PATH . "/Xmf/Module/Helper/{$uname}.php")) {
-            include_once $hnd_file;
-            $class = '\Xmf\Module\Helper\\'.$uname;
-            if (class_exists($class)) {
-                $this->_helper[$name] = new $class($this->getObject());
-                $this->addLog("Loading Helper '{$name}'");
-
-                return true;
-            }
-        }
-        $this->addLog("ERROR :: Helper '{$name}' could not be loaded");
-
+        // not an active installed module
         return false;
-    }
-
-    /**
-     * @return void
-     */
-    protected function _initObject()
-    {
-        global $xoopsModule;
-        if (isset($xoopsModule) && is_object($xoopsModule) && $xoopsModule->getVar('dirname') == $this->_dirname) {
-            $this->_object = $xoopsModule;
-        } else {
-            /* @var $module_handler XoopsModuleHandler */
-            $module_handler = xoops_getHandler('module');
-            $this->_object = $module_handler->getByDirname($this->_dirname);
-        }
-        $this->addLog('INIT MODULE OBJECT');
-    }
-
-    /**
-     * @return void
-     */
-    protected function _initConfig()
-    {
-        $this->addLog('INIT CONFIG');
-        global $xoopsModule;
-        if (isset($xoopsModule) && is_object($xoopsModule) && $xoopsModule->getVar('dirname') == $this->_dirname) {
-            global $xoopsModuleConfig;
-            $this->_config =& $xoopsModuleConfig;
-        } else {
-            /* @var $config_handler XoopsConfigHandler */
-            $config_handler = xoops_gethandler('config');
-            $this->_config = $config_handler->getConfigsByCat(0, $this->getObject()->getVar('mid'));
-        }
-    }
-
-    /**
-     * @param  string $name
-     * @return void
-     */
-    protected function _initHandler($name)
-    {
-        $this->addLog('INIT ' . $name . ' HANDLER');
-
-        if (!isset($this->_handler[$name])) {
-            if (file_exists($hnd_file = XOOPS_ROOT_PATH . "/modules/{$this->_dirname}/class/{$name}.php")) {
-                include_once $hnd_file;
-            }
-            $class = ucfirst(strtolower($this->_dirname)) . ucfirst(strtolower($name)) . 'Handler';
-            if (class_exists($class)) {
-                $db = \XoopsDatabaseFactory::getDatabaseConnection();
-                $this->_handler[$name] = new $class($db);
-                $this->addLog("Loading class '{$class}'");
-            } else {
-                $this->addLog("ERROR :: Class '{$class}' could not be loaded");
-            }
-        }
-    }
-
-    /**
-     * @param  string $name
-     * @param  null   $language
-     * @return bool
-     */
-    public function loadLanguage($name, $language = null)
-    {
-        if ($ret = \Xmf\Language::load($name, $this->_dirname, $language)) {
-            $this->addLog("Loading language '{$name}'");
-        } else {
-            $this->addLog("ERROR :: Language '{$name}' could not be loaded");
-        }
-
-        return $ret;
-    }
-
-    /**
-     * @param  bool $bool
-     * @return void
-     */
-    public function setDebug($bool = true)
-    {
-        $this->_debug = (bool) $bool;
-    }
-
-    /**
-     * @param  string $log
-     * @return void
-     */
-    public function addLog($log)
-    {
-        if ($this->_debug) {
-            if (is_object($GLOBALS['xoopsLogger'])) {
-                $GLOBALS['xoopsLogger']->addExtra(is_object($this->_object) ? $this->_object->name()
-                        : $this->_dirname, $log);
-            }
-        }
     }
 }
