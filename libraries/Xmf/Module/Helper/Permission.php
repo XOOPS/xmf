@@ -1,7 +1,4 @@
 <?php
-
-namespace Xmf\Module\Helper;
-
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -12,19 +9,26 @@ namespace Xmf\Module\Helper;
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-/**
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @license         http://www.fsf.org/copyleft/gpl.html GNU public license
- * @package         Xmf
- * @since           0.1
- * @author          trabis <lusopoemas@gmail.com>
- * @version         $Id: Permission.php 8065 2011-11-06 02:02:32Z beckmi $
- */
+namespace Xmf\Module\Helper;
 
 defined('XMF_EXEC') or die('Xmf was not detected');
 
 include_once XOOPS_ROOT_PATH . '/kernel/groupperm.php';
 
+/**
+ * Manage session variables for a module. Session variable will be
+ * prefixed with the module name to separate them from variables set
+ * by other modules or system functions.
+ *
+ * @category  Xmf\Module\Helper\Permission
+ * @package   Xmf
+ * @author    trabis <lusopoemas@gmail.com>
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @copyright 2011-2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @since     1.0
+ */
 class Permission extends AbstractHelper
 {
     /**
@@ -43,6 +47,8 @@ class Permission extends AbstractHelper
     private $_perm;
 
     /**
+     * Initialize parent::__constuct calls this after verifying module object.
+     *
      * @return void
      */
     public function init()
@@ -55,10 +61,10 @@ class Permission extends AbstractHelper
     /*
      * Returns permissions for a certain type
      *
-     * @param string $type "global", "forum" or "topic" (should perhaps have "post" as well - but I don't know)
-     * @param int    $id   id of the item (forum, topic or possibly post) to get permissions for
+     * @param string $gperm_name "global", "forum" or "topic" (should perhaps have "post" as well - but I don't know)
+     * @param int    $id         id of the item (forum, topic or possibly post) to get permissions for
      *
-     * @return array
+     * @return array of groups with permission
      */
     public function getGrantedGroups($gperm_name, $id = null)
     {
@@ -74,9 +80,19 @@ class Permission extends AbstractHelper
     }
 
     /**
-     * @param $itemsObj_array_keys
+     * This can't be doing what the name implies, as it doesn't use the
+     * oddly named required parameter.
+     *
+     * Seems to get all the groupperms for the module, and gperm_name if
+     * specified.
+     *
+     * TODO - evaluate if this adds value and can be rescued
+     *
+     * @param array $itemsObj_array_keys
      * @param  bool  $gperm_name
-     * @return array
+     *
+     * @return array of [gperm_name][gperm_id] = gperm_groupid
+     *               or [gperm_id] = gperm_groupid
      */
     public function getGrantedGroupsForIds($itemsObj_array_keys, $gperm_name = false)
     {
@@ -172,6 +188,8 @@ class Permission extends AbstractHelper
     }
 
     /**
+     * Check if user is granted permission for an item
+     *
      * @param  string $gperm_name
      * @param  int    $id
      * @return bool
@@ -225,7 +243,7 @@ class Permission extends AbstractHelper
      * @param  string $perm_name
      * @return bool
      */
-    public function saveItem_Permissions($groups, $itemid, $perm_name)
+    public function saveItemPermissions($groups, $itemid, $perm_name)
     {
         $result = true;
 
@@ -265,8 +283,25 @@ class Permission extends AbstractHelper
      **/
     public function accessGranted($gperm_name, $gperm_itemid)
     {
-        $gperm_groupid = is_object($GLOBALS['xoopsUser']) ? $GLOBALS['xoopsUser']->getGroups() : array(XOOPS_GROUP_ANONYMOUS);
+        $gperm_groupid = $this->getUserGroups();
 
         return $this->_perm->checkRight($gperm_name, $gperm_itemid, $gperm_groupid, $this->_mid);
     }
+
+    /**
+     * Get groups user belong to, even for annonymous user
+     *
+     * @return array of groups the current user is associted with
+     */
+    public function getUserGroups()
+    {
+        if (class_exists('Xoops', false)) {
+            $groupids = $this->xoops()->isUser() ? $this->xoops()->user->getGroups() : array(XOOPS_GROUP_ANONYMOUS);
+        } else  {
+            $groupids = is_object($GLOBALS['xoopsUser']) ? $GLOBALS['xoopsUser']->getGroups() : array(XOOPS_GROUP_ANONYMOUS);
+        }
+
+        return $groupids;
+    }
+
 }

@@ -1,21 +1,12 @@
 <?php
-
-namespace Xmf\Mvc;
-
-/**
+/*
  * This file has its roots as part of the Mojavi package which was
  * Copyright (c) 2003 Sean Kerr. It has been incorporated into this
  * derivative work under the terms of the LGPL V2.1.
  * (license terms)
- *
- * @author          Richard Griffith
- * @author          Sean Kerr
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @copyright       Portions Copyright (c) 2003 Sean Kerr
- * @license         (license terms)
- * @package         Xmf\Mvc
- * @since           1.0
  */
+
+namespace Xmf\Mvc;
 
 /**
  * All Action implementations must extend this class. An Action implementation
@@ -23,6 +14,15 @@ namespace Xmf\Mvc;
  * model is a class that provides methods to manipulate data that is linked to
  * something, such as a database.
  *
+ * @category  Xmf\Mvc\Action
+ * @package   Xmf
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @author    Sean Kerr
+ * @copyright 2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @copyright Portions Copyright (c) 2003 Sean Kerr
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @since     1.0
  */
 abstract class Action extends ContextAware
 {
@@ -79,7 +79,7 @@ abstract class Action extends ContextAware
      */
     public function getPrivilege ()
     {
-        return NULL;
+        return null;
 
     }
 
@@ -121,7 +121,7 @@ abstract class Action extends ContextAware
      */
     public function initialize ()
     {
-        return TRUE;
+        return true;
 
     }
 
@@ -134,7 +134,7 @@ abstract class Action extends ContextAware
      */
     public function isSecure ()
     {
-        return FALSE;
+        return false;
 
     }
 
@@ -143,7 +143,9 @@ abstract class Action extends ContextAware
      *
      *  _This method should never be called manually._
      *
-     * @param $validatorManager A ValidatorManager instance.
+     * @param object &$validatorManager A ValidatorManager instance.
+     *
+     * @return void
      *
      * @since  1.0
      */
@@ -157,13 +159,13 @@ abstract class Action extends ContextAware
      *
      *  _This method should never be called manually._
      *
-     * @return bool TRUE if validation completes successfully, otherwise FALSE.
+     * @return bool true if validation completes successfully, otherwise false.
      *
      * @since  1.0
      */
     public function validate ()
     {
-        return TRUE;
+        return true;
 
     }
 

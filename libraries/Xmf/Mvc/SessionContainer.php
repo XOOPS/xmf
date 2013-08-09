@@ -1,20 +1,12 @@
 <?php
-
-namespace Xmf\Mvc;
-
-/**
+/*
  * This file has its roots as part of the Mojavi package which was
  * Copyright (c) 2003 Sean Kerr. It has been incorporated into this
  * derivative work under the terms of the LGPL V2.1.
  * (license terms)
- *
- * @author          Richard Griffith
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @copyright       Portions Copyright (c) 2003 Sean Kerr
- * @license         (license terms)
- * @package         Xmf\Mvc
- * @since           1.0
  */
+
+namespace Xmf\Mvc;
 
 /**
  * SessionContainer is a Container implementation that stores data in
@@ -27,6 +19,13 @@ namespace Xmf\Mvc;
  * blocks,) we will segregate our session data by XOOPS module
  * by including the module name in the name.
  *
+ * @category  Xmf\Mvc\SessionContainer
+ * @package   Xmf
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @copyright 2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @since     1.0
  */
 class SessionContainer extends ContextAware implements Container
 {
@@ -46,26 +45,27 @@ class SessionContainer extends ContextAware implements Container
      *
      * _This should never be called manually._
      *
-     * @param bool  $authenticated The authenticated status.
-     * @param array $attributes    An associative array of attributes.
-     * @param mixed $secure        Security related data.
+     * @param bool  &$authenticated The authenticated status.
+     * @param array &$attributes    An associative array of attributes.
+     * @param mixed &$secure        Security related data.
      *
-     * @since  1.0
+     * @return void
      */
     public function load (&$authenticated, &$attributes, &$secure)
     {
-        $name=$this->name();
-        $rawsession = \Xmf\Request::getString($name,'','session');
+        $name=$this->_name();
+        $rawsession = \Xmf\Request::getString($name, '', 'session');
         $rawsession = null;
-        if(isset($_SESSION[$name])) $rawsession=$_SESSION[$name];
-
+        if (isset($_SESSION[$name])) {
+            $rawsession=$_SESSION[$name];
+        }
         if (empty($rawsession)) {
-            $authenticated = FALSE;
+            $authenticated = false;
             $attributes    = array();
             $secure        = array();
 
         } else {
-            $session=\Xmf\Filter\Input::clean(unserialize($rawsession),'default');
+            $session=\Xmf\Filter\Input::clean(unserialize($rawsession), 'default');
             $authenticated = $session['authenticated'];
             $attributes    = $session['attributes'];
             $secure        = $session['secure'];
@@ -77,15 +77,15 @@ class SessionContainer extends ContextAware implements Container
      *
      * _This should never be called manually._
      *
-     * @param bool  $authenticated The authenticated status.
-     * @param array $attributes    An associative array of attributes.
-     * @param mixed $secure        Security related data.
+     * @param bool  &$authenticated The authenticated status.
+     * @param array &$attributes    An associative array of attributes.
+     * @param mixed &$secure        Security related data.
      *
-     * @since  1.0
+     * @return void
      */
     public function store (&$authenticated, &$attributes, &$secure)
     {
-        $name=$this->name();
+        $name=$this->_name();
         if (empty($authenticated) && empty($attributes) && empty($secure)) {
             if (isset($_SESSION[$name])) {
                 $_SESSION[$name]=null;
@@ -106,13 +106,13 @@ class SessionContainer extends ContextAware implements Container
      *
      * Include XOOPS module so we don't mix context between Mvc modules.
      *
-     * @since  1.0
+     * @return string name for $_SESSION key
      */
-    private function name()
+    private function _name()
     {
         // if we can get this from the controller, do it
         // this is significant for blocks
-        if (method_exists($this->Controller(),'modGetVar')) {
+        if (method_exists($this->Controller(), 'modGetVar')) {
             $name=$this->Controller()->modGetVar('dirname');
         } else {
             $name=$GLOBALS['xoopsModule']->getVar('dirname');
