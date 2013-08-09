@@ -212,7 +212,7 @@ class GenericHelper
 
         if (!isset($this->_handlers[$name])) {
             $hnd_file = XOOPS_ROOT_PATH .
-                "/modules/{$this->dirname}/class/{$name}.php"
+                "/modules/{$this->dirname}/class/{$name}.php";
             if (file_exists($hnd_file)) {
                 include_once $hnd_file;
             }
@@ -231,14 +231,13 @@ class GenericHelper
     /**
      * load a language file for this module
      *
-     * @param string $name     name of language file (i.e. 'admin')
-     * @param null   $language language to load, defaults to current
+     * @param string $name basename of language file (i.e. 'admin')
      *
      * @return bool
      */
-    public function loadLanguage($name, $language = null)
+    public function loadLanguage($name)
     {
-        if ($ret = \Xmf\Language::load($name, $this->dirname, $language)) {
+        if ($ret = \Xmf\Language::load($name, $this->dirname)) {
             $this->addLog("Loading language '{$name}'");
         } else {
             $this->addLog("ERROR :: Language '{$name}' could not be loaded");
