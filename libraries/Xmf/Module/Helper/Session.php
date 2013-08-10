@@ -51,7 +51,8 @@ class Session extends AbstractHelper
      */
     private function _prefix($name)
     {
-        return $this->_prefix . $name;
+        $prefixedName = $this->_prefix . $name;
+        return $prefixedName;
     }
 
     /**
@@ -107,7 +108,7 @@ class Session extends AbstractHelper
     public function destroy()
     {
         foreach ($_SESSION as $key => $value) {
-            if (0 == substr_compare($key, $this->_prefix, strlen($this->_prefix))) {
+            if (0 == substr_compare($key, $this->_prefix, 0, strlen($this->_prefix))) {
                 $_SESSION[$key] = null;
                 unset($_SESSION[$key]);
             }
