@@ -34,6 +34,7 @@ define('XMF_INCLUDE_URL',    XMF_URL . '/include');
 define('XMF_LANGUAGE_URL',   XMF_URL . '/language');
 define('XMF_LIBRARIES_URL',  XMF_URL . '/libraries');
 define('XMF_TEMPLATES_URL',  XMF_URL . '/templates');
+define('XMF_KRUMO_URL',      XMF_URL . '/css/krumo/');
 
 define('XMF_ROOT_PATH',      XOOPS_ROOT_PATH . '/modules/xmf');
 define('XMF_CSS_PATH',       XMF_ROOT_PATH . '/css');
@@ -52,6 +53,7 @@ define('_GLOBAL_RIGHT', 'right');
 //spl_autoload_register(array('Xmf_Loader', 'loadClass'));
 
 require dirname(dirname(__FILE__)) . '/vendor/autoload.php';
+\Xmf\Loader::loadFile(XOOPS_PATH . '/vendor/autoload.php');
 
 require dirname(__FILE__) . '/functions.php';
-Xmf\Language::load('global', 'xmf');
+\Xmf\Language::load('global', 'xmf');
