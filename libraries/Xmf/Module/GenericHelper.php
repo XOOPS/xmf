@@ -343,6 +343,7 @@ class GenericHelper
     public function redirect($url, $time = 3, $message = '')
     {
         redirect_header($this->url($url), $time, $message);
+        exit;
     }
 
 }

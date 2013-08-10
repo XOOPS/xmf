@@ -64,7 +64,7 @@ class XoopsController extends Controller
             $this->_dirname = $GLOBALS['xoopsModule']->getVar('dirname');
         }
         $this->modhelper = \Xmf\Module\Helper::getHelper($this->_dirname);
-        $this->modhelper->setDebug(true);
+        //$this->modhelper->setDebug(true);
         $pathname=XOOPS_ROOT_PATH .'/modules/'.$this->_dirname.'/';
         // set some reasonable defaults if config is empty
         if (!Config::get('MODULES_DIR', false)) {

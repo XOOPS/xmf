@@ -2,6 +2,9 @@
 
 namespace Xmf\Mvc\Lib;
 
+use Xmf\Language;
+use Xmf\Loader;
+
 /**
  * Form provides form support using instructions found in model.
  *
@@ -9,15 +12,15 @@ namespace Xmf\Mvc\Lib;
  * @package         Xmf\Mvc
  * @since           1.0
  */
-
-require_once(XOOPS_ROOT_PATH.'/class/xoopsformloader.php');
-
 class Form extends \Xmf\Mvc\ContextAware
 {
 
     public function __construct()
     {
-        \Xmf\Language::load('form','xmf');
+        if (!class_exists('XoopsThemeForm',true)) {
+            Loader::loadFile(XOOPS_ROOT_PATH.'/class/xoopsformloader.php');
+        }
+        Language::load('form','xmf');
     }
 
     private function buildForm($form_attribute)
