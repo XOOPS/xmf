@@ -11,6 +11,6 @@
     "require": {
         "php": ">=5.3.3",
         "oodle/krumo": "*",
-        "symfony/yaml": "~2.0"
+        "mustangostang/spyc": "~0.5"
     }
 }
