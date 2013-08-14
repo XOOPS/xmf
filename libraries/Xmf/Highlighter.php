@@ -1,7 +1,4 @@
 <?php
-
-namespace Xmf;
-
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -12,96 +9,96 @@ namespace Xmf;
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+namespace Xmf;
+
 /**
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @license         http://www.fsf.org/copyleft/gpl.html GNU public license
- * @package         Xmf
- * @since           0.1
- * @author          trabis <lusopoemas@gmail.com>
- * @author          The SmartFactory <www.smartfactory.ca>
- * @version         $Id: Highlighter.php 8065 2011-11-06 02:02:32Z beckmi $
+ * Highlighter
+ *
+ * @category  Xmf\Module\Highlighter
+ * @package   Xmf
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @copyright 2011-2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @link      http://xoops.org
+ * @since     1.0
  */
-
-defined('XMF_EXEC') or die('Xmf was not detected');
-
 class Highlighter
 {
     /**
      * @var string
      */
-    private $_preg_keywords = '';
+    public static $highlightArg = '';
 
     /**
-     * @var string
-     */
-    private $_keywords = '';
-
-    /**
-     * @var bool
-     */
-    private $_single_words = false;
-
-    /**
-     * @var callback|null
-     */
-    private $_replace_callback = null;
-
-    /**
-     * Main constructor
+     * Apply highlight to words in body text
      *
-     * This is the main constructor of keyhighlighter class.
-     * It is the only public method of the class.
-     * @param string   $keywords         the keywords you want to highlight
-     * @param boolean  $single_words     specify if it has to highlight also the single words.
-     * @param callback $replace_callback a custom callback for keyword highlight.
+     * Surround occurances of words in body with pre in front and post
+     * behing. Considers only occurances of words outside of HTML tags.
+     *
+     * @param mixed  $words words to highlight
+     * @param string $body  body of html text to highlight
+     * @param string $pre   string to begin a highlight
+     * @param string $post  string to end a highlight
+     *
+     * @return string highlighted body
      */
-    public function __construct($keywords, $single_words = false, $replace_callback = null)
+    public static function apply($words, $body, $pre='<b>', $post='</b>')
     {
-        $this->_keywords = $keywords;
-        $this->_single_words = $single_words;
-        $this->_replace_callback = $replace_callback;
+        if (!is_array($words)) {
+            $words=str_replace('  ', ' ', $words);
+            $words=explode(' ', $words);
+        }
+        foreach ($words as $word) {
+            $body=Highlighter::_splitOnTag($word, $body, $pre, $post);
+        }
+
+        return $body;
     }
 
     /**
-     * @param  array $replace_matches
-     * @return mixed
+     * add highlighting
+     *
+     * @param array $capture callback argument from preg_replace_callback
+     *
+     * @return void
      */
-    private function _replace($replace_matches)
+    private static function _addHighlightCallback($capture)
     {
-        $patterns = array();
-        if ($this->_single_words) {
-            $keywords = explode(' ', $this->_preg_keywords);
-            foreach ($keywords as $keyword) {
-                $patterns[] = '/(?' . '>' . $keyword . '+)/si';
-            }
-        } else {
-            $patterns[] = '/(?' . '>' . $this->_preg_keywords . '+)/si';
+        $haystack=$capture[1];
+        $p1=stripos($haystack, self::$highlightArg['needle']);
+        $l1=strlen(self::$highlightArg['needle']);
+        $ret='';
+        while ($p1!==false) {
+            $ret .= substr($haystack, 0, $p1) . self::$highlightArg['pre']
+                . substr($haystack, $p1, $l1) . self::$highlightArg['post'];
+            $haystack=substr($haystack, $p1+$l1);
+            $p1=stripos($haystack, self::$highlightArg['needle']);
         }
+        $ret.=$haystack.$capture[2];
 
-        $result = $replace_matches[0];
-
-        foreach ($patterns as $pattern) {
-            if (!is_null($this->_replace_callback)) {
-                $result = preg_replace_callback($pattern, $this->_replace_callback, $result);
-            } else {
-                $result = preg_replace($pattern, '<span class="highlightedkey">\\0</span>', $result);
-            }
-        }
-
-        return $result;
+        return $ret;
     }
 
     /**
-     * @param  string       $buffer
-     * @return mixed|string
+     * find needle in between html tags
+     *
+     * @param string $needle   string to find
+     * @param string $haystack html text to find needle in
+     * @param string $pre      insert before needle
+     * @param string $post     insert after needle
+     *
+     * @return void
      */
-    private function _highlight($buffer)
+    private static function _splitOnTag($needle, $haystack, $pre, $post)
     {
-        $buffer = '>' . $buffer . '<';
-        $this->_preg_keywords = preg_replace('/[^\w ]/si', '', $this->_keywords);
-        $buffer = preg_replace_callback("/(\>(((?" . ">[^><]+)|(?R))*)\<)/is", array(&$this, '_replace'), $buffer);
-        $buffer = substr($buffer, 1, -1);
+        self::$highlightArg = compact('needle', 'pre', 'post');
 
-        return $buffer;
+        return preg_replace_callback(
+            '#((?:(?!<[/a-z]).)*)([^>]*>|$)#si',
+            '\Xmf\Highlighter::_addHighlightCallback',
+            $haystack
+        );
     }
+
 }
