@@ -53,7 +53,7 @@ define('_GLOBAL_RIGHT', 'right');
 //spl_autoload_register(array('Xmf_Loader', 'loadClass'));
 
 require dirname(dirname(__FILE__)) . '/vendor/autoload.php';
-\Xmf\Loader::loadFile(XOOPS_PATH . '/vendor/autoload.php');
+// \Xmf\Loader::loadFile(XOOPS_PATH . '/vendor/autoload.php');
 
 require dirname(__FILE__) . '/functions.php';
 \Xmf\Language::load('global', 'xmf');
