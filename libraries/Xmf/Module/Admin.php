@@ -11,8 +11,6 @@
 
 namespace Xmf\Module;
 
-defined('XMF_EXEC') or die('Xmf was not detected');
-
 /**
  * Xmf\Module\Admin provides helpful methods for module administration
  * uses.

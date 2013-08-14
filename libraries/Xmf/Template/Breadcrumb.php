@@ -1,7 +1,4 @@
 <?php
-
-namespace Xmf\Template;
-
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -12,18 +9,21 @@ namespace Xmf\Template;
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+namespace Xmf\Template;
+
 /**
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @license         http://www.fsf.org/copyleft/gpl.html GNU public license
- * @package         Xmf
- * @since           0.1
- * @author          trabis <lusopoemas@gmail.com>
- * @author          The SmartFactory <www.smartfactory.ca>
- * @version         $Id: Breadcrumb.php 8065 2011-11-06 02:02:32Z beckmi $
+ * Breadcrumb
+ *
+ * @category  Xmf\Template\Breadcrumb
+ * @package   Xmf
+ * @author    trabis <lusopoemas@gmail.com>
+ * @author    The SmartFactory <www.smartfactory.ca>
+ * @copyright 2011-2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @link      http://xoops.org
+ * @since     1.0
  */
-
-defined('XMF_EXEC') or die('Xmf was not detected');
-
 class Breadcrumb extends AbstractTemplate
 {
     /**
@@ -32,6 +32,8 @@ class Breadcrumb extends AbstractTemplate
     private $_items = array();
 
     /**
+     * initialization run by parent::__construct
+     *
      * @return void
      */
     protected function init()
@@ -40,7 +42,13 @@ class Breadcrumb extends AbstractTemplate
     }
 
     /**
-     * @param  array $items
+     * Set the items to be shown. Items are specified as an array of
+     * breadcrumb items. Each breadcrumb item is an array of:
+     *  - 'caption' => ready to display string item,
+     *  - 'link' => url (omit to disable link on this item)
+     *
+     * @param  array $items array of breadcrumb items
+     *
      * @return void
      */
     public function setItems($items)
@@ -49,6 +57,8 @@ class Breadcrumb extends AbstractTemplate
     }
 
     /**
+     * Assigning content to template
+     *
      * @return void
      */
     protected function render()

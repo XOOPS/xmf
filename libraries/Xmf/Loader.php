@@ -1,7 +1,4 @@
 <?php
-
-namespace Xmf;
-
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -12,22 +9,29 @@ namespace Xmf;
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-/**
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @license         http://www.fsf.org/copyleft/gpl.html GNU public license
- * @package         Xmf
- * @since           0.1
- * @author          trabis <lusopoemas@gmail.com>
- * @version         $Id: Loader.php 8065 2011-11-06 02:02:32Z beckmi $
- */
+namespace Xmf;
 
+/**
+ * Loader
+ *
+ * @category  Xmf\Module\Loader
+ * @package   Xmf
+ * @author    trabis <lusopoemas@gmail.com>
+ * @copyright 2011-2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @link      http://xoops.org
+ * @since     1.0
+ */
 class Loader
 {
     /**
-     * @static
-     * @param  string $file
-     * @param  bool   $once
-     * @return bool
+     * Load a file
+     *
+     * @param string $file filename to load
+     * @param bool   $once true to use include_once
+     *
+     * @return bool true if file exists and was loaded
      */
     public static function loadFile($file, $once = true)
     {
@@ -46,9 +50,11 @@ class Loader
     }
 
     /**
-     * @static
-     * @param  string $class
-     * @return bool
+     * Load a class file, part of old autoloader
+     *
+     * @param  string $class name of class
+     *
+     * @return bool if class exists
      */
     public static function loadClass($class)
     {
@@ -73,9 +79,11 @@ class Loader
     /**
      * Ensure that filename does not contain exploits
      *
+     * exit() if name does not pass check
+     *
      * @param  string         $filename
+     *
      * @return void
-     * @throws Zend_Exception
      */
     protected static function _securityCheck($filename)
     {

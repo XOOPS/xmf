@@ -9,7 +9,7 @@
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-namespace Xmf\Module;
+namespace Xmf\Module\Helper;
 
 /**
  * GenericHelper implements a Xoops 2.6 Xoops_Module_Helper_Abstract.
@@ -18,7 +18,7 @@ namespace Xmf\Module;
  * The most common deprecated warnings can be avaoided by using module
  * helper methods.
  *
- * @category  Xmf\Module\GenericHelper
+ * @category  Xmf\Module\Helper\GenericHelper
  * @package   Xmf
  * @author    trabis <lusopoemas@gmail.com>
  * @author    Richard Griffith <richard@geekwright.com>
@@ -269,6 +269,9 @@ class GenericHelper
     {
         if ($this->debug) {
             if (is_object($GLOBALS['xoopsLogger'])) {
+                if(!is_scalar($log)) {
+                    $log = serialize($log);
+                }
                 $GLOBALS['xoopsLogger']->addExtra(
                     is_object($this->object) ? $this->object->name()
                     : $this->dirname, $log

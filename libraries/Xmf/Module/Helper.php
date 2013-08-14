@@ -11,6 +11,8 @@
 
 namespace Xmf\Module;
 
+use Xmf\Module\Helper\GenericHelper;
+
 /**
  * Helper gets an instance of module helper for the specified module.
  * The helper is defined by the Xoops 2.6 Xoops_Module_Helper_Abstract

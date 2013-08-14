@@ -1,7 +1,4 @@
 <?php
-
-namespace Xmf\Template;
-
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -12,19 +9,21 @@ namespace Xmf\Template;
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+namespace Xmf\Template;
+
 /**
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @license         http://www.fsf.org/copyleft/gpl.html GNU public license
- * @package         Xmf
- * @since           0.1
- * @author          trabis <lusopoemas@gmail.com>
- * @version         $Id: Abstract.php 8065 2011-11-06 02:02:32Z beckmi $
+ * AbstractTemplate
+ *
+ * @category  Xmf\Template\AbstractTemplate
+ * @package   Xmf
+ * @author    trabis <lusopoemas@gmail.com>
+ * @author    The SmartFactory <www.smartfactory.ca>
+ * @copyright 2011-2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @link      http://xoops.org
+ * @since     1.0
  */
-
-defined('XMF_EXEC') or die('Xmf was not detected');
-
-include_once XOOPS_ROOT_PATH . '/class/template.php';
-
 abstract class AbstractTemplate
 {
     /**
@@ -42,6 +41,7 @@ abstract class AbstractTemplate
      */
     public function __construct()
     {
+        \Xmf\Loader::loadFile(XOOPS_ROOT_PATH . '/class/template.php');
         $this->tpl = new \XoopsTpl();
         $this->_template = "db:system_dummy.html";
         $this->init();

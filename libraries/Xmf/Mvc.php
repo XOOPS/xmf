@@ -1,7 +1,4 @@
 <?php
-
-namespace Xmf;
-
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -12,18 +9,20 @@ namespace Xmf;
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+namespace Xmf;
+
 /**
- * Xmf\Mvc provides static contstans used in other Mvc classes
+ * Xmf\Mvc provides static contstants used in other Mvc classes
  *
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @license         http://www.fsf.org/copyleft/gpl.html GNU private license
- * @package         Xmf\Mvc
- * @since           1.0
- * @author          Richard Griffith
+ * @category  Xmf\Mvc
+ * @package   Xmf
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @copyright 2011-2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @link      http://xoops.org
+ * @since     1.0
  */
-
-defined('XMF_EXEC') or die('Xmf was not detected');
-
 class Mvc
 {
 

@@ -1,7 +1,4 @@
 <?php
-
-namespace Xmf;
-
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -11,6 +8,8 @@ namespace Xmf;
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
+
+namespace Xmf;
 
 /**
  * Debugging toos for developers
@@ -41,7 +40,7 @@ class Debug
     /**
      * Dump a variable
      *
-     * @param mixed $var variable which will be dumped
+     * @param mixed $var  variable which will be dumped
      * @param bool  $echo echo
      * @param bool  $html dump as html
      * @param bool  $exit exit after dump if true
@@ -70,14 +69,15 @@ class Debug
     /**
      * Display debug backtrace
      *
-     * @param bool  $echo echo
-     * @param bool  $html dump as html
-     * @param bool  $exit exit after dump if true
+     * @param bool $echo echo
+     * @param bool $html dump as html
+     * @param bool $exit exit after dump if true
      *
      * @return mixed|string
      */
     public static function backtrace($echo = true, $html = true, $exit = false)
     {
-        return self::dump(debug_backtrace(),$echo, $html, $exit);
+        return self::dump(debug_backtrace(), $echo, $html, $exit);
     }
+
 }

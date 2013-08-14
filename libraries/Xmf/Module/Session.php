@@ -9,12 +9,15 @@
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-namespace Xmf\Module\Helper;
+namespace Xmf\Module;
+
+use Xmf\Module\Helper\AbstractHelper;
 
 /**
  * Manage session variables for a module. Session variable will be
- * prefixed with the module name to separate them from variables set
- * by other modules or system functions.
+ * prefixed with the module name to separate it from variables set
+ * by other modules or system functions. All data is serialized, so
+ * any arbitrary data (i.e. array) can be stored.
  *
  * @category  Xmf\Module\Helper\Session
  * @package   Xmf
@@ -23,6 +26,7 @@ namespace Xmf\Module\Helper;
  * @copyright 2011-2013 The XOOPS Project http://sourceforge.net/projects/xoops/
  * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
  * @version   Release: 1.0
+ * @link      http://xoops.org
  * @since     1.0
  */
 class Session extends AbstractHelper
@@ -66,7 +70,7 @@ class Session extends AbstractHelper
     public function set($name, $value)
     {
         $prefixedName = $this->_prefix($name);
-        $_SESSION[$prefixedName] = $value;
+        $_SESSION[$prefixedName] = serialize($value);
     }
 
     /**
@@ -80,7 +84,7 @@ class Session extends AbstractHelper
     {
         $prefixedName = $this->_prefix($name);
         if (isset($_SESSION[$prefixedName])) {
-            return $_SESSION[$prefixedName];
+            return unserialize($_SESSION[$prefixedName]);
         } else {
             return false;
         }

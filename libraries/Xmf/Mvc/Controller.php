@@ -920,11 +920,11 @@ class Controller
     protected function & parseParameters ()
     {
         /**
-         * Xmf\Request::get($hash = 'default', $mask = 0)
+         * \Xmf\Request::get($hash = 'default', $mask = 0)
          * bitmask values for $mask are:
-         *   -  XMF_REQUEST_NOTRIM    (1)  set to skip trim() on values
-         *   -  XMF_REQUEST_ALLOWRAW  (2)  set to disable html check
-         *   -  XMF_REQUEST_ALLOWHTML (4)  set to allow all html, clear for 'safe' only
+         *   -  \Xmf\Request::NOTRIM    (1)  set to skip trim() on values
+         *   -  \Xmf\Request::ALLOWRAW  (2)  set to disable html check
+         *   -  \Xmf\Request::ALLOWHTML (4)  set to allow all html, clear for 'safe' only
          *
          * We will clean agressively. Raw values are not overwritten, so
          * code can go back and get directly with different options if

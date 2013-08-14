@@ -1,7 +1,4 @@
 <?php
-
-namespace Xmf;
-
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -12,24 +9,7 @@ namespace Xmf;
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-/**
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @license         http://www.fsf.org/copyleft/gpl.html GNU public license
- * @package         Xmf
- * @since           0.1
- * @author          trabis <lusopoemas@gmail.com>
- * @author          Joomla!
- * @version         $Id: Request.php 8065 2011-11-06 02:02:32Z beckmi $
- */
-
-defined('XMF_EXEC') or die('Xmf was not detected');
-
-/**
- * Set the available masks for cleaning variables
- */
-define('XMF_REQUEST_NOTRIM', 1);
-define('XMF_REQUEST_ALLOWRAW', 2);
-define('XMF_REQUEST_ALLOWHTML', 4);
+namespace Xmf;
 
 /**
  * Request Class
@@ -37,9 +17,28 @@ define('XMF_REQUEST_ALLOWHTML', 4);
  * This class serves to provide a common interface to access
  * request variables.  This includes $_POST, $_GET, and naturally $_REQUEST.  Variables
  * can be passed through an input filter to avoid injection or returned raw.
+ *
+ * @category  Xmf\Module\Request
+ * @package   Xmf
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @author    trabis <lusopoemas@gmail.com>
+ * @author    Joomla!
+ * @copyright 2011-2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @link      http://xoops.org
+ * @since     1.0
  */
 class Request
 {
+
+    /**
+     * Available masks for cleaning variables
+     */
+    const NOTRIM    = 1;
+    const ALLOWRAW  = 2;
+    const ALLOWHTML = 4;
+
     /**
      * Gets the request method
      *
@@ -62,21 +61,21 @@ class Request
      *
      * You can force the source by setting the $hash parameter:
      *
-     *   post       $_POST
-     *   get        $_GET
-     *   files      $_FILES
-     *   cookie     $_COOKIE
-     *   env        $_ENV
-     *   server     $_SERVER
-     *   method     via current $_SERVER['REQUEST_METHOD']
-     *   default    $_REQUEST
+     *  - post       $_POST
+     *  - get        $_GET
+     *  - files      $_FILES
+     *  - cookie     $_COOKIE
+     *  - env        $_ENV
+     *  - server     $_SERVER
+     *  - method     via current $_SERVER['REQUEST_METHOD']
+     *  - default    $_REQUEST
      *
-     * @static
      * @param  string $name    Variable name
      * @param  string $default Default value if the variable does not exist
      * @param  string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
      * @param  string $type    Return type for the variable, for valid values see {@link Xmf\Filter\Input::clean()}.
      * @param  int    $mask    Filter mask for the variable
+     *
      * @return mixed  Requested variable
      */
     public static function getVar($name, $default = null, $hash = 'default', $type = 'none', $mask = 0)
@@ -142,10 +141,10 @@ class Request
      *
      * See getVar() for more in-depth documentation on the parameters.
      *
-     * @static
      * @param  string $name    Variable name
      * @param  int    $default Default value if the variable does not exist
      * @param  string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     *
      * @return int    Requested variable
      */
     public static function getInt($name, $default = 0, $hash = 'default')
@@ -160,10 +159,10 @@ class Request
      *
      * See getVar() for more in-depth documentation on the parameters.
      *
-     * @static
      * @param  string $name    Variable name
      * @param  float  $default Default value if the variable does not exist
      * @param  string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     *
      * @return float  Requested variable
      */
     public static function getFloat($name, $default = 0.0, $hash = 'default')
@@ -178,10 +177,10 @@ class Request
      *
      * See getVar() for more in-depth documentation on the parameters.
      *
-     * @static
      * @param  string $name    Variable name
      * @param  bool   $default Default value if the variable does not exist
      * @param  string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     *
      * @return bool   Requested variable
      */
     public static function getBool($name, $default = false, $hash = 'default')
@@ -196,10 +195,10 @@ class Request
      *
      * See getVar() for more in-depth documentation on the parameters.
      *
-     * @static
      * @param  string $name    Variable name
      * @param  string $default Default value if the variable does not exist
      * @param  string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     *
      * @return string Requested variable
      */
     public static function getWord($name, $default = '', $hash = 'default')
@@ -214,10 +213,10 @@ class Request
      *
      * See getVar() for more in-depth documentation on the parameters.
      *
-     * @static
      * @param  string $name    Variable name
      * @param  string $default Default value if the variable does not exist
      * @param  string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     *
      * @return string Requested variable
      */
     public static function getCmd($name, $default = '', $hash = 'default')
@@ -232,24 +231,26 @@ class Request
      *
      * See getVar() for more in-depth documentation on the parameters.
      *
-     * @static
      * @param  string $name    Variable name
      * @param  string $default Default value if the variable does not exist
      * @param  string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
      * @param  int    $mask    Filter mask for the variable
+     *
      * @return string Requested variable
      */
     public static function getString($name, $default = '', $hash = 'default', $mask = 0)
     {
-        // Cast to string, in case XMF_REQUEST_ALLOWRAW was specified for mask
+        // Cast to string, in case Xmf\Request::ALLOWRAW was specified for mask
         return (string) Request::getVar($name, $default, $hash, 'string', $mask);
     }
 
     /**
-     * @static
-     * @param  string $name
-     * @param  array  $default
-     * @param  string $hash
+     * Fetches and returns an array
+     *
+     * @param  string $name    Variable name
+     * @param  string $default Default value if the variable does not exist
+     * @param  string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     *
      * @return array
      */
     public static function getArray($name, $default = array(), $hash = 'default')
@@ -258,25 +259,27 @@ class Request
     }
 
     /**
-     * @static
-     * @param  string $name
-     * @param  string $default
-     * @param  string $hash
-     * @return string
+     * Fetches and returns raw text
+     *
+     * @param  string $name    Variable name
+     * @param  string $default Default value if the variable does not exist
+     * @param  string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     *
+     * @return string Requested variable
      */
     public static function getText($name, $default = '', $hash = 'default')
     {
-        return (string) Request::getVar($name, $default, $hash, 'string', XMF_REQUEST_ALLOWRAW);
+        return (string) Request::getVar($name, $default, $hash, 'string', Request::ALLOWRAW);
     }
 
     /**
      * Set a variable in one of the request variables
      *
-     * @access    public
      * @param  string  $name      Name
      * @param  string  $value     Value
      * @param  string  $hash      Hash
      * @param  boolean $overwrite Boolean
+     *
      * @return string  Previous value
      */
     public static function setVar($name, $value = null, $hash = 'method', $overwrite = true)
@@ -330,18 +333,18 @@ class Request
      *
      * You can force the source by setting the $hash parameter:
      *
-     *   post        $_POST
-     *   get         $_GET
-     *   files       $_FILES
-     *   cookie      $_COOKIE
-     *   env         $_ENV
-     *   server      $_SERVER
-     *   method      via current $_SERVER['REQUEST_METHOD']
-     *   default     $_REQUEST
+     *  - post        $_POST
+     *  - get         $_GET
+     *  - files       $_FILES
+     *  - cookie      $_COOKIE
+     *  - env         $_ENV
+     *  - server      $_SERVER
+     *  - method      via current $_SERVER['REQUEST_METHOD']
+     *  - default     $_REQUEST
      *
-     * @static
      * @param  string $hash to get (POST, GET, FILES, METHOD)
      * @param  int    $mask Filter mask for the variable
+     *
      * @return mixed  Request hash
      */
     public static function get($hash = 'default', $mask = 0)
@@ -398,6 +401,8 @@ class Request
      * @param array   $array     An associative array of key-value pairs
      * @param string  $hash      The request variable to set (POST, GET, FILES, METHOD)
      * @param boolean $overwrite If true and an existing key is found, the value is overwritten, otherwise it is ingored
+     *
+     * @return void
      */
     public static function set($array, $hash = 'default', $overwrite = true)
     {

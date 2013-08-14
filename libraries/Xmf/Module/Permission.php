@@ -9,10 +9,11 @@
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-namespace Xmf\Module\Helper;
+namespace Xmf\Module;
 
 use Xmf\Loader;
 use Xmf\Module\Helper;
+use Xmf\Module\Helper\AbstractHelper;
 
 /**
  * Methods to help manage permissions within a module
@@ -24,6 +25,7 @@ use Xmf\Module\Helper;
  * @copyright 2011-2013 The XOOPS Project http://sourceforge.net/projects/xoops/
  * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
  * @version   Release: 1.0
+ * @link      http://xoops.org
  * @since     1.0
  */
 class Permission extends AbstractHelper

@@ -25,6 +25,7 @@ use Xmf\Module\Helper;
  * @copyright 2011-2013 The XOOPS Project http://sourceforge.net/projects/xoops/
  * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
  * @version   Release: 1.0
+ * @link      http://xoops.org
  * @since     1.0
  */
 abstract class AbstractHelper
@@ -51,9 +52,9 @@ abstract class AbstractHelper
             // nothing specified, use current module
             // check if we are running in 2.6
             if (class_exists('Xoops', false)) {
-                $xoops=Xoops::getInstance();
+                $xoops=\Xoops::getInstance();
                 if ($xoops->isModule()) {
-                    $this->module &= $xoops->module;
+                    $this->module = $xoops->module;
                 }
             } else {
                 $this->module = $GLOBALS['xoopsModule'];

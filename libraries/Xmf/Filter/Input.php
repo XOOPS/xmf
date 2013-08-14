@@ -1,7 +1,4 @@
 <?php
-
-namespace Xmf\Filter;
-
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -12,25 +9,25 @@ namespace Xmf\Filter;
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-/**
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @license         http://www.fsf.org/copyleft/gpl.html GNU public license
- * @package         Xmf
- * @since           0.1
- * @author          Grégory Mage (Aka Mage)
- * @author          trabis <lusopoemas@gmail.com>
- * @version         $Id: Input.php 8065 2011-11-06 02:02:32Z beckmi $
- */
-
-defined('XMF_EXEC') or die('Xmf was not detected');
+namespace Xmf\Filter;
 
 /**
  * Xmf\Filter\Input is a class for filtering input from any data source
  *
  * Forked from the php input filter library by: Daniel Morris <dan@rootcube.com>
- * Original Contributors: Gianpaolo Racca, Ghislain Picard, Marco Wandschneider, Chris Tobin and Andrew Eddie.
+ * Original Contributors: Gianpaolo Racca, Ghislain Picard,
+ * Marco Wandschneider, Chris Tobin and Andrew Eddie.
  *
- * @author      Louis Landry <louis.landry@joomla.org>
+ * @category  Xmf\Module\Admin
+ * @package   Xmf
+ * @author    Grégory Mage (Aka Mage)
+ * @author    trabis <lusopoemas@gmail.com>
+ * @author    Louis Landry <louis.landry@joomla.org>
+ * @author    Daniel Morris <dan@rootcube.com>
+ * @copyright 2011-2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @since     1.0
  */
 class Input
 {
@@ -135,9 +132,10 @@ class Input
      * Method to be called by another php script. Processes for XSS and
      * specified bad code.
      *
-     * @access  public
-     * @param  mixed  $source Input string/array-of-string to be 'cleaned'
-     * @param  string $type   Return type for the variable (INT, FLOAT, BOOLEAN, WORD, ALNUM, CMD, BASE64, STRING, ARRAY, PATH, NONE)
+     * @param mixed  $source Input string/array-of-string to be 'cleaned'
+     * @param string $type   Return type for the variable (INT, FLOAT,
+     *                        BOOLEAN, WORD, ALNUM, CMD, BASE64, STRING,
+     *                        ARRAY, PATH, NONE)
      * @return mixed  'Cleaned' version of input parameter
      * @static
      */

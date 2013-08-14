@@ -1,7 +1,4 @@
 <?php
-
-namespace Xmf\Module\Helper;
-
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -12,15 +9,26 @@ namespace Xmf\Module\Helper;
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+namespace Xmf\Module;
+
+use Xmf\Module\Helper\AbstractHelper;
+
 /**
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @license         http://www.fsf.org/copyleft/gpl.html GNU public license
- * @author          trabis <lusopoemas@gmail.com>
- * @version         $Id: Cache.php 8065 2011-11-06 02:02:32Z beckmi $
+ * Manage cache interaction in a module. Cache key will be prefixed
+ * with the module name to segregate it from keys set by other modules
+ * or system functions. Cache data is by definition serialized, so
+ * any arbitrary data (i.e. array) can be stored.
+ *
+ * @category  Xmf\Module\Helper\Cache
+ * @package   Xmf
+ * @author    trabis <lusopoemas@gmail.com>
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @copyright 2011-2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @link      http://xoops.org
+ * @since     1.0
  */
-
-defined('XMF_EXEC') or die('Xmf was not detected');
-
 class Cache extends AbstractHelper
 {
     /**
@@ -33,36 +41,52 @@ class Cache extends AbstractHelper
      */
     private $_cache;
 
+    /**
+     * Initialize parent::__constuct calls this after verifying module object.
+     *
+     * @return void
+     */
     public function init()
     {
-        XoopsLoad::load('xoopscache');
+        \XoopsLoad::load('xoopscache');
         $this->_prefix = $this->module->getVar('dirname') . '_';
-        $this->_cache = XoopsCache::getInstance();
+        $this->_cache = \XoopsCache::getInstance();
     }
 
     /**
-     * @param  string $value
-     * @return string
+     * Add our module prefix to a name
+     *
+     * @param string $name name to prefix
+     *
+     * @return string module prefixed name
      */
-    private function _prefix($value)
+    private function _prefix($name)
     {
-        return $this->_prefix . $value;
+        return $this->_prefix . $name;
     }
 
     /**
-     * @param  string $key
-     * @param  mixed  $value
-     * @param  mixed  $duration
-     * @return bool
+     * Write a value for a key to the cache
+     *
+     * TODO 3rd write parameter handling - 2.5 $duration vs 2.6 $config
+     * plan to add $config in 2.6, for now take default on 3rd parm
+     *
+     * @param string $key   Identifier for the data
+     * @param mixed  $value Data to be cached - anything except a resource
+     *
+     * @return bool True if the data was successfully cached, false on failure
      */
-    public function write($key, $value, $duration = null)
+    public function write($key, $value)
     {
-        return $this->_cache->write($this->_prefix($key), $value, $duration);
+        return $this->_cache->write($this->_prefix($key), $value);
     }
 
     /**
-     * @param  string $key
-     * @return mixed
+     * Read value for a key from the cache
+     *
+     * @param string $key Identifier for the data
+     *
+     * @return mixed value if key was set, false not set or expired
      */
     public function read($key)
     {
@@ -70,7 +94,10 @@ class Cache extends AbstractHelper
     }
 
     /**
-     * @param  string $key
+     * Delete a key from the cache
+     *
+     * @param string $key Identifier for the data
+     *
      * @return void
      */
     public function delete($key)

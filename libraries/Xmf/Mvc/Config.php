@@ -1,7 +1,4 @@
 <?php
-
-namespace Xmf\Mvc;
-
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -12,23 +9,21 @@ namespace Xmf\Mvc;
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-/**
- * Xmf\Mvc\Config is a runtime registry of configuration options.
- *
- * Inspired by David Zülke work in Agavi.
- *
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @license         http://www.fsf.org/copyleft/gpl.html GNU private license
- * @package         Xmf\Mvc
- * @since           1.0
- * @author          Richard Griffith
- */
-
-defined('XMF_EXEC') or die('Xmf was not detected');
+namespace Xmf\Mvc;
 
 /**
  * Config provides a runtime registry for configuration options.
  *
+ * Inspired by David Zülke's work in Agavi.
+ *
+ * @category  Xmf\Mvc\Config
+ * @package   Xmf
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @copyright 2011-2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @link      http://xoops.org
+ * @since     1.0
  */
 class Config
 {
