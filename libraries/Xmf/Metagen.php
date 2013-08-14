@@ -1,7 +1,4 @@
 <?php
-
-namespace Xmf;
-
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -12,18 +9,20 @@ namespace Xmf;
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+namespace Xmf;
+
 /**
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @license         http://www.fsf.org/copyleft/gpl.html GNU public license
- * @package         Xmf
- * @since           0.1
- * @author          trabis <lusopoemas@gmail.com>
- * @author          The SmartFactory <www.smartfactory.ca>
- * @version         $Id: Metagen.php 8065 2011-11-06 02:02:32Z beckmi $
+ * Metagen
+ *
+ * @category  Xmf\Module\Metagen
+ * @package   Xmf
+ * @author    trabis <lusopoemas@gmail.com>
+ * @copyright 2011-2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @link      http://xoops.org
+ * @since     1.0
  */
-
-defined('XMF_EXEC') or die('Xmf was not detected');
-
 class Metagen
 {
     /**
@@ -64,7 +63,8 @@ class Metagen
     /**
      * @var int
      */
-    private $_minChar = 4;
+    private $_minChar = 5;
+    private $_maxKeywords = 20;
 
     /**
      * Constructor
@@ -72,16 +72,16 @@ class Metagen
      * @param string $title         Page title
      * @param string $keywords      List of meta keywords
      * @param string $description   Meta description
-     * @param string $category_path
+     * @param string $category_path category
      */
     public function __construct($title, $keywords = '', $description = '', $category_path = '')
     {
-        $this->_myts = MyTextSanitizer::getInstance();
+        $this->_myts = \MyTextSanitizer::getInstance();
         $this->setCategoryPath($category_path);
         $this->setTitle($title);
         $this->setDescription($description);
 
-        if (!$keywords) {
+        if (empty($keywords)) {
             $keywords = $this->createMetaKeywords();
         }
 
@@ -96,7 +96,7 @@ class Metagen
      * @var string $var to test
      * @return boolean
      */
-    public function emptyString($var)
+    protected function nonEmptyString($var)
     {
         return (strlen($var) > 0);
     }
@@ -132,7 +132,7 @@ class Metagen
         $title = preg_replace($pattern, $rep_pat, $title);
 
         $tableau = explode("-", $title);
-        $tableau = array_filter($tableau, array($this, "emptyString"));
+        $tableau = array_filter($tableau, array($this, "nonEmptyString"));
         $title = implode("-", $tableau);
 
         if (sizeof($title) > 0) {
@@ -217,9 +217,9 @@ class Metagen
         $description = $this->html2text($description);
         $description = $this->purifyText($description);
 
-        $description = ereg_replace("([^\r\n])\r\n([^\r\n])", "\\1 \\2", $description);
-        $description = ereg_replace("[\r\n]*\r\n[\r\n]*", "\r\n\r\n", $description);
-        $description = ereg_replace("[ ]* [ ]*", ' ', $description);
+        $description = preg_replace("/([^\r\n])\r\n([^\r\n])/", "\\1 \\2", $description);
+        $description = preg_replace("/[\r\n]*\r\n[\r\n]*/", "\r\n\r\n", $description);
+        $description = preg_replace("/[ ]* [ ]*/", ' ', $description);
         $description = StripSlashes($description);
 
         $this->_description = $description;
@@ -280,12 +280,13 @@ class Metagen
     {
         $keywords = array();
 
+        $text = strtolower($text);
         $text = $this->purifyText($text);
         $text = $this->html2text($text);
 
-        $text = ereg_replace("([^\r\n])\r\n([^\r\n])", "\\1 \\2", $text);
-        $text = ereg_replace("[\r\n]*\r\n[\r\n]*", "\r\n\r\n", $text);
-        $text = ereg_replace("[ ]* [ ]*", ' ', $text);
+        $text = preg_replace("/([^\r\n])\r\n([^\r\n])/", "\\1 \\2", $text);
+        $text = preg_replace("/[\r\n]*\r\n[\r\n]*/", "\r\n\r\n", $text);
+        $text = preg_replace("/[ ]* [ ]*/", ' ', $text);
         $text = StripSlashes($text);
 
         $originalKeywords = preg_split('/[^a-zA-Z\'"-]+/', $text, -1, PREG_SPLIT_NO_EMPTY);
@@ -295,11 +296,18 @@ class Metagen
             foreach ($secondRoundKeywords as $secondRoundKeyword) {
                 if (strlen($secondRoundKeyword) >= $minChar) {
                     if (!in_array($secondRoundKeyword, $keywords)) {
-                        $keywords[] = trim($secondRoundKeyword);
+                        $key[$secondRoundKeyword] = $secondRoundKeyword;
+                        if(empty($keycnt[$secondRoundKeyword])) $keycnt[$secondRoundKeyword] = 0;
+                         $keycnt[$secondRoundKeyword] += 1;
+                        //$keywords[] = trim($secondRoundKeyword);
                     }
                 }
             }
         }
+Debug::dump($keycnt);
+        array_multisort($keycnt, SORT_DESC, $key, SORT_ASC);
+Debug::dump($key);
+        $keywords = $key;
 
         return $keywords;
     }
@@ -313,13 +321,8 @@ class Metagen
     {
         $keywords = $this->findMetaKeywords($this->_original_title . " " . $this->_description, $this->_minChar);
 
-        // Only take the first 90 keywords
-        $newKeywords = array();
-        $i = 0;
-        while ($i < 90 - 1 && isset($keywords[$i])) {
-            $newKeywords[] = $keywords[$i];
-            $i++;
-        }
+        $newKeywords = array_slice ($keywords , 0, $this->_maxKeywords );
+
         $ret = implode(', ', $newKeywords);
 
         return $ret;
