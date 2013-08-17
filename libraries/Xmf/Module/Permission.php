@@ -51,6 +51,11 @@ class Permission extends AbstractHelper
     private $_perm;
 
     /**
+     * @var Xoops instance if available
+     */
+    private $_xoops = null;
+
+    /**
      * Initialize parent::__constuct calls this after verifying module object.
      *
      * @return void
@@ -64,6 +69,9 @@ class Permission extends AbstractHelper
         $this->_dirname = $this->module->getVar('dirname');
         $this->_db = \XoopsDatabaseFactory::getDatabaseConnection();
         $this->_perm = new \XoopsGroupPermHandler($this->_db);
+        if (class_exists('Xoops', false)) {
+            $this->_xoops = \Xoops::getInstance();
+        }
     }
 
     /**
@@ -114,9 +122,9 @@ class Permission extends AbstractHelper
      */
     public function getUserGroups()
     {
-        if (class_exists('Xoops', false)) {
-            $groupids = $this->xoops()->isUser() ?
-                $this->xoops()->user->getGroups() : array(XOOPS_GROUP_ANONYMOUS);
+        if ($this->_xoops) {
+            $groupids = $this->_xoops->isUser() ?
+                $this->_xoops->user->getGroups() : array(XOOPS_GROUP_ANONYMOUS);
         } else {
             $groupids = is_object($GLOBALS['xoopsUser']) ?
                 $GLOBALS['xoopsUser']->getGroups() : array(XOOPS_GROUP_ANONYMOUS);
