@@ -303,11 +303,7 @@ class GenericHelper
      */
     public function isUserAdmin()
     {
-        if ($this->xoops()->isUser()) {
-            return $this->xoops()->user->isAdmin($this->getModule()->getVar('mid'));
-        }
-
-        return false;
+        return $GLOBALS['xoopsUser']->isAdmin($this->getModule()->getVar('mid'));
     }
 
     /**
