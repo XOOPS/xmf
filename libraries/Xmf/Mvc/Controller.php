@@ -49,12 +49,12 @@ class Controller
     protected $currentAction;
 
     /**
-     * Currently processing module.
+     * Currently processing unit.
      *
      * @since  1.0
      * @type   string
      */
-    protected $currentModule;
+    protected $currentUnit;
 
     /**
      * ExecutionChain instance.
@@ -101,12 +101,12 @@ class Controller
     protected $requestAction;
 
     /**
-     * Originally requested module.
+     * Originally requested unit.
      *
      * @since  1.0
      * @type   string
      */
-    protected $requestModule;
+    protected $requestUnit;
 
     /**
      * A developer supplied session handler.
@@ -146,19 +146,19 @@ class Controller
     {
 
         $this->contentType   =  $externalCom==null?'html':$externalCom; // not exactly
-        $this->currentAction =  NULL;
-        $this->currentModule =  NULL;
+        $this->currentAction =  null;
+        $this->currentUnit   =  null;
         $this->execChain     =  new ExecutionChain;
         $this->renderMode    =  \Xmf\Mvc::RENDER_CLIENT;
-        $this->requestAction =  NULL;
-        $this->requestModule =  NULL;
+        $this->requestAction =  null;
+        $this->requestUnit   =  null;
 
         // init Controller objects
-        $this->authorizationHandler =  NULL;
+        $this->authorizationHandler =  null;
         $this->request              =  new Request($this->parseParameters());
         $this->mojavi               =  array();
-        $this->sessionHandler       =  NULL;
-        $this->user                 =  NULL;
+        $this->sessionHandler       =  null;
+        $this->user                 =  null;
 
         $this->modelManager         =  new ModelManager;
 
@@ -168,13 +168,13 @@ class Controller
      * getComponentName - build filename of action, view, etc.
      *
      * @param $compType type (action, view, etc.)
-     * @param $modName Module name
-     * @param $actName Name
-     * @param $actView view suffix (success, error, input, etc.)
+     * @param $unitName Unit name
+     * @param $actName  Action Name
+     * @param $actView  View suffix (success, error, input, etc.)
      *
      * @return file name or null on error
      */
-    protected function getComponentName ($compType, $modName, $actName, $actView)
+    protected function getComponentName ($compType, $unitName, $actName, $actView)
     {
 
         $cTypes=array(
@@ -190,7 +190,7 @@ class Controller
         if (isset($cTypes[$compType])) {
             $c=$cTypes[$compType];
 
-            $file = Config::get('MODULES_DIR') . "{$modName}/{$c['dir']}/{$actName}{$c['suffix']}";
+            $file = Config::get('UNITS_DIR') . "{$unitName}/{$c['dir']}/{$actName}{$c['suffix']}";
         }
         //trigger_error($file);
         return $file;
@@ -200,17 +200,17 @@ class Controller
     /**
      * Determine if an action exists.
      *
-     * @param string $modName A module name.
-     * @param string $actName An action name.
+     * @param string $unitName A unit name.
+     * @param string $actName  An action name.
      *
-     * @return bool TRUE if the given module has the given action,
+     * @return bool TRUE if the given unit has the given action,
      *              otherwise FALSE.
      *
      * @since  1.0
      */
-    public function actionExists ($modName, $actName)
+    public function actionExists ($unitName, $actName)
     {
-        $file = $this->getComponentName ('action', $modName, $actName, '');
+        $file = $this->getComponentName ('action', $unitName, $actName, '');
 
         return (is_readable($file));
 
@@ -219,27 +219,18 @@ class Controller
     /**
      * Dispatch a request.
      *
-     * _Optional parameters for module and action exist if you wish to
+     * _Optional parameters for unit and action exist if you wish to
      * run Mojavi as a page controller._
      *
-     * @param string $modName A module name.
-     * @param string $actName An action name.
+     * @param string $unitName A unit name.
+     * @param string $actName  An action name.
      */
-    public function dispatch ($modName = NULL, $actName = NULL)
+    public function dispatch ($unitName = null, $actName = null)
     {
-//        $logger=\XoopsLogger::getInstance();
-//        $logger->startTime('MVC dispatch');
-        // register error handler as default logger's standard() method
-        //$logger =& LogManager::getLogger();
 
-        // set error handler
-        //set_error_handler(array(&$logger, 'standard'));
-
-        if ($this->user === NULL) {
-
+        if ($this->user === null) {
             // no user type has been set, use the default no privilege user
             $this->user = new User;
-
         }
 
         // we always have a session controlled by XOOPS so nix the
@@ -256,24 +247,23 @@ class Controller
         $mojavi  =& $this->mojavi;
         $request =& $this->request;
 
-        // use default module and action only if both have not been specified
-        if ($modName == NULL && !$request->hasParameter(Config::get('MODULE_ACCESSOR', 'module')) &&
-            $actName == NULL && !$request->hasParameter(Config::get('ACTION_ACCESSOR', 'action')))
+        // use default unit and action only if both have not been specified
+        if ($unitName == null && !$request->hasParameter(Config::get('UNIT_ACCESSOR', 'unit')) &&
+            $actName == null && !$request->hasParameter(Config::get('ACTION_ACCESSOR', 'action')))
         {
 
             $actName = Config::get('DEFAULT_ACTION', 'DefaultIndex');
-            $modName = Config::get('DEFAULT_MODULE', 'Default');
+            $unitName = Config::get('DEFAULT_UNIT', 'Default');
 
         } else {
 
-            // has a module been specified via dispatch()?
-            if ($modName == NULL) {
+            // has a unit been specified via dispatch()?
+            if ($unitName == NULL) {
 
-                // a module hasn't been specified via dispatch(), let's check
-                // the parameters
-                $modName = $request->getParameter(Config::get('MODULE_ACCESSOR', 'module'));
-                if (empty($modName)) {
-                    $modName = Config::get('DEFAULT_MODULE', 'Default');
+                // unit not specified via dispatch(), check parameters
+                $unitName = $request->getParameter(Config::get('UNIT_ACCESSOR', 'unit'));
+                if (empty($unitName)) {
+                    $unitName = Config::get('DEFAULT_UNIT', 'Default');
                 }
             }
 
@@ -286,8 +276,8 @@ class Controller
 
                 if ($actName == NULL) {
 
-                    // does an Index action exist for this module?
-                    if ($this->actionExists($modName, 'Index')) {
+                    // does an Index action exist for this unit?
+                    if ($this->actionExists($unitName, 'Index')) {
 
                         // ok, we found the Index action
                         $actName = 'Index';
@@ -303,32 +293,32 @@ class Controller
 
         }
 
-        // if $modName or $actName equal NULL, we don't set them. we'll let
+        // if $unitName or $actName equal NULL, we don't set them. we'll let
         // ERROR_404_ACTION do it's thing inside forward()
 
         // replace unwanted characters
         $actName = preg_replace('/[^a-z0-9\-_]+/i', '', $actName);
-        $modName = preg_replace('/[^a-z0-9\-_]+/i', '', $modName);
+        $unitName = preg_replace('/[^a-z0-9\-_]+/i', '', $unitName);
 
-        // set request modules and action
+        // set request unit and action
         $this->requestAction      = $actName;
-        $this->requestModule      = $modName;
+        $this->requestUnit        = $unitName;
         $mojavi['request_action'] = $actName;
-        $mojavi['request_module'] = $modName;
+        $mojavi['request_unit']   = $unitName;
 
         // paths
         $mojavi['controller_path']     = $this->getControllerPath();
-        $mojavi['current_action_path'] = $this->getControllerPath($modName,
+        $mojavi['current_action_path'] = $this->getControllerPath($unitName,
                                                                   $actName);
 
-        $mojavi['current_module_path'] = $this->getControllerPath($modName);
-        $mojavi['request_action_path'] = $this->getControllerPath($modName,
+        $mojavi['current_unit_path'] = $this->getControllerPath($unitName);
+        $mojavi['request_action_path'] = $this->getControllerPath($unitName,
                                                                   $actName);
 
-        $mojavi['request_module_path'] = $this->getControllerPath($modName);
+        $mojavi['request_unit_path'] = $this->getControllerPath($unitName);
 
         // process our originally request action
-        $this->forward($modName, $actName);
+        $this->forward($unitName, $actName);
 
         // shutdown ModelManager
         $this->modelManager->shutdown();
@@ -350,7 +340,7 @@ class Controller
 
     }
 
-    private function loadRequired($filename)
+    protected function loadRequired($filename)
     {
         if (!\Xmf\Loader::loadFile($filename)) {
             die (sprintf('Failed to load %s',$filename));
@@ -365,19 +355,19 @@ class Controller
     /**
      * Forward the request to an action.
      *
-     * @param string $modName A module name.
+     * @param string $unitName A unit name.
      * @param string $actName An action name.
      *
      * @since  1.0
      */
-    public function forward ($modName, $actName)
+    public function forward ($unitName, $actName)
     {
 
-        if ($this->currentModule == $modName &&
+        if ($this->currentUnit == $unitName &&
             $this->currentAction == $actName)
         {
 
-            $error = 'Recursive forward on module ' . $modName . ', action ' .
+            $error = 'Recursive forward on unit ' . $unitName . ', action ' .
                      $actName;
 
             trigger_error($error, E_USER_ERROR);
@@ -386,13 +376,13 @@ class Controller
 
         }
 
-        // execute module configuration, if it exists
-        $this->ifExistsRequire(Config::get('MODULES_DIR') . $modName . '/config.php');
+        // execute unit configuration, if it exists
+        $this->ifExistsRequire(Config::get('UNITS_DIR') . $unitName . '/config.php');
 
-        if ($this->actionExists($modName, $actName)) {
+        if ($this->actionExists($unitName, $actName)) {
 
             // create the action instance
-            $action = $this->getAction($modName, $actName);
+            $action = $this->getAction($unitName, $actName);
 
         } else {
 
@@ -401,25 +391,25 @@ class Controller
 
         }
 
-        // track old module/action
+        // track old unit/action
         $oldAction = $this->currentAction;
-        $oldModule = $this->currentModule;
+        $oldUnit = $this->currentUnit;
 
-        // add module and action to execution chain, and update current vars
-        $this->execChain->addRequest($modName, $actName, $action);
-        $this->updateCurrentVars($modName, $actName);
+        // add unit and action to execution chain, and update current vars
+        $this->execChain->addRequest($unitName, $actName, $action);
+        $this->updateCurrentVars($unitName, $actName);
 
         if ($action === NULL) {
 
             // requested action doesn't exist
             $actName = Config::get('ERROR_404_ACTION', 'PageNotFound');
-            $modName = Config::get('ERROR_404_MODULE', 'Default');
+            $unitName = Config::get('ERROR_404_UNIT', 'Default');
 
-            if (!$this->actionExists($modName, $actName)) {
+            if (!$this->actionExists($unitName, $actName)) {
 
-                // cannot find error 404 module/action
+                // cannot find error 404 unit/action
                 $error = 'Invalid configuration setting(s): ' .
-                         'ERROR_404_MODULE (' . $modName . ') or ' .
+                         'ERROR_404_UNIT (' . $unitName . ') or ' .
                          'ERROR_404_ACTION (' . $actName . ')';
 
                 trigger_error($error, E_USER_ERROR);
@@ -429,10 +419,10 @@ class Controller
             }
 
             // add another request since the action is non-existent
-            $action = $this->getAction($modName, $actName);
+            $action = $this->getAction($unitName, $actName);
 
-            $this->execChain->addRequest($modName, $actName, $action);
-            $this->updateCurrentVars($modName, $actName);
+            $this->execChain->addRequest($unitName, $actName, $action);
+            $this->updateCurrentVars($unitName, $actName);
 
         }
 
@@ -440,7 +430,7 @@ class Controller
 
         // map filters
         $this->mapGlobalFilters($filterChain);
-        $this->mapModuleFilters($filterChain, $modName);
+        $this->mapUnitFilters($filterChain, $unitName);
 
         // and last but not least, the main execution filter
         $filterChain->register(new ExecutionFilter);
@@ -449,7 +439,7 @@ class Controller
         $filterChain->execute($this, $this->request, $this->user);
 
         // update current vars
-        $this->updateCurrentVars($oldModule, $oldAction);
+        $this->updateCurrentVars($oldUnit, $oldAction);
 
     }
 
@@ -492,9 +482,9 @@ class Controller
     }
 
     /**
-     * Generate a URL for a given module, action and parameters
+     * Generate a URL for a given unit, action and parameters
      *
-     * @param string $modName a module name
+     * @param string $unitName a unit name
      * @param string $actName an action name
      * @param array  $params  an associative array of additional URL parameters
      *
@@ -502,10 +492,10 @@ class Controller
      *
      * @since  1.0
      */
-    public function getControllerPathWithParams($modName, $actName, $params)
+    public function getControllerPathWithParams($unitName, $actName, $params)
     {
 
-        $url=$this->getControllerPath($modName, $actName);
+        $url=$this->getControllerPath($unitName, $actName);
         if (strpos($url,'?')===false) {
             $url .= '?';
         }
@@ -536,7 +526,7 @@ class Controller
     /**
      * Retrieve an action implementation instance.
      *
-     * @param string $modName A module name.
+     * @param string $unitName A unit name.
      * @param string $actName An action name.
      *
      * @return Action An Action instance, if the action exists, otherwise
@@ -544,21 +534,21 @@ class Controller
      *
      * @since  1.0
      */
-    public function getAction ($modName, $actName)
+    public function getAction ($unitName, $actName)
     {
 
-        $file = $this->getComponentName ('action', $modName, $actName, '');
+        $file = $this->getComponentName ('action', $unitName, $actName, '');
 
         $this->loadRequired($file);
 
         $action = $actName . 'Action';
 
         // fix for same name actions
-        $modAction = $modName . '_' . $action;
+        $unitAction = $unitName . '_' . $action;
 
-        if (class_exists($modAction)) {
+        if (class_exists($unitAction)) {
 
-            $action =& $modAction;
+            $action =& $unitAction;
 
         }
 
@@ -595,15 +585,15 @@ class Controller
     /**
      * Retrieve an absolute web path to the public controller file.
      *
-     * @param string A module name.
-     * @param string An action name.
+     * @param string $unitName A unit name.
+     * @param string $actName  An action name.
      *
      * @return string An absolute web path representing the controller file,
-     *                which also includes module and action names.
+     *                which also includes unit and action names.
      *
      * @since  1.0
      */
-    public function getControllerPath ($modName = NULL, $actName = NULL)
+    public function getControllerPath ($unitName = null, $actName = null)
     {
 
         $path = Config::get('SCRIPT_PATH');
@@ -611,12 +601,12 @@ class Controller
 
         $varsep = '?';
 
-        if (!(empty($modName) || $modName==Config::get('DEFAULT_MODULE', 'Default'))) {
-            $path .= $varsep."module=$modName";
+        if (!(empty($unitName) || $unitName==Config::get('DEFAULT_UNIT', 'Default'))) {
+            $path .= $varsep.Config::get('UNIT_ACCESSOR','unit')."=$unitName";
             $varsep = '&';
         }
         if (!empty($actName)) {
-            $path .= $varsep."action=$actName";
+            $path .= $varsep.Config::get('ACTION_ACCESSOR','action')."=$actName";
             $varsep = '&';
         }
 
@@ -639,16 +629,16 @@ class Controller
     }
 
     /**
-     * Retrieve the name of the currently processing module.
+     * Retrieve the name of the currently processing unit.
      *
      * / If the request has not been forwarded, this will return the
-     *   the originally requested module./
+     *   the originally requested unit./
      *
      * @since  1.0
      */
-    public function getCurrentModule ()
+    public function getCurrentUnit ()
     {
-        return $this->currentModule;
+        return $this->currentUnit;
 
     }
 
@@ -680,7 +670,7 @@ class Controller
         static $instance;
 
         if ($instance === NULL) {
-            $controllerClass=__CLASS__; // get_called_class(); not available PHP<5.3
+            $controllerClass = get_called_class(); // not available PHP<5.3
             $instance = new $controllerClass($externalCom);
 
         }
@@ -692,18 +682,18 @@ class Controller
 
     /**
      * Retrieve an absolute file-system path home directory of the currently
-     * processing module.
+     * processing unit.
      *
      *  _ If the request has been forwarded, this will return the directory of
-     *    the forwarded module._
+     *    the forwarded unit._
      *
-     * @return string A module directory.
+     * @return string A unit directory.
      *
      * @since  1.0
      */
-    public function getModuleDir ()
+    public function getUnitDir ()
     {
-        return (Config::get('MODULES_DIR') . $this->currentModule . '/');
+        return (Config::get('UNITS_DIR') . $this->currentUnit . '/');
 
     }
 
@@ -762,15 +752,15 @@ class Controller
     }
 
     /**
-     * Retrieve the name of the originally requested module.
+     * Retrieve the name of the originally requested unit.
      *
-     * @return string A module name.
+     * @return string A unit name.
      *
      * @since  1.0
      */
-    public function getRequestModule ()
+    public function getRequestUnit()
     {
-        return $this->requestModule;
+        return $this->requestUnit;
 
     }
 
@@ -804,27 +794,27 @@ class Controller
     /**
      * Retrieve a view implementation instance.
      *
-     * @param string A module name.
+     * @param string A unit name.
      * @param string An action name.
      * @param string A view name.
      *
      * @return View A View instance.
      */
-    public function getView ($modName, $actName, $viewName)
+    public function getView ($unitName, $actName, $viewName)
     {
 
-        $file = $this->getComponentName ('view', $modName, $actName, $viewName);
+        $file = $this->getComponentName ('view', $unitName, $actName, $viewName);
 
         $this->loadRequired($file);
 
         $view =  $actName . 'View';
 
         // fix for same name views
-        $modView = $modName . '_' . $view;
+        $unitView = $unitName . '_' . $view;
 
-        if (class_exists($modView)) {
+        if (class_exists($unitView)) {
 
-            $view =& $modView;
+            $view =& $unitView;
 
         }
 
@@ -846,7 +836,7 @@ class Controller
 
         if (!isset($list)) {
 
-            $file = Config::get('MODULES_DIR') . 'GlobalFilterList.php';
+            $file = Config::get('UNITS_DIR') . 'GlobalFilterList.php';
 
             if ($this->ifExistsRequire($file)) {
 
@@ -866,14 +856,14 @@ class Controller
     }
 
     /**
-     * Map all filters for a given module.
+     * Map all filters for a given unit.
      *
      * @param FilterChain A FilterChain instance.
-     * @param modName     A module name.
+     * @param unitName     A unit name.
      *
      * @since  1.0
      */
-    public function mapModuleFilters (&$filterChain, $modName)
+    public function mapUnitFilters (&$filterChain, $unitName)
     {
 
         static $cache;
@@ -884,11 +874,11 @@ class Controller
 
         }
 
-        $listName = $modName . 'FilterList';
+        $listName = $unitName . 'FilterList';
 
         if (!isset($cache[$listName])) {
 
-            $file = $this->getComponentName ('filterlist', $modName, "{$listName}", '');
+            $file = $this->getComponentName ('filterlist', $unitName, "{$listName}", '');
 
             if ($this->ifExistsRequire($file)) {
 
@@ -1029,42 +1019,42 @@ class Controller
     }
 
     /**
-     * Update current module and action data.
+     * Update current unit and action data.
      *
-     * @param string A module name.
+     * @param string A unit name.
      * @param string An action name.
      *
      * @since  1.0
      */
-    protected function updateCurrentVars ($modName, $actName)
+    protected function updateCurrentVars ($unitName, $actName)
     {
 
         // alias objects for easy access
         $mojavi =& $this->mojavi;
 
-        $this->currentModule = $modName;
+        $this->currentUnit = $unitName;
         $this->currentAction = $actName;
 
         // names
         $mojavi['current_action'] = $actName;
-        $mojavi['current_module'] = $modName;
+        $mojavi['current_unit'] = $unitName;
 
         // directories
-        $mojavi['module_dir']   = Config::get('MODULES_DIR');
-        $mojavi['template_dir'] = Config::get('MODULES_DIR') . $modName .
+        $mojavi['unit_dir']   = Config::get('UNITS_DIR');
+        $mojavi['template_dir'] = Config::get('UNITS_DIR') . $unitName .
                                   '/templates/';
 
         // paths
-        $mojavi['current_action_path'] = $this->getControllerPath($modName,
+        $mojavi['current_action_path'] = $this->getControllerPath($unitName,
                                                                   $actName);
-        $mojavi['current_module_path'] = $this->getControllerPath($modName);
+        $mojavi['current_unit_path'] = $this->getControllerPath($unitName);
 
     }
 
     /**
      * Determine if a view exists.
      *
-     * @param string A module name.
+     * @param string A unit name.
      * @param string An action name.
      * @param string A view name.
      *
@@ -1072,10 +1062,10 @@ class Controller
      *
      * @since  1.0
      */
-    public function viewExists ($modName, $actName, $viewName)
+    public function viewExists ($unitName, $actName, $viewName)
     {
 
-        $file = $this->getComponentName ('view', $modName, $actName, $viewName);
+        $file = $this->getComponentName ('view', $unitName, $actName, $viewName);
 
         return (is_readable($file));
 
@@ -1085,14 +1075,14 @@ class Controller
      * Retrieve a filter implementation instance.
      *
      * @param string $name    - A filter name.
-     * @param string $modName - A unit (module) name, defaults to current unit
+     * @param string $unitName - A unit name, defaults to current unit
      *
      * @return a Filter instance.
      */
     public function getFilter ($name, $unitName='')
     {
 
-        if (empty($unitName)) { $unitName = $this->currentModule; }
+        if (empty($unitName)) { $unitName = $this->currentUnit; }
         $file = $this->getComponentName ('filter', $unitName, $name, '');
 
         $this->loadRequired($file);

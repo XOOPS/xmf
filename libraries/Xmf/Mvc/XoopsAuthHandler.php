@@ -54,7 +54,7 @@ class XoopsAuthHandler extends AuthorizationHandler
         if (!$this->User()->isAuthenticated()) {
             // restore_error_handler(); error_reporting(-1); // tough to debug
             // if we need to authenticate, do XOOPS login rather than
-            // using AUTH_MODULE AUTH_ACTION conventions
+            // using AUTH_UNIT AUTH_ACTION conventions
 
             $url=$this->Controller()->getControllerPath();
             if (isset($_SERVER['QUERY_STRING'])) {
@@ -71,25 +71,25 @@ class XoopsAuthHandler extends AuthorizationHandler
         $privilege = $action->getPrivilege();
 
         if (is_array($privilege) && !isset($privilege[1])) {
-            // use secure module as default namespace
-            $privilege[1] = Config::get('SECURE_MODULE', 'Default');
+            // use secure unit as default namespace
+            $privilege[1] = Config::get('SECURE_UNIT', 'Default');
         }
 
         if ($privilege != NULL &&
            !$this->User()->hasPrivilege($privilege[0], $privilege[1]))
         {
-            $secure_module=Config::get('SECURE_MODULE', 'Default');
+            $secure_unit=Config::get('SECURE_UNIT', 'Default');
             $secure_action=Config::get('SECURE_ACTION', 'NoPermission');
             // user doesn't have privilege to access
-            if ($this->Controller()->actionExists($secure_module, $secure_action)) {
-                $this->Controller()->forward($secure_module, $secure_action);
+            if ($this->Controller()->actionExists($secure_unit, $secure_action)) {
+                $this->Controller()->forward($secure_unit, $secure_action);
 
                 return FALSE;
             }
 
             // cannot find secure action
             $error = 'Invalid configuration setting(s): ' .
-                     'SECURE_MODULE (' . $secure_module . ') or ' .
+                     'SECURE_UNIT (' . $secure_unit . ') or ' .
                      'SECURE_ACTION (' . $secure_action . ')';
 
             trigger_error($error, E_USER_ERROR);

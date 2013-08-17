@@ -20,10 +20,10 @@ namespace Xmf\Mvc;
 /**
  * A FilterList provides for registering a sequence of filters in a
  * form that can be added to the FilterChain. The Controller will
- * look for classes to instantiate both a global and a per-module
+ * look for classes to instantiate both a global and a per-unit
  * filter list using specific files (GlobalFilterList.php and
- * (modulename)/filters/(modulename)FilterList.php under the
- * configured MODULES_DIR. The lists will be used to create the
+ * (modulename)/filters/(unitname)FilterList.php under the
+ * configured UNITS_DIR. The lists will be used to create the
  * FilterChain.
  *
  */

@@ -67,17 +67,17 @@ class XoopsController extends Controller
         //$this->modhelper->setDebug(true);
         $pathname=XOOPS_ROOT_PATH .'/modules/'.$this->_dirname.'/';
         // set some reasonable defaults if config is empty
-        if (!Config::get('MODULES_DIR', false)) {
+        if (!Config::get('UNITS_DIR', false)) {
             Config::setCompatmode(false);
-            Config::set('MODULES_DIR', $pathname.'/xmfmvc/');
+            Config::set('UNITS_DIR', $pathname.'/xmfmvc/');
             Config::set('SCRIPT_PATH', XOOPS_URL .'/modules/'.$this->_dirname.'/index.php');
-            Config::set('MODULE_ACCESSOR', 'module');
+            Config::set('UNIT_ACCESSOR', 'unit');
             Config::set('ACTION_ACCESSOR', 'action');
-            Config::set('DEFAULT_MODULE', 'Default');
+            Config::set('DEFAULT_UNIT', 'Default');
             Config::set('DEFAULT_ACTION', 'Index');
-            Config::set('ERROR_404_MODULE', 'Default');
+            Config::set('ERROR_404_UNIT', 'Default');
             Config::set('ERROR_404_ACTION', 'PageNotFound');
-            Config::set('SECURE_MODULE', 'Default');
+            Config::set('SECURE_UNIT', 'Default');
             Config::set('SECURE_ACTION', 'NoPermission');
         }
 
@@ -94,49 +94,25 @@ class XoopsController extends Controller
     }
 
     /**
-     * Retrieve the single instance of Controller.
-     *
-     * @param string $contentType A user supplied content type.
-     *
-     * @return Controller A Controller instance.
-     *
-     * @since  1.0
-     */
-    public static function & getInstance (&$externalCom=null)
-    {
-
-        static $instance;
-
-        if ($instance === NULL) {
-            $controllerClass=__CLASS__;
-            $instance = new $controllerClass($externalCom);
-
-        }
-        Context::set($instance);
-
-        return $instance;
-
-    }
-
-    /**
      * getComponentName - build filename of action, view, etc.
      *
      * @param $compType type (action, view, etc.)
-     * @param $modName Module name
+     * @param $unitName Unit name
      * @param $actName Name
      * @param $actView view suffix (success, error, input, etc.)
      *
      * @return file name or null on error
      */
-    protected function getComponentName ($compType, $modName, $actName, $actView)
+    protected function getComponentName ($compType, $unitName, $actName, $actView)
     {
+        $actView = ucfirst(strtolower($actView));
 
         $cTypes=array(
             'action'     => array('dir'=>'actions', 'suffix'=>'Action.php')
         ,	'filter'     => array('dir'=>'filters', 'suffix'=>'Filter.php')
         ,	'filterlist' => array('dir'=>'filters', 'suffix'=>'.php')
         ,	'template'   => array('dir'=>'templates', 'suffix'=>'.php')
-        ,	'view'       => array('dir'=>'views', 'suffix'=>"View_{$actView}.php")
+        ,	'view'       => array('dir'=>'views', 'suffix'=>"View{$actView}.php")
         ,	'model'      => array('dir'=>'models', 'suffix'=>'.php')
         );
 
@@ -144,12 +120,44 @@ class XoopsController extends Controller
         if (isset($cTypes[$compType])) {
             $c=$cTypes[$compType];
 
-            $file = Config::get('MODULES_DIR') . "{$modName}/{$c['dir']}/{$actName}{$c['suffix']}";
+            $file = Config::get('UNITS_DIR') . "{$unitName}/{$c['dir']}/{$actName}{$c['suffix']}";
         }
         //trigger_error($file);
         return $file;
 
     }
+
+    /**
+     * Retrieve a view implementation instance.
+     *
+     * @param string $unitName A unit name.
+     * @param string $actName  An action name.
+     * @param string $viewName A view name.
+     *
+     * @return View A View instance.
+     */
+    public function getView ($unitName, $actName, $viewName)
+    {
+
+        $file = $this->getComponentName ('view', $unitName, $actName, $viewName);
+
+        $this->loadRequired($file);
+
+        $view =  $actName . 'View' . ucfirst(strtolower($viewName));;
+
+        // fix for same name views
+        $unitView = $unitName . '_' . $view;
+
+        if (class_exists($unitView)) {
+
+            $view =& $unitView;
+
+        }
+
+        return new $view;
+
+    }
+
 
    /**
     * getExternalCom - get the ExternalCom object

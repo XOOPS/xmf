@@ -41,14 +41,14 @@ class ModelManager extends ContextAware
      * Return a model instance.
      *
      * @param string $name    - A model name.
-     * @param string $modName - A unit (module) name, defaults to current unit
+     * @param string $modName - A unit name, defaults to current unit
      *
      * @return a Model instance.
      */
     public function &loadModel ($name, $unitName='')
     {
 
-        if (empty($unitName)) { $unitName = $this->Controller()->currentModule; }
+        if (empty($unitName)) { $unitName = $this->Controller()->currentUnit; }
         if (empty($this->models[$unitName][$name])) {
             $file = $this->Controller()->getComponentName ('model', $unitName, $name, '');
             $this->Controller()->loadRequired($file);

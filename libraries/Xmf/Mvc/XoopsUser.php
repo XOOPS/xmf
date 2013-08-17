@@ -2,6 +2,8 @@
 
 namespace Xmf\Mvc;
 
+use Xmf\Module\Permission;
+
 /**
  * This file has its roots as part of the Mojavi package which was
  * Copyright (c) 2003 Sean Kerr. It has been incorporated into this
@@ -93,25 +95,17 @@ class XoopsUser extends User
 
         $this->privilege_checked=array($name, $namespace);
 
-        if (is_object($this->xoopsuser)) {
-            $groups = $this->xoopsuser->getGroups();
-        } else {
-            $groups = XOOPS_GROUP_ANONYMOUS;
-        }
-
-        $module_id = $this->Controller()->modGetVar('mid');
-        $gperm_handler = xoops_gethandler('groupperm');
+        $permission = new Permission;
 
         $privilege = false;
 
         if (isset($this->permissions[$namespace]['items'][$name]['id'])) {
             $perm_id=$this->permissions[$namespace]['items'][$name]['id'];
-
-            $privilege = $gperm_handler->checkRight($namespace, $perm_id, $groups, $module_id);
+            $privilege = $permission->checkPermission($namespace, $perm_id);
         } else {
             // this could be a per item permission
             if (is_numeric($name)) {
-                $privilege = $gperm_handler->checkRight($namespace, $name, $groups, $module_id);
+                $privilege = $permission->checkPermission($namespace, $name);
             }
             if (is_object($this->xoopsuser)) {
                 $privilege = $this->xoopsuser->isAdmin();

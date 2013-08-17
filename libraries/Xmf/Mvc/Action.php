@@ -46,7 +46,7 @@ abstract class Action extends ContextAware
      *   (Xmf\Mvc::VIEW_INPUT, Xmf\Mvc::VIEW_SUCCESS, Xmf\Mvc::VIEW_ERROR, etc.)
      *  or
      *   an indexed array coinciding with the following list:
-     *    - *1st* index - module name
+     *    - *1st* index - unit name
      *    - *2nd* index - action name
      *    - *3rd* index - view
      *

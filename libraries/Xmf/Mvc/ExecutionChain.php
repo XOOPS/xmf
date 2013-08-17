@@ -52,16 +52,16 @@ class ExecutionChain
     /**
      * Add an action request to the chain.
      *
-     * @param string $modName A module name.
+     * @param string $unitName A unit name.
      * @param string $actName An action name.
      * @param string $action  An Action instance.
      *
      * @since  1.0
      */
-    public function addRequest ($modName, $actName, &$action)
+    public function addRequest ($unitName, $actName, &$action)
     {
 
-        $this->chain[] = array('module_name' => $modName,
+        $this->chain[] = array('unit_name'   => $unitName,
                                'action_name' => $actName,
                                'action'      => &$action,
                                'microtime'   => microtime());
@@ -113,23 +113,23 @@ class ExecutionChain
     }
 
     /**
-     * Retrieve the module name associated with the request at the given index.
+     * Retrieve the unit name associated with the request at the given index.
      *
      * @param int $index The index from which you're retrieving.
      *
-     * @return string A module name if the given index exists, otherwise NULL.
+     * @return string A unit name if the given index exists, otherwise NULL.
      *
      * @since  1.0
      */
-    public function getModuleName ($index)
+    public function getUnitName ($index)
     {
 
         if (sizeof($this->chain) > $index && $index > -1) {
-            return $this->chain[$index]['module_name'];
+            return $this->chain[$index]['unit_name'];
 
         }
 
-        return NULL;
+        return null;
 
     }
 

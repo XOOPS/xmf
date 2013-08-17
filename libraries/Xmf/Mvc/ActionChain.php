@@ -115,7 +115,7 @@ class ActionChain extends ContextAware
             }
 
             // execute/forward the action and retrieve rendered result
-            $this->Controller()->forward($action['module'], $action['action']);
+            $this->Controller()->forward($action['unit'], $action['action']);
 
             // retrieve renderer for action
             $renderer =& $this->Request()->getAttribute('org.mojavi.renderer');
@@ -185,17 +185,17 @@ class ActionChain extends ContextAware
      * Register an action with the chain.
      *
      * @param string $regName An action registration name.
-     * @param string $modName A module name.
+     * @param string $unitName A unit name.
      * @param string $actName An action name.
      * @param array  $params  An associative array of temporary request parameters.
      *
      * @since  1.0
      */
-    public function register ($regName, $modName, $actName, $params = NULL)
+    public function register ($regName, $unitName, $actName, $params = NULL)
     {
 
         $this->actions[$regName]['action'] = $actName;
-        $this->actions[$regName]['module'] = $modName;
+        $this->actions[$regName]['unit'] = $unitName;
         $this->actions[$regName]['params'] = $params;
 
     }

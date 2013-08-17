@@ -24,7 +24,7 @@ namespace Xmf\Mvc;
  * to request. This object is intended to be passed to the controller
  * with getInstance. From there, Actions and Views can use these
  * methods to get parameters (input) and set attributes (output.)
- * Also communicates a module directory.
+ * Also communicates a XOOPS module directory.
  *
  * The primary envisioned use is to allow Mvc to function in a XOOPS
  * block capacity, i.e.

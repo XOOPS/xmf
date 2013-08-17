@@ -53,7 +53,7 @@ class ExecutionFilter extends Filter
         $execChain =& $this->Controller()->getExecutionChain();
         $action    =& $execChain->getAction($execChain->getSize() - 1);
         $actName   =  $this->Controller()->getCurrentAction();
-        $modName   =  $this->Controller()->getCurrentModule();
+        $unitName  =  $this->Controller()->getCurrentUnit();
 
         // get current method
         $method = $this->Request()->getMethod();
@@ -120,14 +120,14 @@ class ExecutionFilter extends Filter
             if (is_string($actView) || $actView === NULL) {
 
                 // use current action for view
-                $viewMod  = $modName;
+                $viewUnit = $unitName;
                 $viewAct  = $actName;
                 $viewName = $actView;
 
             } elseif (is_array($actView)) {
 
                 // use another action for view
-                $viewMod  = $actView[0];
+                $viewUnit = $actView[0];
                 $viewAct  = $actView[1];
                 $viewName = $actView[2];
 
@@ -135,9 +135,9 @@ class ExecutionFilter extends Filter
 
             if ($viewName != \Xmf\Mvc::VIEW_NONE) {
 
-                if (!$this->Controller()->viewExists($viewMod, $viewAct, $viewName)) {
+                if (!$this->Controller()->viewExists($viewUnit, $viewAct, $viewName)) {
 
-                    $error = 'Module ' . $viewMod . ' does not contain view ' .
+                    $error = 'Unit ' . $viewUnit . ' does not contain view ' .
                              $viewAct . 'View_' . $viewName . ' or the file is ' .
                              'not readable';
 
@@ -148,7 +148,7 @@ class ExecutionFilter extends Filter
                 }
 
                 // execute, render and cleanup view
-                $view     = $this->Controller()->getView($viewMod, $viewAct, $viewName);
+                $view     = $this->Controller()->getView($viewUnit, $viewAct, $viewName);
                 $test     = $view->initialize(); // in 2.0.3b
                 $renderer =& $view->execute();
 

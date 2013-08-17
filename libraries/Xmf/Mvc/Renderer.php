@@ -134,7 +134,7 @@ class Renderer extends ContextAware
         } else {
 
             $dir = ($this->dir == NULL)
-                   ? $this->Controller()->getModuleDir() . 'templates/'
+                   ? $this->Controller()->getUnitDir() . 'templates/'
                    : $this->dir;
 
             if (!is_readable($dir . $this->template) &&
