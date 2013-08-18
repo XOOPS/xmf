@@ -1,21 +1,12 @@
 <?php
-
-namespace Xmf\Mvc;
-
-/**
+/*
  * This file has its roots as part of the Mojavi package which was
  * Copyright (c) 2003 Sean Kerr. It has been incorporated into this
  * derivative work under the terms of the LGPL V2.1.
  * (license terms)
- *
- * @author          Richard Griffith
- * @author          Sean Kerr
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @copyright       Portions Copyright (c) 2003 Sean Kerr
- * @license         (license terms)
- * @package         Xmf\Mvc
- * @since           1.0
  */
+
+namespace Xmf\Mvc;
 
 /**
  * Provide communications with programs outside standard web interface.
@@ -35,23 +26,33 @@ namespace Xmf\Mvc;
  *
  * Borrows heavily from Xmf\Mvc\Request
  *
+ * @category  Xmf\Mvc\ExternalCom
+ * @package   Xmf
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @author    Sean Kerr <skerr@mojavi.org>
+ * @copyright 2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @copyright 2003 Sean Kerr
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @link      http://xoops.org
+ * @since     1.0
  */
 class ExternalCom
 {
     /**
      * @var XOOPS module dirname
      */
-    private $dirname = null;
+    protected $dirname = null;
 
     /**
      * @var parameters - will be array when used
      */
-    private $params = null;
+    protected $params = null;
 
     /**
      * @var attributes - will be array when used
      */
-    private $attributes = null;
+    protected $attributes = null;
 
     /**
      * Create a new ExternalCom instance.
@@ -80,6 +81,7 @@ class ExternalCom
      *
      * @param string $name XOOPS module dirname
      *
+     * @return void
      * @since  1.0
      */
     public function setDirname($name)
@@ -102,7 +104,7 @@ class ExternalCom
         if (isset($this->attributes[$name])) {
             return $this->attributes[$name];
         }
-        $null=NULL;
+        $null=null;
 
         return $null;
     }
@@ -161,7 +163,6 @@ class ExternalCom
     public function getParameterNames ()
     {
         return array_keys($this->params);
-
     }
 
     /**
@@ -174,7 +175,6 @@ class ExternalCom
     public function & getParameters ()
     {
         return $this->params;
-
     }
 
     /**
@@ -189,7 +189,6 @@ class ExternalCom
     public function hasAttribute ($name)
     {
         return isset($this->attributes[$name]);
-
     }
 
     /**
@@ -204,7 +203,6 @@ class ExternalCom
     public function hasParameter ($name)
     {
         return isset($this->params[$name]);
-
     }
 
     /**
@@ -219,17 +217,13 @@ class ExternalCom
      */
     public function & removeAttribute ($name)
     {
-
+        $value = null;
         if (isset($this->attributes[$name])) {
-
             $value =& $this->attributes[$name];
-
             unset($this->attributes[$name]);
-
-            return $value;
-
         }
 
+        return $value;
     }
 
     /**
@@ -238,23 +232,19 @@ class ExternalCom
      * @param string $name A parameter name.
      *
      * @return mixed A parameter value, if the given parameter exists and has
-     *               been removed, otherwise NULL.
+     *               been removed, otherwise null.
      *
      * @since  1.0
      */
     public function & removeParameter ($name)
     {
-
+        $value = null;
         if (isset($this->params[$name])) {
-
             $value =& $this->params[$name];
-
             unset($this->params[$name]);
-
-            return $value;
-
         }
 
+        return $value;
     }
 
     /**
@@ -263,28 +253,26 @@ class ExternalCom
      * @param string $name  An attribute name.
      * @param mixed  $value An attribute value.
      *
+     * @return void
      * @since  1.0
      */
     public function setAttribute ($name, $value)
     {
-
         $this->attributes[$name] =& $value;
-
     }
 
     /**
      * Set an attribute by reference.
      *
-     * @param string $name  An attribute name.
-     * @param mixed  $value An attribute value.
+     * @param string $name   An attribute name.
+     * @param mixed  &$value An attribute value.
      *
+     * @return void
      * @since  1.0
      */
     public function setAttributeByRef ($name, &$value)
     {
-
         $this->attributes[$name] =& $value;
-
     }
 
     /**
@@ -293,42 +281,39 @@ class ExternalCom
      * @param string $name  A parameter name.
      * @param mixed  $value A parameter value.
      *
+     * @return void
      * @since  1.0
      */
     public function setParameter ($name, $value)
     {
-
         $this->params[$name] = $value;
-
     }
 
     /**
      * Manually set a parameter by reference.
      *
-     * @param string $name  A parameter name.
-     * @param mixed  $value A parameter value.
+     * @param string $name   A parameter name.
+     * @param mixed  &$value A parameter value.
      *
+     * @return void
      * @since  1.0
      */
     public function setParameterByRef ($name, &$value)
     {
-
         $this->params[$name] =& $value;
-
     }
 
     /**
      * Manually set all parameters at once by overwriting with array.
      *
-     * @param array $value A parameter array
+     * @param array &$value A parameter array
      *
+     * @return void
      * @since  1.0
      */
     public function setParameterArray (&$value)
     {
-
         $this->params = $value;
-
     }
 
 }

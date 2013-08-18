@@ -84,6 +84,7 @@ class Yaml
     public static function save($var, $yamlFile)
     {
         $yamlString = \Spyc::YAMLDump($var);
+
         return file_put_contents($yamlFile, $yamlString);
     }
 

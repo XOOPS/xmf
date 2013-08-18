@@ -269,7 +269,7 @@ class GenericHelper
     {
         if ($this->debug) {
             if (is_object($GLOBALS['xoopsLogger'])) {
-                if(!is_scalar($log)) {
+                if (!is_scalar($log)) {
                     $log = serialize($log);
                 }
                 $GLOBALS['xoopsLogger']->addExtra(

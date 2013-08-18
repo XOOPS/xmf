@@ -1,27 +1,28 @@
 <?php
-
-namespace Xmf\Mvc\Validator;
-
-/**
+/*
  * This file has its roots as part of the Mojavi package which was
  * Copyright (c) 2003 Sean Kerr. It has been incorporated into this
  * derivative work under the terms of the LGPL V2.1.
  * (license terms)
- *
- * @author          Richard Griffith
- * @author          Sean Kerr
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @copyright       Portions Copyright (c) 2003 Sean Kerr
- * @license         (license terms)
- * @package         Xmf\Mvc
- * @since           1.0
  */
+
+namespace Xmf\Mvc\Validator;
 
 /**
  * A Validator is an object which validates a user submitted parameter
  * conforms to specific rules. It can also modify parameter values,
  * providing input filtering capabilities.
  *
+ * @category  Xmf\Mvc\Validator\AbstractValidator
+ * @package   Xmf
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @author    Sean Kerr <skerr@mojavi.org>
+ * @copyright 2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @copyright 2003 Sean Kerr
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @link      http://xoops.org
+ * @since     1.0
  */
 abstract class AbstractValidator extends \Xmf\Mvc\ContextAware
 {
@@ -49,10 +50,8 @@ abstract class AbstractValidator extends \Xmf\Mvc\ContextAware
      */
     public function __construct ()
     {
-
-        $this->message = NULL;
+        $this->message = null;
         $this->params  = array();
-
     }
 
     /**
@@ -60,8 +59,8 @@ abstract class AbstractValidator extends \Xmf\Mvc\ContextAware
      *
      *  _This method should never be called manually._
      *
-     * @param string $value A user submitted parameter value.
-     * @param string $error The error message variable to be set if an error occurs.
+     * @param string &$value A user submitted parameter value.
+     * @param string &$error error message variable to set if an error occurs.
      *
      * @return bool TRUE if the validator completes successfully, otherwise FALSE.
      *
@@ -82,7 +81,6 @@ abstract class AbstractValidator extends \Xmf\Mvc\ContextAware
     public function getErrorMessage ()
     {
         return $this->message;
-
     }
 
     /**
@@ -90,20 +88,17 @@ abstract class AbstractValidator extends \Xmf\Mvc\ContextAware
      *
      * @param string $name A parameter name.
      *
-     * @return mixed A parameter value, if the given parameter exists, otherwise NULL.
+     * @return mixed parameter value if parameter exists, otherwise NULL
      *
      * @since  1.0
      */
     public function & getParameter ($name)
     {
-
         if (isset($this->params[$name])) {
             return $this->params[$name];
-
         }
 
-        return NULL;
-
+        return null;
     }
 
     /**
@@ -111,13 +106,12 @@ abstract class AbstractValidator extends \Xmf\Mvc\ContextAware
      *
      * @param array $params An associative array of initialization parameters.
      *
+     * @return void
      * @since  1.0
      */
     public function initialize ($params)
     {
-
         $this->params = array_merge($this->params, $params);
-
     }
 
     /**
@@ -125,13 +119,12 @@ abstract class AbstractValidator extends \Xmf\Mvc\ContextAware
      *
      * @param string $message An error message.
      *
+     * @return void
      * @since  1.0
      */
     public function setErrorMessage ($message)
     {
-
         $this->message = $message;
-
     }
 
     /**
@@ -140,28 +133,26 @@ abstract class AbstractValidator extends \Xmf\Mvc\ContextAware
      * @param string $name  A parameter name.
      * @param mixed  $value A parameter value.
      *
+     * @return void
      * @since  1.0
      */
     public function setParameter ($name, $value)
     {
-
         $this->params[$name] = $value;
-
     }
 
     /**
      * Set a validator parameter by reference.
      *
-     * @param string $name  A parameter name.
-     * @param mixed  $value A parameter value.
+     * @param string $name   A parameter name.
+     * @param mixed  &$value A parameter value.
      *
+     * @return void
      * @since  1.0
      */
     public function setParameterByRef ($name, &$value)
     {
-
         $this->params[$name] =& $value;
-
     }
 
 }

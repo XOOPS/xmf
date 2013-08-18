@@ -1,21 +1,12 @@
 <?php
-
-namespace Xmf\Mvc;
-
-/**
+/*
  * This file has its roots as part of the Mojavi package which was
  * Copyright (c) 2003 Sean Kerr. It has been incorporated into this
  * derivative work under the terms of the LGPL V2.1.
  * (license terms)
- *
- * @author          Richard Griffith
- * @author          Sean Kerr
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @copyright       Portions Copyright (c) 2003 Sean Kerr
- * @license         (license terms)
- * @package         Xmf\Mvc
- * @since           1.0
  */
+
+namespace Xmf\Mvc;
 
 /**
  * The XoopsAuthHandler implements an AuthorizationHandler that
@@ -24,6 +15,17 @@ namespace Xmf\Mvc;
  * If a user has not signed in and attempts access to a secure Action,
  * the session will redirect to the system login with the xoops_redirect
  * option set to return to reattempt the secure Action.
+ *
+ * @category  Xmf\Mvc\XoopsAuthHandler
+ * @package   Xmf
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @author    Sean Kerr <skerr@mojavi.org>
+ * @copyright 2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @copyright 2003 Sean Kerr
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @link      http://xoops.org
+ * @since     1.0
  */
 class XoopsAuthHandler extends AuthorizationHandler
 {
@@ -35,7 +37,7 @@ class XoopsAuthHandler extends AuthorizationHandler
      */
     public function __construct ()
     {
-        parent::__construct ();
+        parent::__construct();
     }
 
     /**
@@ -44,9 +46,9 @@ class XoopsAuthHandler extends AuthorizationHandler
      *
      *  _This should never be called manually._
      *
-     * @param $action     An Action instance.
+     * @param object &$action An Action instance.
      *
-     * @since  1.0
+     * @return bool true if authorized, false otherwise
      */
     public function execute (&$action)
     {
@@ -58,8 +60,9 @@ class XoopsAuthHandler extends AuthorizationHandler
 
             $url=$this->Controller()->getControllerPath();
             if (isset($_SERVER['QUERY_STRING'])) {
-                $query=\Xmf\Request::getString('QUERY_STRING','','server');
-                $url=$this->Controller()->getControllerPath().'?'.urlencode ($query);
+                $query = \Xmf\Request::getString('QUERY_STRING', '', 'server');
+                $url = $this->Controller()->getControllerPath()
+                    . '?' . urlencode($query);
             }
             $parts=parse_url($url);
             $url=$parts['path'].(empty($parts['query'])?'':'?'.$parts['query']);
@@ -75,16 +78,16 @@ class XoopsAuthHandler extends AuthorizationHandler
             $privilege[1] = Config::get('SECURE_UNIT', 'Default');
         }
 
-        if ($privilege != NULL &&
-           !$this->User()->hasPrivilege($privilege[0], $privilege[1]))
-        {
+        if ($privilege != null
+            && !$this->User()->hasPrivilege($privilege[0], $privilege[1])
+        ) {
             $secure_unit=Config::get('SECURE_UNIT', 'Default');
             $secure_action=Config::get('SECURE_ACTION', 'NoPermission');
             // user doesn't have privilege to access
             if ($this->Controller()->actionExists($secure_unit, $secure_action)) {
                 $this->Controller()->forward($secure_unit, $secure_action);
 
-                return FALSE;
+                return false;
             }
 
             // cannot find secure action
@@ -100,7 +103,7 @@ class XoopsAuthHandler extends AuthorizationHandler
 
         // user is authenticated, and has the required privilege or a privilege
         // is not required
-        return TRUE;
+        return true;
 
     }
 

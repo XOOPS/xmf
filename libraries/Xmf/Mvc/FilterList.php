@@ -1,21 +1,12 @@
 <?php
-
-namespace Xmf\Mvc;
-
-/**
+/*
  * This file has its roots as part of the Mojavi package which was
  * Copyright (c) 2003 Sean Kerr. It has been incorporated into this
  * derivative work under the terms of the LGPL V2.1.
  * (license terms)
- *
- * @author          Richard Griffith
- * @author          Sean Kerr
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @copyright       Portions Copyright (c) 2003 Sean Kerr
- * @license         (license terms)
- * @package         Xmf\Mvc
- * @since           1.0
  */
+
+namespace Xmf\Mvc;
 
 /**
  * A FilterList provides for registering a sequence of filters in a
@@ -26,6 +17,16 @@ namespace Xmf\Mvc;
  * configured UNITS_DIR. The lists will be used to create the
  * FilterChain.
  *
+ * @category  Xmf\Mvc\FilterList
+ * @package   Xmf
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @author    Sean Kerr <skerr@mojavi.org>
+ * @copyright 2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @copyright 2003 Sean Kerr
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @link      http://xoops.org
+ * @since     1.0
  */
 class FilterList extends ContextAware
 {
@@ -45,9 +46,7 @@ class FilterList extends ContextAware
      */
     public function __construct ()
     {
-
         $this->filters = array();
-
     }
 
     /**
@@ -55,21 +54,19 @@ class FilterList extends ContextAware
      *
      *  _This method should never be called manually._
      *
+     * @param FilterChain &$filterChain a FilterChain instance
+     *
+     * @return void
      * @since  1.0
      */
     public function registerFilters (&$filterChain)
     {
-
         $keys  = array_keys($this->filters);
         $count = sizeof($keys);
-
         // loop through cached filters and register them
         for ($i = 0; $i < $count; $i++) {
-
             $filterChain->register($this->filters[$keys[$i]]);
-
         }
-
     }
 
 }

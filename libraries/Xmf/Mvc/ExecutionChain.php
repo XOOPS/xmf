@@ -1,21 +1,12 @@
 <?php
-
-namespace Xmf\Mvc;
-
-/**
+/*
  * This file has its roots as part of the Mojavi package which was
  * Copyright (c) 2003 Sean Kerr. It has been incorporated into this
  * derivative work under the terms of the LGPL V2.1.
  * (license terms)
- *
- * @author          Richard Griffith
- * @author          Sean Kerr
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @copyright       Portions Copyright (c) 2003 Sean Kerr
- * @license         (license terms)
- * @package         Xmf\Mvc
- * @since           1.0
  */
+
+namespace Xmf\Mvc;
 
 /**
  * ExecutionChain is a list of actions to be performed
@@ -25,6 +16,16 @@ namespace Xmf\Mvc;
  * The Execution chain allows access to the state of all executed
  * actions resulting from a request.
  *
+ * @category  Xmf\Mvc\ExecutionChain
+ * @package   Xmf
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @author    Sean Kerr <skerr@mojavi.org>
+ * @copyright 2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @copyright 2003 Sean Kerr
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @link      http://xoops.org
+ * @since     1.0
  */
 class ExecutionChain
 {
@@ -44,28 +45,25 @@ class ExecutionChain
      */
     public function __construct ()
     {
-
         $this->chain = array();
-
     }
 
     /**
      * Add an action request to the chain.
      *
      * @param string $unitName A unit name.
-     * @param string $actName An action name.
-     * @param string $action  An Action instance.
+     * @param string $actName  An action name.
+     * @param string &$action  An Action instance.
      *
+     * @return void
      * @since  1.0
      */
     public function addRequest ($unitName, $actName, &$action)
     {
-
         $this->chain[] = array('unit_name'   => $unitName,
                                'action_name' => $actName,
                                'action'      => &$action,
                                'microtime'   => microtime());
-
     }
 
     /**
@@ -80,15 +78,12 @@ class ExecutionChain
      */
     public function & getAction ($index)
     {
-
         if (sizeof($this->chain) > $index && $index > -1) {
             return $this->chain[$index]['action'];
-
         }
-        $null=NULL;
+        $null=null;
 
         return $null;
-
     }
 
     /**
@@ -105,11 +100,9 @@ class ExecutionChain
 
         if (sizeof($this->chain) > $index && $index > -1) {
             return $this->chain[$index]['action_name'];
-
         }
 
-        return NULL;
-
+        return null;
     }
 
     /**
@@ -123,14 +116,11 @@ class ExecutionChain
      */
     public function getUnitName ($index)
     {
-
         if (sizeof($this->chain) > $index && $index > -1) {
             return $this->chain[$index]['unit_name'];
-
         }
 
         return null;
-
     }
 
     /**
@@ -142,18 +132,15 @@ class ExecutionChain
      *               request if the given index exists, otherwise NULL.
      *
      * @since  1.0
- */
+     */
     public function & getRequest ($index)
     {
-
         if (sizeof($this->chain) > $index && $index > -1) {
             return $this->chain[$index];
-
         }
-        $null=NULL;
+        $null=null;
 
         return $null;
-
     }
 
     /**
@@ -166,7 +153,6 @@ class ExecutionChain
     public function & getRequests ()
     {
         return $this->chain;
-
     }
 
     /**
@@ -179,7 +165,6 @@ class ExecutionChain
     public function getSize ()
     {
         return sizeof($this->chain);
-
     }
 
 }

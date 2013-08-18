@@ -1,7 +1,4 @@
 <?php
-
-namespace Xmf\Mvc\Lib;
-
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -12,15 +9,7 @@ namespace Xmf\Mvc\Lib;
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-/**
- * Permissions handles a permission map with structured methods.
- *
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @license         http://www.fsf.org/copyleft/gpl.html GNU private license
- * @package         Xmf\Mvc
- * @since           1.0
- * @author          Richard Griffith
- */
+namespace Xmf\Mvc\Lib;
 
 /**
  * PermissionMap handles a permission map with structured methods.
@@ -32,6 +21,7 @@ namespace Xmf\Mvc\Lib;
  * rely on the provided interfaces.
  *
  * At present the map is a simple array following this format:
+ *
  * @code
  * array(
  * 	'Namespace1' => array(
@@ -53,14 +43,27 @@ namespace Xmf\Mvc\Lib;
  * 	)
  * );
  * @endcode
- */
+ *
+ * @category  Xmf\Mvc\Lib\PermissionMap
+ * @package   Xmf
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @copyright 2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @link      http://xoops.org
+ * @since     1.0
+*/
 class PermissionMap
 {
 
     public static $map=array();
 
-    /*
-     * loadConfig loads config.php from current module directory
+    /**
+     * initMap initialize the permission map
+     *
+     * @param string $namespace permission namespace
+     *
+     * @return void
      */
     protected static function initMap($namespace)
     {
@@ -72,9 +75,12 @@ class PermissionMap
         }
     }
 
-    /*
+    /**
      * Add an item to the permission map
-     * 	'Name1'=>array('id'=>(unique numeric id), 'name'=>'(language constant - label for permission form)')
+     * 	'Name1'=>array(
+     *    'id'=>(unique numeric id),
+     *    'name'=>'(language constant - label for permission form)'
+     *  )
      *
      * @param string $namespace  the namespace for the permission
      * @param string $name       the symbolic name of the permission
@@ -91,7 +97,9 @@ class PermissionMap
 
         foreach (self::$map[$namespace]['items'] as $items) {
             if ($items['id']==$id) {
-                trigger_error('Duplicate permission id: '.$id.':'.$namespace.':'.$name);
+                trigger_error(
+                    'Duplicate permission id: '.$id.':'.$namespace.':'.$name
+                );
 
                 return false;
             }
@@ -102,7 +110,7 @@ class PermissionMap
         return true;
     }
 
-    /*
+    /**
      * Add title and description for a namespace to the permission map
      *
      * @param string $namespace        the namespace being defined
@@ -120,20 +128,22 @@ class PermissionMap
         return true;
     }
 
-    /*
+    /**
      * save the map in Config
      *
      * @return bool true if action completed without error
      */
     public static function save()
     {
-        \Xmf\Mvc\Config::set('PermissionMap',self::$map);
+        \Xmf\Mvc\Config::set('PermissionMap', self::$map);
 
         return true;
     }
 
-    /*
+    /**
      * loadConfig loads config.php from current module directory
+     *
+     * @return void
      */
     protected static function loadConfig()
     {
@@ -147,7 +157,7 @@ class PermissionMap
         \Xmf\Loader::loadFile($configfile, true);
     }
 
-    /*
+    /**
      * renderPermissionForm renders a permission form from a permission map
      *
      * @param array $map a permission map. If null, uses current Config map
@@ -170,25 +180,32 @@ class PermissionMap
         } else {
             if (empty(self::$map)) {	// if map is not set, load config
                 self::loadConfig();
-//				$mvc_permissions=\Xmf\Mvc\Config::get('PermissionMap',array());
+                // $mvc_permissions=\Xmf\Mvc\Config::get('PermissionMap',array());
             }
         }
         $mvc_permissions = self::$map; // use the map we already have
         foreach ($mvc_permissions as $key=>$perm) {
-            $title_of_form = defined($perm['title']) ? constant($perm['title']) : $perm['title'];
+            $title_of_form
+                = defined($perm['title'])
+                ? constant($perm['title']) : $perm['title'];
             $perm_name = $key;
-            $perm_desc = defined($perm['desc']) ? constant($perm['desc']) : $perm['desc'];
+            $perm_desc
+                = defined($perm['desc']) ? constant($perm['desc']) : $perm['desc'];
 
-            $forms[$key] = new \XoopsGroupPermForm($title_of_form, $module_id, $perm_name, $perm_desc, '', false);
+            $forms[$key] = new \XoopsGroupPermForm(
+                $title_of_form, $module_id, $perm_name, $perm_desc, '', false
+            );
             foreach ($perm['items'] as $item) {
-                $forms[$key]->addItem($item['id'],
-                    defined($item['name']) ? constant($item['name']) : $item['name']);
+                $forms[$key]->addItem(
+                    $item['id'],
+                    defined($item['name']) ? constant($item['name']) : $item['name']
+                );
             }
 
             $rendered[$key]=$forms[$key]->render();
         }
 
-        $return=implode("\n<br /><br />",$rendered);
+        $return=implode("\n<br /><br />", $rendered);
 
         return $return;
     }

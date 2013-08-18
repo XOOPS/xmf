@@ -1,23 +1,14 @@
 <?php
-
-namespace Xmf\Mvc;
-
-use Xmf\Module\Permission;
-
-/**
+/*
  * This file has its roots as part of the Mojavi package which was
  * Copyright (c) 2003 Sean Kerr. It has been incorporated into this
  * derivative work under the terms of the LGPL V2.1.
  * (license terms)
- *
- * @author          Richard Griffith
- * @author          Sean Kerr
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @copyright       Portions Copyright (c) 2003 Sean Kerr
- * @license         (license terms)
- * @package         Xmf\Mvc
- * @since           1.0
  */
+
+namespace Xmf\Mvc;
+
+use Xmf\Module\Permission;
 
 /**
  * XoopsUser implements a User object using the XOOPS user for
@@ -26,16 +17,38 @@ use Xmf\Module\Permission;
  * PrivilegeUser object, but nothing else from that class.
  * Xmf\Mvc\XoopsUser is intended for use with Xmf\Mvc\XoopsAuthHandler.
  *
+ * @category  Xmf\Mvc\User
+ * @package   Xmf
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @author    Sean Kerr <skerr@mojavi.org>
+ * @copyright 2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @copyright 2003 Sean Kerr
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @link      http://xoops.org
+ * @since     1.0
  */
 class XoopsUser extends User
 {
+    /**
+     * @var array of permissions that map mojavie namespace and name
+     *            xoops group permission name and id
+     */
+    protected $permissons;
 
-    // array of permissions that map mojavie namespace and name to
-    // xoops group permission name and id
-    private $permissons;
-    private $privilege_checked;
-    private $xoopsuser;
+    /**
+     * @var array last privilege checked
+     */
+    protected $privilege_checked;
 
+    /**
+     * @var object xoopsuser
+     */
+    protected $xoopsuser;
+
+    /**
+     * class constructor
+     */
     public function __construct ()
     {
         global $xoopsUser;
@@ -46,11 +59,11 @@ class XoopsUser extends User
             $this->authenticated = true;
             $this->xoopsuser =& $xoopsUser;
         }
-        $this->attributes    = NULL;
-        $this->container     = NULL;
-        $this->secure        = NULL;
+        $this->attributes    = null;
+        $this->container     = null;
+        $this->secure        = null;
         $this->permissions   = array();
-        $this->privilege_checked = NULL;
+        $this->privilege_checked = null;
 
     }
 
@@ -85,8 +98,8 @@ class XoopsUser extends User
     /**
      * Determine if the user has a privilege.
      *
-     * @param name      Privilege name.
-     * @param namespace Privilege namespace.
+     * @param string $name      Privilege name.
+     * @param string $namespace Privilege namespace.
      *
      * @return TRUE, if the user has the given privilege, otherwise FALSE.
      */
@@ -118,6 +131,10 @@ class XoopsUser extends User
 
     /**
      * Set the permission map to give symbolic names to global permissions
+     *
+     * @param array $permissions permission map
+     *
+     * @return void
      */
     public function setXoopsPermissionMap($permissions)
     {
@@ -125,6 +142,15 @@ class XoopsUser extends User
     }
 
     // mimic a few common $xoopsUser calls for code brevity
+
+    /**
+     * get the current users id
+     *
+     * @param string $ignored usused place holder for compatibility with
+     *                        same named method in $xoopsUser
+     *
+     * @return string user name
+     */
     public function id($ignored='')
     {
         if ($this->xoopsuser) {
@@ -134,6 +160,11 @@ class XoopsUser extends User
         return 0;
     }
 
+    /**
+     * get the current users user name
+     *
+     * @return string user name
+     */
     public function uname()
     {
         global $xoopsConfig;

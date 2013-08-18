@@ -18,7 +18,7 @@ namespace Xmf\Mvc;
  * @category  Xmf\Mvc\XoopsTplRender
  * @package   Xmf
  * @author    Richard Griffith <richard@geekwright.com>
- * @copyright 2011-2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @copyright 2013 The XOOPS Project http://sourceforge.net/projects/xoops/
  * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
  * @version   Release: 1.0
  * @link      http://xoops.org
@@ -32,6 +32,8 @@ class XoopsTplRender extends \Xmf\Template\AbstractTemplate
     private $_title = '';
 
     /**
+     * initialize
+     *
      * @return void
      */
     protected function init()
@@ -52,14 +54,23 @@ class XoopsTplRender extends \Xmf\Template\AbstractTemplate
     /**
      * Assign a template variable
      *
-     * @param string $name
-     * @param string $value
+     * @param string $name  attribute name
+     * @param string $value attribute value
+     *
+     * @return void
      */
     public function setAttribute($name,$value)
     {
         $this->tpl->assign($name, $value);
     }
 
+    /**
+     * Assign a template
+     *
+     * @param string $name template name
+     *
+     * @return void
+     */
     public function setXTemplate($name)
     {
         $this->setTemplate($name);

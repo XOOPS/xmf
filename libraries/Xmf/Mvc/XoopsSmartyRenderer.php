@@ -1,7 +1,4 @@
 <?php
-
-namespace Xmf\Mvc;
-
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -12,27 +9,28 @@ namespace Xmf\Mvc;
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-/**
- * XoopsSmartRenderer renders using XOOPS Smarty templates
- *
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @license         http://www.fsf.org/copyleft/gpl.html GNU private license
- * @package         Xmf\Mvc
- * @since           1.0
- * @author          Richard Griffith
- */
+namespace Xmf\Mvc;
 
 /**
  * The XoopsSmartyRenderer is a XOOPS specific renderer that uses XOOPS
  * Smarty templates and the standard $xoopsTpl mechanisms for page
  * rendering. Renderer attributes become Smarty assigned variables,
  * and the actual display is handled by the normal XOOPS cycle.
+ *
+ * @category  Xmf\Mvc\XoopsSmartyRenderer
+ * @package   Xmf
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @copyright 2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @link      http://xoops.org
+ * @since     1.0
  */
 class XoopsSmartyRenderer extends Renderer
 {
 
     /** signal that we used a default template, just dump attributes */
-    private $dumpmode;
+    private $_dumpmode;
 
     /**
      * Create a new Renderer instance.
@@ -41,10 +39,8 @@ class XoopsSmartyRenderer extends Renderer
      */
     public function __construct ()
     {
-
         parent::__construct();
-        $this->dumpmode   = false;
-
+        $this->_dumpmode   = false;
     }
 
     /**
@@ -54,15 +50,16 @@ class XoopsSmartyRenderer extends Renderer
      * - make sure that a template is set
      * - assign attributes to smarty variables
      *
+     * @return void
      * @since  1.0
      */
     public function execute ()
     {
         global $xoopsTpl, $xoopsOption;
-        if ($this->template == NULL) {
+        if ($this->template == null) {
             if (empty($xoopsOption['template_main'])) {
                 $this->template = 'db:system_dummy.html';
-                $this->dumpmode   = true;
+                $this->_dumpmode   = true;
             } else {
                 $this->template = $xoopsOption['template_main'];
             }
@@ -71,19 +68,22 @@ class XoopsSmartyRenderer extends Renderer
         // make it easier to access data directly in the template
         $mojavi   =& $this->controller()->getMojavi();
         $template =& $this->attributes;
-        if ($this->dumpmode) {
-            $template['dummy_content']='<pre>'.print_r($this->attributes,true).'</pre>';
+        if ($this->_dumpmode) {
+            $template['dummy_content']
+                ='<pre>' . print_r($this->attributes, true) . '</pre>';
         } else {
             $template =& $this->attributes;
         }
 
-        if ($this->mode == \Xmf\Mvc::RENDER_VAR || $this->Controller()->getRenderMode() == \Xmf\Mvc::RENDER_VAR) {
+        if ($this->mode == \Xmf\Mvc::RENDER_VAR
+            || $this->Controller()->getRenderMode() == \Xmf\Mvc::RENDER_VAR
+        ) {
             $varRender = new XoopsTplRender;
             $varRender->setXTemplate($this->template);
             foreach ($template as $k=>$v) {
-                $varRender->setAttribute($k,$v);
+                $varRender->setAttribute($k, $v);
             }
-            $varRender->setAttribute('xmfmvc',$mojavi);
+            $varRender->setAttribute('xmfmvc', $mojavi);
             $this->result=$varRender->fetch();
             // echo $this->result;
 
@@ -91,15 +91,16 @@ class XoopsSmartyRenderer extends Renderer
             $GLOBALS['xoopsOption']['template_main'] = $this->template;
             // the following is to make footer.php quit complaining
             if (false === strpos($xoopsOption['template_main'], ':')) {
-                $GLOBALS['xoTheme']->contentTemplate = 'db:' . $xoopsOption['template_main'];
+                $GLOBALS['xoTheme']->contentTemplate
+                    = 'db:' . $xoopsOption['template_main'];
             } else {
                 $GLOBALS['xoTheme']->contentTemplate = $xoopsOption['template_main'];
             }
 
             foreach ($template as $k=>$v) {
-                $xoopsTpl->assign($k,$v);
+                $xoopsTpl->assign($k, $v);
             }
-            $xoopsTpl->assign('xmfmvc',$mojavi);
+            $xoopsTpl->assign('xmfmvc', $mojavi);
             // templates and values are assigned, XOOPS will handle the rest
         }
 
@@ -108,10 +109,11 @@ class XoopsSmartyRenderer extends Renderer
     // These following are unique to XoopsSmartyRenderer
 
     /**
-     * @brief Add Stylesheet
+     * Add Stylesheet
      *
-     * @param $stylesheet URL of CSS stylesheet
+     * @param string $stylesheet URL of CSS stylesheet
      *
+     * @return void
      * @since  1.0
      */
     public function addStylesheet($stylesheet)
@@ -122,10 +124,11 @@ class XoopsSmartyRenderer extends Renderer
     }
 
     /**
-     * @brief Add Script
+     * Add Script
      *
-     * @param $script URL to javascript file
+     * @param string $script URL to javascript file
      *
+     * @return void
      * @since  1.0
      */
     public function addScript($script)
@@ -136,10 +139,11 @@ class XoopsSmartyRenderer extends Renderer
     }
 
     /**
-     * @brief Add Page Title
+     * Add Page Title
      *
-     * @param string $pagetitle
+     * @param string $pagetitle page title
      *
+     * @return void
      * @since  1.0
      */
     public function addPageTitle($pagetitle)
@@ -148,33 +152,43 @@ class XoopsSmartyRenderer extends Renderer
     }
 
     /**
-     * @brief Add meta tag for keywords
+     * Add meta tag for keywords
      *
      * @param mixed $keywords meta keywords to include
      *
+     * @return void
      * @since  1.0
      */
     public function addMetaKeywords($keywords)
     {
         if (is_array($keywords)) {
-            $keywords=implode(',',$keywords);
+            $keywords=implode(',', $keywords);
         }
         if (is_object($GLOBALS['xoTheme'])) {
-            $GLOBALS['xoTheme']->addMeta('meta','keywords',htmlspecialchars($keywords, ENT_QUOTES,null,false));
+            $GLOBALS['xoTheme']->addMeta(
+                'meta', 'keywords',
+                htmlspecialchars($keywords, ENT_QUOTES, null, false)
+            );
         }
     }
 
     /**
-     * @brief Add meta tag for description
+     * Add meta tag for description
      *
-     * @param string $description
+     * @param string $description meta description
      *
+     * @return void
      * @since  1.0
      */
     public function addMetaDescription($description)
     {
         if (is_object($GLOBALS['xoTheme'])) {
-            $GLOBALS['xoTheme']->addMeta('meta','description',htmlspecialchars($pageX['meta_description'], ENT_QUOTES,null,false));
+            $GLOBALS['xoTheme']->addMeta(
+                'meta', 'description',
+                htmlspecialchars(
+                    $pageX['meta_description'], ENT_QUOTES, null, false
+                )
+            );
         }
     }
 

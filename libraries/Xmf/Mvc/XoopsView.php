@@ -1,7 +1,4 @@
 <?php
-
-namespace Xmf\Mvc;
-
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -12,15 +9,7 @@ namespace Xmf\Mvc;
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-/**
- * XoopsView provides a XOOPS enhanced View object.
- *
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @license         http://www.fsf.org/copyleft/gpl.html GNU private license
- * @package         Xmf\Mvc
- * @since           1.0
- * @author          Richard Griffith
- */
+namespace Xmf\Mvc;
 
 /**
  * XoopsView provides specific custoomization to a View object to
@@ -28,13 +17,26 @@ namespace Xmf\Mvc;
  * - A XoopsSmartyRenderer is automatically instantiated as Renderer()
  * - (more to come)
  *
+ * @category  Xmf\Mvc\XoopsView
+ * @package   Xmf
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @copyright 2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @link      http://xoops.org
+ * @since     1.0
  */
 abstract class XoopsView extends View
 {
 
-    private static $renderer = null;
-    private static $form = null;
+    protected static $renderer = null;
+    protected static $form = null;
 
+    /**
+     * Renderer - obtain the renderer object
+     *
+     * @return object a Renderer
+     */
     public function & Renderer()
     {
         if (is_null(self::$renderer)) {
@@ -44,6 +46,11 @@ abstract class XoopsView extends View
         return self::$renderer;
     }
 
+    /**
+     * Form - obtain a Form object
+     *
+     * @return object a Renderer
+     */
     public function & Form()
     {
         if (is_null(self::$form)) {

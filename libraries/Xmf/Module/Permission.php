@@ -226,6 +226,7 @@ class Permission extends AbstractHelper
             $size,
             $multiple
         );
+
         return $element;
 
     }
@@ -243,6 +244,7 @@ class Permission extends AbstractHelper
     {
         $name = $this->module->getVar('dirname') . '_' .
             $gperm_name . '_' . $gperm_itemid;
+
         return $name;
     }
 

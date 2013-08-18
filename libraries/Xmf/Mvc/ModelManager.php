@@ -1,7 +1,4 @@
 <?php
-
-namespace Xmf\Mvc;
-
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -12,25 +9,28 @@ namespace Xmf\Mvc;
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-/**
- * Xmf\Mvc\ModelManager abstract model interface
- *
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @license         http://www.fsf.org/copyleft/gpl.html GNU private license
- * @package         Xmf\Mvc
- * @since           1.0
- * @author          Richard Griffith
- */
+namespace Xmf\Mvc;
 
 /**
  * A ModelManager manages the loading, start up and shut down of models.
  *
+ * @category  Xmf\Mvc\ModelManager
+ * @package   Xmf
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @copyright 2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @link      http://xoops.org
+ * @since     1.0
  */
 class ModelManager extends ContextAware
 {
     protected $models;
     protected $modelorder;
 
+    /**
+     * class constructor
+     */
     public function __construct()
     {
         $this->models=array();
@@ -40,17 +40,21 @@ class ModelManager extends ContextAware
     /**
      * Return a model instance.
      *
-     * @param string $name    - A model name.
-     * @param string $modName - A unit name, defaults to current unit
+     * @param string $name     - A model name.
+     * @param string $unitName - A unit name, defaults to current unit
      *
      * @return a Model instance.
      */
     public function &loadModel ($name, $unitName='')
     {
 
-        if (empty($unitName)) { $unitName = $this->Controller()->currentUnit; }
+        if (empty($unitName)) {
+            $unitName = $this->Controller()->currentUnit;
+        }
         if (empty($this->models[$unitName][$name])) {
-            $file = $this->Controller()->getComponentName ('model', $unitName, $name, '');
+            $file = $this->Controller()->getComponentName(
+                'model', $unitName, $name, ''
+            );
             $this->Controller()->loadRequired($file);
 
             $model =  $name; // no suffix
@@ -75,6 +79,7 @@ class ModelManager extends ContextAware
     /**
      * Shutdown the ModelManager
      *
+     * @return void
      */
     public function shutdown()
     {

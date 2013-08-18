@@ -1,27 +1,29 @@
 <?php
-
-namespace Xmf\Mvc;
-use Xmf\Mvc;
-
-/**
+/*
  * This file has its roots as part of the Mojavi package which was
  * Copyright (c) 2003 Sean Kerr. It has been incorporated into this
  * derivative work under the terms of the LGPL V2.1.
  * (license terms)
- *
- * @author          Richard Griffith
- * @author          Sean Kerr
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @copyright       Portions Copyright (c) 2003 Sean Kerr
- * @license         (license terms)
- * @package         Xmf\Mvc
- * @since           1.0
  */
+
+namespace Xmf\Mvc;
+
+use Xmf\Mvc;
 
 /**
  * Renderer implements a renderer object using template files
  * consisting of PHP code.
  *
+ * @category  Xmf\Mvc\Renderer
+ * @package   Xmf
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @author    Sean Kerr <skerr@mojavi.org>
+ * @copyright 2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @copyright 2003 Sean Kerr
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @link      http://xoops.org
+ * @since     1.0
  */
 class Renderer extends ContextAware
 {
@@ -84,11 +86,11 @@ class Renderer extends ContextAware
     {
 
         $this->attributes = array();
-        $this->dir        = NULL;
-        $this->engine     = NULL;
+        $this->dir        = null;
+        $this->engine     = null;
         $this->mode       = Mvc::RENDER_CLIENT;
-        $this->result     = NULL;
-        $this->template   = NULL;
+        $this->result     = null;
+        $this->template   = null;
 
     }
 
@@ -97,11 +99,12 @@ class Renderer extends ContextAware
      *
      * _This is only useful when render mode is_ Xmf\Mvc::RENDER_VAR
      *
+     * @return void
      * @since  1.0
      */
     public function clearResult ()
     {
-        $this->result = NULL;
+        $this->result = null;
     }
 
     /**
@@ -109,79 +112,54 @@ class Renderer extends ContextAware
      *
      *  _This method should never be called manually._
      *
+     * @return void
      * @since  1.0
      */
     public function execute ()
     {
+        $dir = null;
 
-        $dir = NULL;
-
-        if ($this->template == NULL) {
-
+        if ($this->template == null) {
             $error = 'A template has not been specified';
-
             trigger_error($error, E_USER_ERROR);
-
             exit;
-
         }
 
         if ($this->isPathAbsolute($this->template)) {
-
             $dir            = dirname($this->template) . '/';
             $this->template = basename($this->template);
-
         } else {
-
-            $dir = ($this->dir == NULL)
+            $dir = ($this->dir == null)
                    ? $this->Controller()->getUnitDir() . 'templates/'
                    : $this->dir;
-
-            if (!is_readable($dir . $this->template) &&
-                 is_readable(TEMPLATE_DIR . $this->template))
-            {
-
+            if (!is_readable($dir . $this->template)
+                && is_readable(TEMPLATE_DIR . $this->template)
+            ) {
                 $dir = TEMPLATE_DIR;
-
             }
-
         }
 
         if (is_readable($dir . $this->template)) {
-
             // make it easier to access data directly in the template
             $mojavi   =& $this->Controller()->getMojavi();
             $template =& $this->attributes;
 
-            if ($this->mode == Mvc::RENDER_VAR ||
-                $this->controller()->getRenderMode() == Mvc::RENDER_VAR)
-            {
-
+            if ($this->mode == Mvc::RENDER_VAR
+                || $this->controller()->getRenderMode() == Mvc::RENDER_VAR
+            ) {
                 ob_start();
-
-                require($dir . $this->template);
-
+                require $dir . $this->template;
                 $this->result = ob_get_contents();
-
                 ob_end_clean();
-
             } else {
-
-                require($dir . $this->template);
-
+                require $dir . $this->template;
             }
-
         } else {
-
             $error = 'Template file ' . $dir . $this->template . ' does ' .
                      'not exist or is not readable';
-
             trigger_error($error, E_USER_ERROR);
-
             exit;
-
         }
-
     }
 
     /**
@@ -193,21 +171,16 @@ class Renderer extends ContextAware
      */
     public function & fetchResult ()
     {
-
-        if ($this->mode == Mvc::RENDER_VAR ||
-            $this->Controller()->getRenderMode() == Mvc::RENDER_VAR)
-        {
-
-            if ($this->result == NULL) {
-
+        if ($this->mode == Mvc::RENDER_VAR
+            || $this->Controller()->getRenderMode() == Mvc::RENDER_VAR
+        ) {
+            if ($this->result == null) {
                 $this->execute();
-
             }
 
             return $this->result;
-
         }
-        $null=NULL;
+        $null = null;
 
         return $null;
 
@@ -218,7 +191,7 @@ class Renderer extends ContextAware
      *
      * @param string $name An attribute name.
      *
-     * @return mixed An attribute value, if the given attribute exists, otherwise NULL.
+     * @return mixed An attribute value, if attribute exists, otherwise NULL.
      *
      * @since  1.0
      */
@@ -229,7 +202,7 @@ class Renderer extends ContextAware
             return $this->attributes[$name];
 
         }
-        $null=NULL;
+        $null=null;
 
         return $null;
 
@@ -245,7 +218,6 @@ class Renderer extends ContextAware
     public function & getEngine ()
     {
         return $this->engine;
-
     }
 
     /**
@@ -259,7 +231,6 @@ class Renderer extends ContextAware
     public function getMode ()
     {
         return $this->mode;
-
     }
 
     /**
@@ -274,7 +245,6 @@ class Renderer extends ContextAware
     public function getTemplateDir ()
     {
         return $this->dir;
-
     }
 
     /**
@@ -282,22 +252,18 @@ class Renderer extends ContextAware
      *
      * @param string $path A file-system path.
      *
+     * @return bool True if path is absolute, false otherwise
      * @since  1.0
      */
     public function isPathAbsolute ($path)
     {
-
         if (strlen($path) >= 2) {
-
             if ($path{0} == '/' || $path{0} == "\\" || $path{1} == ':') {
-                return TRUE;
-
+                return true;
             }
-
         }
 
-        return FALSE;
-
+        return false;
     }
 
     /**
@@ -305,17 +271,14 @@ class Renderer extends ContextAware
      *
      * @param string $name An attribute name.
      *
+     * @return void
      * @since  1.0
      */
     public function & removeAttribute ($name)
     {
-
         if (isset($this->attributes[$name])) {
-
             unset($this->attributes[$name]);
-
         }
-
     }
 
     /**
@@ -323,6 +286,7 @@ class Renderer extends ContextAware
      *
      * @param array $array An associative array of attributes.
      *
+     * @return void
      * @since  1.0
      */
     public function setArray ($array)
@@ -330,28 +294,24 @@ class Renderer extends ContextAware
         if (is_array($array)) {
             $this->attributes = array_merge($this->attributes, $array);
         }
-
     }
 
     /**
      * Set multiple attributes by using a reference to an associative array.
      *
-     * @param array $array An associative array of attributes.
+     * @param array &$array An associative array of attributes.
      *
+     * @return void
      * @since  1.0
      */
     public function setArrayByRef (&$array)
     {
-
         $keys  = array_keys($array);
         $count = sizeof($keys);
 
         for ($i = 0; $i < $count; $i++) {
-
             $this->attributes[$keys[$i]] =& $array[$keys[$i]];
-
         }
-
     }
 
     /**
@@ -360,13 +320,12 @@ class Renderer extends ContextAware
      * @param string $name  An attribute name.
      * @param mixed  $value An attribute value.
      *
+     * @return void
      * @since  1.0
      */
     public function setAttribute ($name, $value)
     {
-
         $this->attributes[$name] = $value;
-
     }
 
     /**
@@ -375,17 +334,20 @@ class Renderer extends ContextAware
      * This allows an attribute which is an array to be built one
      * element at a time.
      *
-     * @param string $stem An attribute array name.
-     * @param string $name An attribute array item name. If empty, the
+     * @param string $stem  An attribute array name.
+     * @param string $name  An attribute array item name. If empty, the
      *                      value will be appended to the end of the
      *                      array rather than added with the key $name.
-     * @param mixed $value An attribute array item value.
+     * @param mixed  $value An attribute array item value.
      *
+     * @return void
      * @since  1.0
      */
     public function setAttributeArrayItem ($stem, $name, $value)
     {
-        if (!isset($this->attributes[$stem]) || !is_array($this->attributes[$stem])) {
+        if (!isset($this->attributes[$stem])
+            || !is_array($this->attributes[$stem])
+        ) {
             $this->attributes[$stem]=array();
         }
         if (empty($name)) {
@@ -393,22 +355,20 @@ class Renderer extends ContextAware
         } else {
             $this->attributes[$stem][$name] = $value;
         }
-
     }
 
     /**
      * Set an attribute by reference.
      *
-     * @param string $name  An attribute name.
-     * @param mixed  $value An attribute value.
+     * @param string $name   An attribute name.
+     * @param mixed  &$value An attribute value.
      *
+     * @return void
      * @since  1.0
      */
     public function setAttributeByRef ($name, &$value)
     {
-
         $this->attributes[$name] =& $value;
-
     }
 
     /**
@@ -418,13 +378,12 @@ class Renderer extends ContextAware
      *
      * @param int $mode render mode.
      *
+     * @return void
      * @since  1.0
      */
     public function setMode ($mode)
     {
-
         $this->mode = $mode;
-
     }
 
     /**
@@ -432,13 +391,12 @@ class Renderer extends ContextAware
      *
      * @param string $template A relative or absolute file-system path to a template.
      *
+     * @return void
      * @since  1.0
      */
     public function setTemplate ($template)
     {
-
         $this->template = $template;
-
     }
 
     /**
@@ -446,53 +404,42 @@ class Renderer extends ContextAware
      *
      * @param string $dir An absolute file-system path to the template directory.
      *
+     * @return void
      * @since  1.0
      */
     public function setTemplateDir ($dir)
     {
-
         $this->dir = $dir;
 
         if (substr($dir, -1) != '/') {
-
             $this->dir .= '/';
-
         }
-
     }
 
     /**
      * Determine if a template exists.
      *
-     * @param $template A relative or absolute file-system path to the template.
-     * @param $dir      An absolute file-system path to the template directory.
+     * @param string $template A relative or absolute path to atemplate.
+     * @param atring $dir      Absolute file-system path of template directory.
      *
      * @return bool TRUE if the template exists and is readable, otherwise FALSE.
      *
      * @since  1.0
      */
-    public function templateExists ($template, $dir = NULL)
+    public function templateExists ($template, $dir = null)
     {
-
         if ($this->isPathAbsolute($template)) {
-
             $dir      = dirname($template) . '/';
             $template = basename($template);
-
-        } elseif ($dir == NULL) {
-
+        } elseif ($dir == null) {
             $dir = $this->dir;
 
             if (substr($dir, -1) != '/') {
-
                 $dir .= '/';
-
             }
-
         }
 
         return (is_readable($dir . $template));
-
     }
 
 }

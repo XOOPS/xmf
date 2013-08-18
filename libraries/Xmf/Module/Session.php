@@ -56,6 +56,7 @@ class Session extends AbstractHelper
     private function _prefix($name)
     {
         $prefixedName = $this->_prefix . $name;
+
         return $prefixedName;
     }
 

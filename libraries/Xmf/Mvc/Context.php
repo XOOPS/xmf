@@ -9,7 +9,6 @@
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-
 namespace Xmf\Mvc;
 
 /**
@@ -21,7 +20,7 @@ namespace Xmf\Mvc;
  * @category  Xmf\Mvc\Context
  * @package   Xmf
  * @author    Richard Griffith <richard@geekwright.com>
- * @copyright 2011-2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @copyright 2013 The XOOPS Project http://sourceforge.net/projects/xoops/
  * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
  * @version   Release: 1.0
  * @link      http://xoops.org
@@ -30,32 +29,32 @@ namespace Xmf\Mvc;
 class Context
 {
 
-    private static $context = null;
+    private static $_context = null;
 
-   /**
-    * Get the context object
-    *
-    * @return  object  The context object
-    *
-    * @since      1.0
-    */
+    /**
+     * Get the context object
+     *
+     * @return  object  The context object
+     *
+     * @since      1.0
+     */
     public static function & get()
     {
-        if (!is_null(self::$context)) {
-            return self::$context;
+        if (!is_null(self::$_context)) {
+            return self::$_context;
         }
         die('Context not established');
     }
 
-   /**
-    * Set the context
-    *
-    * @param  object $context - the controller creating the context
-    *
-    * @since      1.0
-    */
+    /**
+     * Set the context
+     *
+     * @param object &$context - the controller creating the context
+     *
+     * @return void
+     */
     public static function set(&$context)
     {
-        self::$context =& $context;
+        self::$_context =& $context;
     }
 }

@@ -1,21 +1,12 @@
 <?php
-
-namespace Xmf\Mvc;
-
-/**
+/*
  * This file has its roots as part of the Mojavi package which was
  * Copyright (c) 2003 Sean Kerr. It has been incorporated into this
  * derivative work under the terms of the LGPL V2.1.
  * (license terms)
- *
- * @author          Richard Griffith
- * @author          Sean Kerr
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @copyright       Portions Copyright (c) 2003 Sean Kerr
- * @license         (license terms)
- * @package         Xmf\Mvc
- * @since           1.0
  */
+
+namespace Xmf\Mvc;
 
 /**
  * The Request object hold data related to a request including the
@@ -24,6 +15,16 @@ namespace Xmf\Mvc;
  * request is proccessed. Request also provides methods for accessing
  * and managing the request data.
  *
+ * @category  Xmf\Mvc\Request
+ * @package   Xmf
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @author    Sean Kerr <skerr@mojavi.org>
+ * @copyright 2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @copyright 2003 Sean Kerr
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @link      http://xoops.org
+ * @since     1.0
  */
 class Request
 {
@@ -63,19 +64,17 @@ class Request
     /**
      * Create a new Request instance.
      *
-     * @param array $params A parsed array of user submitted parameters.
+     * @param array &$params A parsed array of user submitted parameters.
      *
      * @since  1.0
      */
     public function __construct (&$params)
     {
-
         $this->attributes =  array();
         $this->errors     =  array();
         $this->method     = ($_SERVER['REQUEST_METHOD'] == 'POST')
                             ? \Xmf\Mvc::REQ_POST : \Xmf\Mvc::REQ_GET;
         $this->params     =& $params;
-
     }
 
     /**
@@ -90,15 +89,12 @@ class Request
      */
     public function & getAttribute ($name)
     {
-
         if (isset($this->attributes[$name])) {
             return $this->attributes[$name];
-
         }
-        $null=NULL;
+        $null=null;
 
         return $null;
-
     }
 
     /**
@@ -111,7 +107,6 @@ class Request
     public function getAttributeNames ()
     {
         return array_keys($this->attributes);
-
     }
 
     /**
@@ -119,12 +114,12 @@ class Request
      *
      * @return array An array of attributes.
      *
+     * @return void
      * @since  1.0
      */
     public function & getAttributes ()
     {
         return $this->attributes;
-
     }
 
     /**
@@ -132,22 +127,18 @@ class Request
      *
      * @param string $name A cookie name.
      *
-     * @return string A cookie value, if the given cookie exists,
-     *                otherwise NULL.
+     * @return string A cookie value, if the cookie exists, otherwise NULL.
      *
      * @since  1.0
      */
     public function & getCookie ($name)
     {
-
         if (isset($_COOKIE[$name])) {
             return $_COOKIE[$name];
-
         }
-        $null=NULL;
+        $null=null;
 
         return $null;
-
     }
 
     /**
@@ -160,7 +151,6 @@ class Request
     public function getCookieNames ()
     {
         return array_keys($_COOKIE);
-
     }
 
     /**
@@ -173,7 +163,6 @@ class Request
     public function & getCookies ()
     {
         return $_COOKIE;
-
     }
 
     /**
@@ -190,8 +179,7 @@ class Request
      */
     public function getError ($name)
     {
-        return (isset($this->errors[$name])) ? $this->errors[$name] : NULL;
-
+        return (isset($this->errors[$name])) ? $this->errors[$name] : null;
     }
 
     /**
@@ -205,7 +193,6 @@ class Request
     public function & getErrors ()
     {
         return $this->errors;
-
     }
 
     /**
@@ -213,7 +200,7 @@ class Request
      *
      * @param string $name_like restrict output to only errors with a name
      *                          starting with this string
-     * @param string $joiner used between multiple errors to build one string
+     * @param string $joiner    used between multiple errors to build one string
      *
      * @return string HTML representation of errors
      *
@@ -229,15 +216,16 @@ class Request
                 if (empty($name_like)) {
                     $erroroutput .= (empty($erroroutput)?'':$joiner) . $k.':'.$v;
                 } else {
-                    if (substr($k,0,strlen($name_like))==$name_like) {
-                        $erroroutput .= (empty($erroroutput)?'':$joiner) . substr($k,strlen($name_like)).':'.$v;
+                    if (substr($k, 0, strlen($name_like))==$name_like) {
+                        $erroroutput
+                            .= (empty($erroroutput)?'':$joiner)
+                            . substr($k, strlen($name_like)) . ':' . $v;
                     }
                 }
             }
         }
 
         return $erroroutput;
-
     }
 
     /**
@@ -252,7 +240,6 @@ class Request
     public function getMethod ()
     {
         return $this->method;
-
     }
 
     /**
@@ -266,23 +253,14 @@ class Request
      *
      * @since  1.0
      */
-    public function & getParameter ($name, $value = 'NULL')
+    public function & getParameter ($name, $value = null)
     {
-
-        // the default $value value is the string value of NULL because
-        // default values cannot be NULL itself
-
         if (isset($this->params[$name])) {
             return $this->params[$name];
 
-        } elseif ($value != 'NULL') {
+        } else {
             return $value;
-
         }
-        $null=NULL;
-
-        return $null;
-
     }
 
     /**
@@ -295,7 +273,6 @@ class Request
     public function getParameterNames ()
     {
         return array_keys($this->params);
-
     }
 
     /**
@@ -308,7 +285,6 @@ class Request
     public function & getParameters ()
     {
         return $this->params;
-
     }
 
     /**
@@ -323,7 +299,6 @@ class Request
     public function hasAttribute ($name)
     {
         return isset($this->attributes[$name]);
-
     }
 
     /**
@@ -338,7 +313,6 @@ class Request
     public function hasCookie ($name)
     {
         return isset($_COOKIE[$name]);
-
     }
 
     /**
@@ -355,7 +329,6 @@ class Request
     public function hasError ($name)
     {
         return isset($this->errors[$name]);
-
     }
 
     /**
@@ -368,7 +341,6 @@ class Request
     public function hasErrors ()
     {
         return (sizeof($this->errors) > 0);
-
     }
 
     /**
@@ -383,7 +355,6 @@ class Request
     public function hasParameter ($name)
     {
         return isset($this->params[$name]);
-
     }
 
     /**
@@ -398,17 +369,12 @@ class Request
      */
     public function & removeAttribute ($name)
     {
-
         if (isset($this->attributes[$name])) {
-
             $value =& $this->attributes[$name];
-
             unset($this->attributes[$name]);
 
             return $value;
-
         }
-
     }
 
     /**
@@ -423,17 +389,12 @@ class Request
      */
     public function & removeParameter ($name)
     {
-
         if (isset($this->params[$name])) {
-
             $value =& $this->params[$name];
-
             unset($this->params[$name]);
 
             return $value;
-
         }
-
     }
 
     /**
@@ -442,28 +403,26 @@ class Request
      * @param string $name  An attribute name.
      * @param mixed  $value An attribute value.
      *
+     * @return void
      * @since  1.0
      */
     public function setAttribute ($name, $value)
     {
-
         $this->attributes[$name] =& $value;
-
     }
 
     /**
      * Set an attribute by reference.
      *
-     * @param string $name  An attribute name.
-     * @param mixed  $value An attribute value.
+     * @param string $name   An attribute name.
+     * @param mixed  &$value An attribute value.
      *
+     * @return void
      * @since  1.0
      */
     public function setAttributeByRef ($name, &$value)
     {
-
         $this->attributes[$name] =& $value;
-
     }
 
     /**
@@ -472,13 +431,12 @@ class Request
      * @param string $name    The name under which to register the message.
      * @param string $message An error message.
      *
+     * @return void
      * @since  1.0
      */
     public function setError ($name, $message)
     {
-
         $this->errors[$name] =& $message;
-
     }
 
     /**
@@ -486,20 +444,17 @@ class Request
      *
      * @param array $errors An associative array of error messages.
      *
+     * @return void
      * @since  1.0
      */
     public function setErrors ($errors)
     {
-
         $keys  = array_keys($errors);
         $count = sizeof($keys);
 
         for ($i = 0; $i < $count; $i++) {
-
             $this->errors[$keys[$i]] = $errors[$keys[$i]];
-
         }
-
     }
 
     /**
@@ -509,13 +464,12 @@ class Request
      * - Xmf\Mvc::REQ_GET  - serve GET requests
      * - Xmf\Mvc::REQ_POST - serve POST requests
      *
+     * @return void
      * @since  1.0
      */
     public function setMethod ($method)
     {
-
         $this->method = $method;
-
     }
 
     /**
@@ -524,28 +478,26 @@ class Request
      * @param string $name  A parameter name.
      * @param mixed  $value A parameter value.
      *
+     * @return void
      * @since  1.0
      */
     public function setParameter ($name, $value)
     {
-
         $this->params[$name] = $value;
-
     }
 
     /**
      * Manually set a parameter by reference.
      *
-     * @param string $name  A parameter name.
-     * @param mixed  $value A parameter value.
+     * @param string $name   A parameter name.
+     * @param mixed  &$value A parameter value.
      *
+     * @return void
      * @since  1.0
      */
     public function setParameterByRef ($name, &$value)
     {
-
         $this->params[$name] =& $value;
-
     }
 
 }

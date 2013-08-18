@@ -1,19 +1,32 @@
 <?php
+/*
+ You may not change or alter any portion of this comment or credits
+ of supporting developers from this source code or any supporting source code
+ which is considered copyrighted (c) material of the original comment or credit authors.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ */
 
 namespace Xmf\Mvc\Lib;
+
+die ('not ready');
 
 /**
  * ListController provides list support using instructions found in model.
  *
- * @author          Richard Griffith
- * @package         Xmf\Mvc
- * @since           1.0
+ * @category  Xmf\Mvc\Lib\ListController
+ * @package   Xmf
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @copyright 2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @link      http://xoops.org
+ * @since     1.0
  */
-die ('not ready');
-
 class ListController extends \Xmf\Mvc\ContextAware
 {
-
     private $handler=null;
     private $criteria=null;
     private $total_items;

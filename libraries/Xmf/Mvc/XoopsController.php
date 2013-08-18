@@ -1,7 +1,4 @@
 <?php
-
-namespace Xmf\Mvc;
-
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -12,22 +9,22 @@ namespace Xmf\Mvc;
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-/**
- * The Xmf\Mvc\XoopsController is a XOOPS specific Controller implementation
- *
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @license         http://www.fsf.org/copyleft/gpl.html GNU private license
- * @package         Xmf\Mvc
- * @since           1.0
- * @author          Richard Griffith
- */
-
+namespace Xmf\Mvc;
 /**
  * XoopsController implements a controller with with specific
  * characteristics optimized for the XOOPS environment, including:
  * - XOOPS specific User and AuthorizationHandler
  * - XOOPS module helper
  * - XOOPS module appropriate configuration, defaults and autoloading
+ *
+ * @category  Xmf\Mvc\XoopsController
+ * @package   Xmf
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @copyright 2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @link      http://xoops.org
+ * @since     1.0
  */
 class XoopsController extends Controller
 {
@@ -40,37 +37,39 @@ class XoopsController extends Controller
     /**
      *  @var XOOPS Module directory name
      */
-    protected $_dirname;
+    protected $dirname;
 
     /**
      *  @var XOOPS Module helper
      */
     protected $modhelper;
 
-   /**
-    * XOOPS specific controller constructor, sets user and
-    * authorization handler to XOOPS specific onjects.
-    *
-    * @param object $externalCom  ExternalCom object
-    *
-    * @since  1.0
-    */
+    /**
+     * XOOPS specific controller constructor, sets user and
+     * authorization handler to XOOPS specific onjects.
+     *
+     * @param object &$externalCom ExternalCom object
+     *
+     * @since  1.0
+     */
     protected function __construct (&$externalCom=null)
     {
         $this->externalCom =& $externalCom;
-        if (is_object($externalCom) && method_exists ($externalCom, 'getDirname')) {
-            $this->_dirname = $externalCom->getDirname();
+        if (is_object($externalCom) && method_exists($externalCom, 'getDirname')) {
+            $this->dirname = $externalCom->getDirname();
         } else {
-            $this->_dirname = $GLOBALS['xoopsModule']->getVar('dirname');
+            $this->dirname = $GLOBALS['xoopsModule']->getVar('dirname');
         }
-        $this->modhelper = \Xmf\Module\Helper::getHelper($this->_dirname);
+        $this->modhelper = \Xmf\Module\Helper::getHelper($this->dirname);
         //$this->modhelper->setDebug(true);
-        $pathname=XOOPS_ROOT_PATH .'/modules/'.$this->_dirname.'/';
+        $pathname=XOOPS_ROOT_PATH .'/modules/'.$this->dirname.'/';
         // set some reasonable defaults if config is empty
         if (!Config::get('UNITS_DIR', false)) {
             Config::setCompatmode(false);
             Config::set('UNITS_DIR', $pathname.'/xmfmvc/');
-            Config::set('SCRIPT_PATH', XOOPS_URL .'/modules/'.$this->_dirname.'/index.php');
+            Config::set(
+                'SCRIPT_PATH', XOOPS_URL .'/modules/'.$this->dirname.'/index.php'
+            );
             Config::set('UNIT_ACCESSOR', 'unit');
             Config::set('ACTION_ACCESSOR', 'action');
             Config::set('DEFAULT_UNIT', 'Default');
@@ -85,21 +84,21 @@ class XoopsController extends Controller
         $configfile=$pathname.'/config.php';
         \Xmf\Loader::loadFile($configfile, true);
 
-        parent::__construct ();
+        parent::__construct();
 
         $this->user                 =  new XoopsUser();
         $this->authorizationHandler =  new XoopsAuthHandler();
-        $this->user->setXoopsPermissionMap(Config::get('PermissionMap',array()));
+        $this->user->setXoopsPermissionMap(Config::get('PermissionMap', array()));
 
     }
 
     /**
      * getComponentName - build filename of action, view, etc.
      *
-     * @param $compType type (action, view, etc.)
-     * @param $unitName Unit name
-     * @param $actName Name
-     * @param $actView view suffix (success, error, input, etc.)
+     * @param string $compType type (action, view, etc.)
+     * @param string $unitName Unit name
+     * @param string $actName  Action name
+     * @param string $actView  view suffix (success, error, input, etc.)
      *
      * @return file name or null on error
      */
@@ -120,7 +119,8 @@ class XoopsController extends Controller
         if (isset($cTypes[$compType])) {
             $c=$cTypes[$compType];
 
-            $file = Config::get('UNITS_DIR') . "{$unitName}/{$c['dir']}/{$actName}{$c['suffix']}";
+            $file = Config::get('UNITS_DIR')
+                . "{$unitName}/{$c['dir']}/{$actName}{$c['suffix']}";
         }
         //trigger_error($file);
         return $file;
@@ -139,7 +139,7 @@ class XoopsController extends Controller
     public function getView ($unitName, $actName, $viewName)
     {
 
-        $file = $this->getComponentName ('view', $unitName, $actName, $viewName);
+        $file = $this->getComponentName('view', $unitName, $actName, $viewName);
 
         $this->loadRequired($file);
 
@@ -158,16 +158,15 @@ class XoopsController extends Controller
 
     }
 
-
-   /**
-    * getExternalCom - get the ExternalCom object
-    *
-    * TODO - should this be in parent instead?
-    *
-    * @return object ExternalCom
-    *
-    * @since  1.0
-    */
+    /**
+     * getExternalCom - get the ExternalCom object
+     *
+     * TODO - should this be in parent instead?
+     *
+     * @return object ExternalCom
+     *
+     * @since  1.0
+     */
     public function getExternalCom()
     {
         return $this->externalCom;
@@ -180,7 +179,7 @@ class XoopsController extends Controller
     /**
      * getHandler - get XoopsObjectHandler
      *
-     * @param string $name
+     * @param string $name name of an object handler
      *
      * @return bool|XoopsObjectHandler|XoopsPersistableObjectHandler
      *
@@ -193,6 +192,8 @@ class XoopsController extends Controller
 
     /**
      * modHelper - get module helper
+     *
+     * @param string $name a XOOPS module dirname
      *
      * @return object Module Helper
      *

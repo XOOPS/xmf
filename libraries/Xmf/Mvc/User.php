@@ -1,27 +1,28 @@
 <?php
-
-namespace Xmf\Mvc;
-
-/**
+/*
  * This file has its roots as part of the Mojavi package which was
  * Copyright (c) 2003 Sean Kerr. It has been incorporated into this
  * derivative work under the terms of the LGPL V2.1.
  * (license terms)
- *
- * @author          Richard Griffith
- * @author          Sean Kerr
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @copyright       Portions Copyright (c) 2003 Sean Kerr
- * @license         (license terms)
- * @package         Xmf\Mvc
- * @since           1.0
  */
+
+namespace Xmf\Mvc;
 
 /**
  * A User object provides an interface to data representing an individual
  * user, allowing for access and managment of attributes and security
  * related data.
  *
+ * @category  Xmf\Mvc\User
+ * @package   Xmf
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @author    Sean Kerr <skerr@mojavi.org>
+ * @copyright 2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @copyright 2003 Sean Kerr
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @link      http://xoops.org
+ * @since     1.0
  */
 class User extends ContextAware
 {
@@ -65,41 +66,37 @@ class User extends ContextAware
      */
     public function __construct ()
     {
-
-        $this->authenticated = NULL;
-        $this->attributes    = NULL;
-        $this->container     = NULL;
-        $this->secure        = NULL;
-
+        $this->authenticated = null;
+        $this->attributes    = null;
+        $this->container     = null;
+        $this->secure        = null;
     }
 
     /**
      * Clear all user data.
      *
+     * @return void
      * @since  1.0
      */
     public function clearAll ()
     {
-
-        $this->authenticated = FALSE;
-        $this->attributes    = NULL;
+        $this->authenticated = false;
+        $this->attributes    = null;
         $this->attributes    = array();
-        $this->secure        = NULL;
+        $this->secure        = null;
         $this->secure        = array();
-
     }
 
     /**
      * Clear all attribute namespaces and their associated attributes.
      *
+     * @return void
      * @since  1.0
      */
     public function clearAttributes ()
     {
-
-        $this->attributes = NULL;
+        $this->attributes = null;
         $this->attributes = array();
-
     }
 
     /**
@@ -115,17 +112,13 @@ class User extends ContextAware
      */
     public function & getAttribute ($name, $namespace = 'org.mojavi')
     {
-
         $namespace =& $this->getAttributes($namespace);
-
-        if ($namespace != NULL && isset($namespace[$name])) {
+        if ($namespace != null && isset($namespace[$name])) {
             return $namespace[$name];
-
         }
-        $null=NULL;
+        $null=null;
 
         return $null;
-
     }
 
     /**
@@ -140,11 +133,9 @@ class User extends ContextAware
      */
     public function getAttributeNames ($namespace = 'org.mojavi')
     {
-
         $namespace =& $this->getAttributes($namespace);
 
-        return ($namespace != NULL) ? array_keys($namespace) : NULL;
-
+        return ($namespace != null) ? array_keys($namespace) : null;
     }
 
     /**
@@ -157,35 +148,30 @@ class User extends ContextAware
     public function getAttributeNamespaces ()
     {
         return array_keys($this->attributes);
-
     }
 
     /**
      * Retrieve an associative array of namespace attributes.
      *
      * @param string $namespace An attribute namespace.
-     * @param bool   Whether or not to auto-create the attribute namespace
-     *               if it doesn't already exist.
+     * @param bool   $create    Whether or not to auto-create the attribute
+     *                          namespace if it doesn't already exist.
      *
      * @return array An array of attributes, if the given namespace exists,
      *               otherwise NULL.
      *
      * @since  1.0
      */
-    public function & getAttributes ($namespace, $create = FALSE)
+    public function & getAttributes ($namespace, $create = false)
     {
-
         if (isset($this->attributes[$namespace])) {
             return $this->attributes[$namespace];
-
         } elseif ($create) {
-
             $this->attributes[$namespace] = array();
 
             return $this->attributes[$namespace];
-
         }
-        $null=NULL;
+        $null=null;
 
         return $null;
 
@@ -201,7 +187,6 @@ class User extends ContextAware
     public function & getContainer ()
     {
         return $this->container;
-
     }
 
     /**
@@ -216,11 +201,9 @@ class User extends ContextAware
      */
     public function hasAttribute ($name, $namespace = 'org.mojavi')
     {
-
         $namespace =& $this->getAttributes($namespace);
 
-        return ($namespace != NULL && isset($namespace[$name])) ? TRUE : FALSE;
-
+        return ($namespace != null && isset($namespace[$name])) ? true : false;
     }
 
     /**
@@ -232,8 +215,7 @@ class User extends ContextAware
      */
     public function isAuthenticated ()
     {
-        return ($this->authenticated === TRUE) ? TRUE : FALSE;
-
+        return ($this->authenticated === true) ? true : false;
     }
 
     /**
@@ -241,18 +223,16 @@ class User extends ContextAware
      *
      * _This method should never be called manually._
      *
+     * @return void
      * @since  1.0
      */
     public function load ()
     {
-
-        if ($this->container !== NULL) {
-
-            $this->container->load($this->authenticated, $this->attributes,
-                                   $this->secure);
-
+        if ($this->container !== null) {
+            $this->container->load(
+                $this->authenticated, $this->attributes, $this->secure
+            );
         }
-
     }
 
     /**
@@ -260,37 +240,28 @@ class User extends ContextAware
      *
      * @param array $attributes An associative array of attributes.
      *
+     * @return void
      * @since  1.0
      */
     public function mergeAttributes ($attributes)
     {
-
         $keys  = array_keys($attributes);
         $count = sizeof($keys);
 
         for ($i = 0; $i < $count; $i++) {
-
             if (isset($this->attributes[$keys[$i]])) {
-
                 // namespace already exists, merge values only
                 $subKeys  = array_keys($attributes[$keys[$i]]);
                 $subCount = sizeof($subKeys);
-
                 for ($x = 0; $x < $subCount; $x++) {
-
-                    $this->attributes[$keys[$i]][$subKeys[$x]] =& $attributes[$keys[$i]][$subKeys[$x]];
-
+                    $this->attributes[$keys[$i]][$subKeys[$x]]
+                        =& $attributes[$keys[$i]][$subKeys[$x]];
                 }
-
             } else {
-
                 // merge entire value
                 $this->attributes[$keys[$i]] =& $attributes[$keys[$i]];
-
             }
-
         }
-
     }
 
     /**
@@ -306,22 +277,16 @@ class User extends ContextAware
      */
     public function & removeAttribute ($name, $namespace = 'org.mojavi')
     {
-
         $namespace =& $this->getAttributes($namespace);
-
-        if ($namespace !== NULL && isset($namespace[$name])) {
-
+        if ($namespace !== null && isset($namespace[$name])) {
             $value =& $namespace[$name];
-
             unset($namespace[$name]);
 
             return $value;
-
         }
-        $null=NULL;
+        $null=null;
 
         return $null;
-
     }
 
     /**
@@ -329,14 +294,13 @@ class User extends ContextAware
      *
      * @param string $namespace An attribute namespace.
      *
+     * @return void
      * @since  1.0
      */
     public function removeAttributes ($namespace = 'org.mojavi')
     {
-
         $namespace =& $this->getAttributes($namespace);
-        $namespace =  NULL;
-
+        $namespace =  null;
     }
 
     /**
@@ -346,59 +310,55 @@ class User extends ContextAware
      * @param mixed  $value     An attribute value.
      * @param string $namespace An attribute namespace.
      *
+     * @return void
      * @since  1.0
      */
     public function setAttribute ($name, $value, $namespace = 'org.mojavi')
     {
-
-        $namespace        =& $this->getAttributes($namespace, TRUE);
+        $namespace        =& $this->getAttributes($namespace, true);
         $namespace[$name] =  $value;
-
     }
 
     /**
      * Set an attribute by reference.
      *
      * @param string $name      An attribute name.
-     * @param mixed  $value     An attribute value.
+     * @param mixed  &$value    An attribute value.
      * @param string $namespace An attribute namespace.
      *
+     * @return void
      * @since  1.0
      */
     public function setAttributeByRef ($name, &$value, $namespace = 'org.mojavi')
     {
-
-        $namespace        =& $this->getAttributes($namespace, TRUE);
+        $namespace        =& $this->getAttributes($namespace, true);
         $namespace[$name] =& $value;
-
     }
 
     /**
      * Set the authenticated status of the user.
      *
-     * @param bool The authentication status.
+     * @param bool $status The authentication status.
      *
+     * @return void
      * @since  1.0
      */
     public function setAuthenticated ($status)
     {
-
         $this->authenticated = $status;
-
     }
 
     /**
      * Set the container.
      *
-     * @param $container A Container instance.
+     * @param Container &$container A Container instance.
      *
+     * @return void
      * @since  1.0
      */
     public function setContainer (&$container)
     {
-
         $this->container =& $container;
-
     }
 
     /**
@@ -406,18 +366,16 @@ class User extends ContextAware
      *
      *  _This method should never be called manually._
      *
+     * @return void
      * @since  1.0
      */
     public function store ()
     {
-
-        if ($this->container !== NULL) {
-
-            $this->container->store($this->authenticated, $this->attributes,
-                                    $this->secure);
-
+        if ($this->container !== null) {
+            $this->container->store(
+                $this->authenticated, $this->attributes, $this->secure
+            );
         }
-
     }
 
 }

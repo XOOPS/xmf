@@ -1,25 +1,27 @@
 <?php
-
-namespace Xmf\Mvc;
-
-/**
+/*
  * This file has its roots as part of the Mojavi package which was
  * Copyright (c) 2003 Sean Kerr. It has been incorporated into this
  * derivative work under the terms of the LGPL V2.1.
  * (license terms)
- *
- * @author          Richard Griffith
- * @author          Sean Kerr
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @copyright       Portions Copyright (c) 2003 Sean Kerr
- * @license         (license terms)
- * @package         Xmf\Mvc
- * @since           1.0
  */
+
+namespace Xmf\Mvc;
 
 /**
  * The Controller dispatches requests to the proper action and controls
  * application flow.
+ *
+ * @category  Xmf\Mvc\Controller
+ * @package   Xmf
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @author    Sean Kerr <skerr@mojavi.org>
+ * @copyright 2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @copyright 2003 Sean Kerr
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @link      http://xoops.org
+ * @since     1.0
  */
 class Controller
 {
@@ -138,14 +140,13 @@ class Controller
      * _This should never be called manually._
      * Use static getInstance() method.
      *
-     * @param object $externalCom ExternalCom object
+     * @param object &$externalCom ExternalCom object
      *
      * @since  1.0
      */
     protected function __construct (&$externalCom=null)
     {
-
-        $this->contentType   =  $externalCom==null?'html':$externalCom; // not exactly
+        $this->contentType   =  $externalCom==null?'html':$externalCom;
         $this->currentAction =  null;
         $this->currentUnit   =  null;
         $this->execChain     =  new ExecutionChain;
@@ -167,10 +168,10 @@ class Controller
     /**
      * getComponentName - build filename of action, view, etc.
      *
-     * @param $compType type (action, view, etc.)
-     * @param $unitName Unit name
-     * @param $actName  Action Name
-     * @param $actView  View suffix (success, error, input, etc.)
+     * @param string $compType type (action, view, etc.)
+     * @param string $unitName Unit name
+     * @param string $actName  Action Name
+     * @param string $actView  View suffix (success, error, input, etc.)
      *
      * @return file name or null on error
      */
@@ -182,7 +183,10 @@ class Controller
         ,	'filter'     => array('dir'=>'filters', 'suffix'=>'Filter.class.php')
         ,	'filterlist' => array('dir'=>'filters', 'suffix'=>'.class.php')
         ,	'template'   => array('dir'=>'templates', 'suffix'=>'.php')
-        ,	'view'       => array('dir'=>'views', 'suffix'=>"View_{$actView}.class.php")
+        ,	'view'       => array(
+                'dir'=>'views',
+                'suffix'=>"View_{$actView}.class.php"
+            )
         ,	'model'      => array('dir'=>'models', 'suffix'=>'.php')
         );
 
@@ -190,7 +194,8 @@ class Controller
         if (isset($cTypes[$compType])) {
             $c=$cTypes[$compType];
 
-            $file = Config::get('UNITS_DIR') . "{$unitName}/{$c['dir']}/{$actName}{$c['suffix']}";
+            $file = Config::get('UNITS_DIR')
+                . "{$unitName}/{$c['dir']}/{$actName}{$c['suffix']}";
         }
         //trigger_error($file);
         return $file;
@@ -210,7 +215,7 @@ class Controller
      */
     public function actionExists ($unitName, $actName)
     {
-        $file = $this->getComponentName ('action', $unitName, $actName, '');
+        $file = $this->getComponentName('action', $unitName, $actName, '');
 
         return (is_readable($file));
 
@@ -220,10 +225,12 @@ class Controller
      * Dispatch a request.
      *
      * _Optional parameters for unit and action exist if you wish to
-     * run Mojavi as a page controller._
+     * use a page controller pattern._
      *
      * @param string $unitName A unit name.
      * @param string $actName  An action name.
+     *
+     * @return void
      */
     public function dispatch ($unitName = null, $actName = null)
     {
@@ -237,7 +244,7 @@ class Controller
         // USE_SESSIONS check and session initialization code
 
         // set session container
-        if ($this->user->getContainer() == NULL) {
+        if ($this->user->getContainer() == null) {
             $this->user->setContainer(new SessionContainer);
         }
 
@@ -248,49 +255,44 @@ class Controller
         $request =& $this->request;
 
         // use default unit and action only if both have not been specified
-        if ($unitName == null && !$request->hasParameter(Config::get('UNIT_ACCESSOR', 'unit')) &&
-            $actName == null && !$request->hasParameter(Config::get('ACTION_ACCESSOR', 'action')))
-        {
-
+        if ($unitName == null
+            && !$request->hasParameter(Config::get('UNIT_ACCESSOR', 'unit'))
+            && $actName == null
+            && !$request->hasParameter(Config::get('ACTION_ACCESSOR', 'action'))
+        ) {
             $actName = Config::get('DEFAULT_ACTION', 'DefaultIndex');
             $unitName = Config::get('DEFAULT_UNIT', 'Default');
-
         } else {
-
             // has a unit been specified via dispatch()?
-            if ($unitName == NULL) {
-
+            if ($unitName == null) {
                 // unit not specified via dispatch(), check parameters
-                $unitName = $request->getParameter(Config::get('UNIT_ACCESSOR', 'unit'));
+                $unitName = $request->getParameter(
+                    Config::get('UNIT_ACCESSOR', 'unit')
+                );
                 if (empty($unitName)) {
                     $unitName = Config::get('DEFAULT_UNIT', 'Default');
                 }
             }
 
             // has an action been specified via dispatch()?
-            if ($actName == NULL) {
-
+            if ($actName == null) {
                 // an action hasn't been specified via dispatch(), let's check
                 // the parameters
-                $actName = $request->getParameter(Config::get('ACTION_ACCESSOR', 'action'));
+                $actName = $request->getParameter(
+                    Config::get('ACTION_ACCESSOR', 'action')
+                );
 
-                if ($actName == NULL) {
-
+                if ($actName == null) {
                     // does an Index action exist for this unit?
                     if ($this->actionExists($unitName, 'Index')) {
-
                         // ok, we found the Index action
                         $actName = 'Index';
-
                     }
                     if (empty($actName)) {
                         $actName = Config::get('DEFAULT_ACTION', 'DefaultIndex');
                     }
-
                 }
-
             }
-
         }
 
         // if $unitName or $actName equal NULL, we don't set them. we'll let
@@ -308,13 +310,11 @@ class Controller
 
         // paths
         $mojavi['controller_path']     = $this->getControllerPath();
-        $mojavi['current_action_path'] = $this->getControllerPath($unitName,
-                                                                  $actName);
-
+        $mojavi['current_action_path']
+            = $this->getControllerPath($unitName, $actName);
         $mojavi['current_unit_path'] = $this->getControllerPath($unitName);
-        $mojavi['request_action_path'] = $this->getControllerPath($unitName,
-                                                                  $actName);
-
+        $mojavi['request_action_path']
+            = $this->getControllerPath($unitName, $actName);
         $mojavi['request_unit_path'] = $this->getControllerPath($unitName);
 
         // process our originally request action
@@ -327,27 +327,35 @@ class Controller
         $this->user->store();
 
         // cleanup session handler
-        if ($this->sessionHandler !== NULL) {
+        if ($this->sessionHandler !== null) {
 
             $this->sessionHandler->cleanup();
 
         }
-
-        // cleanup loggers
-        //$logManager =& LogManager::getInstance();
-        //$logManager->cleanup();
-        //$logger->stopTime('MVC dispatch');
-
     }
 
+    /**
+     * loadRequired - load a file, die if not found
+     *
+     * @param string $filename name of file to load
+     *
+     * @return void
+     */
     protected function loadRequired($filename)
     {
         if (!\Xmf\Loader::loadFile($filename)) {
-            die (sprintf('Failed to load %s',$filename));
+            die (sprintf('Failed to load %s', $filename));
         }
     }
 
-    private function ifExistsRequire($filename)
+    /**
+     * ifExistsRequire - load a file if it exists
+     *
+     * @param string $filename name of file to load
+     *
+     * @return void
+     */
+    protected function ifExistsRequire($filename)
     {
         return \Xmf\Loader::loadFile($filename);
     }
@@ -356,39 +364,33 @@ class Controller
      * Forward the request to an action.
      *
      * @param string $unitName A unit name.
-     * @param string $actName An action name.
+     * @param string $actName  An action name.
      *
+     * @return void
      * @since  1.0
      */
     public function forward ($unitName, $actName)
     {
-
-        if ($this->currentUnit == $unitName &&
-            $this->currentAction == $actName)
-        {
-
-            $error = 'Recursive forward on unit ' . $unitName . ', action ' .
-                     $actName;
+        if ($this->currentUnit == $unitName
+            && $this->currentAction == $actName
+        ) {
+            $error = 'Recursive forward on unit ' . $unitName
+                . ', action ' . $actName;
 
             trigger_error($error, E_USER_ERROR);
 
             exit;
-
         }
 
         // execute unit configuration, if it exists
         $this->ifExistsRequire(Config::get('UNITS_DIR') . $unitName . '/config.php');
 
         if ($this->actionExists($unitName, $actName)) {
-
             // create the action instance
             $action = $this->getAction($unitName, $actName);
-
         } else {
-
             // the requested action doesn't exist
-            $action = NULL;
-
+            $action = null;
         }
 
         // track old unit/action
@@ -399,7 +401,7 @@ class Controller
         $this->execChain->addRequest($unitName, $actName, $action);
         $this->updateCurrentVars($unitName, $actName);
 
-        if ($action === NULL) {
+        if ($action === null) {
 
             // requested action doesn't exist
             $actName = Config::get('ERROR_404_ACTION', 'PageNotFound');
@@ -485,8 +487,8 @@ class Controller
      * Generate a URL for a given unit, action and parameters
      *
      * @param string $unitName a unit name
-     * @param string $actName an action name
-     * @param array  $params  an associative array of additional URL parameters
+     * @param string $actName  an action name
+     * @param array  $params   an associative array of additional URL parameters
      *
      * @return string A URL to a Mojavi resource.
      *
@@ -496,7 +498,7 @@ class Controller
     {
 
         $url=$this->getControllerPath($unitName, $actName);
-        if (strpos($url,'?')===false) {
+        if (strpos($url, '?')===false) {
             $url .= '?';
         }
 
@@ -527,7 +529,7 @@ class Controller
      * Retrieve an action implementation instance.
      *
      * @param string $unitName A unit name.
-     * @param string $actName An action name.
+     * @param string $actName  An action name.
      *
      * @return Action An Action instance, if the action exists, otherwise
      *                an error will be reported.
@@ -537,7 +539,7 @@ class Controller
     public function getAction ($unitName, $actName)
     {
 
-        $file = $this->getComponentName ('action', $unitName, $actName, '');
+        $file = $this->getComponentName('action', $unitName, $actName, '');
 
         $this->loadRequired($file);
 
@@ -574,12 +576,12 @@ class Controller
     /**
      * Retrieve the user supplied content type.
      *
+     * @return string content type
      * @since  1.0
      */
     public function getContentType ()
     {
         return $this->contentType;
-
     }
 
     /**
@@ -601,12 +603,14 @@ class Controller
 
         $varsep = '?';
 
-        if (!(empty($unitName) || $unitName==Config::get('DEFAULT_UNIT', 'Default'))) {
-            $path .= $varsep.Config::get('UNIT_ACCESSOR','unit')."=$unitName";
+        if (!(empty($unitName)
+            || $unitName==Config::get('DEFAULT_UNIT', 'Default'))
+        ) {
+            $path .= $varsep.Config::get('UNIT_ACCESSOR', 'unit')."=$unitName";
             $varsep = '&';
         }
         if (!empty($actName)) {
-            $path .= $varsep.Config::get('ACTION_ACCESSOR','action')."=$actName";
+            $path .= $varsep.Config::get('ACTION_ACCESSOR', 'action')."=$actName";
             $varsep = '&';
         }
 
@@ -620,12 +624,12 @@ class Controller
      * / If the request has not been forwarded, this will return the
      *   the originally requested action./
      *
+     * @return void
      * @since  1.0
      */
     public function getCurrentAction ()
     {
         return $this->currentAction;
-
     }
 
     /**
@@ -634,6 +638,7 @@ class Controller
      * / If the request has not been forwarded, this will return the
      *   the originally requested unit./
      *
+     * @return string current unit
      * @since  1.0
      */
     public function getCurrentUnit ()
@@ -658,7 +663,7 @@ class Controller
     /**
      * Retrieve the single instance of Controller.
      *
-     * @param object $externalCom ExternalCom object
+     * @param object &$externalCom ExternalCom object
      *
      * @return Controller A Controller instance.
      *
@@ -669,7 +674,7 @@ class Controller
 
         static $instance;
 
-        if ($instance === NULL) {
+        if ($instance === null) {
             $controllerClass = get_called_class(); // not available PHP<5.3
             $instance = new $controllerClass($externalCom);
 
@@ -794,16 +799,16 @@ class Controller
     /**
      * Retrieve a view implementation instance.
      *
-     * @param string A unit name.
-     * @param string An action name.
-     * @param string A view name.
+     * @param string $unitName A unit name.
+     * @param string $actName  An action name.
+     * @param string $viewName A view name.
      *
-     * @return View A View instance.
+     * @return View instance.
      */
     public function getView ($unitName, $actName, $viewName)
     {
 
-        $file = $this->getComponentName ('view', $unitName, $actName, $viewName);
+        $file = $this->getComponentName('view', $unitName, $actName, $viewName);
 
         $this->loadRequired($file);
 
@@ -825,79 +830,67 @@ class Controller
     /**
      * Map global filters.
      *
-     * @param FilterChain A FilterChain instance.
+     * @param FilterChain &$filterChain A FilterChain instance.
      *
+     * @return void
      * @since  1.0
      */
     public function mapGlobalFilters (&$filterChain)
     {
-
         static $list;
 
         if (!isset($list)) {
-
             $file = Config::get('UNITS_DIR') . 'GlobalFilterList.php';
-
             if ($this->ifExistsRequire($file)) {
-
                 $list = new GlobalFilterList;
-                $list->registerFilters($filterChain, $this, $this->request,
-                                       $this->user);
-
+                $list->registerFilters(
+                    $filterChain, $this, $this->request, $this->user
+                );
             }
-
         } else {
-
-            $list->registerFilters($filterChain, $this, $this->request,
-                                   $this->user);
-
+            $list->registerFilters(
+                $filterChain, $this, $this->request, $this->user
+            );
         }
-
     }
 
     /**
      * Map all filters for a given unit.
      *
-     * @param FilterChain A FilterChain instance.
-     * @param unitName     A unit name.
+     * @param FilterChain &$filterChain A FilterChain instance.
+     * @param string      $unitName     A unit name.
      *
+     * @return void
      * @since  1.0
      */
     public function mapUnitFilters (&$filterChain, $unitName)
     {
-
         static $cache;
 
         if (!isset($cache)) {
-
             $cache = array();
-
         }
 
         $listName = $unitName . 'FilterList';
 
         if (!isset($cache[$listName])) {
-
-            $file = $this->getComponentName ('filterlist', $unitName, "{$listName}", '');
+            $file = $this->getComponentName(
+                'filterlist', $unitName, "{$listName}", ''
+            );
 
             if ($this->ifExistsRequire($file)) {
-
                 $list             =  new $listName;
                 $cache[$listName] =& $list;
-
                 // register filters
-                $list->registerFilters($filterChain, $this, $this->request,
-                                       $this->user);
-
+                $list->registerFilters(
+                    $filterChain, $this, $this->request, $this->user
+                );
             }
-
         } else {
-
-            $cache[$listName]->registerFilters($filterChain, $this,
-                                               $this->request, $this->user);
-
+            $cache[$listName]->registerFilters(
+                $filterChain, $this, $this->request, $this->user
+            );
         }
-
     }
 
     /**
@@ -914,7 +907,8 @@ class Controller
          * bitmask values for $mask are:
          *   -  \Xmf\Request::NOTRIM    (1)  set to skip trim() on values
          *   -  \Xmf\Request::ALLOWRAW  (2)  set to disable html check
-         *   -  \Xmf\Request::ALLOWHTML (4)  set to allow all html, clear for 'safe' only
+         *   -  \Xmf\Request::ALLOWHTML (4)  set to allow all html,
+         *      clear for 'safe' only
          *
          * We will clean agressively. Raw values are not overwritten, so
          * code can go back and get directly with different options if
@@ -937,43 +931,40 @@ class Controller
     /**
      * Redirect the request to another location.
      *
-     * @param string A URL.
+     * @param string $url A URL.
      *
+     * @return void
      * @since  1.0
      */
     public function redirect ($url)
     {
-
         header('Location: ' . $url);
-
     }
 
     /**
      * Set the developer supplied authorization handler.
      *
-     * @param Authorizationhandler An AuthorizationHandler instance.
+     * @param Authorizationhandler &$handler An AuthorizationHandler instance.
      *
+     * @return void
      * @since  1.0
      */
     public function setAuthorizationHandler (&$handler)
     {
-
         $this->authorizationHandler =& $handler;
-
     }
 
     /**
      * Set the content type.
      *
-     * @param string A user supplied content type.
+     * @param string $contentType A user supplied content type.
      *
+     * @return void
      * @since  1.0
      */
     public function setContentType ($contentType)
     {
-
         $this->contentType = $contentType;
-
     }
 
     /**
@@ -982,48 +973,47 @@ class Controller
      * @param int $mode Global render mode, which is one of the following two:
      * - Xmf\Mvc::RENDER_CLIENT - render to the client
      * - Xmf\Mvc::RENDER_VAR    - render to variable
+     *
+     * @return void
      */
     public function setRenderMode ($mode)
     {
-
         $this->renderMode = $mode;
-
     }
 
     /**
      * Set the session handler.
      *
-     * @param SessionHandler A SessionHandler instance.
+     * @param SessionHandler &$handler A SessionHandler instance.
      *
+     * @return void
      * @since  1.0
      */
     public function setSessionHandler (&$handler)
     {
-
         $this->sessionHandler =& $handler;
-
     }
 
     /**
      * Set the user type.
      *
-     * @param User A User instance.
+     * @param User &$user A User instance.
      *
+     * @return void
      * @since  1.0
      */
     public function setUser (&$user)
     {
-
         $this->user =& $user;
-
     }
 
     /**
      * Update current unit and action data.
      *
-     * @param string A unit name.
-     * @param string An action name.
+     * @param string $unitName A unit name.
+     * @param string $actName  An action name.
      *
+     * @return void
      * @since  1.0
      */
     protected function updateCurrentVars ($unitName, $actName)
@@ -1041,12 +1031,12 @@ class Controller
 
         // directories
         $mojavi['unit_dir']   = Config::get('UNITS_DIR');
-        $mojavi['template_dir'] = Config::get('UNITS_DIR') . $unitName .
-                                  '/templates/';
+        $mojavi['template_dir']
+            = Config::get('UNITS_DIR') . $unitName . '/templates/';
 
         // paths
-        $mojavi['current_action_path'] = $this->getControllerPath($unitName,
-                                                                  $actName);
+        $mojavi['current_action_path']
+            = $this->getControllerPath($unitName, $actName);
         $mojavi['current_unit_path'] = $this->getControllerPath($unitName);
 
     }
@@ -1054,9 +1044,9 @@ class Controller
     /**
      * Determine if a view exists.
      *
-     * @param string A unit name.
-     * @param string An action name.
-     * @param string A view name.
+     * @param string $unitName A unit name.
+     * @param string $actName  An action name.
+     * @param string $viewName A view name.
      *
      * @return bool <b>TRUE</b>, if the view exists, otherwise <b>FALSE</b>.
      *
@@ -1065,7 +1055,7 @@ class Controller
     public function viewExists ($unitName, $actName, $viewName)
     {
 
-        $file = $this->getComponentName ('view', $unitName, $actName, $viewName);
+        $file = $this->getComponentName('view', $unitName, $actName, $viewName);
 
         return (is_readable($file));
 
@@ -1074,7 +1064,7 @@ class Controller
     /**
      * Retrieve a filter implementation instance.
      *
-     * @param string $name    - A filter name.
+     * @param string $name     - A filter name.
      * @param string $unitName - A unit name, defaults to current unit
      *
      * @return a Filter instance.
@@ -1082,8 +1072,10 @@ class Controller
     public function getFilter ($name, $unitName='')
     {
 
-        if (empty($unitName)) { $unitName = $this->currentUnit; }
-        $file = $this->getComponentName ('filter', $unitName, $name, '');
+        if (empty($unitName)) {
+            $unitName = $this->currentUnit;
+        }
+        $file = $this->getComponentName('filter', $unitName, $name, '');
 
         $this->loadRequired($file);
 

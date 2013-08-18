@@ -1,25 +1,26 @@
 <?php
-
-namespace Xmf\Mvc;
-
-/**
+/*
  * This file has its roots as part of the Mojavi package which was
  * Copyright (c) 2003 Sean Kerr. It has been incorporated into this
  * derivative work under the terms of the LGPL V2.1.
  * (license terms)
- *
- * @author          Richard Griffith
- * @author          Sean Kerr
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @copyright       Portions Copyright (c) 2003 Sean Kerr
- * @license         (license terms)
- * @package         Xmf\Mvc
- * @since           1.0
  */
+
+namespace Xmf\Mvc;
 
 /**
  * FilterChain controls the sequence of Filter execution.
  *
+ * @category  Xmf\Mvc\FilterChain
+ * @package   Xmf
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @author    Sean Kerr <skerr@mojavi.org>
+ * @copyright 2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @copyright 2003 Sean Kerr
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @link      http://xoops.org
+ * @since     1.0
  */
 class FilterChain
 {
@@ -35,7 +36,6 @@ class FilterChain
     /**
      * An indexed array of filters.
      *
-
      * @since  1.0
      * @type   array
      */
@@ -44,14 +44,13 @@ class FilterChain
     /**
      * Create a new FilterChain instance.
      *
+     * @return void
      * @since  1.0
      */
     public function __construct ()
     {
-
         $this->index = -1;
         $this->filters = array();
-
     }
 
     /**
@@ -59,31 +58,27 @@ class FilterChain
      *
      *  _This method should never be called manually._
      *
+     * @return void
      * @since  1.0
      */
     public function execute ()
     {
-
         if (++$this->index < sizeof($this->filters)) {
-
             $this->filters[$this->index]->execute($this);
-
         }
-
     }
 
     /**
      * Register a filter.
      *
-     * @param $filter A Filter instance.
+     * @param Filter &$filter A Filter instance.
      *
+     * @return void
      * @since  1.0
      */
     public function register (&$filter)
     {
-
         $this->filters[] =& $filter;
-
     }
 
 }

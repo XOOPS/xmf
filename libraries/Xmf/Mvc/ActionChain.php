@@ -1,27 +1,28 @@
 <?php
-
-namespace Xmf\Mvc;
-
-/**
+/*
  * This file has its roots as part of the Mojavi package which was
  * Copyright (c) 2003 Sean Kerr. It has been incorporated into this
  * derivative work under the terms of the LGPL V2.1.
  * (license terms)
- *
- * @author          Richard Griffith
- * @author          Sean Kerr
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @copyright       Portions Copyright (c) 2003 Sean Kerr
- * @license         (license terms)
- * @package         Xmf\Mvc
- * @since           1.0
  */
+
+namespace Xmf\Mvc;
 
 /**
  * An ActionChain allows execution of multiple actions and retrieving
  * the rendered results from that execution. Potential uses include
  * incoporating information from external Action implementations.
  *
+ * @category  Xmf\Mvc\ActionChain
+ * @package   Xmf
+ * @author    Richard Griffith <richard@geekwright.com>
+ * @author    Sean Kerr <skerr@mojavi.org>
+ * @copyright 2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @copyright 2003 Sean Kerr
+ * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @version   Release: 1.0
+ * @link      http://xoops.org
+ * @since     1.0
  */
 class ActionChain extends ContextAware
 {
@@ -52,7 +53,7 @@ class ActionChain extends ContextAware
     {
 
         $this->actions  = array();
-        $this->preserve = FALSE;
+        $this->preserve = false;
 
     }
 
@@ -61,7 +62,7 @@ class ActionChain extends ContextAware
      *
      * _This method should never be called manually._
      *
-     * @since  1.0
+     * @return void
      */
     public function execute ()
     {
@@ -79,7 +80,7 @@ class ActionChain extends ContextAware
 
             $action =& $this->actions[$keys[$i]];
 
-            if ($this->preserve && $action['params'] != NULL) {
+            if ($this->preserve && $action['params'] != null) {
 
                 // make a copy of the current variables if they exist
                 $params   = array();
@@ -91,7 +92,8 @@ class ActionChain extends ContextAware
                     if ($this->Request()->hasParameter($subKeys[$x])) {
 
                         // do not use a reference here
-                        $params[$subKeys[$x]] = $this->Request()->getParameter($subKeys[$x]);
+                        $params[$subKeys[$x]]
+                            = $this->Request()->getParameter($subKeys[$x]);
 
                     }
 
@@ -99,7 +101,7 @@ class ActionChain extends ContextAware
 
             }
 
-            if ($action['params'] != NULL) {
+            if ($action['params'] != null) {
 
                 // add replacement parameters to the request
                 $subKeys  = array_keys($action['params']);
@@ -107,8 +109,10 @@ class ActionChain extends ContextAware
 
                 for ($x = 0; $x < $subCount; $x++) {
 
-                    $this->Request()->setParameterByRef($subKeys[$x],
-                                                $action['params'][$subKeys[$x]]);
+                    $this->Request()->setParameterByRef(
+                        $subKeys[$x],
+                        $action['params'][$subKeys[$x]]
+                    );
 
                 }
 
@@ -121,7 +125,7 @@ class ActionChain extends ContextAware
             $renderer =& $this->Request()->getAttribute('org.mojavi.renderer');
 
             // did the action render a view?
-            if ($renderer !== NULL) {
+            if ($renderer !== null) {
 
                 // retrieve rendered result
                 $action['result'] = $renderer->fetchResult();
@@ -142,8 +146,10 @@ class ActionChain extends ContextAware
 
                 for ($x = 0; $x < $subCount; $x++) {
 
-                    $this->Request()->setParameterByRef($subKeys[$x],
-                                                $params[$subKeys[$x]]);
+                    $this->Request()->setParameterByRef(
+                        $subKeys[$x],
+                        $params[$subKeys[$x]]
+                    );
 
                 }
 
@@ -175,7 +181,7 @@ class ActionChain extends ContextAware
             return $this->actions[$regName]['result'];
 
         }
-        $null = NULL;
+        $null = null;
 
         return $null;
 
@@ -184,14 +190,15 @@ class ActionChain extends ContextAware
     /**
      * Register an action with the chain.
      *
-     * @param string $regName An action registration name.
+     * @param string $regName  An action registration name.
      * @param string $unitName A unit name.
-     * @param string $actName An action name.
-     * @param array  $params  An associative array of temporary request parameters.
+     * @param string $actName  An action name.
+     * @param array  $params   Associative array of temporary request
+     *                         parameters.
      *
-     * @since  1.0
+     * @return void
      */
-    public function register ($regName, $unitName, $actName, $params = NULL)
+    public function register ($regName, $unitName, $actName, $params = null)
     {
 
         $this->actions[$regName]['action'] = $actName;
@@ -205,7 +212,7 @@ class ActionChain extends ContextAware
      *
      * @param bool $preserve A preservation status.
      *
-     * @since  1.0
+     * @return void
      */
     public function setPreserve ($preserve)
     {
