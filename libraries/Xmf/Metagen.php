@@ -25,10 +25,6 @@ namespace Xmf;
  */
 class Metagen
 {
-    /**
-     * @var MyTextSanitizer
-     */
-    private $_myts;
 
     /**
      * @var string
@@ -66,6 +62,13 @@ class Metagen
     private $_minChar = 5;
     private $_maxKeywords = 20;
 
+public static function assignTitle($title) {}
+public static function assignKeywords($keywords) {}
+public static function assignDescription($description) {}
+public static function generateKeywords($body, $forceKeys = null, $count=20, $minLength=5) {}
+public static function generateDescription($body, $wordCount = 100) {}
+public static function generateMetaTags($title, $body, $forceKeys = null, $count=20, $minLength=5, $wordCount = 100) {}
+
     /**
      * Constructor
      *
@@ -76,7 +79,6 @@ class Metagen
      */
     public function __construct($title, $keywords = '', $description = '', $category_path = '')
     {
-        $this->_myts = \MyTextSanitizer::getInstance();
         $this->setCategoryPath($category_path);
         $this->setTitle($title);
         $this->setDescription($description);
