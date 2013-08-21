@@ -42,6 +42,8 @@ class Buttonbox extends AbstractTemplate
     private $_position = "right";
 
     /**
+     * init
+     * 
      * @return void
      */
     protected function init()
@@ -49,7 +51,10 @@ class Buttonbox extends AbstractTemplate
     }
 
     /**
-     * @param  string $position
+     * set position - alignment position
+     * 
+     * @param string $position left, right, center
+     * 
      * @return void
      */
     public function setPosition($position)
@@ -58,7 +63,10 @@ class Buttonbox extends AbstractTemplate
     }
 
     /**
-     * @param  string $delimiter
+     * setDelimiter
+     * 
+     * @param string $delimiter delimiter put between buttons
+     * 
      * @return void
      */
     public function setDelimiter($delimiter)
@@ -67,10 +75,13 @@ class Buttonbox extends AbstractTemplate
     }
 
     /**
-     * @param  string $title
-     * @param  string $link
-     * @param  string $icon
-     * @param  string $extra
+     * addItem to buttonn box
+     * 
+     * @param string $title title string for button
+     * @param string $link  link for button
+     * @param string $icon  icon for button
+     * @param string $extra extra
+     * 
      * @return void
      */
     public function addItem($title, $link, $icon = 'add', $extra = '')
@@ -83,6 +94,8 @@ class Buttonbox extends AbstractTemplate
     }
 
     /**
+     * render the buttonbox
+     * 
      * @return void
      */
     protected function render()
@@ -90,17 +103,17 @@ class Buttonbox extends AbstractTemplate
         $ret = '';
         $path = XMF_IMAGES_URL . "/icons/32/";
         switch ($this->_position) {
-            default:
-            case "right":
-                $ret = "<div class=\"floatright\">\n";
-                break;
+        default:
+        case "right":
+            $ret = "<div class=\"floatright\">\n";
+            break;
 
-            case "left":
-                $ret = "<div class=\"floatleft\">\n";
-                break;
+        case "left":
+            $ret = "<div class=\"floatleft\">\n";
+            break;
 
-            case "center":
-                $ret = "<div class=\"aligncenter\">\n";
+        case "center":
+            $ret = "<div class=\"aligncenter\">\n";
         }
         $ret .= "<div class=\"xo-buttons\">\n";
         foreach ($this->_items as $item) {

@@ -50,21 +50,22 @@ abstract class AbstractTemplate
     /**
      * Classes must implement this method instead of using constructors
      *
-     * @abstract
+     * @return void
      */
     abstract protected function init();
 
     /**
      * Classes must implement this method for assigning content to $_tpl
      *
-     * @abstract
+     * @return void
      */
     abstract protected function render();
 
     /**
      * Used in init methods to set the template used by $_tpl
      *
-     * @param  string $template Path to the template file
+     * @param string $template Path to the template file
+     * 
      * @return void
      */
     protected function setTemplate($template = '')

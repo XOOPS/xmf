@@ -122,6 +122,8 @@ class Feed extends AbstractTemplate
     private $_items = array();
 
     /**
+     * init - called by parent::_construct
+     * 
      * @return void
      */
     protected function init()
@@ -175,7 +177,11 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @param string $category
+     * setCategory
+     * 
+     * @param string $category feed category
+     * 
+     * @return void
      */
     public function setCategory($category)
     {
@@ -183,7 +189,9 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @return string
+     * getCategory
+     * 
+     * @return string feed category
      */
     public function getCategory()
     {
@@ -191,7 +199,11 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @param string $charset
+     * setCharset
+     * 
+     * @param string $charset feed character set
+     * 
+     * @return void
      */
     public function setCharset($charset)
     {
@@ -199,7 +211,9 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @return string
+     * getCharset
+     * 
+     * @return string feed character set
      */
     public function getCharset()
     {
@@ -207,7 +221,11 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @param string $copyright
+     * setCopyright
+     * 
+     * @param string $copyright feed copyright
+     * 
+     * @return void
      */
     public function setCopyright($copyright)
     {
@@ -215,7 +233,9 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @return string
+     * getCopyright
+     * 
+     * @return string feed copyright
      */
     public function getCopyright()
     {
@@ -223,7 +243,11 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @param string $description
+     * setDescription
+     * 
+     * @param string $description feed description
+     * 
+     * @return void
      */
     public function setDescription($description)
     {
@@ -231,7 +255,9 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @return string
+     * getDescription
+     * 
+     * @return string feed description
      */
     public function getDescription()
     {
@@ -239,7 +265,11 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @param string $editor
+     * setEditor
+     * 
+     * @param string $editor editor of feed
+     * 
+     * @return void
      */
     public function setEditor($editor)
     {
@@ -247,7 +277,9 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @return string
+     * getEditor
+     * 
+     * @return string editor of feed
      */
     public function getEditor()
     {
@@ -255,7 +287,11 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @param string $generator
+     * setGenerator
+     * 
+     * @param string $generator feed generator
+     * 
+     * @return void
      */
     public function setGenerator($generator)
     {
@@ -263,7 +299,9 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @return string
+     * getGenerator
+     * 
+     * @return string feed generator
      */
     public function getGenerator()
     {
@@ -271,7 +309,11 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @param int $image_height
+     * setImageHeight
+     * 
+     * @param int $image_height height of feed image
+     * 
+     * @return void
      */
     public function setImageHeight($image_height)
     {
@@ -279,7 +321,9 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @return int
+     * getImageHeight
+     * 
+     * @return int height of feed image
      */
     public function getImageHeight()
     {
@@ -287,7 +331,11 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @param string $image_link
+     * setImageLink
+     * 
+     * @param string $image_link feed image link
+     * 
+     * @return void
      */
     public function setImageLink($image_link)
     {
@@ -295,7 +343,9 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @return string
+     * getImageLink
+     * 
+     * @return string feed image link
      */
     public function getImageLink()
     {
@@ -303,7 +353,11 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @param string $image_title
+     * setImageTitle
+     * 
+     * @param string $image_title feed image title
+     * 
+     * @return void
      */
     public function setImageTitle($image_title)
     {
@@ -311,7 +365,9 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @return string
+     * getImageTitle
+     * 
+     * @return string feed image title
      */
     public function getImageTitle()
     {
@@ -319,7 +375,11 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @param string $image_url
+     * setImageUrl
+     * 
+     * @param string $image_url url of feed image
+     * 
+     * @return void
      */
     public function setImageUrl($image_url)
     {
@@ -327,7 +387,9 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @return string
+     * getImageUrl
+     * 
+     * @return string url of feed image
      */
     public function getImageUrl()
     {
@@ -335,7 +397,11 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @param int $image_width
+     * setImageWidth
+     * 
+     * @param int $image_width width of feed image
+     * 
+     * @return void
      */
     public function setImageWidth($image_width)
     {
@@ -343,7 +409,9 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @return int
+     * getImageWidth
+     * 
+     * @return int width of feed image
      */
     public function getImageWidth()
     {
@@ -351,7 +419,11 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @param array $items
+     * setItems
+     * 
+     * @param array $items feed items
+     * 
+     * @return void
      */
     public function setItems($items)
     {
@@ -359,7 +431,9 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @return array
+     * getItems
+     * 
+     * @return array feed items
      */
     public function getItems()
     {
@@ -367,7 +441,11 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @param string $language
+     * setLanguage
+     * 
+     * @param string $language feed language
+     * 
+     * @return void
      */
     public function setLanguage($language)
     {
@@ -375,7 +453,9 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @return string
+     * getLanguage
+     * 
+     * @return string feed language
      */
     public function getLanguage()
     {
@@ -383,7 +463,11 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @param string $lastbuild
+     * setLastbuild
+     * 
+     * @param string $lastbuild last build time
+     * 
+     * @return void
      */
     public function setLastbuild($lastbuild)
     {
@@ -391,7 +475,9 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @return string
+     * getLastbuild
+     * 
+     * @return string last build time
      */
     public function getLastbuild()
     {
@@ -399,7 +485,11 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @param string $pubdate
+     * setPubdate
+     * 
+     * @param string $pubdate publish date
+     * 
+     * @return void
      */
     public function setPubdate($pubdate)
     {
@@ -407,7 +497,9 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @return string
+     * getPubdate
+     * 
+     * @return string publish date
      */
     public function getPubdate()
     {
@@ -415,7 +507,11 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @param string $title
+     * setTitle
+     * 
+     * @param string $title feed title
+     * 
+     * @return void
      */
     public function setTitle($title)
     {
@@ -423,7 +519,9 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @return string
+     * getTitle
+     * 
+     * @return string feed title
      */
     public function getTitle()
     {
@@ -431,7 +529,11 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @param int $ttl
+     * setTtl
+     * 
+     * @param int $ttl feed time to live
+     * 
+     * @return void
      */
     public function setTtl($ttl)
     {
@@ -439,7 +541,9 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @return int
+     * getTtl 
+     * 
+     * @return int feed time to live
      */
     public function getTtl()
     {
@@ -447,7 +551,11 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @param string $url
+     * set url
+     * 
+     * @param string $url feed site url
+     * 
+     * @return void
      */
     public function setUrl($url)
     {
@@ -455,7 +563,9 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @return string
+     * getUrl
+     * 
+     * @return string feed site url
      */
     public function getUrl()
     {
@@ -463,7 +573,11 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @param string $webmaster
+     * setWebmaster
+     * 
+     * @param string $webmaster feed site webmaster
+     * 
+     * @return void
      */
     public function setWebmaster($webmaster)
     {
@@ -471,7 +585,9 @@ class Feed extends AbstractTemplate
     }
 
     /**
-     * @return string
+     * getWebmaster
+     * 
+     * @return string feed site webmaster
      */
     public function getWebmaster()
     {

@@ -14,7 +14,7 @@ namespace Xmf\Database;
 use Xmf\Language;
 
 /**
- * Xmf\Database\Migrate
+ * Xmf\Database\Tables
  *
  * inspired by Yii CDbMigration
  *
@@ -24,15 +24,16 @@ use Xmf\Language;
  * already exists) no work is added. Then queueExecute() to process the
  * whole set.
   *
- * @category  Xmf\Database\Migrate
+ * @category  Xmf\Database\Tables
  * @package   Xmf
  * @author    Richard Griffith <richard@geekwright.com>
  * @copyright 2011-2013 The XOOPS Project http://sourceforge.net/projects/xoops/
  * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
  * @version   Release: 1.0
+ * @link      http://xoops.org
  * @since     1.0
  */
-class Migrate
+class Tables
 {
     /**
      * for add/alter column position
@@ -114,27 +115,27 @@ class Migrate
             // Is this on a table we are adding?
             if (isset($tableDef['create']) && $tableDef['create']) {
                 switch ($position) {
-                    case Migrate::POSITION_FIRST:
-                        array_unshift($tableDef['columns'], $columnDef);
-                        break;
-                    case '':
-                    case null:
-                    case false:
-                        array_push($tableDef['columns'], $columnDef);
-                        break;
-                    default:
-                        // should be a column name to add after
-                        // loop thru and find that column
-                        $i=0;
-                        foreach ($tableDef['columns'] as $col) {
-                            ++$i;
-                            if (strcasecmp($col['name'], $position)==0) {
-                                array_splice(
-                                    $tableDef['columns'], $i, 0, array($columnDef)
-                                );
-                                break;
-                            }
+                case Tables::POSITION_FIRST:
+                    array_unshift($tableDef['columns'], $columnDef);
+                    break;
+                case '':
+                case null:
+                case false:
+                    array_push($tableDef['columns'], $columnDef);
+                    break;
+                default:
+                    // should be a column name to add after
+                    // loop thru and find that column
+                    $i=0;
+                    foreach ($tableDef['columns'] as $col) {
+                        ++$i;
+                        if (strcasecmp($col['name'], $position)==0) {
+                            array_splice(
+                                $tableDef['columns'], $i, 0, array($columnDef)
+                            );
+                            break;
                         }
+                    }
                 }
 
                 return true;
@@ -145,16 +146,16 @@ class Migrate
                     }
                 }
                 switch ($position) {
-                    case Migrate::POSITION_FIRST:
-                        $pos='FIRST';
-                        break;
-                    case '':
-                    case null:
-                    case false:
-                        $pos='';
-                        break;
-                    default:
-                        $pos="AFTER `{$position}`";
+                case Tables::POSITION_FIRST:
+                    $pos='FIRST';
+                    break;
+                case '':
+                case null:
+                case false:
+                    $pos='';
+                    break;
+                default:
+                    $pos="AFTER `{$position}`";
                 }
                 $this->_queue[]="ALTER TABLE `{$tableDef['name']}`"
                     . " ADD COLUMN {$column} {$columnDef['attributes']} {$pos} ";
@@ -279,16 +280,16 @@ class Migrate
                 return true;
             } else {
                 switch ($position) {
-                    case Migrate::POSITION_FIRST:
-                        $pos='FIRST';
-                        break;
-                    case '':
-                    case null:
-                    case false:
-                        $pos='';
-                        break;
-                    default:
-                        $pos="AFTER `{$position}`";
+                case Tables::POSITION_FIRST:
+                    $pos='FIRST';
+                    break;
+                case '':
+                case null:
+                case false:
+                    $pos='';
+                    break;
+                default:
+                    $pos="AFTER `{$position}`";
                 }
                 $this->_queue[]="ALTER TABLE `{$tableDef['name']}` " .
                     "CHANGE COLUMN `{$column}` `{$newName}` {$attributes} {$pos} ";
@@ -932,8 +933,21 @@ class Migrate
         return $this->lastErrNo;
     }
 
-    // for development debugging only
-    public function dumpTables() { return $this->_tables; }
+    /**
+     * dumpTables - development function to dump raw tables array
+     * 
+     * @return array tables
+     */
+    public function dumpTables()
+    {
+        return $this->_tables;
+    }
+
+    /**
+     * dumpQueue - development function to dump the work queue
+     * 
+     * @return array work queue
+     */
     public function dumpQueue()
     {
         $this->_expandQueue();

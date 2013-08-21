@@ -47,7 +47,7 @@ class Breadcrumb extends AbstractTemplate
      *  - 'caption' => ready to display string item,
      *  - 'link' => url (omit to disable link on this item)
      *
-     * @param  array $items array of breadcrumb items
+     * @param array $items array of breadcrumb items
      *
      * @return void
      */

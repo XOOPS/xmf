@@ -22,11 +22,13 @@ namespace Xmf\Filter;
  * @package   Xmf
  * @author    Grégory Mage (Aka Mage)
  * @author    trabis <lusopoemas@gmail.com>
+ * @author    Richard Griffith <richard@geekwright.com>
  * @author    Louis Landry <louis.landry@joomla.org>
  * @author    Daniel Morris <dan@rootcube.com>
  * @copyright 2011-2013 The XOOPS Project http://sourceforge.net/projects/xoops/
  * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
  * @version   Release: 1.0
+ * @link      http://xoops.org
  * @since     1.0
  */
 class Input
@@ -67,22 +69,23 @@ class Input
     /**
      * @var array
      */
-    protected $attrBlacklist =
-    array('action', 'background', 'codebase', 'dynsrc', 'lowsrc'); // also will strip ALL event handlers
+    protected $attrBlacklist 
+        =  array('action', 'background', 'codebase', 'dynsrc', 'lowsrc'); 
+    // also will strip ALL event handlers
 
     /**
      * Constructor for inputFilter class. Only first parameter is required.
      *
-     * @access  protected
      * @param array $tagsArray  list of user-defined tags
      * @param array $attrArray  list of user-defined attributes
      * @param int   $tagsMethod WhiteList method = 0, BlackList method = 1
      * @param int   $attrMethod WhiteList method = 0, BlackList method = 1
      * @param int   $xssAuto    Only auto clean essentials = 0, Allow clean blacklisted tags/attr = 1
      */
-    protected function __construct($tagsArray = array(), $attrArray =
-        array(), $tagsMethod = 0, $attrMethod = 0, $xssAuto = 1)
-    {
+    protected function __construct(
+        $tagsArray = array(), $attrArray = array(), 
+        $tagsMethod = 0, $attrMethod = 0, $xssAuto = 1
+    ) {
         // Make sure user defined arrays are in lowercase
         $tagsArray = array_map('strtolower', (array) $tagsArray);
         $attrArray = array_map('strtolower', (array) $attrArray);
@@ -101,18 +104,20 @@ class Input
      * This method must be invoked as:
      *      <pre>  $filter = & Xmf\Filter\Input::getInstance();</pre>
      *
-     * @static
-     * @param  array            $tagsArray  list of user-defined tags
-     * @param  array            $attrArray  list of user-defined attributes
-     * @param  int              $tagsMethod WhiteList method = 0, BlackList method = 1
-     * @param  int              $attrMethod WhiteList method = 0, BlackList method = 1
-     * @param  int              $xssAuto    Only auto clean essentials = 0, Allow clean blacklisted tags/attr = 1
+     * @param array $tagsArray  list of user-defined tags
+     * @param array $attrArray  list of user-defined attributes
+     * @param int   $tagsMethod WhiteList method = 0, BlackList method = 1
+     * @param int   $attrMethod WhiteList method = 0, BlackList method = 1
+     * @param int   $xssAuto    Only auto clean essentials = 0, 
+     *                           Allow clean blacklisted tags/attr = 1
+     * 
      * @return Xmf\Filter\Input The Xmf\Filter\Input object.
      * @since   1.5
      */
-    public static function getInstance($tagsArray = array(), $attrArray =
-        array(), $tagsMethod = 0, $attrMethod = 0, $xssAuto = 1)
-    {
+    public static function getInstance(
+        $tagsArray = array(), $attrArray = array(), 
+        $tagsMethod = 0, $attrMethod = 0, $xssAuto = 1
+    ) {
         static $instances;
 
         $sig = md5(serialize(array($tagsArray, $attrArray, $tagsMethod, $attrMethod, $xssAuto)));
@@ -134,102 +139,103 @@ class Input
      *
      * @param mixed  $source Input string/array-of-string to be 'cleaned'
      * @param string $type   Return type for the variable (INT, FLOAT,
-     *                        BOOLEAN, WORD, ALNUM, CMD, BASE64, STRING,
-     *                        ARRAY, PATH, NONE)
-     * @return mixed  'Cleaned' version of input parameter
+     *                       BOOLEAN, WORD, ALNUM, CMD, BASE64, STRING,
+     *                       ARRAY, PATH, NONE)
+     * 
+     * @return mixed 'Cleaned' version of input parameter
      * @static
      */
     public static function clean($source, $type = 'string')
     {
         // Handle the type constraint
         switch (strtoupper($type)) {
-            case 'INT' :
-            case 'INTEGER' :
-                // Only use the first integer value
-                preg_match('/-?[0-9]+/', (string) $source, $matches);
-                $result = @ (int) $matches[0];
-                break;
+        case 'INT' :
+        case 'INTEGER' :
+            // Only use the first integer value
+            preg_match('/-?[0-9]+/', (string) $source, $matches);
+            $result = @ (int) $matches[0];
+            break;
 
-            case 'FLOAT' :
-            case 'DOUBLE' :
-                // Only use the first floating point value
-                preg_match('/-?[0-9]+(\.[0-9]+)?/', (string) $source, $matches);
-                $result = @ (float) $matches[0];
-                break;
+        case 'FLOAT' :
+        case 'DOUBLE' :
+            // Only use the first floating point value
+            preg_match('/-?[0-9]+(\.[0-9]+)?/', (string) $source, $matches);
+            $result = @ (float) $matches[0];
+            break;
 
-            case 'BOOL' :
-            case 'BOOLEAN' :
-                $result = (bool) $source;
-                break;
+        case 'BOOL' :
+        case 'BOOLEAN' :
+            $result = (bool) $source;
+            break;
 
-            case 'WORD' :
-                $result = (string) preg_replace('/[^A-Z_]/i', '', $source);
-                break;
+        case 'WORD' :
+            $result = (string) preg_replace('/[^A-Z_]/i', '', $source);
+            break;
 
-            case 'ALNUM' :
-                $result = (string) preg_replace('/[^A-Z0-9]/i', '', $source);
-                break;
+        case 'ALNUM' :
+            $result = (string) preg_replace('/[^A-Z0-9]/i', '', $source);
+            break;
 
-            case 'CMD' :
-                $result = (string) preg_replace('/[^A-Z0-9_\.-]/i', '', $source);
-                $result = ltrim($result, '.');
-                break;
+        case 'CMD' :
+            $result = (string) preg_replace('/[^A-Z0-9_\.-]/i', '', $source);
+            $result = ltrim($result, '.');
+            break;
 
-            case 'BASE64' :
-                $result = (string) preg_replace('/[^A-Z0-9\/+=]/i', '', $source);
-                break;
+        case 'BASE64' :
+            $result = (string) preg_replace('/[^A-Z0-9\/+=]/i', '', $source);
+            break;
 
-            case 'STRING' :
-                // Check for static usage and assign $filter the proper variable
-                if (isset($this) && is_a($this, 'Xmf\Filter\Input')) {
-                    $filter =& $this;
-                } else {
-                    $filter = Input::getInstance();
-                }
-                $result = (string) $filter->_remove($filter->_decode((string) $source));
-                break;
+        case 'STRING' :
+            // Check for static usage and assign $filter the proper variable
+            if (isset($this) && is_a($this, 'Xmf\Filter\Input')) {
+                $filter =& $this;
+            } else {
+                $filter = Input::getInstance();
+            }
+            $result = (string) $filter->_remove($filter->_decode((string) $source));
+            break;
 
-            case 'ARRAY' :
-                $result = (array) $source;
-                break;
+        case 'ARRAY' :
+            $result = (array) $source;
+            break;
 
-            case 'PATH' :
-                $pattern = '/^[A-Za-z0-9_-]+[A-Za-z0-9_\.-]*([\\\\\/][A-Za-z0-9_-]+[A-Za-z0-9_\.-]*)*$/';
-                preg_match($pattern, (string) $source, $matches);
-                $result = @ (string) $matches[0];
-                break;
+        case 'PATH' :
+            $pattern = '/^[A-Za-z0-9_-]+[A-Za-z0-9_\.-]*([\\\\\/][A-Za-z0-9_-]+[A-Za-z0-9_\.-]*)*$/';
+            preg_match($pattern, (string) $source, $matches);
+            $result = @ (string) $matches[0];
+            break;
 
-            case 'USERNAME' :
-                $result = (string) preg_replace('/[\x00-\x1F\x7F<>"\'%&]/', '', $source);
-                break;
+        case 'USERNAME' :
+            $result = (string) preg_replace('/[\x00-\x1F\x7F<>"\'%&]/', '', $source);
+            break;
 
-            default :
-                // Check for static usage and assign $filter the proper variable
-                if (isset($this) && is_object($this) && get_class($this) == 'Xmf\Filter\Input') {
-                    $filter =& $this;
-                } else {
-                    $filter = Input::getInstance();
-                }
-                // Are we dealing with an array?
-                if (is_array($source)) {
-                    foreach ($source as $key => $value) {
-                        // filter element for XSS and other 'bad' code etc.
-                        if (is_string($value)) {
-                            $source[$key] = $filter->_remove($filter->_decode($value));
-                        }
+        default :
+            // Check for static usage and assign $filter the proper variable
+            if (isset($this) && is_object($this) && get_class($this) == 'Xmf\Filter\Input') {
+                $filter =& $this;
+            } else {
+                $filter = Input::getInstance();
+            }
+            // Are we dealing with an array?
+            if (is_array($source)) {
+                foreach ($source as $key => $value) {
+                    // filter element for XSS and other 'bad' code etc.
+                    if (is_string($value)) {
+                        $source[$key] = $filter->_remove($filter->_decode($value));
                     }
+                }
+                $result = $source;
+            } else {
+                // Or a string?
+                if (is_string($source) && !empty ($source)) {
+                    // filter source for XSS and other 'bad' code etc.
+                    $result = $filter->_remove($filter->_decode($source));
+                } else {
+                    // Not an array or string.. return the passed parameter
                     $result = $source;
-                } else {
-                    // Or a string?
-                    if (is_string($source) && !empty ($source)) {
-                        // filter source for XSS and other 'bad' code etc.
-                        $result = $filter->_remove($filter->_decode($source));
-                    } else {
-                        // Not an array or string.. return the passed parameter
-                        $result = $source;
-                    }
                 }
-                break;
+            }
+            break;
         }
 
         return $result;
@@ -238,11 +244,11 @@ class Input
     /**
      * Function to determine if contents of an attribute is safe
      *
-     * @static
-     * @param  array   $attrSubSet A 2 element array for attributes name,value
+     * @param array $attrSubSet A 2 element array for attributes name,value
+     * 
      * @return boolean True if bad code is detected
      */
-    public function checkAttribute($attrSubSet)
+    protected static function checkAttribute($attrSubSet)
     {
         $attrSubSet[0] = strtolower($attrSubSet[0]);
         $attrSubSet[1] = strtolower($attrSubSet[1]);
@@ -253,11 +259,11 @@ class Input
     /**
      * Internal method to iteratively remove all unwanted tags and attributes
      *
-     * @access  protected
-     * @param  string $source Input string to be 'cleaned'
+     * @param string $source Input string to be 'cleaned'
+     * 
      * @return string 'Cleaned' version of input parameter
      */
-    protected function _remove($source)
+    private function _remove($source)
     {
         $loopCounter = 0;
 
@@ -273,11 +279,11 @@ class Input
     /**
      * Internal method to strip a string of certain tags
      *
-     * @access  protected
-     * @param  string $source Input string to be 'cleaned'
+     * @param string $source Input string to be 'cleaned'
+     * 
      * @return string 'Cleaned' version of input parameter
      */
-    protected function _cleanTags($source)
+    private function _cleanTags($source)
     {
         /*
          * In the beginning we don't really have a tag, so everything is
@@ -436,11 +442,11 @@ class Input
     /**
      * Internal method to strip a tag of certain attributes
      *
-     * @access  protected
-     * @param  array $attrSet Array of attribute pairs to filter
+     * @param array $attrSet Array of attribute pairs to filter
+     * 
      * @return array Filtered array of attribute pairs
      */
-    protected function _cleanAttributes($attrSet)
+    private function _cleanAttributes($attrSet)
     {
         // Initialize variables
         $newSet = array();
@@ -512,11 +518,11 @@ class Input
     /**
      * Try to convert to plaintext
      *
-     * @access  protected
-     * @param  string $source
+     * @param string $source text to convert
+     * 
      * @return string Plaintext string
      */
-    protected function _decode($source)
+    private function _decode($source)
     {
         // entity decode
         $ttr = array();
@@ -526,9 +532,15 @@ class Input
         }
         $source = strtr($source, $ttr);
         // convert decimal
-        $source = preg_replace_callback('/&#(\d+);/m', create_function('$matches',"return  chr(\$matches[1]);"),$source);
+        $source = preg_replace_callback(
+            '/&#(\d+);/m', 
+            create_function('$matches', "return  chr(\$matches[1]);"), $source
+        );
         // convert hex
-        $source = preg_replace_callback('/&#x([a-f0-9]+);/mi', create_function('$matches',"return  chr('0x'.\$matches[1]);"),$source);
+        $source = preg_replace_callback(
+            '/&#x([a-f0-9]+);/mi', 
+            create_function('$matches', "return  chr('0x'.\$matches[1]);"), $source
+        );
 
         return $source;
     }

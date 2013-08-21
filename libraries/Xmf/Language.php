@@ -30,41 +30,47 @@ class Language
     /**
      * Returns a translated string
      *
-     * @static
-     * @param  string       $string
-     * @param  string       $default
-     * @return mixed|string
+     * @param string $string string to translate
+     * @param string $domain language domain
+     * 
+     * @return mixed|string translated string
      */
-    public static function _($string, $default = null)
+    public static function _($string, $domain = null)
     {
         if (defined(strtoupper($string))) {
             return constant(strtoupper($string));
         } else {
-            return self::translate($string, $default);
+            return self::translate($string, $domain);
         }
     }
 
     /**
-     * @static
-     * @param  string $string
-     * @param  string $default
-     * @return string
+     * Attempt a translation of a simple string
+     *
+     * @param string $string string to translate
+     * @param string $domain language domain
+     * 
+     * @return string translated string
+     * 
+     * @todo do something useful
      */
-    public static function translate($string, $default = null)
+    public static function translate($string, $domain = null)
     {
-        if (isset($default)) {
-            $string = '';
+        if (isset($domain)) {
+            //$string = ;
         }
 
         return $string;
     }
 
     /**
-     * @static
-     * @param  string $name
-     * @param  string $domain
-     * @param  string $language
-     * @return bool
+     * load - load a language file
+     * 
+     * @param string $name     name of the language file
+     * @param string $domain   domain or module supplying language file
+     * @param string $language laguage folder name
+     * 
+     * @return bool true if loaded, otherwise false
      */
     public static function load($name, $domain = '', $language = null)
     {

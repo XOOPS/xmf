@@ -52,6 +52,8 @@ class PrintContent extends AbstractTemplate
     private $_width = 680;
 
     /**
+     * init - called by parent::_construct
+     * 
      * @return void
      */
     protected function init()
@@ -59,6 +61,11 @@ class PrintContent extends AbstractTemplate
         $this->setTemplate(XMF_ROOT_PATH . '/templates/xmf_print.html');
     }
 
+    /**
+     * Render the print template
+     * 
+     * @return void
+     */
     protected function render()
     {
         $this->tpl->assign('xmf_print_pageTitle', $this->_pagetitle ? $this->_pagetitle : $this->_title);
@@ -69,7 +76,11 @@ class PrintContent extends AbstractTemplate
     }
 
     /**
-     * @param string $content
+     * setContent
+     * 
+     * @param string $content page content
+     * 
+     * @return void
      */
     public function setContent($content)
     {
@@ -77,7 +88,9 @@ class PrintContent extends AbstractTemplate
     }
 
     /**
-     * @return string
+     * getContent
+     * 
+     * @return string page content
      */
     public function getContent()
     {
@@ -85,7 +98,11 @@ class PrintContent extends AbstractTemplate
     }
 
     /**
-     * @param string $description
+     * setDescription
+     * 
+     * @param string $description page description
+     * 
+     * @return void
      */
     public function setDescription($description)
     {
@@ -93,7 +110,9 @@ class PrintContent extends AbstractTemplate
     }
 
     /**
-     * @return string
+     * getDescription
+     * 
+     * @return string page description
      */
     public function getDescription()
     {
@@ -101,7 +120,11 @@ class PrintContent extends AbstractTemplate
     }
 
     /**
-     * @param boolean $pagetitle
+     * setPagetitle
+     * 
+     * @param boolean $pagetitle use page title
+     * 
+     * @return void
      */
     public function setPagetitle($pagetitle)
     {
@@ -109,7 +132,9 @@ class PrintContent extends AbstractTemplate
     }
 
     /**
-     * @return boolean
+     * getPagetitle
+     * 
+     * @return boolean use page title
      */
     public function getPagetitle()
     {
@@ -117,7 +142,11 @@ class PrintContent extends AbstractTemplate
     }
 
     /**
-     * @param string $title
+     * setTitle
+     * 
+     * @param string $title page title
+     * 
+     * @return void
      */
     public function setTitle($title)
     {
@@ -125,7 +154,9 @@ class PrintContent extends AbstractTemplate
     }
 
     /**
-     * @return string
+     * getTitle
+     * 
+     * @return string page title
      */
     public function getTitle()
     {
@@ -133,7 +164,11 @@ class PrintContent extends AbstractTemplate
     }
 
     /**
-     * @param int $width
+     * setWidth
+     * 
+     * @param int $width page width in pixels
+     * 
+     * @return void
      */
     public function setWidth($width)
     {
@@ -141,7 +176,9 @@ class PrintContent extends AbstractTemplate
     }
 
     /**
-     * @return int
+     * getWidth
+     * 
+     * @return int page width in pixels
      */
     public function getWidth()
     {

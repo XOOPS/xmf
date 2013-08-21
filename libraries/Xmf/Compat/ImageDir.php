@@ -34,7 +34,7 @@ class ImageDir
      */
     public static function is26()
     {
-        return class_exists('Xoops',false);
+        return class_exists('Xoops', false);
     }
 
     /**
@@ -50,21 +50,22 @@ class ImageDir
      * @param string $size the icon size (directory). Valid values are
      *                     16, 32 or /. A '/' slash will simply set the
      *                     path to the icon directory and append $image.
+     * 
      * @return bool true if we are in a 2.6 environment
      */
     public static function iconUrl($name='',$size='32')
     {
         switch ($size) {
-            case '16':
-                $path='16/';
-                break;
-            case '/':
-                $path='';
-                break;
-            default:
-            case '32':
-                $path='32/';
-                break;
+        case '16':
+            $path='16/';
+            break;
+        case '/':
+            $path='';
+            break;
+        default:
+        case '32':
+            $path='32/';
+            break;
         }
 
         if (ImageDir::is26()) {
