@@ -206,6 +206,19 @@ class Metagen
             $i++;
         }
         $ret = implode(' ', $newWords);
+        if (function_exists('mb_strlen')) {
+            $len = mb_strlen($ret);
+            $lastperiod = mb_strrpos($ret, '.');
+            if ($len>100 && ($len-$lastperiod)<30) {
+                $ret = mb_substr($ret, 0, $lastperiod+1);
+            }
+        } else {
+            $len = strlen($ret);
+            $lastperiod = strrpos($ret, '.');
+            if ($len>100 && ($len-$lastperiod)<30) {
+                $ret = substr($ret, 0, $lastperiod+1);
+            }
+        }
 
         return $ret;
     }
