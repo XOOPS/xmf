@@ -29,7 +29,7 @@ define('XMF_EXEC', true);
 
 define('XMF_URL',            XOOPS_URL . '/modules/xmf');
 define('XMF_CSS_URL',        XMF_URL . '/css');
-define('XMF_IMAGES_URL',     XMF_URL . '/images');
+// define('XMF_IMAGES_URL',     XMF_URL . '/images');
 define('XMF_INCLUDE_URL',    XMF_URL . '/include');
 define('XMF_LANGUAGE_URL',   XMF_URL . '/language');
 define('XMF_LIBRARIES_URL',  XMF_URL . '/libraries');
