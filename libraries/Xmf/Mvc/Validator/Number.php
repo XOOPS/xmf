@@ -59,7 +59,7 @@ class Number extends AbstractValidator
         if ($this->params['strip']) {
             $value = preg_replace('/[^0-9\.\-]*/', '', $value);
             if ($value!='') {
-                $value = \Xmf\Filter\Input::clean($value, 'float') . '';
+                $value = \Xmf\FilterInput::clean($value, 'float') . '';
             }
         }
 

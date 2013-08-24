@@ -51,7 +51,7 @@ class Clean extends AbstractValidator
     public function execute (&$value, &$error)
     {
         $value = trim($value);
-        $value = \Xmf\Filter\Input::clean($value, $this->params['type']);
+        $value = \Xmf\FilterInput::clean($value, $this->params['type']);
 
         return true;
     }
@@ -64,14 +64,14 @@ class Clean extends AbstractValidator
      *
      * Name    | Type   | Default | Required | Description
      * ------- | ------ | ------- | -------- | -----------
-     * chars   | string | default | no       | type for Xmf\Filter\Input::clean()
+     * chars   | string | default | no       | type for Xmf\FilterInput::clean()
      *
      * Error Messages:
      *
      * _none_ - this validator cannot fail
      *
      * @param mixed $params An associative array of initialization parameters,
-     *                       or a scalar type string for Xmf\Filter\Input::clean()
+     *                       or a scalar type string for Xmf\FilterInput::clean()
      *
      * @return void
      * @since  1.0

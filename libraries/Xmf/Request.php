@@ -70,11 +70,11 @@ class Request
      *  - method     via current $_SERVER['REQUEST_METHOD']
      *  - default    $_REQUEST
      *
-     * @param  string $name    Variable name
-     * @param  string $default Default value if the variable does not exist
-     * @param  string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
-     * @param  string $type    Return type for the variable, for valid values see {@link Xmf\Filter\Input::clean()}.
-     * @param  int    $mask    Filter mask for the variable
+     * @param string $name    Variable name
+     * @param string $default Default value if the variable does not exist
+     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $type    Return type for the variable, for valid values see {@link Xmf\FilterInput::clean()}.
+     * @param int    $mask    Filter mask for the variable
      *
      * @return mixed  Requested variable
      */
@@ -90,28 +90,28 @@ class Request
 
         // Get the input hash
         switch ($hash) {
-            case 'GET' :
-                $input = &$_GET;
-                break;
-            case 'POST' :
-                $input = &$_POST;
-                break;
-            case 'FILES' :
-                $input = &$_FILES;
-                break;
-            case 'COOKIE' :
-                $input = &$_COOKIE;
-                break;
-            case 'ENV'    :
-                $input = &$_ENV;
-                break;
-            case 'SERVER'    :
-                $input = &$_SERVER;
-                break;
-            default:
-                $input = &$_REQUEST;
-                $hash = 'REQUEST';
-                break;
+        case 'GET' :
+            $input = &$_GET;
+            break;
+        case 'POST' :
+            $input = &$_POST;
+            break;
+        case 'FILES' :
+            $input = &$_FILES;
+            break;
+        case 'COOKIE' :
+            $input = &$_COOKIE;
+            break;
+        case 'ENV'    :
+            $input = &$_ENV;
+            break;
+        case 'SERVER'    :
+            $input = &$_SERVER;
+            break;
+        default:
+            $input = &$_REQUEST;
+            $hash = 'REQUEST';
+            break;
         }
 
         if (isset($input[$name]) && $input[$name] !== null) {
@@ -141,9 +141,9 @@ class Request
      *
      * See getVar() for more in-depth documentation on the parameters.
      *
-     * @param  string $name    Variable name
-     * @param  int    $default Default value if the variable does not exist
-     * @param  string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $name    Variable name
+     * @param int    $default Default value if the variable does not exist
+     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
      *
      * @return int    Requested variable
      */
@@ -159,9 +159,9 @@ class Request
      *
      * See getVar() for more in-depth documentation on the parameters.
      *
-     * @param  string $name    Variable name
-     * @param  float  $default Default value if the variable does not exist
-     * @param  string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $name    Variable name
+     * @param float  $default Default value if the variable does not exist
+     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
      *
      * @return float  Requested variable
      */
@@ -177,11 +177,11 @@ class Request
      *
      * See getVar() for more in-depth documentation on the parameters.
      *
-     * @param  string $name    Variable name
-     * @param  bool   $default Default value if the variable does not exist
-     * @param  string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $name    Variable name
+     * @param bool   $default Default value if the variable does not exist
+     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
      *
-     * @return bool   Requested variable
+     * @return bool Requested variable
      */
     public static function getBool($name, $default = false, $hash = 'default')
     {
@@ -195,9 +195,9 @@ class Request
      *
      * See getVar() for more in-depth documentation on the parameters.
      *
-     * @param  string $name    Variable name
-     * @param  string $default Default value if the variable does not exist
-     * @param  string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $name    Variable name
+     * @param string $default Default value if the variable does not exist
+     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
      *
      * @return string Requested variable
      */
@@ -213,9 +213,9 @@ class Request
      *
      * See getVar() for more in-depth documentation on the parameters.
      *
-     * @param  string $name    Variable name
-     * @param  string $default Default value if the variable does not exist
-     * @param  string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $name    Variable name
+     * @param string $default Default value if the variable does not exist
+     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
      *
      * @return string Requested variable
      */
@@ -231,10 +231,10 @@ class Request
      *
      * See getVar() for more in-depth documentation on the parameters.
      *
-     * @param  string $name    Variable name
-     * @param  string $default Default value if the variable does not exist
-     * @param  string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
-     * @param  int    $mask    Filter mask for the variable
+     * @param string $name    Variable name
+     * @param string $default Default value if the variable does not exist
+     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param int    $mask    Filter mask for the variable
      *
      * @return string Requested variable
      */
@@ -247,9 +247,9 @@ class Request
     /**
      * Fetches and returns an array
      *
-     * @param  string $name    Variable name
-     * @param  string $default Default value if the variable does not exist
-     * @param  string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $name    Variable name
+     * @param string $default Default value if the variable does not exist
+     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
      *
      * @return array
      */
@@ -261,9 +261,9 @@ class Request
     /**
      * Fetches and returns raw text
      *
-     * @param  string $name    Variable name
-     * @param  string $default Default value if the variable does not exist
-     * @param  string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $name    Variable name
+     * @param string $default Default value if the variable does not exist
+     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
      *
      * @return string Requested variable
      */
@@ -275,10 +275,10 @@ class Request
     /**
      * Set a variable in one of the request variables
      *
-     * @param  string  $name      Name
-     * @param  string  $value     Value
-     * @param  string  $hash      Hash
-     * @param  boolean $overwrite Boolean
+     * @param string  $name      Name
+     * @param string  $value     Value
+     * @param string  $hash      Hash
+     * @param boolean $overwrite Boolean
      *
      * @return string  Previous value
      */
@@ -298,27 +298,27 @@ class Request
         $previous = array_key_exists($name, $_REQUEST) ? $_REQUEST[$name] : null;
 
         switch ($hash) {
-            case 'GET' :
-                $_GET[$name] = $value;
-                $_REQUEST[$name] = $value;
-                break;
-            case 'POST' :
-                $_POST[$name] = $value;
-                $_REQUEST[$name] = $value;
-                break;
-            case 'COOKIE' :
-                $_COOKIE[$name] = $value;
-                $_REQUEST[$name] = $value;
-                break;
-            case 'FILES' :
-                $_FILES[$name] = $value;
-                break;
-            case 'ENV'    :
-                $_ENV['name'] = $value;
-                break;
-            case 'SERVER'    :
-                $_SERVER['name'] = $value;
-                break;
+        case 'GET' :
+            $_GET[$name] = $value;
+            $_REQUEST[$name] = $value;
+            break;
+        case 'POST' :
+            $_POST[$name] = $value;
+            $_REQUEST[$name] = $value;
+            break;
+        case 'COOKIE' :
+            $_COOKIE[$name] = $value;
+            $_REQUEST[$name] = $value;
+            break;
+        case 'FILES' :
+            $_FILES[$name] = $value;
+            break;
+        case 'ENV'    :
+            $_ENV['name'] = $value;
+            break;
+        case 'SERVER'    :
+            $_SERVER['name'] = $value;
+            break;
         }
 
         return $previous;
@@ -342,8 +342,8 @@ class Request
      *  - method      via current $_SERVER['REQUEST_METHOD']
      *  - default     $_REQUEST
      *
-     * @param  string $hash to get (POST, GET, FILES, METHOD)
-     * @param  int    $mask Filter mask for the variable
+     * @param string $hash to get (POST, GET, FILES, METHOD)
+     * @param int    $mask Filter mask for the variable
      *
      * @return mixed  Request hash
      */
@@ -356,33 +356,27 @@ class Request
         }
 
         switch ($hash) {
-            case 'GET' :
-                $input = $_GET;
-                break;
-
-            case 'POST' :
-                $input = $_POST;
-                break;
-
-            case 'FILES' :
-                $input = $_FILES;
-                break;
-
-            case 'COOKIE' :
-                $input = $_COOKIE;
-                break;
-
-            case 'ENV'    :
-                $input = &$_ENV;
-                break;
-
-            case 'SERVER'    :
-                $input = &$_SERVER;
-                break;
-
-            default:
-                $input = $_REQUEST;
-                break;
+        case 'GET' :
+            $input = $_GET;
+            break;
+        case 'POST' :
+            $input = $_POST;
+            break;
+        case 'FILES' :
+            $input = $_FILES;
+            break;
+        case 'COOKIE' :
+            $input = $_COOKIE;
+            break;
+        case 'ENV'    :
+            $input = &$_ENV;
+            break;
+        case 'SERVER'    :
+            $input = &$_SERVER;
+            break;
+        default:
+            $input = $_REQUEST;
+            break;
         }
 
         // Handle magic quotes compatability
@@ -414,17 +408,17 @@ class Request
     /**
      * Clean up an input variable.
      *
-     * @param mixed $var  The input variable.
-     * @param int   $mask Filter bit mask.
+     * @param mixed  $var  The input variable.
+     * @param int    $mask Filter bit mask.
      *  - 1=no trim: If this flag is cleared and the input is a string, the string will have leading and trailing whitespace trimmed.
      *  - 2=allow_raw: If set, no more filtering is performed, higher bits are ignored.
      *  - 4=allow_html: HTML is allowed, but passed through a safe HTML filter first. If set, no more filtering is performed.
      *  - If no bits other than the 1 bit is set, a strict filter is applied.
-     * @param string $type The variable type. See {@link Xmf\Filter\Input::clean()}.
+     * @param string $type The variable type. See {@link Xmf\FilterInput::clean()}.
      *
      * @return string
      */
-    protected static function _cleanVar($var, $mask = 0, $type = null)
+    private static function _cleanVar($var, $mask = 0, $type = null)
     {
         // Static input filters for specific settings
         static $noHtmlFilter = null;
@@ -442,13 +436,13 @@ class Request
             if ($mask & 4) {
                 // If the allow html flag is set, apply a safe html filter to the variable
                 if (is_null($safeHtmlFilter)) {
-                    $safeHtmlFilter = Filter\Input::getInstance(null, null, 1, 1);
+                    $safeHtmlFilter = FilterInput::getInstance(null, null, 1, 1);
                 }
                 $var = $safeHtmlFilter->clean($var, $type);
             } else {
                 // Since no allow flags were set, we will apply the most strict filter to the variable
                 if (is_null($noHtmlFilter)) {
-                    $noHtmlFilter = Filter\Input::getInstance( /* $tags, $attr, $tag_method, $attr_method, $xss_auto */);
+                    $noHtmlFilter = FilterInput::getInstance();
                 }
                 $var = $noHtmlFilter->clean($var, $type);
             }
@@ -462,11 +456,11 @@ class Request
      *
      * @param mixed  $var  The input variable.
      * @param int    $mask Filter bit mask. See {@link Xmf\Request::_cleanVar()}
-     * @param string $type The variable type. See {@link Xmf\Filter\Input::clean()}.
+     * @param string $type The variable type. See {@link Xmf\FilterInput::clean()}.
      *
      * @return string
      */
-    protected static function _cleanVars($var, $mask = 0, $type = null)
+    private static function _cleanVars($var, $mask = 0, $type = null)
     {
         if (is_string($var)) {
             $var = Request::_cleanVar($var, $mask, $type);
@@ -483,11 +477,11 @@ class Request
     /**
      * Strips slashes recursively on an array
      *
-     * @access    protected
-     * @param  array $value Array of (nested arrays of) strings
+     * @param array $value Array of (nested arrays of) strings
+     * 
      * @return array The input array with stripshlashes applied to it
      */
-    protected static function _stripSlashesRecursive($value)
+    private static function _stripSlashesRecursive($value)
     {
         $value = is_array($value) ? array_map(array('Xmf\Request', '_stripSlashesRecursive'), $value)
             : stripslashes($value);
