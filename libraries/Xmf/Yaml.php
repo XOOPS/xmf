@@ -11,6 +11,8 @@
 
 namespace Xmf;
 
+use Symfony\Component\Yaml\Yaml as VendorYaml;
+
 /**
  * Yaml dump and parse methods
  *
@@ -22,12 +24,12 @@ namespace Xmf;
  * vendor directory. The intent is to provide a consistent interface
  * no mater what underlying library is actually used.
  *
- * At present, this class expects the mustangostang/spyc package
+ * At present, this class expects the symfony/yaml package.
  *
  * @category  Xmf\Module\Yaml
  * @package   Xmf
  * @author    Richard Griffith <richard@geekwright.com>
- * @copyright 2011-2013 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @copyright 2013 The XOOPS Project http://sourceforge.net/projects/xoops/
  * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
  * @version   Release: 1.0
  * @link      http://xoops.org
@@ -40,13 +42,21 @@ class Yaml
     /**
      * Dump an PHP array as a YAML string
      *
-     * @param array $var variable which will be dumped
+     * @param mixed   $var    Variable which will be dumped
+     * @param integer $inline Nesting level where you switch to inline YAML
+     * @param integer $indent Number of spaces to indent for nested nodes
      *
-     * @return mixed|string
+     * @return string|bool YAML string or false on error
      */
-    public static function dump($var)
+    public static function dump($var, $inline = 4, $indent = 4)
     {
-        return \Spyc::YAMLDump($var);
+        try {
+            $ret = VendorYaml::dump($var, $inline, $indent);
+        } catch (Exception $e) {
+            trigger_error($e->getMessage());
+            $ret = false;
+        }
+        return $ret;
     }
 
     /**
@@ -54,11 +64,17 @@ class Yaml
      *
      * @param string $yamlString YAML dump string
      *
-     * @return mixed|string
+     * @return mixed|bool PHP array or false on error
      */
     public static function load($yamlString)
     {
-        return \Spyc::YAMLLoadString($yamlString);
+        try {
+            $ret = VendorYaml::parse($yamlString);
+        } catch (Exception $e) {
+            trigger_error($e->getMessage());
+            $ret = false;
+        }
+        return $ret;
     }
 
     /**
@@ -66,26 +82,40 @@ class Yaml
      *
      * @param string $yamlFile filename of YAML file
      *
-     * @return mixed|string
+     * @return mixed|bool PHP array or false on error
      */
     public static function read($yamlFile)
     {
-        return \Spyc::YAMLLoad($yamlFile);
+        try {
+            $yamlString = file_get_contents($yamlFile);
+            $ret = VendorYaml::parse($yamlString);
+        } catch (Exception $e) {
+            trigger_error($e->getMessage());
+            $ret = false;
+        }
+        return $ret;
     }
 
     /**
      * Save a PHP array as a YAML file
      *
-     * @param array  $var      variable which will be dumped
-     * @param string $yamlFile filename of YAML file
+     * @param array   $var      variable which will be dumped
+     * @param string  $yamlFile filename of YAML file
+     * @param integer $inline   Nesting level where you switch to inline YAML
+     * @param integer $indent   Number of spaces to indent for nested nodes
      *
-     * @return mixed|string
+     * @return int|bool number of bytes written, or false on error
      */
-    public static function save($var, $yamlFile)
+    public static function save($var, $yamlFile, $inline = 4, $indent = 4)
     {
-        $yamlString = \Spyc::YAMLDump($var);
-
-        return file_put_contents($yamlFile, $yamlString);
+        try {
+            $yamlString = VendorYaml::dump($var, $inline, $indent);
+            $ret = file_put_contents($yamlFile, $yamlString);
+        } catch (Exception $e) {
+            trigger_error($e->getMessage());
+            $ret = false;
+        }
+        return $ret;
     }
 
 }
