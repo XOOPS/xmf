@@ -92,7 +92,7 @@ class Session extends AbstractHelper
     }
 
     /**
-     * Deletes a names session variable respecting our module prefix
+     * Deletes a named session variable respecting our module prefix
      *
      * @param string $name name of variable
      *
