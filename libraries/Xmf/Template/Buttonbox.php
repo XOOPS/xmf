@@ -42,6 +42,11 @@ class Buttonbox extends AbstractTemplate
     private $_position = "right";
 
     /**
+     * @var string
+     */
+    private $_path = '';
+
+    /**
      * init
      * 
      * @return void
@@ -63,6 +68,19 @@ class Buttonbox extends AbstractTemplate
     }
 
     /**
+     * set path - path to image files. Do not set if icons are 
+     * specified with absoulte URLs
+     * 
+     * @param string $position left, right, center
+     * 
+     * @return void
+     */
+    public function setImagePath($path)
+    {
+        $this->_path = $path;
+    }
+
+    /**
      * setDelimiter
      * 
      * @param string $delimiter delimiter put between buttons
@@ -75,7 +93,7 @@ class Buttonbox extends AbstractTemplate
     }
 
     /**
-     * addItem to buttonn box
+     * addItem to button box
      * 
      * @param string $title title string for button
      * @param string $link  link for button
@@ -84,11 +102,11 @@ class Buttonbox extends AbstractTemplate
      * 
      * @return void
      */
-    public function addItem($title, $link, $icon = 'add', $extra = '')
+    public function addItem($title, $link, $icon, $extra = '')
     {
         $item['title'] = $title;
         $item['link'] = $link;
-        $item['icon'] = $icon . '.png';
+        $item['icon'] = $icon;
         $item['extra'] = $extra;
         $this->_items[] = $item;
     }
@@ -101,7 +119,7 @@ class Buttonbox extends AbstractTemplate
     protected function render()
     {
         $ret = '';
-        $path = XMF_IMAGES_URL . "/icons/32/";
+        $path = $this->_path;
         switch ($this->_position) {
         default:
         case "right":
