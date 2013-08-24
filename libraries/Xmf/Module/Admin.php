@@ -354,6 +354,46 @@ class Admin
     }
 
     /**
+     * Get an appropriate URL for system provided icons.
+     *
+     * Things which were in Frameworks in 2.5 are in media in 2.6,
+     * making it harder to use and rely on the standard icons.
+     *
+     * not part of 2.6, just a transition assist
+     *
+     * @param string $name the image name to provide URL for, or blank
+     *                     to just get the URL path.
+     * @param string $size the icon size (directory). Valid values are
+     *                     16, 32 or /. A '/' slash will simply set the
+     *                     path to the icon directory and append $image.
+     * 
+     * @return bool true if we are in a 2.6 environment
+     */
+    public static function iconUrl($name='',$size='32')
+    {
+        switch ($size) {
+        case '16':
+            $path='16/';
+            break;
+        case '/':
+            $path='';
+            break;
+        default:
+        case '32':
+            $path='32/';
+            break;
+        }
+
+        if (self::is26()) {
+            $path='/media/xoops/images/icons/'.$path;
+        } else {
+            $path='/Frameworks/moduleclasses/icons/'.$path;
+        }
+
+        return(XOOPS_URL . $path . $name);
+    }
+
+    /**
      * Check for installed module and version and do addConfigBoxLine()
      *
      * @param string  $moddir     - module directory name
