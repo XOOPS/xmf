@@ -9,16 +9,16 @@
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-namespace Xmf\Filter;
+namespace Xmf;
 
 /**
- * Xmf\Filter\Input is a class for filtering input from any data source
+ * Xmf\FilterInput is a class for filtering input from any data source
  *
  * Forked from the php input filter library by: Daniel Morris <dan@rootcube.com>
  * Original Contributors: Gianpaolo Racca, Ghislain Picard,
  * Marco Wandschneider, Chris Tobin and Andrew Eddie.
  *
- * @category  Xmf\Module\Admin
+ * @category  Xmf\FilterInput
  * @package   Xmf
  * @author    Grégory Mage (Aka Mage)
  * @author    trabis <lusopoemas@gmail.com>
@@ -31,7 +31,7 @@ namespace Xmf\Filter;
  * @link      http://xoops.org
  * @since     1.0
  */
-class Input
+class FilterInput
 {
     /**
      * @var array
@@ -102,7 +102,7 @@ class Input
      * Returns a reference to an input filter object, only creating it if it doesn't already exist.
      *
      * This method must be invoked as:
-     *      <pre>  $filter = & Xmf\Filter\Input::getInstance();</pre>
+     *      <pre>  $filter = & Xmf\FilterInput::getInstance();</pre>
      *
      * @param array $tagsArray  list of user-defined tags
      * @param array $attrArray  list of user-defined attributes
@@ -111,7 +111,7 @@ class Input
      * @param int   $xssAuto    Only auto clean essentials = 0, 
      *                           Allow clean blacklisted tags/attr = 1
      * 
-     * @return Xmf\Filter\Input The Xmf\Filter\Input object.
+     * @return Xmf\FilterInput The FilterInput object.
      * @since   1.5
      */
     public static function getInstance(
@@ -127,7 +127,7 @@ class Input
         }
 
         if (empty ($instances[$sig])) {
-            $instances[$sig] = new Input($tagsArray, $attrArray, $tagsMethod, $attrMethod, $xssAuto);
+            $instances[$sig] = new FilterInput($tagsArray, $attrArray, $tagsMethod, $attrMethod, $xssAuto);
         }
 
         return $instances[$sig];
@@ -187,10 +187,10 @@ class Input
 
         case 'STRING' :
             // Check for static usage and assign $filter the proper variable
-            if (isset($this) && is_a($this, 'Xmf\Filter\Input')) {
+            if (isset($this) && is_a($this, 'Xmf\FilterInput')) {
                 $filter =& $this;
             } else {
-                $filter = Input::getInstance();
+                $filter = FilterInput::getInstance();
             }
             $result = (string) $filter->_remove($filter->_decode((string) $source));
             break;
@@ -211,10 +211,10 @@ class Input
 
         default :
             // Check for static usage and assign $filter the proper variable
-            if (isset($this) && is_object($this) && get_class($this) == 'Xmf\Filter\Input') {
+            if (isset($this) && is_object($this) && get_class($this) == 'Xmf\FilterInput') {
                 $filter =& $this;
             } else {
-                $filter = Input::getInstance();
+                $filter = FilterInput::getInstance();
             }
             // Are we dealing with an array?
             if (is_array($source)) {
@@ -487,7 +487,7 @@ class Input
             }
 
             // Autostrip script tags
-            if (Input::checkAttribute($attrSubSet)) {
+            if (FilterInput::checkAttribute($attrSubSet)) {
                 continue;
             }
 
