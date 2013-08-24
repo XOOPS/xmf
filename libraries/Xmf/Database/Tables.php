@@ -71,9 +71,11 @@ class Tables
      */
     public function __construct()
     {
+        global $xoopsDB; // lock this to legacy support
+        //\Xmf\Debug::dump($xoopsDB,true);
         Language::load('database', 'xmf');
 
-        $this->_db = \XoopsDatabaseFactory::getDatabaseConnection();
+        $this->_db =& $xoopsDB;// $GLOBALS['xoopsDB']; //\XoopsDatabaseFactory::getDatabaseConnection();
         $this->queueReset();
     }
 
@@ -83,7 +85,6 @@ class Tables
      * @param string $table table name to contain prefix
      *
      * @return string table name with prefix
-     *
      */
     public function name($table)
     {
@@ -95,13 +96,13 @@ class Tables
      *
      * @param string $table      table to contain the column
      * @param string $column     name of column to add
+     * @param array  $attributes column_definition
      * @param mixed  $position   FIRST, string of column name to add new
      *                           column after, or null for natural append
-     * @param array  $attributes column_definition
      *
      * @return bool true if no errors, false if errors encountered
      */
-    public function addColumn($table, $column, $position, $attributes)
+    public function addColumn($table, $column, $attributes, $position=null)
     {
         $columnDef=array(
             'name'=>$column,
@@ -232,15 +233,23 @@ class Tables
     }
 
     /**
-     * Alias for addTable
+     * AddTable only if it exists
      *
      * @param string $table table
      *
-     * @return bool true if no errors, false if errors encountered
+     * @return bool true if table exists, false otherwise
      */
     public function useTable($table)
     {
-        return $this->addTable($table);
+        if (isset($this->_tables[$table])) {
+            return true;
+        }
+        $tableDef=$this->_getTable($table);
+        if (is_array($tableDef)) {
+            $this->_tables[$table] = $tableDef;
+            return true;
+        }
+        return false;
     }
 
 
@@ -249,14 +258,14 @@ class Tables
      *
      * @param string $table      table containing the column
      * @param string $column     column to alter
-     * @param mixed  $position   FIRST, string of column name to add new
-     *                           column after, or null for no change
      * @param array  $attributes new column_definition
      * @param string $newName    new name for column, blank to keep same
+     * @param mixed  $position   FIRST, string of column name to add new
+     *                           column after, or null for no change
      *
      * @return bool true if no errors, false if errors encountered
      */
-    public function alterColumn($table, $column, $position, $attributes, $newName='')
+    public function alterColumn($table, $column, $attributes, $newName='', $position=null)
     {
         if (empty($newName)) {
             $newName=$column;
@@ -759,7 +768,7 @@ class Tables
     }
 
     /**
-     * get table definition from INFORMATION_SCHEMA
+     * execute an SQL statement
      *
      * @param string $sql   SQL statement to execute
      * @param bool   $force true to use queryF
