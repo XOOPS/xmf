@@ -66,7 +66,7 @@ class SessionContainer extends ContextAware implements Container
             $secure        = array();
 
         } else {
-            $session=\Xmf\Filter\Input::clean(unserialize($rawsession), 'default');
+            $session=\Xmf\FilterInput::clean(unserialize($rawsession), 'default');
             $authenticated = $session['authenticated'];
             $attributes    = $session['attributes'];
             $secure        = $session['secure'];
