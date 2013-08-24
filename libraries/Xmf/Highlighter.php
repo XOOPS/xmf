@@ -43,7 +43,7 @@ class Highlighter
      *
      * @return string highlighted body
      */
-    public static function apply($words, $body, $pre='<b>', $post='</b>')
+    public static function apply($words, $body, $pre='<strong>', $post='</strong>')
     {
         if (!is_array($words)) {
             $words=str_replace('  ', ' ', $words);
