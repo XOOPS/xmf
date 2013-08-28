@@ -66,7 +66,7 @@ abstract class AbstractValidator extends \Xmf\Mvc\ContextAware
      *
      * @since  1.0
      */
-    abstract public function execute (&$value, &$error);
+    abstract public function execute(&$value, &$error);
 
     /**
      * Retrieve the default error message.
@@ -78,7 +78,7 @@ abstract class AbstractValidator extends \Xmf\Mvc\ContextAware
      *
      * @since  1.0
      */
-    public function getErrorMessage ()
+    public function getErrorMessage()
     {
         return $this->message;
     }
@@ -92,7 +92,7 @@ abstract class AbstractValidator extends \Xmf\Mvc\ContextAware
      *
      * @since  1.0
      */
-    public function & getParameter ($name)
+    public function & getParameter($name)
     {
         if (isset($this->params[$name])) {
             return $this->params[$name];
@@ -109,7 +109,7 @@ abstract class AbstractValidator extends \Xmf\Mvc\ContextAware
      * @return void
      * @since  1.0
      */
-    public function initialize ($params)
+    public function initialize($params)
     {
         $this->params = array_merge($this->params, $params);
     }
@@ -122,7 +122,7 @@ abstract class AbstractValidator extends \Xmf\Mvc\ContextAware
      * @return void
      * @since  1.0
      */
-    public function setErrorMessage ($message)
+    public function setErrorMessage($message)
     {
         $this->message = $message;
     }
@@ -136,7 +136,7 @@ abstract class AbstractValidator extends \Xmf\Mvc\ContextAware
      * @return void
      * @since  1.0
      */
-    public function setParameter ($name, $value)
+    public function setParameter($name, $value)
     {
         $this->params[$name] = $value;
     }
@@ -150,9 +150,8 @@ abstract class AbstractValidator extends \Xmf\Mvc\ContextAware
      * @return void
      * @since  1.0
      */
-    public function setParameterByRef ($name, &$value)
+    public function setParameterByRef($name, &$value)
     {
         $this->params[$name] =& $value;
     }
-
 }

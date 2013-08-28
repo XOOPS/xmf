@@ -41,7 +41,7 @@ namespace Xmf\Mvc\Validator;
 class Zend extends AbstractValidator
 {
 
-    private $_zvalidator;
+    private $zvalidator;
 
     /**
      * Create a new Email Validator instance.
@@ -52,7 +52,7 @@ class Zend extends AbstractValidator
     {
         parent::__construct();
 
-        $this->_zvalidator = '';
+        $this->zvalidator = '';
         $this->params = array();
     }
 
@@ -68,7 +68,7 @@ class Zend extends AbstractValidator
      */
     public function execute (&$value, &$error)
     {
-        $class = "Zend\\Validator\\" . $this->_zvalidator;
+        $class = "Zend\\Validator\\" . $this->zvalidator;
         if (class_exists($class, true)) {
             $validator = new $class($this->params);
             if (is_object($validator)) {
@@ -111,11 +111,11 @@ class Zend extends AbstractValidator
      */
     public function initialize ($params)
     {
-        $this->_zvalidator = '';
+        $this->zvalidator = '';
         $this->params = array();
         foreach ($params as $key => $value) {
             if (strcasecmp($key, 'validator')===0) {
-                $this->_zvalidator = $value;
+                $this->zvalidator = $value;
             } else {
                 $this->params[$key]=$value;
             }

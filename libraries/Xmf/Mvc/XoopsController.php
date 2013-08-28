@@ -10,6 +10,7 @@
  */
 
 namespace Xmf\Mvc;
+
 /**
  * XoopsController implements a controller with with specific
  * characteristics optimized for the XOOPS environment, including:
@@ -52,7 +53,7 @@ class XoopsController extends Controller
      *
      * @since  1.0
      */
-    protected function __construct (&$externalCom=null)
+    protected function __construct (&$externalCom = null)
     {
         $this->externalCom =& $externalCom;
         if (is_object($externalCom) && method_exists($externalCom, 'getDirname')) {
@@ -67,9 +68,7 @@ class XoopsController extends Controller
         if (!Config::get('UNITS_DIR', false)) {
             Config::setCompatmode(false);
             Config::set('UNITS_DIR', $pathname.'/xmfmvc/');
-            Config::set(
-                'SCRIPT_PATH', XOOPS_URL .'/modules/'.$this->dirname.'/index.php'
-            );
+            Config::set('SCRIPT_PATH', XOOPS_URL .'/modules/'.$this->dirname.'/index.php');
             Config::set('UNIT_ACCESSOR', 'unit');
             Config::set('ACTION_ACCESSOR', 'action');
             Config::set('DEFAULT_UNIT', 'Default');
@@ -143,7 +142,7 @@ class XoopsController extends Controller
 
         $this->loadRequired($file);
 
-        $view =  $actName . 'View' . ucfirst(strtolower($viewName));;
+        $view =  $actName . 'View' . ucfirst(strtolower($viewName));
 
         // fix for same name views
         $unitView = $unitName . '_' . $view;
@@ -245,5 +244,4 @@ class XoopsController extends Controller
     {
         return $this->modhelper->getConfig($name);
     }
-
 }

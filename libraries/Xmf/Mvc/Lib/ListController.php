@@ -11,8 +11,6 @@
 
 namespace Xmf\Mvc\Lib;
 
-die ('not ready');
-
 /**
  * ListController provides list support using instructions found in model.
  *
@@ -40,6 +38,7 @@ class ListController extends \Xmf\Mvc\ContextAware
     public function __construct($handler_name)
     {
         $this->handler =& $this->Controller()->getHandler($handler_name);
+        die ('not ready');
     }
 
     public function Criteria($column, $value = '', $operator = '=', $prefix = '', $function = '')
@@ -59,5 +58,4 @@ class ListController extends \Xmf\Mvc\ContextAware
     public function renderNav($offset=4) {}
     public function renderSelect($showbutton=false) {}
     // XoopsPageNav ($total_items, $items_perpage, $current_start, $start_name="start", $extra_arg="")
-
 }

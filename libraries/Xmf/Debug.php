@@ -31,7 +31,7 @@ class Debug
      *
      * @var string
      */
-    private static $_config = array(
+    private static $config = array(
         'skin' => array('selected' => 'schablon.com'),
         'css'  => array('url' => XMF_KRUMO_URL),
         'display' => array('show_version' => false, 'show_call_info' => false)
@@ -52,7 +52,7 @@ class Debug
         if (!$html) {
             $msg = var_export($var, true);
         } else {
-            \krumo::setConfig(self::$_config);
+            \krumo::setConfig(self::$config);
             $msg = \krumo::dump($var);
         }
         if (!$echo) {
@@ -79,5 +79,4 @@ class Debug
     {
         return self::dump(debug_backtrace(), $echo, $html, $exit);
     }
-
 }

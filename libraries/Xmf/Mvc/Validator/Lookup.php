@@ -136,5 +136,4 @@ class Lookup extends AbstractValidator
     {
         parent::initialize($params);
     }
-
 }

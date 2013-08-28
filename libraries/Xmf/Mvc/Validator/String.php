@@ -65,9 +65,7 @@ class String extends AbstractValidator
         }
 
         if (function_exists('mb_strlen')) {
-            $length = mb_strlen(
-                $value, defined('_CHARSET')?constant('_CHARSET'):'UTF-8'
-            );
+            $length = mb_strlen($value, defined('_CHARSET')?constant('_CHARSET'):'UTF-8');
         } else {
             $length = strlen($value);
         }
@@ -138,5 +136,4 @@ class String extends AbstractValidator
     {
         parent::initialize($params);
     }
-
 }

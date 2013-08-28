@@ -95,5 +95,4 @@ class Config
     {
         self::$_compatmode = $value;
     }
-
 }

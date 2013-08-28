@@ -115,5 +115,4 @@ class Email extends AbstractValidator
         parent::initialize($params);
 
     }
-
 }

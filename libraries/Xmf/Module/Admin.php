@@ -35,17 +35,17 @@ class Admin
      *
      * @var object
      */
-    private static $_ModuleAdmin = null;
-    private $_version26 = null;
-    private $_lastInfoBoxTitle = null;
-    private static $_paypal = '';
+    private static $ModuleAdmin = null;
+    private $version26 = null;
+    private $lastInfoBoxTitle = null;
+    private static $paypal = '';
 
     /**
      * Constructor
      */
     private function __construct()
     {
-        $this->_version26 = self::is26();
+        $this->version26 = self::is26();
     }
 
     /**
@@ -71,13 +71,13 @@ class Admin
         if ($instance === null) {
             if (class_exists('XoopsModuleAdmin', true)) {
                 $instance  = new \XoopsModuleAdmin;
-                self::$_ModuleAdmin = $instance;
+                self::$ModuleAdmin = $instance;
             } else {
                 \Xmf\Loader::loadFile(
                     XOOPS_ROOT_PATH .
                     '/Frameworks/moduleclasses/moduleadmin/moduleadmin.php'
                 );
-                self::$_ModuleAdmin = new \ModuleAdmin;
+                self::$ModuleAdmin = new \ModuleAdmin;
                 $instance  = new \Xmf\Module\Admin;
             }
 
@@ -133,7 +133,7 @@ class Admin
      */
     public function addConfigBoxLine($value = '', $type = 'default')
     {
-        return self::$_ModuleAdmin->addConfigBoxLine($value, $type);
+        return self::$ModuleAdmin->addConfigBoxLine($value, $type);
     }
 
     /**
@@ -147,9 +147,9 @@ class Admin
      */
     public function addInfoBox($title, $type = 'default', $extra = '')
     {
-        $this->_lastInfoBoxTitle = $title;
+        $this->lastInfoBoxTitle = $title;
 
-        return self::$_ModuleAdmin->addInfoBox($title);
+        return self::$ModuleAdmin->addInfoBox($title);
     }
 
     /**
@@ -163,8 +163,12 @@ class Admin
      */
     public function addInfoBoxLine($text = '', $type = 'default', $color = 'inherit')
     {
-        return self::$_ModuleAdmin->addInfoBoxLine(
-            $this->_lastInfoBoxTitle, $text, '', $color, $type
+        return self::$ModuleAdmin->addInfoBoxLine(
+            $this->lastInfoBoxTitle,
+            $text,
+            '',
+            $color,
+            $type
         );
     }
 
@@ -180,7 +184,7 @@ class Admin
      */
     public function addItemButton($title, $link, $icon = 'add', $extra = '')
     {
-        return self::$_ModuleAdmin->addItemButton($title, $link, $icon, $extra);
+        return self::$ModuleAdmin->addItemButton($title, $link, $icon, $extra);
     }
 
     /**
@@ -197,7 +201,7 @@ class Admin
             $position = 'right';
         }
 
-        return self::$_ModuleAdmin->renderButton($position, $delimiter);
+        return self::$ModuleAdmin->renderButton($position, $delimiter);
     }
 
     /**
@@ -220,7 +224,7 @@ class Admin
      */
     public function renderInfoBox()
     {
-        return self::$_ModuleAdmin->renderInfoBox();
+        return self::$ModuleAdmin->renderInfoBox();
     }
 
     /**
@@ -240,7 +244,7 @@ class Admin
      */
     public function renderIndex()
     {
-        return self::$_ModuleAdmin->renderIndex();
+        return self::$ModuleAdmin->renderIndex();
     }
 
     /**
@@ -262,7 +266,7 @@ class Admin
      */
     public function displayNavigation($menu = '')
     {
-        echo self::$_ModuleAdmin->addNavigation($menu);
+        echo self::$ModuleAdmin->addNavigation($menu);
     }
 
     /**
@@ -274,7 +278,7 @@ class Admin
      */
     public function renderAbout($logo_xoops = true)
     {
-        return self::$_ModuleAdmin->renderAbout(self::$_paypal, $logo_xoops);
+        return self::$ModuleAdmin->renderAbout(self::$paypal, $logo_xoops);
     }
 
     /**
@@ -286,7 +290,7 @@ class Admin
      */
     public static function setPaypal($paypal = '')
     {
-        self::$_paypal = $paypal;
+        self::$paypal = $paypal;
     }
 
     /**
@@ -325,7 +329,7 @@ class Admin
             $type = 'default';
         }
 
-        return self::$_ModuleAdmin->addConfigBoxLine($value, $type);
+        return self::$ModuleAdmin->addConfigBoxLine($value, $type);
     }
 
     /**
@@ -350,7 +354,7 @@ class Admin
             $type = 'default';
         }
 
-        return self::$_ModuleAdmin->addConfigBoxLine($value, $type);
+        return self::$ModuleAdmin->addConfigBoxLine($value, $type);
     }
 
     /**
@@ -369,19 +373,19 @@ class Admin
      * 
      * @return bool true if we are in a 2.6 environment
      */
-    public static function iconUrl($name='',$size='32')
+    public static function iconUrl($name = '', $size = '32')
     {
         switch ($size) {
-        case '16':
-            $path='16/';
-            break;
-        case '/':
-            $path='';
-            break;
-        default:
-        case '32':
-            $path='32/';
-            break;
+            case '16':
+                $path='16/';
+                break;
+            case '/':
+                $path='';
+                break;
+            default:
+            case '32':
+                $path='32/';
+                break;
         }
 
         if (self::is26()) {
@@ -401,7 +405,7 @@ class Admin
      *
      * @return bool true if requested version of the module is available
      */
-    public static function checkModuleVersion($moddir,$minversion)
+    public static function checkModuleVersion($moddir, $minversion)
     {
         \Xmf\Language::load('main', 'xmf');
         $return=false;
@@ -411,8 +415,10 @@ class Admin
             $mod_version_f = $mod_modversion/100;
             $min_version_f = $minversion/100;
             $value = sprintf(
-                _AM_XMF_DEMOMVC_MODULE_VERSION, strtoupper($moddir),
-                $min_version_f, $mod_version_f
+                _AM_XMF_DEMOMVC_MODULE_VERSION,
+                strtoupper($moddir),
+                $min_version_f,
+                $mod_version_f
             );
             if ($mod_modversion>=$minversion) {
                 self::addConfigAccept($value);
@@ -422,7 +428,8 @@ class Admin
             }
         } else {
             $value = sprintf(
-                _AM_XMF_DEMOMVC_MODULE_NOTFOUND, strtoupper($moddir),
+                _AM_XMF_DEMOMVC_MODULE_NOTFOUND,
+                strtoupper($moddir),
                 $minversion/100
             );
             self::addConfigError($value);
@@ -430,5 +437,4 @@ class Admin
 
         return $return;
     }
-
 }

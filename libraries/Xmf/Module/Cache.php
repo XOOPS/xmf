@@ -34,12 +34,12 @@ class Cache extends AbstractHelper
     /**
      * @var string
      */
-    private $_prefix;
+    private $prefix;
 
     /**
      * @var XoopsCache
      */
-    private $_cache;
+    private $cache;
 
     /**
      * Initialize parent::__constuct calls this after verifying module object.
@@ -49,8 +49,8 @@ class Cache extends AbstractHelper
     public function init()
     {
         \XoopsLoad::load('xoopscache');
-        $this->_prefix = $this->module->getVar('dirname') . '_';
-        $this->_cache = \XoopsCache::getInstance();
+        $this->prefix = $this->module->getVar('dirname') . '_';
+        $this->cache = \XoopsCache::getInstance();
     }
 
     /**
@@ -60,9 +60,9 @@ class Cache extends AbstractHelper
      *
      * @return string module prefixed name
      */
-    private function _prefix($name)
+    private function prefix($name)
     {
-        return $this->_prefix . $name;
+        return $this->prefix . $name;
     }
 
     /**
@@ -78,7 +78,7 @@ class Cache extends AbstractHelper
      */
     public function write($key, $value)
     {
-        return $this->_cache->write($this->_prefix($key), $value);
+        return $this->cache->write($this->prefix($key), $value);
     }
 
     /**
@@ -90,7 +90,7 @@ class Cache extends AbstractHelper
      */
     public function read($key)
     {
-        return $this->_cache->read($this->_prefix($key));
+        return $this->cache->read($this->prefix($key));
     }
 
     /**
@@ -102,7 +102,6 @@ class Cache extends AbstractHelper
      */
     public function delete($key)
     {
-        $this->_cache->delete($this->_prefix($key));
+        $this->cache->delete($this->prefix($key));
     }
-
 }

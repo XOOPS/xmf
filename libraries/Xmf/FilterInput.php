@@ -69,8 +69,8 @@ class FilterInput
     /**
      * @var array
      */
-    protected $attrBlacklist 
-        =  array('action', 'background', 'codebase', 'dynsrc', 'lowsrc'); 
+    protected $attrBlacklist
+        =  array('action', 'background', 'codebase', 'dynsrc', 'lowsrc');
     // also will strip ALL event handlers
 
     /**
@@ -83,8 +83,11 @@ class FilterInput
      * @param int   $xssAuto    Only auto clean essentials = 0, Allow clean blacklisted tags/attr = 1
      */
     protected function __construct(
-        $tagsArray = array(), $attrArray = array(), 
-        $tagsMethod = 0, $attrMethod = 0, $xssAuto = 1
+        $tagsArray = array(),
+        $attrArray = array(),
+        $tagsMethod = 0,
+        $attrMethod = 0,
+        $xssAuto = 1
     ) {
         // Make sure user defined arrays are in lowercase
         $tagsArray = array_map('strtolower', (array) $tagsArray);
@@ -115,8 +118,11 @@ class FilterInput
      * @since   1.5
      */
     public static function getInstance(
-        $tagsArray = array(), $attrArray = array(), 
-        $tagsMethod = 0, $attrMethod = 0, $xssAuto = 1
+        $tagsArray = array(),
+        $attrArray = array(),
+        $tagsMethod = 0,
+        $attrMethod = 0,
+        $xssAuto = 1
     ) {
         static $instances;
 
@@ -149,93 +155,93 @@ class FilterInput
     {
         // Handle the type constraint
         switch (strtoupper($type)) {
-        case 'INT' :
-        case 'INTEGER' :
-            // Only use the first integer value
-            preg_match('/-?[0-9]+/', (string) $source, $matches);
-            $result = @ (int) $matches[0];
-            break;
+            case 'INT':
+            case 'INTEGER':
+                // Only use the first integer value
+                preg_match('/-?[0-9]+/', (string) $source, $matches);
+                $result = @ (int) $matches[0];
+                break;
 
-        case 'FLOAT' :
-        case 'DOUBLE' :
-            // Only use the first floating point value
-            preg_match('/-?[0-9]+(\.[0-9]+)?/', (string) $source, $matches);
-            $result = @ (float) $matches[0];
-            break;
+            case 'FLOAT':
+            case 'DOUBLE':
+                // Only use the first floating point value
+                preg_match('/-?[0-9]+(\.[0-9]+)?/', (string) $source, $matches);
+                $result = @ (float) $matches[0];
+                break;
 
-        case 'BOOL' :
-        case 'BOOLEAN' :
-            $result = (bool) $source;
-            break;
+            case 'BOOL':
+            case 'BOOLEAN':
+                $result = (bool) $source;
+                break;
 
-        case 'WORD' :
-            $result = (string) preg_replace('/[^A-Z_]/i', '', $source);
-            break;
+            case 'WORD':
+                $result = (string) preg_replace('/[^A-Z_]/i', '', $source);
+                break;
 
-        case 'ALNUM' :
-            $result = (string) preg_replace('/[^A-Z0-9]/i', '', $source);
-            break;
+            case 'ALNUM':
+                $result = (string) preg_replace('/[^A-Z0-9]/i', '', $source);
+                break;
 
-        case 'CMD' :
-            $result = (string) preg_replace('/[^A-Z0-9_\.-]/i', '', $source);
-            $result = ltrim($result, '.');
-            break;
+            case 'CMD':
+                $result = (string) preg_replace('/[^A-Z0-9_\.-]/i', '', $source);
+                $result = ltrim($result, '.');
+                break;
 
-        case 'BASE64' :
-            $result = (string) preg_replace('/[^A-Z0-9\/+=]/i', '', $source);
-            break;
+            case 'BASE64':
+                $result = (string) preg_replace('/[^A-Z0-9\/+=]/i', '', $source);
+                break;
 
-        case 'STRING' :
-            // Check for static usage and assign $filter the proper variable
-            if (isset($this) && is_a($this, 'Xmf\FilterInput')) {
-                $filter =& $this;
-            } else {
-                $filter = FilterInput::getInstance();
-            }
-            $result = (string) $filter->_remove($filter->_decode((string) $source));
-            break;
+            case 'STRING':
+                // Check for static usage and assign $filter the proper variable
+                if (isset($this) && is_a($this, 'Xmf\FilterInput')) {
+                    $filter =& $this;
+                } else {
+                    $filter = FilterInput::getInstance();
+                }
+                $result = (string) $filter->remove($filter->decode((string) $source));
+                break;
 
-        case 'ARRAY' :
-            $result = (array) $source;
-            break;
+            case 'ARRAY':
+                $result = (array) $source;
+                break;
 
-        case 'PATH' :
-            $pattern = '/^[A-Za-z0-9_-]+[A-Za-z0-9_\.-]*([\\\\\/][A-Za-z0-9_-]+[A-Za-z0-9_\.-]*)*$/';
-            preg_match($pattern, (string) $source, $matches);
-            $result = @ (string) $matches[0];
-            break;
+            case 'PATH':
+                $pattern = '/^[A-Za-z0-9_-]+[A-Za-z0-9_\.-]*([\\\\\/][A-Za-z0-9_-]+[A-Za-z0-9_\.-]*)*$/';
+                preg_match($pattern, (string) $source, $matches);
+                $result = @ (string) $matches[0];
+                break;
 
-        case 'USERNAME' :
-            $result = (string) preg_replace('/[\x00-\x1F\x7F<>"\'%&]/', '', $source);
-            break;
+            case 'USERNAME':
+                $result = (string) preg_replace('/[\x00-\x1F\x7F<>"\'%&]/', '', $source);
+                break;
 
-        default :
-            // Check for static usage and assign $filter the proper variable
-            if (isset($this) && is_object($this) && get_class($this) == 'Xmf\FilterInput') {
-                $filter =& $this;
-            } else {
-                $filter = FilterInput::getInstance();
-            }
-            // Are we dealing with an array?
-            if (is_array($source)) {
-                foreach ($source as $key => $value) {
-                    // filter element for XSS and other 'bad' code etc.
-                    if (is_string($value)) {
-                        $source[$key] = $filter->_remove($filter->_decode($value));
+            default:
+                // Check for static usage and assign $filter the proper variable
+                if (isset($this) && is_object($this) && get_class($this) == 'Xmf\FilterInput') {
+                    $filter =& $this;
+                } else {
+                    $filter = FilterInput::getInstance();
+                }
+                // Are we dealing with an array?
+                if (is_array($source)) {
+                    foreach ($source as $key => $value) {
+                        // filter element for XSS and other 'bad' code etc.
+                        if (is_string($value)) {
+                            $source[$key] = $filter->remove($filter->decode($value));
+                        }
+                    }
+                    $result = $source;
+                } else {
+                    // Or a string?
+                    if (is_string($source) && !empty ($source)) {
+                        // filter source for XSS and other 'bad' code etc.
+                        $result = $filter->remove($filter->decode($source));
+                    } else {
+                        // Not an array or string.. return the passed parameter
+                        $result = $source;
                     }
                 }
-                $result = $source;
-            } else {
-                // Or a string?
-                if (is_string($source) && !empty ($source)) {
-                    // filter source for XSS and other 'bad' code etc.
-                    $result = $filter->_remove($filter->_decode($source));
-                } else {
-                    // Not an array or string.. return the passed parameter
-                    $result = $source;
-                }
-            }
-            break;
+                break;
         }
 
         return $result;
@@ -253,7 +259,13 @@ class FilterInput
         $attrSubSet[0] = strtolower($attrSubSet[0]);
         $attrSubSet[1] = strtolower($attrSubSet[1]);
 
-        return (((strpos($attrSubSet[1], 'expression') !== false) && ($attrSubSet[0]) == 'style') || (strpos($attrSubSet[1], 'javascript:') !== false) || (strpos($attrSubSet[1], 'behaviour:') !== false) || (strpos($attrSubSet[1], 'vbscript:') !== false) || (strpos($attrSubSet[1], 'mocha:') !== false) || (strpos($attrSubSet[1], 'livescript:') !== false));
+        return (((strpos($attrSubSet[1], 'expression') !== false)
+            && ($attrSubSet[0]) == 'style')
+            || (strpos($attrSubSet[1], 'javascript:') !== false)
+            || (strpos($attrSubSet[1], 'behaviour:') !== false)
+            || (strpos($attrSubSet[1], 'vbscript:') !== false)
+            || (strpos($attrSubSet[1], 'mocha:') !== false)
+            || (strpos($attrSubSet[1], 'livescript:') !== false));
     }
 
     /**
@@ -263,13 +275,13 @@ class FilterInput
      * 
      * @return string 'Cleaned' version of input parameter
      */
-    private function _remove($source)
+    private function remove($source)
     {
         $loopCounter = 0;
 
         // Iteration provides nested tag protection
-        while ($source != $this->_cleanTags($source)) {
-            $source = $this->_cleanTags($source);
+        while ($source != $this->cleanTags($source)) {
+            $source = $this->cleanTags($source);
             $loopCounter++;
         }
 
@@ -283,7 +295,7 @@ class FilterInput
      * 
      * @return string 'Cleaned' version of input parameter
      */
-    private function _cleanTags($source)
+    private function cleanTags($source)
     {
         /*
          * In the beginning we don't really have a tag, so everything is
@@ -346,7 +358,11 @@ class FilterInput
              * OR no tagname
              * OR remove if xssauto is on and tag is blacklisted
              */
-            if ((!preg_match("/^[a-z][a-z0-9]*$/i", $tagName)) || (!$tagName) || ((in_array(strtolower($tagName), $this->tagBlacklist)) && ($this->xssAuto))) {
+            if ((!preg_match("/^[a-z][a-z0-9]*$/i", $tagName))
+                || (!$tagName)
+                || ((in_array(strtolower($tagName), $this->tagBlacklist))
+                && ($this->xssAuto))
+            ) {
                 $postTag = substr($postTag, ($tagLength + 2));
                 $tagOpen_start = strpos($postTag, '<');
                 // Strip tag
@@ -408,7 +424,7 @@ class FilterInput
                 // Reconstruct tag with allowed attributes
                 if (!$isCloseTag) {
                     // Open or Single tag
-                    $attrSet = $this->_cleanAttributes($attrSet);
+                    $attrSet = $this->cleanAttributes($attrSet);
                     $preTag .= '<' . $tagName;
                     for ($i = 0; $i < count($attrSet); $i++) {
                         $preTag .= ' ' . $attrSet[$i];
@@ -446,7 +462,7 @@ class FilterInput
      * 
      * @return array Filtered array of attribute pairs
      */
-    private function _cleanAttributes($attrSet)
+    private function cleanAttributes($attrSet)
     {
         // Initialize variables
         $newSet = array();
@@ -466,7 +482,11 @@ class FilterInput
              * Remove all "non-regular" attribute names
              * AND blacklisted attributes
              */
-            if ((!preg_match('/[a-z]*$/i', $attrSubSet[0])) || (($this->xssAuto) && ((in_array(strtolower($attrSubSet[0]), $this->attrBlacklist)) || (substr($attrSubSet[0], 0, 2) == 'on')))) {
+            if ((!preg_match('/[a-z]*$/i', $attrSubSet[0]))
+                || (($this->xssAuto)
+                && ((in_array(strtolower($attrSubSet[0]), $this->attrBlacklist))
+                || (substr($attrSubSet[0], 0, 2) == 'on')))
+            ) {
                 continue;
             }
 
@@ -479,7 +499,9 @@ class FilterInput
                 // strip double quotes
                 $attrSubSet[1] = str_replace('"', '', $attrSubSet[1]);
                 // convert single quotes from either side to doubles (Single quotes shouldn't be used to pad attr value)
-                if ((substr($attrSubSet[1], 0, 1) == "'") && (substr($attrSubSet[1], (strlen($attrSubSet[1]) - 1), 1) == "'")) {
+                if ((substr($attrSubSet[1], 0, 1) == "'")
+                    && (substr($attrSubSet[1], (strlen($attrSubSet[1]) - 1), 1) == "'")
+                ) {
                     $attrSubSet[1] = substr($attrSubSet[1], 1, (strlen($attrSubSet[1]) - 2));
                 }
                 // strip slashes
@@ -522,7 +544,7 @@ class FilterInput
      * 
      * @return string Plaintext string
      */
-    private function _decode($source)
+    private function decode($source)
     {
         // entity decode
         $ttr = array();
@@ -533,13 +555,15 @@ class FilterInput
         $source = strtr($source, $ttr);
         // convert decimal
         $source = preg_replace_callback(
-            '/&#(\d+);/m', 
-            create_function('$matches', "return  chr(\$matches[1]);"), $source
+            '/&#(\d+);/m',
+            create_function('$matches', "return  chr(\$matches[1]);"),
+            $source
         );
         // convert hex
         $source = preg_replace_callback(
-            '/&#x([a-f0-9]+);/mi', 
-            create_function('$matches', "return  chr('0x'.\$matches[1]);"), $source
+            '/&#x([a-f0-9]+);/mi',
+            create_function('$matches', "return  chr('0x'.\$matches[1]);"),
+            $source
         );
 
         return $source;

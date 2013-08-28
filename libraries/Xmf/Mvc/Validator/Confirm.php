@@ -103,5 +103,4 @@ class Confirm extends AbstractValidator
             $this->params['confirm']=$params;
         }
     }
-
 }

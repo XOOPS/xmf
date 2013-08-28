@@ -59,5 +59,4 @@ abstract class XoopsView extends View
 
         return self::$form;
     }
-
 }

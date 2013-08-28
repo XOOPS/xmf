@@ -106,5 +106,4 @@ class XoopsAuthHandler extends AuthorizationHandler
         return true;
 
     }
-
 }

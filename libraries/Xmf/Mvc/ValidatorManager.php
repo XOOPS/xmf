@@ -80,9 +80,7 @@ class ValidatorManager extends ContextAware
                         if ($validator->getErrorMessage() == null) {
                             $this->Request()->setError($param, $error);
                         } else {
-                            $this->Request()->setError(
-                                $param, $validator->getErrorMessage()
-                            );
+                            $this->Request()->setError($param, $validator->getErrorMessage());
                         }
                         $success = false;
                         break;
@@ -144,7 +142,7 @@ class ValidatorManager extends ContextAware
      * @return void
      * @since  1.0
      */
-    public function setRequired ($name, $required=true, $message = null)
+    public function setRequired($name, $required = true, $message = null)
     {
         if (!isset($this->validators[$name])) {
             $this->validators[$name] = array();
@@ -166,7 +164,7 @@ class ValidatorManager extends ContextAware
      * @since  1.0
      */
 
-    public function addValidation($name, $validatorName, $initParms=null)
+    public function addValidation($name, $validatorName, $initParms = null)
     {
         $validatorClass = '\Xmf\Mvc\Validator\\'.$validatorName;
         if (class_exists($validatorClass)) {
@@ -179,5 +177,4 @@ class ValidatorManager extends ContextAware
             trigger_error("Class \"$validatorClass\" was not found", E_USER_WARNING);
         }
     }
-
 }

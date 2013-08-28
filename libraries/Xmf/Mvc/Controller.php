@@ -144,7 +144,7 @@ class Controller
      *
      * @since  1.0
      */
-    protected function __construct (&$externalCom=null)
+    protected function __construct(&$externalCom = null)
     {
         $this->contentType   =  $externalCom==null?'html':$externalCom;
         $this->currentAction =  null;
@@ -669,7 +669,7 @@ class Controller
      *
      * @since  1.0
      */
-    public static function & getInstance (&$externalCom=null)
+    public static function & getInstance(&$externalCom = null)
     {
 
         static $instance;
@@ -844,12 +844,18 @@ class Controller
             if ($this->ifExistsRequire($file)) {
                 $list = new GlobalFilterList;
                 $list->registerFilters(
-                    $filterChain, $this, $this->request, $this->user
+                    $filterChain,
+                    $this,
+                    $this->request,
+                    $this->user
                 );
             }
         } else {
             $list->registerFilters(
-                $filterChain, $this, $this->request, $this->user
+                $filterChain,
+                $this,
+                $this->request,
+                $this->user
             );
         }
     }
@@ -875,7 +881,10 @@ class Controller
 
         if (!isset($cache[$listName])) {
             $file = $this->getComponentName(
-                'filterlist', $unitName, "{$listName}", ''
+                'filterlist',
+                $unitName,
+                $listName,
+                ''
             );
 
             if ($this->ifExistsRequire($file)) {
@@ -883,12 +892,18 @@ class Controller
                 $cache[$listName] =& $list;
                 // register filters
                 $list->registerFilters(
-                    $filterChain, $this, $this->request, $this->user
+                    $filterChain,
+                    $this,
+                    $this->request,
+                    $this->user
                 );
             }
         } else {
             $cache[$listName]->registerFilters(
-                $filterChain, $this, $this->request, $this->user
+                $filterChain,
+                $this,
+                $this->request,
+                $this->user
             );
         }
     }
@@ -1069,7 +1084,7 @@ class Controller
      *
      * @return a Filter instance.
      */
-    public function getFilter ($name, $unitName='')
+    public function getFilter ($name, $unitName = '')
     {
 
         if (empty($unitName)) {
@@ -1099,5 +1114,4 @@ class Controller
     {
         return $this->modelManager;
     }
-
 }

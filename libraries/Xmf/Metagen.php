@@ -105,7 +105,10 @@ class Metagen
      * @return array of keywords
      */
     public static function generateKeywords(
-        $body, $forceKeys = null, $count=20, $minLength=4
+        $body,
+        $forceKeys = null,
+        $count = 20,
+        $minLength = 4
     ) {
         $keywords = array();
 
@@ -120,7 +123,10 @@ class Metagen
         $text = StripSlashes($text);
 
         $originalKeywords = preg_split(
-            '/[^a-zA-Z\'"-]+/', $text, -1, PREG_SPLIT_NO_EMPTY
+            '/[^a-zA-Z\'"-]+/',
+            $text,
+            -1,
+            PREG_SPLIT_NO_EMPTY
         );
 
         foreach ($originalKeywords as $originalKeyword) {
@@ -132,7 +138,9 @@ class Metagen
                     ) {
                         if (!in_array($secondRoundKeyword, $keywords)) {
                             $key[$secondRoundKeyword] = $secondRoundKeyword;
-                            if(empty($keycnt[$secondRoundKeyword])) $keycnt[$secondRoundKeyword] = 0;
+                            if (empty($keycnt[$secondRoundKeyword])) {
+                                $keycnt[$secondRoundKeyword] = 0;
+                            }
                              $keycnt[$secondRoundKeyword] += 1;
                             //$keywords[] = trim($secondRoundKeyword);
                         }
@@ -236,7 +244,12 @@ class Metagen
      * @return void
      */
     public static function generateMetaTags(
-        $title, $body, $forceKeys = null, $count=20, $minLength=4, $wordCount = 100
+        $title,
+        $body,
+        $forceKeys = null,
+        $count = 20,
+        $minLength = 4,
+        $wordCount = 100
     ) {
         $keywords = self::generateKeywords($body, $forceKeys, $count, $minLength);
         $description = self::generateDescription($body, $wordCount);
@@ -304,5 +317,4 @@ class Metagen
             return '';
         }
     }
-
 }

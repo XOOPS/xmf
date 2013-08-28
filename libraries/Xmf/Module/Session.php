@@ -34,7 +34,7 @@ class Session extends AbstractHelper
     /**
      * @var string
      */
-    private $_prefix;
+    private $prefix;
 
     /**
      * Initialize parent::__constuct calls this after verifying module object.
@@ -43,7 +43,7 @@ class Session extends AbstractHelper
      */
     public function init()
     {
-        $this->_prefix = $this->module->getVar('dirname') . '_';
+        $this->prefix = $this->module->getVar('dirname') . '_';
     }
 
     /**
@@ -53,9 +53,9 @@ class Session extends AbstractHelper
      *
      * @return string module prefixed name
      */
-    private function _prefix($name)
+    private function prefix($name)
     {
-        $prefixedName = $this->_prefix . $name;
+        $prefixedName = $this->prefix . $name;
 
         return $prefixedName;
     }
@@ -70,7 +70,7 @@ class Session extends AbstractHelper
      */
     public function set($name, $value)
     {
-        $prefixedName = $this->_prefix($name);
+        $prefixedName = $this->prefix($name);
         $_SESSION[$prefixedName] = serialize($value);
     }
 
@@ -83,7 +83,7 @@ class Session extends AbstractHelper
      */
     public function get($name)
     {
-        $prefixedName = $this->_prefix($name);
+        $prefixedName = $this->prefix($name);
         if (isset($_SESSION[$prefixedName])) {
             return unserialize($_SESSION[$prefixedName]);
         } else {
@@ -100,7 +100,7 @@ class Session extends AbstractHelper
      */
     public function del($name)
     {
-        $prefixedName = $this->_prefix($name);
+        $prefixedName = $this->prefix($name);
         $_SESSION[$prefixedName] = null;
         unset($_SESSION[$prefixedName]);
     }
@@ -113,7 +113,7 @@ class Session extends AbstractHelper
     public function destroy()
     {
         foreach ($_SESSION as $key => $value) {
-            if (0 == substr_compare($key, $this->_prefix, 0, strlen($this->_prefix))) {
+            if (0 == substr_compare($key, $this->prefix, 0, strlen($this->prefix))) {
                 $_SESSION[$key] = null;
                 unset($_SESSION[$key]);
             }

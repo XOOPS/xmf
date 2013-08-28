@@ -151,7 +151,7 @@ class XoopsUser extends User
      *
      * @return string user name
      */
-    public function id($ignored='')
+    public function id($ignored = '')
     {
         if ($this->xoopsuser) {
             return $this->xoopsuser->id();
@@ -175,5 +175,4 @@ class XoopsUser extends User
 
         return $xoopsConfig['anonymous'];
     }
-
 }

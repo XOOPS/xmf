@@ -53,7 +53,7 @@ abstract class Action extends ContextAware
      *
      * @since  1.0
      */
-    abstract public function execute ();
+    abstract public function execute();
 
     /**
      * Retrieve the default view.
@@ -169,5 +169,4 @@ abstract class Action extends ContextAware
         return true;
 
     }
-
 }

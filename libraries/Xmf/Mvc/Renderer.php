@@ -441,5 +441,4 @@ class Renderer extends ContextAware
 
         return (is_readable($dir . $template));
     }
-
 }

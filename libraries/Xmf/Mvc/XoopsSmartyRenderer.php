@@ -80,7 +80,7 @@ class XoopsSmartyRenderer extends Renderer
         ) {
             $varRender = new XoopsTplRender;
             $varRender->setXTemplate($this->template);
-            foreach ($template as $k=>$v) {
+            foreach ($template as $k => $v) {
                 $varRender->setAttribute($k, $v);
             }
             $varRender->setAttribute('xmfmvc', $mojavi);
@@ -97,7 +97,7 @@ class XoopsSmartyRenderer extends Renderer
                 $GLOBALS['xoTheme']->contentTemplate = $xoopsOption['template_main'];
             }
 
-            foreach ($template as $k=>$v) {
+            foreach ($template as $k => $v) {
                 $xoopsTpl->assign($k, $v);
             }
             $xoopsTpl->assign('xmfmvc', $mojavi);
@@ -166,7 +166,8 @@ class XoopsSmartyRenderer extends Renderer
         }
         if (is_object($GLOBALS['xoTheme'])) {
             $GLOBALS['xoTheme']->addMeta(
-                'meta', 'keywords',
+                'meta',
+                'keywords',
                 htmlspecialchars($keywords, ENT_QUOTES, null, false)
             );
         }
@@ -184,12 +185,10 @@ class XoopsSmartyRenderer extends Renderer
     {
         if (is_object($GLOBALS['xoTheme'])) {
             $GLOBALS['xoTheme']->addMeta(
-                'meta', 'description',
-                htmlspecialchars(
-                    $pageX['meta_description'], ENT_QUOTES, null, false
-                )
+                'meta',
+                'description',
+                htmlspecialchars($pageX['meta_description'], ENT_QUOTES, null, false)
             );
         }
     }
-
 }

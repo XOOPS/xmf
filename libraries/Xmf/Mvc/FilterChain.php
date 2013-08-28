@@ -80,5 +80,4 @@ class FilterChain
     {
         $this->filters[] =& $filter;
     }
-
 }

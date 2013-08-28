@@ -206,7 +206,7 @@ class Request
      *
      * @since  1.0
      */
-    public function & getErrorsAsHtml ($name_like='',$joiner='<br />')
+    public function & getErrorsAsHtml ($name_like = '', $joiner = '<br />')
     {
         $erroroutput = null;
         if ($this->hasErrors()) {
@@ -499,5 +499,4 @@ class Request
     {
         $this->params[$name] =& $value;
     }
-
 }

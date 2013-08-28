@@ -70,7 +70,8 @@ class ExecutionFilter extends Filter
                     // log invalid security notice
                     trigger_error(
                         'Action requires security but no authorization ' .
-                        'handler has been registered', E_USER_NOTICE
+                        'handler has been registered',
+                        E_USER_NOTICE
                     );
                 } elseif (!$authHandler->execute($action)) {
                     // user doesn't have access
@@ -119,10 +120,7 @@ class ExecutionFilter extends Filter
             }
 
             if ($viewName != \Xmf\Mvc::VIEW_NONE) {
-                if (!$this->Controller()->viewExists(
-                    $viewUnit, $viewAct, $viewName
-                )
-                ) {
+                if (!$this->Controller()->viewExists($viewUnit, $viewAct, $viewName)) {
                     $error = 'Unit ' . $viewUnit . ' does not contain view ' .
                              $viewAct . 'View_' . $viewName . ' or the file is ' .
                              'not readable';
@@ -143,14 +141,11 @@ class ExecutionFilter extends Filter
                 $view->cleanup();
 
                 // add the renderer to the request
-                $this->Request()->setAttributeByRef(
-                    'org.mojavi.renderer', $renderer
-                );
+                $this->Request()->setAttributeByRef('org.mojavi.renderer', $renderer);
 
             }
 
         }
 
     }
-
 }

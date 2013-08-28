@@ -59,7 +59,7 @@ class XoopsTplRender extends \Xmf\Template\AbstractTemplate
      *
      * @return void
      */
-    public function setAttribute($name,$value)
+    public function setAttribute($name, $value)
     {
         $this->tpl->assign($name, $value);
     }
@@ -75,5 +75,4 @@ class XoopsTplRender extends \Xmf\Template\AbstractTemplate
     {
         $this->setTemplate($name);
     }
-
 }

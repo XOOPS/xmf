@@ -229,9 +229,7 @@ class User extends ContextAware
     public function load ()
     {
         if ($this->container !== null) {
-            $this->container->load(
-                $this->authenticated, $this->attributes, $this->secure
-            );
+            $this->container->load($this->authenticated, $this->attributes, $this->secure);
         }
     }
 
@@ -372,10 +370,7 @@ class User extends ContextAware
     public function store ()
     {
         if ($this->container !== null) {
-            $this->container->store(
-                $this->authenticated, $this->attributes, $this->secure
-            );
+            $this->container->store($this->authenticated, $this->attributes, $this->secure);
         }
     }
-
 }

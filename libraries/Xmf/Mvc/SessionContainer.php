@@ -121,5 +121,4 @@ class SessionContainer extends ContextAware implements Container
 
         return $name.'_attributes';
     }
-
 }

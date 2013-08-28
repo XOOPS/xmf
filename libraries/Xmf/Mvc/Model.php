@@ -11,8 +11,6 @@
 
 namespace Xmf\Mvc;
 
-die('not ready');
-
 /**
  * A Model defines a business process rule set consisting of
  * - business objects (one or more database objects and relating rules)
@@ -48,6 +46,7 @@ abstract class Model extends ContextAware
     public function __construct()
     {
         $object=null;
+        die('not ready');
     }
 
     /**
@@ -71,5 +70,4 @@ abstract class Model extends ContextAware
      * @return bool true if model has closed cleanly, otherwise false
      */
     abstract public function cleanup(&$modelManager);
-
 }

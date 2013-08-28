@@ -315,5 +315,4 @@ class ExternalCom
     {
         $this->params = $value;
     }
-
 }

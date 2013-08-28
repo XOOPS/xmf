@@ -69,7 +69,7 @@ abstract class Filter extends ContextAware
      * @return void
      * @since  1.0
      */
-    abstract public function execute (&$filterChain);
+    abstract public function execute(&$filterChain);
 
     /**
      * Initialize the filter.
@@ -85,5 +85,4 @@ abstract class Filter extends ContextAware
     {
         $this->params = array_merge($this->params, $params);
     }
-
 }

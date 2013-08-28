@@ -90,42 +90,42 @@ class Request
 
         // Get the input hash
         switch ($hash) {
-        case 'GET' :
-            $input = &$_GET;
-            break;
-        case 'POST' :
-            $input = &$_POST;
-            break;
-        case 'FILES' :
-            $input = &$_FILES;
-            break;
-        case 'COOKIE' :
-            $input = &$_COOKIE;
-            break;
-        case 'ENV'    :
-            $input = &$_ENV;
-            break;
-        case 'SERVER'    :
-            $input = &$_SERVER;
-            break;
-        default:
-            $input = &$_REQUEST;
-            $hash = 'REQUEST';
-            break;
+            case 'GET':
+                $input = &$_GET;
+                break;
+            case 'POST':
+                $input = &$_POST;
+                break;
+            case 'FILES':
+                $input = &$_FILES;
+                break;
+            case 'COOKIE':
+                $input = &$_COOKIE;
+                break;
+            case 'ENV':
+                $input = &$_ENV;
+                break;
+            case 'SERVER':
+                $input = &$_SERVER;
+                break;
+            default:
+                $input = &$_REQUEST;
+                $hash = 'REQUEST';
+                break;
         }
 
         if (isset($input[$name]) && $input[$name] !== null) {
             // Get the variable from the input hash and clean it
-            $var = Request::_cleanVar($input[$name], $mask, $type);
+            $var = Request::cleanVar($input[$name], $mask, $type);
 
             // Handle magic quotes compatability
             if (get_magic_quotes_gpc() && ($var != $default) && ($hash != 'FILES')) {
-                $var = Request::_stripSlashesRecursive($var);
+                $var = Request::stripSlashesRecursive($var);
             }
         } else {
             if ($default !== null) {
                 // Clean the default value
-                $var = Request::_cleanVar($default, $mask, $type);
+                $var = Request::cleanVar($default, $mask, $type);
             } else {
                 $var = $default;
             }
@@ -298,27 +298,27 @@ class Request
         $previous = array_key_exists($name, $_REQUEST) ? $_REQUEST[$name] : null;
 
         switch ($hash) {
-        case 'GET' :
-            $_GET[$name] = $value;
-            $_REQUEST[$name] = $value;
-            break;
-        case 'POST' :
-            $_POST[$name] = $value;
-            $_REQUEST[$name] = $value;
-            break;
-        case 'COOKIE' :
-            $_COOKIE[$name] = $value;
-            $_REQUEST[$name] = $value;
-            break;
-        case 'FILES' :
-            $_FILES[$name] = $value;
-            break;
-        case 'ENV'    :
-            $_ENV['name'] = $value;
-            break;
-        case 'SERVER'    :
-            $_SERVER['name'] = $value;
-            break;
+            case 'GET':
+                $_GET[$name] = $value;
+                $_REQUEST[$name] = $value;
+                break;
+            case 'POST':
+                $_POST[$name] = $value;
+                $_REQUEST[$name] = $value;
+                break;
+            case 'COOKIE':
+                $_COOKIE[$name] = $value;
+                $_REQUEST[$name] = $value;
+                break;
+            case 'FILES':
+                $_FILES[$name] = $value;
+                break;
+            case 'ENV':
+                $_ENV['name'] = $value;
+                break;
+            case 'SERVER':
+                $_SERVER['name'] = $value;
+                break;
         }
 
         return $previous;
@@ -356,35 +356,35 @@ class Request
         }
 
         switch ($hash) {
-        case 'GET' :
-            $input = $_GET;
-            break;
-        case 'POST' :
-            $input = $_POST;
-            break;
-        case 'FILES' :
-            $input = $_FILES;
-            break;
-        case 'COOKIE' :
-            $input = $_COOKIE;
-            break;
-        case 'ENV'    :
-            $input = &$_ENV;
-            break;
-        case 'SERVER'    :
-            $input = &$_SERVER;
-            break;
-        default:
-            $input = $_REQUEST;
-            break;
+            case 'GET':
+                $input = $_GET;
+                break;
+            case 'POST':
+                $input = $_POST;
+                break;
+            case 'FILES':
+                $input = $_FILES;
+                break;
+            case 'COOKIE':
+                $input = $_COOKIE;
+                break;
+            case 'ENV':
+                $input = &$_ENV;
+                break;
+            case 'SERVER':
+                $input = &$_SERVER;
+                break;
+            default:
+                $input = $_REQUEST;
+                break;
         }
 
         // Handle magic quotes compatability
         if (get_magic_quotes_gpc() && ($hash != 'FILES')) {
-            $result = Request::_stripSlashesRecursive($result);
+            $result = Request::stripSlashesRecursive($result);
         }
 
-        $result = Request::_cleanVars($input, $mask);
+        $result = Request::cleanVars($input, $mask);
 
         return $result;
     }
@@ -410,15 +410,17 @@ class Request
      *
      * @param mixed  $var  The input variable.
      * @param int    $mask Filter bit mask.
-     *  - 1=no trim: If this flag is cleared and the input is a string, the string will have leading and trailing whitespace trimmed.
+     *  - 1=no trim: If this flag is cleared and the input is a string, 
+     *    the string will have leading and trailing whitespace trimmed.
      *  - 2=allow_raw: If set, no more filtering is performed, higher bits are ignored.
-     *  - 4=allow_html: HTML is allowed, but passed through a safe HTML filter first. If set, no more filtering is performed.
+     *  - 4=allow_html: HTML is allowed, but passed through a safe HTML filter first. 
+     *    If set, no more filtering is performed.
      *  - If no bits other than the 1 bit is set, a strict filter is applied.
      * @param string $type The variable type. See {@link Xmf\FilterInput::clean()}.
      *
      * @return string
      */
-    private static function _cleanVar($var, $mask = 0, $type = null)
+    private static function cleanVar($var, $mask = 0, $type = null)
     {
         // Static input filters for specific settings
         static $noHtmlFilter = null;
@@ -455,18 +457,18 @@ class Request
      * Clean up an array of variables.
      *
      * @param mixed  $var  The input variable.
-     * @param int    $mask Filter bit mask. See {@link Xmf\Request::_cleanVar()}
+     * @param int    $mask Filter bit mask. See {@link Xmf\Request::cleanVar()}
      * @param string $type The variable type. See {@link Xmf\FilterInput::clean()}.
      *
      * @return string
      */
-    private static function _cleanVars($var, $mask = 0, $type = null)
+    private static function cleanVars($var, $mask = 0, $type = null)
     {
         if (is_string($var)) {
-            $var = Request::_cleanVar($var, $mask, $type);
+            $var = Request::cleanVar($var, $mask, $type);
         } else {
             foreach ($var as $key => &$value) {
-                $value = Request::_cleanVars($value, $mask, $type);
+                $value = Request::cleanVars($value, $mask, $type);
             }
         }
 
@@ -481,9 +483,9 @@ class Request
      * 
      * @return array The input array with stripshlashes applied to it
      */
-    private static function _stripSlashesRecursive($value)
+    private static function stripSlashesRecursive($value)
     {
-        $value = is_array($value) ? array_map(array('Xmf\Request', '_stripSlashesRecursive'), $value)
+        $value = is_array($value) ? array_map(array('Xmf\Request', 'stripSlashesRecursive'), $value)
             : stripslashes($value);
 
         return $value;

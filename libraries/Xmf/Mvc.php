@@ -38,5 +38,4 @@ class Mvc
     const VIEW_INPUT    = 'input';
     const VIEW_NONE     =  null;
     const VIEW_SUCCESS  = 'success';
-
 }

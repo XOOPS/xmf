@@ -36,7 +36,7 @@ interface Container
      *
      * @return void
      */
-    public function load (&$authenticated, &$attributes, &$secure);
+    public function load(&$authenticated, &$attributes, &$secure);
 
     /**
      * Store user data.
@@ -49,5 +49,5 @@ interface Container
      *
      * @return void
      */
-    public function store (&$authenticated, &$attributes, &$secure);
+    public function store(&$authenticated, &$attributes, &$secure);
 }

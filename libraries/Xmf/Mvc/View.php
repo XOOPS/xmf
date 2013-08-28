@@ -75,5 +75,4 @@ abstract class View extends ContextAware
      * @since  1.0
      */
     abstract public function & execute ();
-
 }

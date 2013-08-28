@@ -43,6 +43,5 @@ abstract class AuthorizationHandler extends ContextAware
      *
      * @return bool true if authorized, false otherwise
      */
-    abstract public function execute (&$action);
-
+    abstract public function execute(&$action);
 }

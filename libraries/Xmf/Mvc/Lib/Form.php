@@ -74,8 +74,11 @@ class Form extends \Xmf\Mvc\ContextAware
         $elements=array();
 
         $form = new \XoopsThemeForm(
-            $formdef['title'], $formdef['name'], $formdef['action'],
-            $formdef['method'], $formdef['addtoken']
+            $formdef['title'],
+            $formdef['name'],
+            $formdef['action'],
+            $formdef['method'],
+            $formdef['addtoken']
         );
 
         foreach ($fields as $fieldname => $fielddef) {
@@ -91,27 +94,50 @@ class Form extends \Xmf\Mvc\ContextAware
                 $caption .= '<br /> - <span style="color:red;">'.$errors[$fieldname].'</span>';
             }
             switch ($fielddef['input']['form']) {
-            case 'text':
-                $form->addElement(new \XoopsFormText($caption, $fieldname, $size, $fielddef['length'], $value), $fielddef['required']);
-                break;
-            case 'editor':
-                //$form->addElement(new XoopsFormEditor ($caption, $name, $configs=null, $nohtml=false, $OnFailure= ''), $fielddef['required']);
-                $form->addElement(new \XoopsFormDhtmlTextArea($caption, $fieldname, $value, $fielddef['input']['height'], $fielddef['input']['width']), $fielddef['required']);
-                break;
-            case 'textarea':
-                $form->addElement(new \XoopsFormTextArea($caption, $fieldname, $value, $fielddef['input']['height'], $fielddef['input']['width']), $fielddef['required']);
-                break;
-            case 'password':
-                $form->addElement(new \XoopsFormPassword($caption, $fieldname, $size, $fielddef['length'], $value), $fielddef['required']);
-                break;
-            case 'select':
-                $elements[$fieldname] = new \XoopsFormSelect($caption, $fieldname, $value);
-                $elements[$fieldname] -> addOptionArray($fielddef['input']['options']);
-                $form->addElement($elements[$fieldname], $fielddef['required']);
-                break;
-            case 'hidden':
-                $form->addElement(new \XoopsFormHidden($fieldname, $value));
-                break;
+                case 'text':
+                    $form->addElement(
+                        new \XoopsFormText($caption, $fieldname, $size, $fielddef['length'], $value),
+                        $fielddef['required']
+                    );
+                    break;
+                case 'editor':
+                    $form->addElement(
+                        new \XoopsFormDhtmlTextArea(
+                            $caption,
+                            $fieldname,
+                            $value,
+                            $fielddef['input']['height'],
+                            $fielddef['input']['width']
+                        ),
+                        $fielddef['required']
+                    );
+                    break;
+                case 'textarea':
+                    $form->addElement(
+                        new \XoopsFormTextArea(
+                            $caption,
+                            $fieldname,
+                            $value,
+                            $fielddef['input']['height'],
+                            $fielddef['input']['width']
+                        ),
+                        $fielddef['required']
+                    );
+                    break;
+                case 'password':
+                    $form->addElement(
+                        new \XoopsFormPassword($caption, $fieldname, $size, $fielddef['length'], $value),
+                        $fielddef['required']
+                    );
+                    break;
+                case 'select':
+                    $elements[$fieldname] = new \XoopsFormSelect($caption, $fieldname, $value);
+                    $elements[$fieldname] -> addOptionArray($fielddef['input']['options']);
+                    $form->addElement($elements[$fieldname], $fielddef['required']);
+                    break;
+                case 'hidden':
+                    $form->addElement(new \XoopsFormHidden($fieldname, $value));
+                    break;
             }
         }
 

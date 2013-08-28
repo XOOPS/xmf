@@ -29,7 +29,7 @@ namespace Xmf\Mvc;
 class Context
 {
 
-    private static $_context = null;
+    private static $context = null;
 
     /**
      * Get the context object
@@ -40,8 +40,8 @@ class Context
      */
     public static function & get()
     {
-        if (!is_null(self::$_context)) {
-            return self::$_context;
+        if (!is_null(self::$context)) {
+            return self::$context;
         }
         die('Context not established');
     }
@@ -55,6 +55,6 @@ class Context
      */
     public static function set(&$context)
     {
-        self::$_context =& $context;
+        self::$context =& $context;
     }
 }

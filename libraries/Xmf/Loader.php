@@ -35,7 +35,7 @@ class Loader
      */
     public static function loadFile($file, $once = true)
     {
-        self::_securityCheck($file);
+        self::securityCheck($file);
         if (file_exists($file)) {
             if ($once) {
                 include_once $file;
@@ -68,7 +68,10 @@ class Loader
         }
 
         if (!class_exists($class, false) && !interface_exists($class, false)) {
-            trigger_error("File \"$file\" does not exist or class \"$class\" was not found in the file", E_USER_WARNING);
+            trigger_error(
+                "File \"$file\" does not exist or class \"$class\" was not found in the file",
+                E_USER_WARNING
+            );
 
             return false;
         }
@@ -85,7 +88,7 @@ class Loader
      *
      * @return void
      */
-    protected static function _securityCheck($filename)
+    protected static function securityCheck($filename)
     {
         /**
          * Security check

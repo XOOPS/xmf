@@ -220,5 +220,4 @@ class ActionChain extends ContextAware
         $this->preserve = $preserve;
 
     }
-
 }

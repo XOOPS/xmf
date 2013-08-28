@@ -113,5 +113,4 @@ class Number extends AbstractValidator
     {
         parent::initialize($params);
     }
-
 }

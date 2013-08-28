@@ -214,5 +214,4 @@ class PrivilegeUser extends User
         $namespace =& $this->getPrivilegeNamespace($namespace);
         $namespace =  null;
     }
-
 }

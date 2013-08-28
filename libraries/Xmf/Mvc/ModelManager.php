@@ -45,16 +45,14 @@ class ModelManager extends ContextAware
      *
      * @return a Model instance.
      */
-    public function &loadModel ($name, $unitName='')
+    public function &loadModel($name, $unitName = '')
     {
 
         if (empty($unitName)) {
             $unitName = $this->Controller()->currentUnit;
         }
         if (empty($this->models[$unitName][$name])) {
-            $file = $this->Controller()->getComponentName(
-                'model', $unitName, $name, ''
-            );
+            $file = $this->Controller()->getComponentName('model', $unitName, $name, '');
             $this->Controller()->loadRequired($file);
 
             $model =  $name; // no suffix
@@ -88,5 +86,4 @@ class ModelManager extends ContextAware
         }
 
     }
-
 }

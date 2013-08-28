@@ -90,7 +90,7 @@ class PermissionMap
      *
      * @return bool true if item added, false if error encountered
      */
-    public static function addItem($namespace,$name,$id,$lang_label)
+    public static function addItem($namespace, $name, $id, $lang_label)
     {
 
         self::initMap($namespace);
@@ -119,7 +119,7 @@ class PermissionMap
      *
      * @return bool true if action completed without error
      */
-    public static function addNamespace($namespace,$lang_title,$lang_description)
+    public static function addNamespace($namespace, $lang_title, $lang_description)
     {
         self::initMap($namespace);
         self::$map[$namespace]['title']=$lang_title;
@@ -164,7 +164,7 @@ class PermissionMap
      *
      * @return string an HTML string containing group permission form(s)
      */
-    public static function renderPermissionForm($map=null)
+    public static function renderPermissionForm($map = null)
     {
         require_once XOOPS_ROOT_PATH.'/class/xoopsform/grouppermform.php';
 
@@ -184,7 +184,7 @@ class PermissionMap
             }
         }
         $mvc_permissions = self::$map; // use the map we already have
-        foreach ($mvc_permissions as $key=>$perm) {
+        foreach ($mvc_permissions as $key => $perm) {
             $title_of_form
                 = defined($perm['title'])
                 ? constant($perm['title']) : $perm['title'];
@@ -193,7 +193,12 @@ class PermissionMap
                 = defined($perm['desc']) ? constant($perm['desc']) : $perm['desc'];
 
             $forms[$key] = new \XoopsGroupPermForm(
-                $title_of_form, $module_id, $perm_name, $perm_desc, '', false
+                $title_of_form,
+                $module_id,
+                $perm_name,
+                $perm_desc,
+                '',
+                false
             );
             foreach ($perm['items'] as $item) {
                 $forms[$key]->addItem(
@@ -209,5 +214,4 @@ class PermissionMap
 
         return $return;
     }
-
 }

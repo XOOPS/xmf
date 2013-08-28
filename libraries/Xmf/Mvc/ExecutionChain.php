@@ -166,5 +166,4 @@ class ExecutionChain
     {
         return sizeof($this->chain);
     }
-
 }

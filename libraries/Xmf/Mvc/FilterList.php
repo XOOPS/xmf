@@ -68,5 +68,4 @@ class FilterList extends ContextAware
             $filterChain->register($this->filters[$keys[$i]]);
         }
     }
-
 }

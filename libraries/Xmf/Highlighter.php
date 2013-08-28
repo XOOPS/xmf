@@ -43,14 +43,14 @@ class Highlighter
      *
      * @return string highlighted body
      */
-    public static function apply($words, $body, $pre='<strong>', $post='</strong>')
+    public static function apply($words, $body, $pre = '<strong>', $post = '</strong>')
     {
         if (!is_array($words)) {
             $words=str_replace('  ', ' ', $words);
             $words=explode(' ', $words);
         }
         foreach ($words as $word) {
-            $body=Highlighter::_splitOnTag($word, $body, $pre, $post);
+            $body=Highlighter::splitOnTag($word, $body, $pre, $post);
         }
 
         return $body;
@@ -63,7 +63,7 @@ class Highlighter
      *
      * @return void
      */
-    private static function _addHighlightCallback($capture)
+    private static function addHighlightCallback($capture)
     {
         $haystack=$capture[1];
         $p1=stripos($haystack, self::$highlightArg['needle']);
@@ -90,15 +90,14 @@ class Highlighter
      *
      * @return void
      */
-    private static function _splitOnTag($needle, $haystack, $pre, $post)
+    private static function splitOnTag($needle, $haystack, $pre, $post)
     {
         self::$highlightArg = compact('needle', 'pre', 'post');
 
         return preg_replace_callback(
             '#((?:(?!<[/a-z]).)*)([^>]*>|$)#si',
-            '\Xmf\Highlighter::_addHighlightCallback',
+            '\Xmf\Highlighter::addHighlightCallback',
             $haystack
         );
     }
-
 }

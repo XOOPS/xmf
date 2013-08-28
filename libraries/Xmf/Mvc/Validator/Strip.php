@@ -85,5 +85,4 @@ class Strip extends AbstractValidator
     {
         parent::initialize($params);
     }
-
 }
