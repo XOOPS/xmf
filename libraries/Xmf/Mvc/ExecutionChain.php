@@ -22,7 +22,7 @@ namespace Xmf\Mvc;
  * @author    Sean Kerr <skerr@mojavi.org>
  * @copyright 2013 The XOOPS Project http://sourceforge.net/projects/xoops/
  * @copyright 2003 Sean Kerr
- * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @license   GNU GPL 2 or later (http://www.gnu.org/licenses/gpl-2.0.html)
  * @version   Release: 1.0
  * @link      http://xoops.org
  * @since     1.0

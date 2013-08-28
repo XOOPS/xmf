@@ -16,10 +16,10 @@ namespace Xmf\Template;
  *
  * @category  Xmf\Template\Buttonbox
  * @package   Xmf
- * @author    Grégory Mage (Aka Mage)
+ * @author    GrÃ©gory Mage (Aka Mage)
  * @author    trabis <lusopoemas@gmail.com>
  * @copyright 2011-2013 The XOOPS Project http://sourceforge.net/projects/xoops/
- * @license   http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @license   GNU GPL 2 or later (http://www.gnu.org/licenses/gpl-2.0.html)
  * @version   Release: 1.0
  * @link      http://xoops.org
  * @since     1.0
