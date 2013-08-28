@@ -28,3 +28,5 @@ define("_DB_XMF_MSG_DROP_TABLE", "Table '%s' was dropped");
 define("_DB_XMF_MSG_DROP_TABLE_ERR", "Error dropping table '%s'");
 define("_DB_XMF_MSG_UPDATE_TABLE", "Table '%s' was updated");
 define("_DB_XMF_MSG_UPDATE_TABLE_ERR", "Error updating table '%s'");
+
+define('_DB_XMF_TABLE_IS_NOT_DEFINED','Table is not defined');
