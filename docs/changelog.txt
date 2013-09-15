@@ -1,7 +1,8 @@
 xmf ChangeLog
 
 === xmf ===
-Unreleased produce
+14-Sep-2013
 
+* 1.0 Alpha for XOOPS 2.5.6
+* reworked at https://github.com/geekwright/xmf.git
 * initial checkout: svn checkout http://svn.code.sf.net/p/xoops/svn/XMF/xmf/trunk/xmf
-
