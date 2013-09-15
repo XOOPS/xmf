@@ -13,11 +13,11 @@
  * XOOPS version
  *
  * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @license         http://www.fsf.org/copyleft/gpl.html GNU public license
+ * @license         GNU GPL 2 or later (http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
  * @package         xmf
  * @since           0.1
+ * @author          Richard Griffith <richard@geekwright.com>
  * @author          trabis <lusopoemas@gmail.com>
- * @version         $Id: xoops_version.php 8065 2011-11-06 02:02:32Z beckmi $
  */
 
 defined("XOOPS_ROOT_PATH") or die("XOOPS root path not defined");
@@ -25,10 +25,11 @@ defined("XOOPS_ROOT_PATH") or die("XOOPS root path not defined");
 $modversion['name'] = 'XMF';
 $modversion['version'] = 1.0;
 $modversion['description'] = '';
-$modversion['author'] = "XMF";
+$modversion['author'] = "geekwright";
 $modversion['credits'] = "trabis";
 $modversion['help'] = "";
-$modversion['license'] = "GNU General Public License (GPL)";
+$modversion['license'] = "GNU GPL 2 or later";
+$modversion['license_url'] = 'http://www.gnu.org/licenses/old-licenses/gpl-2.0.html';
 $modversion['official'] = 0;
 $modversion['dirname'] = "xmf";
 
@@ -41,4 +42,16 @@ $modversion['hasAdmin'] = 0;
 $modversion['hasSearch'] = 0;
 // Menu
 $modversion['hasMain'] = 0;
-?>
+
+// About stuff
+$modversion['module_status'] = "Alpha";
+$modversion['status'] = "Alpha";
+$modversion['release_date'] = "08/28/2013";
+
+$modversion['developer_lead'] = "geekwright";
+$modversion['developer_website_url'] = "http://xoops.org";
+$modversion['developer_website_name'] = "Xoops";
+$modversion['developer_email'] = "richard@geekwright.com";
+
+$modversion['people']['developers'][] = "geekwright";
+$modversion['people']['developers'][] = "trabis";

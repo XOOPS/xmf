@@ -10,7 +10,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
  * @copyright   Grégory Mage (Aka Mage)
- * @license     GNU GPL 2 or later (http://www.gnu.org/licenses/gpl-2.0.html)
+ * @license     GNU GPL 2 or later (http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
  * @author      Grégory Mage (Aka Mage)
  */
 
@@ -34,6 +34,3 @@ define('_AM_XMF_ABOUT_WEBSITE',"Website:");
 // checkModuleVersion
 define('_AM_XMF_DEMOMVC_MODULE_NOTFOUND','Please install or reactivate %1$s module. Minimum version required: %2$s');
 define('_AM_XMF_DEMOMVC_MODULE_VERSION','Minimum %1$s module version required: %2$s (your version is %3$s)');
-
-
-?>

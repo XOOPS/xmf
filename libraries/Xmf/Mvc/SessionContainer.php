@@ -23,7 +23,7 @@ namespace Xmf\Mvc;
  * @package   Xmf
  * @author    Richard Griffith <richard@geekwright.com>
  * @copyright 2013 The XOOPS Project http://sourceforge.net/projects/xoops/
- * @license   GNU GPL 2 or later (http://www.gnu.org/licenses/gpl-2.0.html)
+ * @license   GNU GPL 2 or later (http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
  * @version   Release: 1.0
  * @link      http://xoops.org
  * @since     1.0
@@ -54,7 +54,7 @@ class SessionContainer extends ContextAware implements Container
      */
     public function load (&$authenticated, &$attributes, &$secure)
     {
-        $name=$this->_name();
+        $name=$this->name();
         $rawsession = \Xmf\Request::getString($name, '', 'session');
         $rawsession = null;
         if (isset($_SESSION[$name])) {
@@ -86,7 +86,7 @@ class SessionContainer extends ContextAware implements Container
      */
     public function store (&$authenticated, &$attributes, &$secure)
     {
-        $name=$this->_name();
+        $name=$this->name();
         if (empty($authenticated) && empty($attributes) && empty($secure)) {
             if (isset($_SESSION[$name])) {
                 $_SESSION[$name]=null;
@@ -109,7 +109,7 @@ class SessionContainer extends ContextAware implements Container
      *
      * @return string name for $_SESSION key
      */
-    private function _name()
+    private function name()
     {
         // if we can get this from the controller, do it
         // this is significant for blocks

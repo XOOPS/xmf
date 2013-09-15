@@ -10,7 +10,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
  * @copyright   Grégory Mage (Aka Mage)
- * @license     GNU GPL 2 or later (http://www.gnu.org/licenses/gpl-2.0.html)
+ * @license     GNU GPL 2 or later (http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
  * @author      Grégory Mage (Aka Mage)
  */
 
@@ -33,5 +33,3 @@ define('_AM_XMF_ABOUT_MODULESTATUS','Состояние:');
 define('_AM_XMF_ABOUT_UPDATEDATE','Дата обновления:');
 define('_AM_XMF_ABOUT_WEBSITE',"Веб-сайт:");
 define('_AM_XMF_ABOUT_DESCRIPTION','Описание');
-
-?>

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Frameworks Module Admin
  *
@@ -10,7 +10,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
  * @copyright   Grégory Mage (Aka Mage)
- * @license     GNU GPL 2 or later (http://www.gnu.org/licenses/gpl-2.0.html)
+ * @license     GNU GPL 2 or later (http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
  * @author      Grégory Mage (Aka Mage)
  */
 
@@ -32,5 +32,3 @@ define("_AM_XMF_ABOUT_MODULEINFO","Modul-Infos");
 define("_AM_XMF_ABOUT_MODULESTATUS","Status:");
 define("_AM_XMF_ABOUT_UPDATEDATE","Update-Datum:");
 define("_AM_XMF_ABOUT_WEBSITE","Website:");
-
-?>

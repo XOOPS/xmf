@@ -18,7 +18,7 @@ namespace Xmf\Mvc\Validator;
  * @author    Sean Kerr <skerr@mojavi.org>
  * @copyright 2013 The XOOPS Project http://sourceforge.net/projects/xoops/
  * @copyright 2003 Sean Kerr
- * @license   GNU GPL 2 or later (http://www.gnu.org/licenses/gpl-2.0.html)
+ * @license   GNU GPL 2 or later (http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
  * @version   Release: 1.0
  * @link      http://xoops.org
  * @since     1.0
@@ -58,8 +58,8 @@ class Lookup extends AbstractValidator
 
         $found = false;
 
-        $table = $this->_cleanName($this->params['lookup_table']);
-        $column = $this->_cleanName($this->params['lookup_column']);
+        $table = $this->cleanName($this->params['lookup_table']);
+        $column = $this->cleanName($this->params['lookup_column']);
 
         if (empty($table)) {
             $error = $this->params['table_error'];
@@ -99,7 +99,7 @@ class Lookup extends AbstractValidator
      *
      * @return string cleaned name
      */
-    private function _cleanName($name)
+    private function cleanName($name)
     {
         $name = trim($name);
         if (preg_match('#^[a-zA-Z0-9._]*$#i', $name)) {
