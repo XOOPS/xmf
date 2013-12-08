@@ -74,6 +74,7 @@ class Language
      */
     public static function load($name, $domain = '', $language = null)
     {
+        if(!isset($GLOBALS['xoopsConfig']) && empty($language)) $language = 'english';
         $language = empty($language) ? $GLOBALS['xoopsConfig']['language'] : $language;
         $path = XOOPS_ROOT_PATH . '/' . ((empty($domain) || 'global' == $domain) ? ''
             : "modules/{$domain}/") . 'language';

@@ -26,11 +26,6 @@ namespace Xmf;
 class Highlighter
 {
     /**
-     * @var string
-     */
-    public static $highlightArg = '';
-
-    /**
      * Apply highlight to words in body text
      *
      * Surround occurances of words in body with pre in front and post
@@ -57,31 +52,7 @@ class Highlighter
     }
 
     /**
-     * add highlighting
-     *
-     * @param array $capture callback argument from preg_replace_callback
-     *
-     * @return void
-     */
-    private static function addHighlightCallback($capture)
-    {
-        $haystack=$capture[1];
-        $p1=stripos($haystack, self::$highlightArg['needle']);
-        $l1=strlen(self::$highlightArg['needle']);
-        $ret='';
-        while ($p1!==false) {
-            $ret .= substr($haystack, 0, $p1) . self::$highlightArg['pre']
-                . substr($haystack, $p1, $l1) . self::$highlightArg['post'];
-            $haystack=substr($haystack, $p1+$l1);
-            $p1=stripos($haystack, self::$highlightArg['needle']);
-        }
-        $ret.=$haystack.$capture[2];
-
-        return $ret;
-    }
-
-    /**
-     * find needle in between html tags
+     * find needle in between html tags and add highlighting
      *
      * @param string $needle   string to find
      * @param string $haystack html text to find needle in
@@ -92,11 +63,24 @@ class Highlighter
      */
     private static function splitOnTag($needle, $haystack, $pre, $post)
     {
-        self::$highlightArg = compact('needle', 'pre', 'post');
-
         return preg_replace_callback(
             '#((?:(?!<[/a-z]).)*)([^>]*>|$)#si',
-            '\Xmf\Highlighter::addHighlightCallback',
+            function ($capture) use ($needle, $pre, $post) {
+                $haystack=$capture[1];
+                $p1=stripos($haystack, $needle);
+                $l1=strlen($needle);
+                $ret='';
+                while ($p1!==false) {
+                    $ret .= substr($haystack, 0, $p1) . $pre
+                        . substr($haystack, $p1, $l1) . $post;
+                    $haystack=substr($haystack, $p1+$l1);
+                    $p1=stripos($haystack, $needle);
+                }
+                $ret.=$haystack.$capture[2];
+
+                return $ret;
+                
+            },
             $haystack
         );
     }
