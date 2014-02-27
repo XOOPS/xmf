@@ -11,6 +11,10 @@
 
 namespace Xmf;
 
+if (!defined('XMF_KRUMO_URL')) {
+    define('XMF_KRUMO_URL', XOOPS_URL . '/modules/xmf/css/krumo/');
+}
+
 /**
  * Debugging toos for developers
  *
@@ -30,11 +34,18 @@ class Debug
      * configuration ini for krumo
      *
      * @var string
+     *
+     * @todo implement resource asset for css
      */
+
     private static $config = array(
         'skin' => array('selected' => 'modern'),
         'css'  => array('url' => XMF_KRUMO_URL),
-        'display' => array('show_version' => false, 'show_call_info' => false)
+        'display' => array(
+            'show_version' => false,
+            'show_call_info' => false,
+            'sort_arrays' => false,
+            ),
         );
 
     /**
@@ -49,16 +60,21 @@ class Debug
      */
     public static function dump($var, $echo = true, $html = true, $exit = false)
     {
-        if (!$html) {
-            $msg = var_export($var, true);
+        if ($html && $echo && class_exists("\\Kint")) {
+            \Kint::dump(func_get_arg(0));
         } else {
-            \krumo::setConfig(self::$config);
-            $msg = \krumo::dump($var);
+            //self::$config['css'] = array('url' => XOOPS_URL . '/modules/xmf/css/krumo/');
+            if (!$html) {
+                $msg = var_export($var, true);
+            } else {
+                \krumo::setConfig(self::$config);
+                $msg = \krumo::dump($var);
+            }
+            if (!$echo) {
+                return $msg;
+            }
+            echo $msg;
         }
-        if (!$echo) {
-            return $msg;
-        }
-        echo $msg;
         if ($exit) {
             die();
         }
@@ -77,6 +93,52 @@ class Debug
      */
     public static function backtrace($echo = true, $html = true, $exit = false)
     {
-        return self::dump(debug_backtrace(), $echo, $html, $exit);
+        if ($html && class_exists("\\Kint")) {
+            \Kint::trace(debug_backtrace());
+            if ($exit) {
+                die();
+            }
+        } else {
+            return self::dump(debug_backtrace(), $echo, $html, $exit);
+        }
+    }
+
+    /**
+     * start_trace - turn on xdebug trace
+     *
+     * Requires xdebug extension
+     *
+     * @param type $tracefile      file name for trace file
+     * @param type $collect_params argument for ini_set('xdebug.collect_params',?)
+     *                             Controls display of parameters in trace output
+     * @param type $collect_return argument for ini_set('xdebug.collect_return',?)
+     *                             Controls display of function return value in trace
+     *
+     * @return void
+     */
+    public static function startTrace($tracefile = '', $collect_params = '3', $collect_return = 'On')
+    {
+        if (function_exists('xdebug_start_trace')) {
+            ini_set('xdebug.collect_params', $collect_params);
+            ini_set('xdebug.collect_return', $collect_return);
+            if ($tracefile == '') {
+                $tracefile = XOOPS_VAR_PATH . '/logs/php_trace';
+            }
+            xdebug_start_trace($tracefile);
+        }
+    }
+
+    /**
+     * stop_trace - turn off xdebug trace
+     *
+     * Requires xdebug extension
+     *
+     * @return void
+     */
+    public static function stopTrace()
+    {
+        if (function_exists('xdebug_stop_trace')) {
+            xdebug_stop_trace();
+        }
     }
 }
