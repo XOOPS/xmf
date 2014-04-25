@@ -52,7 +52,7 @@ class Yaml
     {
         try {
             $ret = VendorYaml::dump($var, $inline, $indent);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             trigger_error($e->getMessage(), E_USER_ERROR);
             $ret = false;
         }
@@ -70,7 +70,7 @@ class Yaml
     {
         try {
             $ret = VendorYaml::parse($yamlString);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             trigger_error($e->getMessage(), E_USER_ERROR);
             $ret = false;
         }
@@ -89,7 +89,7 @@ class Yaml
         try {
             $yamlString = file_get_contents($yamlFile);
             $ret = VendorYaml::parse($yamlString);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             trigger_error($e->getMessage(), E_USER_ERROR);
             $ret = false;
         }
@@ -111,7 +111,7 @@ class Yaml
         try {
             $yamlString = VendorYaml::dump($var, $inline, $indent);
             $ret = file_put_contents($yamlFile, $yamlString);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             trigger_error($e->getMessage(), E_USER_ERROR);
             $ret = false;
         }
