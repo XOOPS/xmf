@@ -10,7 +10,7 @@
     },
     "require": {
         "php": ">=5.3.3",
-        "oodle/krumo": "*",
+        "oodle/krumo": "0.5.0",
         "symfony/yaml": "2.4.*"
     }
 }
