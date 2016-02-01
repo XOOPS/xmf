@@ -1,16 +1,17 @@
 {
-    "name": "xmf/xoops-module-framework",
+    "name": "xoops/xmf",
     "license": "GPL-2.0+",
     "type": "project",
-    "description": "The \"XOOPS Module Framework\" distribution",
+    "description": "XMF - XOOPS Module Framework",
     "autoload": {
-        "psr-0": {
-            "Xmf\\": "libraries/"
+        "psr-4": {
+            "Xmf\\": "src/Xmf"
         }
     },
     "require": {
-        "php": ">=5.3.3",
+        "php": ">=5.3.7",
         "oodle/krumo": "0.5.0",
-        "symfony/yaml": "2.4.*"
+        "symfony/yaml": "2.4.*",
+        "ircmaxell/random-lib": "~1.1"
     }
 }

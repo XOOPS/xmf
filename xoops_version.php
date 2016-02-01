@@ -13,7 +13,7 @@
  * XOOPS version
  *
  * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
- * @license         GNU GPL 2 or later (http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
+ * @license         GNU GPL 2 or later (http://www.gnu.org/licenses/gpl-2.0.html)
  * @package         xmf
  * @since           0.1
  * @author          Richard Griffith <richard@geekwright.com>
@@ -29,8 +29,8 @@ $modversion['author'] = "geekwright";
 $modversion['credits'] = "trabis";
 $modversion['help'] = "";
 $modversion['license'] = "GNU GPL 2 or later";
-$modversion['license_url'] = 'http://www.gnu.org/licenses/old-licenses/gpl-2.0.html';
-$modversion['official'] = 0;
+$modversion['license_url'] = 'http://www.gnu.org/licenses/gpl-2.0.html';
+$modversion['official'] = 1;
 $modversion['dirname'] = "xmf";
 
 $modversion['image'] = "images/xmf.png";
@@ -44,9 +44,8 @@ $modversion['hasSearch'] = 0;
 $modversion['hasMain'] = 0;
 
 // About stuff
-$modversion['module_status'] = "Alpha";
-$modversion['status'] = "Alpha";
-$modversion['release_date'] = "08/28/2013";
+$modversion['module_status'] = "RC";
+$modversion['release_date'] = "02/01/2016";
 
 $modversion['developer_lead'] = "geekwright";
 $modversion['developer_website_url'] = "http://xoops.org";
