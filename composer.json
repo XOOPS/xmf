@@ -1,5 +1,5 @@
 {
-    "name": "xoops/xmf",
+    "name": "geekwright/xmf",
     "license": "GPL-2.0+",
     "type": "project",
     "description": "XMF - XOOPS Module Framework",
@@ -13,7 +13,6 @@
         "oodle/krumo": "0.5.0",
         "symfony/yaml": "2.4.*",
         "ircmaxell/random-lib": "^1.1.0",
-        "firebase/php-jwt": "^3.0.0",
-        "ircmaxell/password-compat": "^1.0.4"
+        "firebase/php-jwt": "^3.0.0"
     }
 }

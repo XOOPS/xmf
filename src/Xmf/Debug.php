@@ -31,7 +31,7 @@ if (!defined('XMF_KRUMO_URL')) {
 class Debug
 {
     /**
-     * Dump a variable
+     * Dump one or more variables
      *
      * @param mixed $var variable which will be dumped
      *
@@ -39,6 +39,8 @@ class Debug
      */
     public static function dump($var)
     {
+        $args = func_get_args();
+
         $config = array(
             'skin' => array('selected' => 'modern'),
             'css' => array('url' => XOOPS_URL  . '/include/krumo/'),
@@ -49,8 +51,10 @@ class Debug
             ),
         );
         \krumo::setConfig($config);
-        $msg = \krumo::dump($var);
-        echo $msg;
+        foreach ($args as $var) {
+            $msg = \krumo::dump($var);
+            echo $msg;
+        }
     }
 
     /**
@@ -68,10 +72,10 @@ class Debug
      *
      * Requires xdebug extension
      *
-     * @param type $tracefile      file name for trace file
-     * @param type $collect_params argument for ini_set('xdebug.collect_params',?)
+     * @param string $tracefile      file name for trace file
+     * @param string $collect_params argument for ini_set('xdebug.collect_params',?)
      *                             Controls display of parameters in trace output
-     * @param type $collect_return argument for ini_set('xdebug.collect_return',?)
+     * @param string $collect_return argument for ini_set('xdebug.collect_return',?)
      *                             Controls display of function return value in trace
      *
      * @return void
