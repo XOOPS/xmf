@@ -46,7 +46,7 @@ class Tables
     private $db;
 
     /**
-     * @var Tables
+     * @var array Tables
      */
     private $tables;
 
@@ -72,7 +72,7 @@ class Tables
     public function __construct()
     {
         global $xoopsDB; // lock this to legacy support
-        Language::load('database', 'xmf');
+        Language::load('xmf');
 
         $this->db =& $xoopsDB;
         $this->queueReset();
@@ -250,8 +250,8 @@ class Tables
     /**
      * Get column attributes
      *
-     * @param string $table      table containing the column
-     * @param string $column     column to alter
+     * @param string $table  table containing the column
+     * @param string $column column to alter
      *
      * @return string|bool attribute string, or false if error encountered
      */
@@ -266,6 +266,23 @@ class Tables
                     return $col['attributes'];
                 }
             }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get indexes for a table
+     *
+     * @param string $table      table containing the column
+     *
+     * @return array|bool array of indexes, or false if error encountered
+     */
+    public function getTableIndexes($table)
+    {
+        // Find table def.
+        if (isset($this->tables[$table]) && isset($this->tables[$table]['keys'])) {
+            return $this->tables[$table]['keys'];
         }
 
         return false;

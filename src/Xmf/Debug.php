@@ -12,7 +12,7 @@
 namespace Xmf;
 
 if (!defined('XMF_KRUMO_URL')) {
-    define('XMF_KRUMO_URL', XOOPS_URL . '/modules/xmf/css/krumo/');
+    define('XMF_KRUMO_URL', XOOPS_URL . '/include/krumo/');
 }
 
 /**
@@ -41,7 +41,7 @@ class Debug
     {
         $config = array(
             'skin' => array('selected' => 'modern'),
-            'css' => array('url' => XOOPS_URL  . '/modules/xmf/css/krumo/'),
+            'css' => array('url' => XOOPS_URL  . '/include/krumo/'),
             'display' => array(
                 'show_version' => false,
                 'show_call_info' => false,

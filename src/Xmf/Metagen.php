@@ -170,7 +170,7 @@ class Metagen
 
         if (!$stopwords) {
             if (!defined('_XMF_STOPWORDS')) {
-                \Xmf\Language::load('stopwords', 'xmf');
+                \Xmf\Language::load('stopwords');
             }
             if (defined('_XMF_STOPWORDS')) {
                 $sw = explode(' ', _XMF_STOPWORDS);

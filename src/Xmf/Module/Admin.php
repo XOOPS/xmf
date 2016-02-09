@@ -305,8 +305,6 @@ class Admin
         echo $this->renderAbout($logo_xoops);
     }
 
-    // not in regular ModuleAdmin
-
     /**
      * Add error to config box
      *
@@ -314,20 +312,20 @@ class Admin
      *
      * @return bool
      */
-    public static function addConfigError($value = '')
+    public function addConfigError($value = '')
     {
         if (self::is26()) {
-            $type='error';
-        } else {
-            $path=XOOPS_URL.'/Frameworks/moduleclasses/icons/16/';
-            $line = "";
-            $line .= "<span style='color : red; font-weight : bold;'>";
-            $line .= "<img src='" . $path . "off.png' >";
-            $line .= $value;
-            $line .= "</span>";
-            $value=$line;
-            $type = 'default';
+            return self::$ModuleAdmin->addConfigError($value);
         }
+
+        $path = XOOPS_URL . '/Frameworks/moduleclasses/icons/16/';
+        $line = "";
+        $line .= "<span style='color : red; font-weight : bold;'>";
+        $line .= "<img src='" . $path . "off.png' >";
+        $line .= $value;
+        $line .= "</span>";
+        $value = $line;
+        $type = 'default';
 
         return self::$ModuleAdmin->addConfigBoxLine($value, $type);
     }
@@ -339,20 +337,20 @@ class Admin
      *
      * @return bool
      */
-    public static function addConfigAccept($value = '')
+    public function addConfigAccept($value = '')
     {
         if (self::is26()) {
-            $type='accept';
-        } else {
-            $path=XOOPS_URL.'/Frameworks/moduleclasses/icons/16/';
-            $line = "";
-            $line .= "<span style='color : green;'>";
-            $line .= "<img src='" . $path . "on.png' >";
-            $line .= $value;
-            $line .= "</span>";
-            $value=$line;
-            $type = 'default';
+            return self::$ModuleAdmin->addConfigAccept($value);
         }
+
+        $path = XOOPS_URL . '/Frameworks/moduleclasses/icons/16/';
+        $line = "";
+        $line .= "<span style='color : green;'>";
+        $line .= "<img src='" . $path . "on.png' >";
+        $line .= $value;
+        $line .= "</span>";
+        $value = $line;
+        $type = 'default';
 
         return self::$ModuleAdmin->addConfigBoxLine($value, $type);
     }
@@ -364,23 +362,71 @@ class Admin
      *
      * @return bool
      */
-    public static function addConfigWarning($value = '')
+    public function addConfigWarning($value = '')
     {
         if (self::is26()) {
-            $type='warning';
-        } else {
-            $path=XOOPS_URL.'/Frameworks/moduleclasses/icons/16/';
-            $line = "";
-            $line .= "<span style='color : orange; font-weight : bold;'>";
-            $line .= "<img src='" . $path . "warning.png' >";
-            $line .= $value;
-            $line .= "</span>";
-            $value=$line;
-            $type = 'default';
+            return self::$ModuleAdmin->addConfigWarning($value);
         }
+
+        $path = XOOPS_URL . '/Frameworks/moduleclasses/icons/16/';
+        $line = "";
+        $line .= "<span style='color : orange; font-weight : bold;'>";
+        $line .= "<img src='" . $path . "warning.png' >";
+        $line .= $value;
+        $line .= "</span>";
+        $value = $line;
+        $type = 'default';
 
         return self::$ModuleAdmin->addConfigBoxLine($value, $type);
     }
+
+
+    /**
+     * Check for installed module and version and do addConfigBoxLine()
+     *
+     * @param string  $moddir     - module directory name
+     * @param integer $minversion - minimum acceptable module version (100 = V1.00)
+     *
+     * @return bool true if requested version of the module is available
+     */
+    public function addConfigModuleVersion($moddir, $minversion)
+    {
+        if (self::is26()) {
+            return self::$ModuleAdmin->addConfigModuleVersion($moddir, $minversion);
+        }
+
+        \Xmf\Language::load('xmf');
+        $return=false;
+        $helper=\Xmf\Module\Helper::getHelper($moddir);
+        if (is_object($helper) && is_object($helper->getModule())) {
+            $mod_modversion=$helper->getModule()->getVar('version');
+            $mod_version_f = $mod_modversion/100;
+            $min_version_f = $minversion/100;
+            $value = sprintf(
+                _AM_XMF_MODULE_VERSION,
+                strtoupper($moddir),
+                $min_version_f,
+                $mod_version_f
+            );
+            if ($mod_modversion>=$minversion) {
+                $this->addConfigAccept($value);
+                $return=true;
+            } else {
+                $this->addConfigError($value);
+            }
+        } else {
+            $value = sprintf(
+                _AM_XMF_MODULE_NOTFOUND,
+                strtoupper($moddir),
+                $minversion/100
+            );
+            $this->addConfigError($value);
+        }
+
+        return $return;
+    }
+
+    // not in regular ModuleAdmin
 
     /**
      * Get an appropriate URL for system provided icons.
@@ -420,46 +466,5 @@ class Admin
         }
 
         return(XOOPS_URL . $path . $name);
-    }
-
-    /**
-     * Check for installed module and version and do addConfigBoxLine()
-     *
-     * @param string  $moddir     - module directory name
-     * @param integer $minversion - minimum acceptable module version (100 = V1.00)
-     *
-     * @return bool true if requested version of the module is available
-     */
-    public static function checkModuleVersion($moddir, $minversion)
-    {
-        \Xmf\Language::load('main', 'xmf');
-        $return=false;
-        $helper=\Xmf\Module\Helper::getHelper($moddir);
-        if (is_object($helper) && is_object($helper->getModule())) {
-            $mod_modversion=$helper->getModule()->getVar('version');
-            $mod_version_f = $mod_modversion/100;
-            $min_version_f = $minversion/100;
-            $value = sprintf(
-                _AM_XMF_DEMOMVC_MODULE_VERSION,
-                strtoupper($moddir),
-                $min_version_f,
-                $mod_version_f
-            );
-            if ($mod_modversion>=$minversion) {
-                self::addConfigAccept($value);
-                $return=true;
-            } else {
-                self::addConfigError($value);
-            }
-        } else {
-            $value = sprintf(
-                _AM_XMF_DEMOMVC_MODULE_NOTFOUND,
-                strtoupper($moddir),
-                $minversion/100
-            );
-            self::addConfigError($value);
-        }
-
-        return $return;
     }
 }

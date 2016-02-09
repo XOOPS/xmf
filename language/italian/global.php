@@ -41,7 +41,7 @@ define ('_XMF_COUNTER_FORM_CAPTION', 'Hit counter');
 define ('_XMF_CREATE', 'Create');
 define ('_XMF_CREATINGNEW', 'Creazione');
 define ('_XMF_CUSTOM_CSS', 'Custom CSS');
-define ('_XMF_CUSTOM_CSS_DSC', 'È possibile specificare informazioni personalizzate CSS qui Questo SSN viene outputed in cui l\'oggetto viene visualizzato sul lato utente..');
+define ('_XMF_CUSTOM_CSS_DSC', 'Ãˆ possibile specificare informazioni personalizzate CSS qui Questo SSN viene outputed in cui l\'oggetto viene visualizzato sul lato utente..');
 define ('_XMF_DELETE', 'Cancella');
 define ('_XMF_DELETE_CONFIRM', "Sei sicuro di voler eliminare '<em>%s </em>'?");
 define ('_XMF_DELETE_ERROR', 'Si &#232; verificato un errore durante l\'eliminazione dell\'oggetto.');
@@ -144,9 +144,9 @@ define ('_XMF_TAG_VALUE_DSC', "Il valore di questo tag, vale a dire ci&#242; che
 define ('_XMF_UPDATE_MODULE', 'Aggiornamento del modulo');
 define ('_XMF_UPLOAD_IMAGE', 'Carica una nuova immagine:');
 define ('_XMF_VERSION_HISTORY', 'Cronologia delle versioni');
-define ('_XMF_WARNING_BETA', "Questo modulo viene fornito come &#232;, senza alcuna garanzia di sorta. Questo modulo &#232; BETA, significa che &#232; ancora in fase di sviluppo attivo. Questa versione &#232; destinata a scopo di test <b> solo </ b> e <b > fortemente </ b> consiglia di non utilizzarlo su un sito web dal vivo o in un ambiente di produzione ");
-define ('_XMF_WARNING_FINAL', "Questo modulo viene fornito così com'&#232;, senza alcuna garanzia di sorta. Anche se questo modulo non &#232; beta, &#232; ancora in fase di sviluppo attivo. Questo comunicato pu&#242; essere utilizzato in un sito web dal vivo o un ambiente di produzione, ma il suo uso &#232; sotto la propria responsabilit&#224;, il che significa che l'autore non &#232; responsabile ");
-define ('_XMF_WARNING_RC', "Questo modulo viene fornito così com'&#232;, senza alcuna garanzia di sorta. Questo modulo &#232; una Release Candidate e non deve essere utilizzato su un sito Web di produzione. Il modulo &#232; ancora in fase di sviluppo attivo e il suo utilizzo &#232; sotto la propria responsabilit&#224; , il che significa che l'autore non &#232; responsabile ");
+define ('_XMF_WARNING_BETA', "Questo modulo viene fornito come &#232;, senza alcuna garanzia di sorta. Questo modulo &#232; BETA, significa che &#232; ancora in fase di sviluppo attivo. Questa versione &#232; destinata a scopo di test <b> solo </ b> e <b > fortemente </ b> consiglia di non utilizzarlo su un sito web dal vivo o in un ambiente di produzione");
+define ('_XMF_WARNING_FINAL', "Questo modulo viene fornito cosÃ¬ com'&#232;, senza alcuna garanzia di sorta. Anche se questo modulo non &#232; beta, &#232; ancora in fase di sviluppo attivo. Questo comunicato pu&#242; essere utilizzato in un sito web dal vivo o un ambiente di produzione, ma il suo uso &#232; sotto la propria responsabilit&#224;, il che significa che l'autore non &#232; responsabile ");
+define ('_XMF_WARNING_RC', "Questo modulo viene fornito cosÃ¬ com'&#232;, senza alcuna garanzia di sorta. Questo modulo &#232; una Release Candidate e non deve essere utilizzato su un sito Web di produzione. Il modulo &#232; ancora in fase di sviluppo attivo e il suo utilizzo &#232; sotto la propria responsabilit&#224; , il che significa che l'autore non &#232; responsabile ");
 define ('_XMF_WEIGHT_FORM_CAPTION', 'Peso');
 define ('_XMF_WEIGHT_FORM_DSC', "");
 
@@ -166,7 +166,7 @@ define ('_XMF_BLOCKS_ADDTO_LAYOUT_OPTION1', "2 righe orizzontali");
 define ('_XMF_BLOCKS_ADDTO_LAYOUT_OPTION2', "verticale con icone");
 define ('_XMF_BLOCKS_ADDTO_LAYOUT_OPTION3', "Vertical nessuna icona");
 define ('_XMF_CURRENT_FILE', "Current file:");
-define ('_XMF_URL_FILE_DSC', "In alternativa, &#232; possibile utilizzare un URL Se si seleziona un file tramite il pulsante 'Sfoglia', l'URL viene ignorato &#232; possibile utilizzare il tag {XOOPS_URL} per la stampa ".XOOPS_URL);
+define ('_XMF_URL_FILE_DSC', "In alternativa, &#232; possibile utilizzare un URL Se si seleziona un file tramite il pulsante 'Sfoglia', l'URL viene ignorato &#232; possibile utilizzare il tag {XOOPS_URL} per la stampa ".\XoopsBaseConfig::get('root-path'));
 define ('_XMF_URL_FILE', "URL:");
 define ('_XMF_UPLOAD', "Seleziona un file da caricare:");
 
