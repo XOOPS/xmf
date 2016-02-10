@@ -86,12 +86,18 @@ class TokenReader
      *
      * @return object|false payload as stdClass, or false if token was invalid
      */
-    public static function fromHeader($keyName, $headerName, $assertClaims = array())
+    public static function fromHeader($keyName, $headerName = 'Authorization', $assertClaims = array())
     {
-        $token = Request::getHeader($headerName, '');
-        if (empty($token)) {
+        $header = Request::getHeader($headerName, '');
+        if (empty($header)) {
             return false;
         }
+        $header = trim($header);
+        $space = strpos($header, ' '); // expecting "Bearer base64-token-string"
+        if (false !== $space) {
+            $header = substr($header, $space);
+        }
+        $token = trim($header);
         return static::fromString($keyName, $token, $assertClaims);
     }
 }
