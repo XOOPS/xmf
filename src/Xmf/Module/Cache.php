@@ -108,9 +108,9 @@ class Cache extends AbstractHelper
      *
      * If the cache read for $key is a miss, call the $regenFunction to update it.
      *
-     * @param string   $cacheKey      Identifier for the cache item
+     * @param string   $key           Identifier for the cache item
      * @param callable $regenFunction function to generate cached content
-     * @param int|null $ttl           time to live, number ofseconds as integer
+     * @param int|null $ttl           time to live, number of seconds as integer
      *                                 or null for default
      * @param mixed    $args          variable argument list for $regenFunction
      *

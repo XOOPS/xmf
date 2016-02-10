@@ -41,9 +41,8 @@ class TableLoad
      */
     public static function loadTableFromArray($table, $data)
     {
-        global $xoopsDB;
         /** @var \XoopsDatabase */
-        $db = $xoopsDB;
+        $db = \XoopsDatabaseFactory::getDatabaseConnection();
 
         $prefixedTable = $db->prefix($table);
         $count = 0;
@@ -104,9 +103,8 @@ class TableLoad
      */
     public static function truncateTable($table)
     {
-        global $xoopsDB;
         /** @var \XoopsDatabase */
-        $db = $xoopsDB;
+        $db = \XoopsDatabaseFactory::getDatabaseConnection();
 
         $prefixedTable = $db->prefix($table);
         $sql = 'TRUNCATE TABLE ' . $prefixedTable;
@@ -127,9 +125,8 @@ class TableLoad
      */
     public static function rowCount($table, $criteria = null)
     {
-        global $xoopsDB;
         /** @var \XoopsDatabase */
-        $db = $xoopsDB;
+        $db = \XoopsDatabaseFactory::getDatabaseConnection();
 
         $prefixedTable = $db->prefix($table);
         $sql = 'SELECT COUNT(*) as count FROM ' . $prefixedTable . ' ';

@@ -11,6 +11,9 @@
 
 namespace Xmf\Module;
 
+use Xmf\Language;
+use Xmf\Loader;
+
 /**
  * Xmf\Module\Admin provides helpful methods for module administration
  * uses.
@@ -73,12 +76,12 @@ class Admin
                 $instance  = new \Xoops\Module\Admin;
                 self::$ModuleAdmin = $instance;
             } else {
-                \Xmf\Loader::loadFile(
+                Loader::loadFile(
                     XOOPS_ROOT_PATH .
                     '/Frameworks/moduleclasses/moduleadmin/moduleadmin.php'
                 );
                 self::$ModuleAdmin = new \ModuleAdmin;
-                $instance  = new \Xmf\Module\Admin;
+                $instance  = new Admin;
             }
 
         }
@@ -395,9 +398,9 @@ class Admin
             return self::$ModuleAdmin->addConfigModuleVersion($moddir, $minversion);
         }
 
-        \Xmf\Language::load('xmf');
-        $return=false;
-        $helper=\Xmf\Module\Helper::getHelper($moddir);
+        Language::load('xmf');
+        $return = false;
+        $helper = Helper::getHelper($moddir);
         if (is_object($helper) && is_object($helper->getModule())) {
             $mod_modversion=$helper->getModule()->getVar('version');
             $mod_version_f = $mod_modversion/100;

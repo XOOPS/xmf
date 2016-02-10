@@ -590,7 +590,9 @@ class Request
      */
     private static function stripSlashesRecursive($value)
     {
-        $value = is_array($value) ? array_map(array('XoopsRequest', 'stripSlashesRecursive'), $value) : stripslashes($value);
+        $value = is_array($value)
+            ? array_map(array('XoopsRequest', 'stripSlashesRecursive'), $value)
+            : stripslashes($value);
 
         return $value;
     }

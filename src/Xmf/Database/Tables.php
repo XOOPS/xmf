@@ -71,10 +71,9 @@ class Tables
      */
     public function __construct()
     {
-        global $xoopsDB; // lock this to legacy support
         Language::load('xmf');
 
-        $this->db =& $xoopsDB;
+        $this->db = \XoopsDatabaseFactory::getDatabaseConnection();
         $this->queueReset();
     }
 
@@ -274,7 +273,7 @@ class Tables
     /**
      * Get indexes for a table
      *
-     * @param string $table      table containing the column
+     * @param string $table get indexes for this named table
      *
      * @return array|bool array of indexes, or false if error encountered
      */

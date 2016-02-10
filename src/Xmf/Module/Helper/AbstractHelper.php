@@ -15,8 +15,7 @@ use Xmf\Module\Helper;
 
 /**
  * Xmf\Module\Helper\AbstractHelper defines the basis for various
- * helpers that simplfy routine module tasks.
- * uses.
+ * helpers that simplify routine module tasks.
  *
  * @category  Xmf\Module\Helper\AbstractHelper
  * @package   Xmf

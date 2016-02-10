@@ -33,7 +33,7 @@ class Debug
     /**
      * Dump one or more variables
      *
-     * @param mixed $var variable which will be dumped
+     * @param mixed $var variable(s) to dump
      *
      * @return void
      */
@@ -50,9 +50,9 @@ class Debug
                 'sort_arrays' => false,
             ),
         );
-        \krumo::setConfig($config);
+        \Krumo::setConfig($config);
         foreach ($args as $var) {
-            $msg = \krumo::dump($var);
+            $msg = \Krumo::dump($var);
             echo $msg;
         }
     }

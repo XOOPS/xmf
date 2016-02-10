@@ -9,17 +9,15 @@
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-namespace Xmf;
+namespace Xmf\Jwt;
 
 use Firebase\JWT\JWT;
 use Xmf\Key\KeyAbstract;
 
 /**
- * Xmf\JsonWebToken
+ * Basic JSON Web Token support
  *
- * Basic JWT support
- *
- * @category  Xmf\JsonWebToken
+ * @category  Xmf\Jwt\JsonWebToken
  * @package   Xmf
  * @author    Richard Griffith <richard@geekwright.com>
  * @copyright 2016 XOOPS Project (http://xoops.org)
@@ -101,9 +99,11 @@ class JsonWebToken
     }
 
     /**
-     * @param array $payload          associative array og claims, claim => value
-     * @param int   $expirationOffset seconds from now that token will expire. If not specified,
-     *                                 an "exp" claim will not be added or updated
+     * Create a signed token string for a payload
+     *
+     * @param array|Traversable $payload          traversable set of claims, claim => value
+     * @param int               $expirationOffset seconds from now that token will expire. If not specified,
+     *                                             an "exp" claim will not be added or updated
      *
      * @return string encoded and signed jwt string
      *

@@ -11,10 +11,12 @@
 
 namespace Xmf\Module\Helper;
 
+use Xmf\Language;
+
 /**
  * GenericHelper implements a Xoops 2.6 Xoops\Module\Helper\HelperAbstract.
  * We use it pre 2.6 systems so we can encapsulate many of the changes
- * needed to make modules more compatable with 2.6 in these methods.
+ * needed to make modules more compatible with 2.6 in these methods.
  * The most common deprecated warnings can be avoided by using module
  * helper methods.
  *
@@ -36,14 +38,14 @@ class GenericHelper
     protected $dirname;
 
     /**
-     * @var XoopsModule
+     * @var \XoopsModule
      */
     protected $object;
 
     /**
      * @var array of XoopsObjectHandler|XoopsPersistableObjectHandler
      */
-    private $_handlers;
+    private $handlers;
 
     /**
      * @var array config items
@@ -92,7 +94,7 @@ class GenericHelper
     public function getModule()
     {
         if ($this->object == null) {
-            $this->_initObject();
+            $this->initObject();
         }
         if (!is_object($this->object)) {
             $this->addLog("ERROR :: Module '{$this->dirname}' does not exist");
@@ -112,7 +114,7 @@ class GenericHelper
     public function getConfig($name)
     {
         if ($this->configs == null) {
-            $this->_initConfig();
+            $this->initConfig();
         }
         if (!$name) {
             $this->addLog("Getting all config");
@@ -143,15 +145,15 @@ class GenericHelper
     {
         $ret = false;
         $name = strtolower($name);
-        if (!isset($this->_handlers[$name])) {
-            $this->_initHandler($name);
+        if (!isset($this->handlers[$name])) {
+            $this->initHandler($name);
         }
 
-        if (!isset($this->_handlers[$name])) {
+        if (!isset($this->handlers[$name])) {
             $this->addLog("ERROR :: Handler '{$name}' does not exist");
         } else {
             $this->addLog("Getting handler '{$name}'");
-            $ret = $this->_handlers[$name];
+            $ret = $this->handlers[$name];
         }
 
         return $ret;
@@ -162,7 +164,7 @@ class GenericHelper
      *
      * @return void
      */
-    private function _initObject()
+    private function initObject()
     {
         global $xoopsModule;
         if (isset($xoopsModule) && is_object($xoopsModule)
@@ -182,7 +184,7 @@ class GenericHelper
      *
      * @return void
      */
-    private function _initConfig()
+    private function initConfig()
     {
         $this->addLog('INIT CONFIG');
         global $xoopsModule;
@@ -194,9 +196,7 @@ class GenericHelper
         } else {
             /* @var $config_handler XoopsConfigHandler */
             $config_handler = xoops_getHandler('config');
-            $this->configs = $config_handler->getConfigsByCat(
-                0, $this->getModule()->getVar('mid')
-            );
+            $this->configs = $config_handler->getConfigsByCat(0, $this->getModule()->getVar('mid'));
         }
     }
 
@@ -207,11 +207,11 @@ class GenericHelper
      *
      * @return void
      */
-    private function _initHandler($name)
+    private function initHandler($name)
     {
         $this->addLog('INIT ' . $name . ' HANDLER');
 
-        if (!isset($this->_handlers[$name])) {
+        if (!isset($this->handlers[$name])) {
             $hnd_file = XOOPS_ROOT_PATH .
                 "/modules/{$this->dirname}/class/{$name}.php";
             if (file_exists($hnd_file)) {
@@ -221,7 +221,7 @@ class GenericHelper
                 . ucfirst(strtolower($name)) . 'Handler';
             if (class_exists($class)) {
                 $db = \XoopsDatabaseFactory::getDatabaseConnection();
-                $this->_handlers[$name] = new $class($db);
+                $this->handlers[$name] = new $class($db);
                 $this->addLog("Loading class '{$class}'");
             } else {
                 $this->addLog("ERROR :: Class '{$class}' could not be loaded");
@@ -238,7 +238,7 @@ class GenericHelper
      */
     public function loadLanguage($name)
     {
-        if ($ret = \Xmf\Language::load($name, $this->dirname)) {
+        if ($ret = Language::load($name, $this->dirname)) {
             $this->addLog("Loading language '{$name}'");
         } else {
             $this->addLog("ERROR :: Language '{$name}' could not be loaded");
@@ -274,8 +274,8 @@ class GenericHelper
                     $log = serialize($log);
                 }
                 $GLOBALS['xoopsLogger']->addExtra(
-                    is_object($this->object) ? $this->object->name()
-                    : $this->dirname, $log
+                    is_object($this->object) ? $this->object->name() : $this->dirname,
+                    $log
                 );
             }
         }
@@ -345,5 +345,4 @@ class GenericHelper
         redirect_header($this->url($url), $time, $message);
         exit;
     }
-
 }

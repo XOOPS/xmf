@@ -191,7 +191,7 @@ class Permission extends AbstractHelper
      * @param int    $gperm_itemid id of the object to check
      * @param string $caption      caption for form field
      * @param string $name         name/id of form field
-     * @param bool   $include_anon true to include annonymous group
+     * @param bool   $include_anon true to include anonymous group
      * @param int    $size         size of list
      * @param bool   $multiple     true to allow multiple selections
      *

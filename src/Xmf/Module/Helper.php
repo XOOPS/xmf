@@ -34,7 +34,7 @@ class Helper
     /**
      * Get an instance to a module helper for a module directory
      *
-     * @param string $dirname module direcory
+     * @param string $dirname module directory
      *
      * @return bool|\Xoops\Module\Helper\HelperAbstract
      */

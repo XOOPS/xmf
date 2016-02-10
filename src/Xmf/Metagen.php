@@ -170,7 +170,7 @@ class Metagen
 
         if (!$stopwords) {
             if (!defined('_XMF_STOPWORDS')) {
-                \Xmf\Language::load('stopwords');
+                Language::load('stopwords');
             }
             if (defined('_XMF_STOPWORDS')) {
                 $sw = explode(' ', _XMF_STOPWORDS);
@@ -180,7 +180,7 @@ class Metagen
             }
         }
         if ($stopwords) {
-	    if (function_exists('mb_strtolower')) {
+            if (function_exists('mb_strtolower')) {
                 return !isset($stopwords[mb_strtolower($key)]);
             } else {
                 return !isset($stopwords[strtolower($key)]);
