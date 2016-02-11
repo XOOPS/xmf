@@ -35,12 +35,12 @@ abstract class KeyAbstract
     /**
      * KeyAbstract constructor.
      * @param StorageInterface $storage key store
-     * @param string           $name    key name
+     * @param string           $name    case insensitive key name, allow only A-Z, 0-9, _ and -
      */
     public function __construct(StorageInterface $storage, $name)
     {
         $this->storage = $storage;
-        $this->name = $name;
+        $this->name = strtolower(preg_replace('/[^A-Z0-9_-]/i', '', $name));
     }
 
     /**
