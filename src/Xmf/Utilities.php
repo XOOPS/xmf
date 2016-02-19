@@ -74,7 +74,7 @@ class Utilities
      *
      * @param string $document HTML to be converted
      *
-     * @return string Text version of $documnent parameter
+     * @return string Text version of $document parameter
      */
     public static function html2text($document)
     {

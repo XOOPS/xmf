@@ -33,30 +33,30 @@ class Permission extends AbstractHelper
     /**
      * @var int
      */
-    private $mid;
+    protected $mid;
 
     /**
      * @var string
      */
-    private $dirname;
+    protected $dirname;
 
     /**
-     * @var XoopsDatabase
+     * @var \XoopsDatabase
      */
-    private $db;
+    protected $db;
 
     /**
-     * @var XoopsGrouppermHandler
+     * @var \XoopsGrouppermHandler
      */
-    private $perm;
+    protected $permissionHandler;
 
     /**
      * @var Xoops instance if available
      */
-    private $xoops = null;
+    protected $xoops = null;
 
     /**
-     * Initialize parent::__constuct calls this after verifying module object.
+     * Initialize parent::__construct calls this after verifying module object.
      *
      * @return void
      */
@@ -68,7 +68,7 @@ class Permission extends AbstractHelper
         $this->mid = $this->module->getVar('mid');
         $this->dirname = $this->module->getVar('dirname');
         $this->db = \XoopsDatabaseFactory::getDatabaseConnection();
-        $this->perm = new \XoopsGroupPermHandler($this->db);
+        $this->permissionHandler = new \XoopsGroupPermHandler($this->db);
         if (class_exists('Xoops', false)) {
             $this->xoops = \Xoops::getInstance();
         }
@@ -86,7 +86,7 @@ class Permission extends AbstractHelper
     {
         $gperm_groupid = $this->getUserGroups();
 
-        return $this->perm->checkRight(
+        return $this->permissionHandler->checkRight(
             $gperm_name,
             $gperm_itemid,
             $gperm_groupid,
@@ -113,7 +113,7 @@ class Permission extends AbstractHelper
         $message = ''
     ) {
         $gperm_groupid = $this->getUserGroups();
-        $permission = $this->perm->checkRight(
+        $permission = $this->permissionHandler->checkRight(
             $gperm_name,
             $gperm_itemid,
             $gperm_groupid,
@@ -135,7 +135,7 @@ class Permission extends AbstractHelper
      **/
     public function getGroupsForItem($gperm_name, $gperm_itemid)
     {
-        return $this->perm->getGroupIds($gperm_name, $gperm_itemid, $this->mid);
+        return $this->permissionHandler->getGroupIds($gperm_name, $gperm_itemid, $this->mid);
     }
 
     /**
@@ -157,7 +157,7 @@ class Permission extends AbstractHelper
         // Save the new permissions
         if (count($groups) > 0) {
             foreach ($groups as $group_id) {
-                $this->perm->addRight(
+                $this->permissionHandler->addRight(
                     $gperm_name,
                     $gperm_itemid,
                     $group_id,
@@ -179,7 +179,7 @@ class Permission extends AbstractHelper
      */
     public function deletePermissionForItem($gperm_name, $gperm_itemid)
     {
-        return $this->perm->deleteByModule($this->mid, $gperm_name, $gperm_itemid);
+        return $this->permissionHandler->deleteByModule($this->mid, $gperm_name, $gperm_itemid);
     }
 
     /**
@@ -241,5 +241,14 @@ class Permission extends AbstractHelper
             $gperm_name . '_' . $gperm_itemid;
 
         return $name;
+    }
+
+    public function getUserGroups()
+    {
+        global $xoopsUser;
+
+        $groups = $xoopsUser ? $xoopsUser->getGroups() : XOOPS_GROUP_ANONYMOUS;
+
+        return $groups;
     }
 }

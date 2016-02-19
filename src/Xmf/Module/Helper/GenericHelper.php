@@ -45,7 +45,7 @@ class GenericHelper
     /**
      * @var array of XoopsObjectHandler|XoopsPersistableObjectHandler
      */
-    private $handlers;
+    protected $handlers;
 
     /**
      * @var array config items
@@ -58,11 +58,11 @@ class GenericHelper
     protected $debug;
 
     /**
-     * class constuctor
+     * class constructor
      *
      * @param string $dirname a module directory name
      */
-    private function __construct($dirname)
+    protected function __construct($dirname)
     {
         $this->dirname = $dirname;
     }
@@ -74,12 +74,11 @@ class GenericHelper
      *
      * @return GenericHelper
      */
-    public static function getInstance($dirname = 'notsetyet')
+    public static function getInstance($dirname)
     {
         static $instance = array();
         if (!isset($instance[$dirname])) {
-            $class = __CLASS__;
-            $instance[$dirname] = new $class($dirname);
+            $instance[$dirname] = new static($dirname);
         }
 
         return $instance[$dirname];
@@ -164,7 +163,7 @@ class GenericHelper
      *
      * @return void
      */
-    private function initObject()
+    protected function initObject()
     {
         global $xoopsModule;
         if (isset($xoopsModule) && is_object($xoopsModule)
@@ -184,7 +183,7 @@ class GenericHelper
      *
      * @return void
      */
-    private function initConfig()
+    protected function initConfig()
     {
         $this->addLog('INIT CONFIG');
         global $xoopsModule;
@@ -207,7 +206,7 @@ class GenericHelper
      *
      * @return void
      */
-    private function initHandler($name)
+    protected function initHandler($name)
     {
         $this->addLog('INIT ' . $name . ' HANDLER');
 

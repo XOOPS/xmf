@@ -28,8 +28,8 @@ class Highlighter
     /**
      * Apply highlight to words in body text
      *
-     * Surround occurances of words in body with pre in front and post
-     * behing. Considers only occurances of words outside of HTML tags.
+     * Surround occurrences of words in body with pre in front and post
+     * behind. Considers only occurrences of words outside of HTML tags.
      *
      * @param mixed  $words words to highlight
      * @param string $body  body of html text to highlight
@@ -45,7 +45,7 @@ class Highlighter
             $words=explode(' ', $words);
         }
         foreach ($words as $word) {
-            $body=Highlighter::splitOnTag($word, $body, $pre, $post);
+            $body=static::splitOnTag($word, $body, $pre, $post);
         }
 
         return $body;
@@ -61,7 +61,7 @@ class Highlighter
      *
      * @return mixed return from preg_replace_callback()
      */
-    private static function splitOnTag($needle, $haystack, $pre, $post)
+    protected static function splitOnTag($needle, $haystack, $pre, $post)
     {
         return preg_replace_callback(
             '#((?:(?!<[/a-z]).)*)([^>]*>|$)#si',

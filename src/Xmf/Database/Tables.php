@@ -43,17 +43,17 @@ class Tables
     /**
      * @var \XoopsDatabase
      */
-    private $db;
+    protected $db;
 
     /**
      * @var array Tables
      */
-    private $tables;
+    protected $tables;
 
     /**
      * @var array Work queue
      */
-    private $queue;
+    protected $queue;
 
     /**
      * @var string last error message
@@ -804,12 +804,12 @@ class Tables
      * @param string $sql   SQL statement to execute
      * @param bool   $force true to use force updates even in safe requests
      *
-     * @return mixed result resouce if no error,
+     * @return mixed result resource if no error,
      *               true if no error but no result
      *               false if error encountered.
      *               Any error message is in $this->lastError;
      */
-    private function & execSql($sql, $force = false)
+    protected function execSql($sql, $force = false)
     {
         if ($force) {
             $result = $this->db->queryF($sql);
@@ -828,12 +828,12 @@ class Tables
     /**
      * fetch the next row of a result set
      *
-     * @param resource &$result as returned by query
+     * @param resource $result as returned by query
      *
      * @return bool true if no errors and table is loaded, false if
      *               error presented. Error message in $this->lastError;
      */
-    private function fetch(&$result)
+    protected function fetch($result)
     {
         return $this->db->fetchArray($result);
     }
@@ -846,7 +846,7 @@ class Tables
      * @return bool true if no errors and table is loaded, false if
      *               error presented. Error message in $this->lastError;
      */
-    private function getTable($table)
+    protected function getTable($table)
     {
         $tableDef = array();
 
@@ -941,7 +941,7 @@ class Tables
      *
      * @return void
      */
-    private function expandQueue()
+    protected function expandQueue()
     {
         foreach ($this->queue as &$ddl) {
             if (is_array($ddl)) {

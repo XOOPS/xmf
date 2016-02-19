@@ -186,7 +186,7 @@ class Yaml
     {
         try {
             $yamlString = file_get_contents($yamlFile);
-            $ret = self::loadWrapped($yamlString);
+            $ret = static::loadWrapped($yamlString);
         } catch (\Exception $e) {
             trigger_error($e->getMessage(), E_USER_ERROR);
             $ret = false;
@@ -212,7 +212,7 @@ class Yaml
     public static function saveWrapped($var, $yamlFile, $inline = 4, $indent = 4)
     {
         try {
-            $yamlString = self::dumpWrapped($var, $inline, $indent);
+            $yamlString = static::dumpWrapped($var, $inline, $indent);
             $ret = file_put_contents($yamlFile, $yamlString);
         } catch (\Exception $e) {
             trigger_error($e->getMessage(), E_USER_ERROR);

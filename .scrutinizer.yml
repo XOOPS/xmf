@@ -1,0 +1,6 @@
+# .scrutinizer.yml
+imports:
+    - php
+filter:
+    excluded_paths:
+        - '_archive/*'

@@ -54,7 +54,7 @@ class FileStorage implements StorageInterface
         }
         $fileContents = "<?php\n//**Warning** modifying this file will break things!\n"
             . "return '{$data}';\n";
-        return file_put_contents($this->fileName($name), $fileContents);
+        return (false !== file_put_contents($this->fileName($name), $fileContents));
     }
 
     /**

@@ -34,7 +34,7 @@ class Session extends AbstractHelper
     /**
      * @var string
      */
-    private $prefix;
+    protected $prefix;
 
     /**
      * Initialize parent::__constuct calls this after verifying module object.
@@ -53,7 +53,7 @@ class Session extends AbstractHelper
      *
      * @return string module prefixed name
      */
-    private function prefix($name)
+    protected function prefix($name)
     {
         $prefixedName = $this->prefix . $name;
 

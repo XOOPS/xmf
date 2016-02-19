@@ -60,7 +60,7 @@ class Cache extends AbstractHelper
      *
      * @return string module prefixed name
      */
-    private function prefix($name)
+    protected function prefix($name)
     {
         return $this->prefix . $name;
     }

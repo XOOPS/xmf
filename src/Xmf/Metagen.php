@@ -45,7 +45,7 @@ class Metagen
         global $xoopsTpl, $xoTheme;
 
         $title = trim($title);
-        $title = self::asPlainText($title);
+        $title = static::asPlainText($title);
         if (!empty($title)) {
             if (is_object($xoTheme)) {
                 $xoTheme->addMeta('meta', 'title', $title);
@@ -120,7 +120,7 @@ class Metagen
             $forceKeys = array();
         }
 
-        $text = self::asPlainText($body);
+        $text = static::asPlainText($body);
         $text = mb_strtolower($text);
 
         $originalKeywords = preg_split(
@@ -131,10 +131,10 @@ class Metagen
         );
 
         foreach ($originalKeywords as $originalKeyword) {
-            if (self::checkStopWords($originalKeyword)) {
+            if (static::checkStopWords($originalKeyword)) {
                 $secondRoundKeywords = explode("'", $originalKeyword);
                 foreach ($secondRoundKeywords as $secondRoundKeyword) {
-                    if (self::checkStopWords($secondRoundKeyword)
+                    if (static::checkStopWords($secondRoundKeyword)
                         && strlen($secondRoundKeyword) >= $minLength
                     ) {
                         $keyCount[$secondRoundKeyword] =
@@ -199,7 +199,7 @@ class Metagen
      */
     public static function generateDescription($body, $wordCount = 100)
     {
-        $text = self::asPlainText($body);
+        $text = static::asPlainText($body);
 
         $words = explode(" ", $text);
 
@@ -214,14 +214,14 @@ class Metagen
         if (function_exists('mb_strlen')) {
             $len = mb_strlen($ret);
             $lastPeriod = mb_strrpos($ret, '.');
-            $ret .= ($lastPeriod === false) ? self::ELLIPSIS : '';
+            $ret .= ($lastPeriod === false) ? static::ELLIPSIS : '';
             if ($len>100 && ($len-$lastPeriod)<30) {
                 $ret = mb_substr($ret, 0, $lastPeriod+1);
             }
         } else {
             $len = strlen($ret);
             $lastPeriod = strrpos($ret, '.');
-            $ret .= ($lastPeriod === false) ? self::ELLIPSIS : '';
+            $ret .= ($lastPeriod === false) ? static::ELLIPSIS : '';
             if ($len>100 && ($len-$lastPeriod)<30) {
                 $ret = substr($ret, 0, $lastPeriod+1);
             }
@@ -250,12 +250,12 @@ class Metagen
         $wordCount = 100,
         $forceKeys = null
     ) {
-        $title_keywords = self::generateKeywords($title, $count, 3, $forceKeys);
-        $keywords = self::generateKeywords($body, $count, $minLength, $title_keywords);
-        $description = self::generateDescription($body, $wordCount);
-        self::assignTitle($title);
-        self::assignKeywords($keywords);
-        self::assignDescription($description);
+        $title_keywords = static::generateKeywords($title, $count, 3, $forceKeys);
+        $keywords = static::generateKeywords($body, $count, $minLength, $title_keywords);
+        $description = static::generateDescription($body, $wordCount);
+        static::assignTitle($title);
+        static::assignKeywords($keywords);
+        static::assignDescription($description);
     }
 
     /**
@@ -304,8 +304,8 @@ class Metagen
         $title = preg_replace($pattern, $rep_pat, $title);
 
         $tableau = explode("-", $title);
-        $tableau = array_filter($tableau, 'self::nonEmptyString');
-        $tableau = array_filter($tableau, 'self::checkStopWords');
+        $tableau = array_filter($tableau, 'static::nonEmptyString');
+        $tableau = array_filter($tableau, 'static::checkStopWords');
         $title = implode("-", $tableau);
 
         $title = (empty($title)) ? '' : $title . $extension;
@@ -331,8 +331,8 @@ class Metagen
     {
         $encoding = 'UTF-8';
 
-        $haystack = self::asPlainText($haystack);
-        $pos = self::getNeedlePositions($haystack, $needles);
+        $haystack = static::asPlainText($haystack);
+        $pos = static::getNeedlePositions($haystack, $needles);
 
         $start = empty($pos) ? 0 : min($pos);
 
@@ -355,7 +355,7 @@ class Metagen
             }
         }
 
-        $haystack = ($pre ? self::ELLIPSIS : '') . trim($haystack) . ($post ? self::ELLIPSIS : '');
+        $haystack = ($pre ? static::ELLIPSIS : '') . trim($haystack) . ($post ? static::ELLIPSIS : '');
         return $haystack;
     }
 
@@ -390,7 +390,7 @@ class Metagen
      *
      * @return integer[] array of initial positions of substring of haystack
      */
-    private static function getNeedlePositions($haystack, $needles)
+    protected static function getNeedlePositions($haystack, $needles)
     {
         $pos=array();
         $needles = empty($needles) ? array() : (array) $needles;

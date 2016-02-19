@@ -134,8 +134,7 @@ class FilterInput
         }
 
         if (empty($instances[$sig])) {
-            $classname       = __CLASS__;
-            $instances[$sig] = new $classname ($tagsArray, $attrArray, $tagsMethod, $attrMethod, $xssAuto);
+            $instances[$sig] = new static($tagsArray, $attrArray, $tagsMethod, $attrMethod, $xssAuto);
         }
 
         return $instances[$sig];

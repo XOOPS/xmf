@@ -38,14 +38,14 @@ class Admin
      *
      * @var object
      */
-    private static $ModuleAdmin = null;
-    private $lastInfoBoxTitle = null;
-    private static $paypal = '';
+    protected static $ModuleAdmin = null;
+    protected $lastInfoBoxTitle = null;
+    protected static $paypal = '';
 
     /**
      * Constructor
      */
-    private function __construct()
+    protected function __construct()
     {
     }
 
@@ -72,20 +72,19 @@ class Admin
         if ($instance === null) {
             if (class_exists('\Xoops\Module\Admin', true)) {
                 $instance  = new \Xoops\Module\Admin;
-                self::$ModuleAdmin = $instance;
+                static::$ModuleAdmin = $instance;
             } else {
                 Loader::loadFile(
                     XOOPS_ROOT_PATH .
                     '/Frameworks/moduleclasses/moduleadmin/moduleadmin.php'
                 );
-                self::$ModuleAdmin = new \ModuleAdmin;
+                static::$ModuleAdmin = new \ModuleAdmin;
                 $instance  = new Admin;
             }
 
         }
 
         return $instance;
-
     }
 
     /**
@@ -93,7 +92,7 @@ class Admin
      *
      * @return bool true if we are in a 2.6 environment
      */
-    private static function is26()
+    protected static function is26()
     {
         return class_exists('\Xoops', false);
     }
@@ -111,7 +110,7 @@ class Admin
      */
     public static function menuIconPath($image)
     {
-        if (self::is26()) {
+        if (static::is26()) {
             return($image);
         } else {
             $path='../../Frameworks/moduleclasses/icons/32/';
@@ -130,7 +129,7 @@ class Admin
      */
     public function addConfigBoxLine($value = '', $type = 'default')
     {
-        return self::$ModuleAdmin->addConfigBoxLine($value, $type);
+        return static::$ModuleAdmin->addConfigBoxLine($value, $type);
     }
 
     /**
@@ -146,7 +145,7 @@ class Admin
     {
         $this->lastInfoBoxTitle = $title;
 
-        return self::$ModuleAdmin->addInfoBox($title);
+        return static::$ModuleAdmin->addInfoBox($title);
     }
 
     /**
@@ -160,7 +159,7 @@ class Admin
      */
     public function addInfoBoxLine($text = '', $type = 'default', $color = 'inherit')
     {
-        return self::$ModuleAdmin->addInfoBoxLine(
+        return static::$ModuleAdmin->addInfoBoxLine(
             $this->lastInfoBoxTitle,
             $text,
             '',
@@ -181,7 +180,7 @@ class Admin
      */
     public function addItemButton($title, $link, $icon = 'add', $extra = '')
     {
-        return self::$ModuleAdmin->addItemButton($title, $link, $icon, $extra);
+        return static::$ModuleAdmin->addItemButton($title, $link, $icon, $extra);
     }
 
     /**
@@ -198,7 +197,7 @@ class Admin
             $position = 'right';
         }
 
-        return self::$ModuleAdmin->renderButton($position, $delimiter);
+        return static::$ModuleAdmin->renderButton($position, $delimiter);
     }
 
     /**
@@ -221,7 +220,7 @@ class Admin
      */
     public function renderInfoBox()
     {
-        return self::$ModuleAdmin->renderInfoBox();
+        return static::$ModuleAdmin->renderInfoBox();
     }
 
     /**
@@ -241,7 +240,7 @@ class Admin
      */
     public function renderIndex()
     {
-        return self::$ModuleAdmin->renderIndex();
+        return static::$ModuleAdmin->renderIndex();
     }
 
     /**
@@ -263,7 +262,7 @@ class Admin
      */
     public function displayNavigation($menu = '')
     {
-        echo self::$ModuleAdmin->addNavigation($menu);
+        echo static::$ModuleAdmin->addNavigation($menu);
     }
 
     /**
@@ -275,7 +274,7 @@ class Admin
      */
     public function renderAbout($logo_xoops = true)
     {
-        return self::$ModuleAdmin->renderAbout(self::$paypal, $logo_xoops);
+        return static::$ModuleAdmin->renderAbout(static::$paypal, $logo_xoops);
     }
 
     /**
@@ -287,7 +286,7 @@ class Admin
      */
     public static function setPaypal($paypal = '')
     {
-        self::$paypal = $paypal;
+        static::$paypal = $paypal;
     }
 
     /**
@@ -311,8 +310,8 @@ class Admin
      */
     public function addConfigError($value = '')
     {
-        if (self::is26()) {
-            return self::$ModuleAdmin->addConfigError($value);
+        if (static::is26()) {
+            return static::$ModuleAdmin->addConfigError($value);
         }
 
         $path = XOOPS_URL . '/Frameworks/moduleclasses/icons/16/';
@@ -324,7 +323,7 @@ class Admin
         $value = $line;
         $type = 'default';
 
-        return self::$ModuleAdmin->addConfigBoxLine($value, $type);
+        return static::$ModuleAdmin->addConfigBoxLine($value, $type);
     }
 
     /**
@@ -336,8 +335,8 @@ class Admin
      */
     public function addConfigAccept($value = '')
     {
-        if (self::is26()) {
-            return self::$ModuleAdmin->addConfigAccept($value);
+        if (static::is26()) {
+            return static::$ModuleAdmin->addConfigAccept($value);
         }
 
         $path = XOOPS_URL . '/Frameworks/moduleclasses/icons/16/';
@@ -349,7 +348,7 @@ class Admin
         $value = $line;
         $type = 'default';
 
-        return self::$ModuleAdmin->addConfigBoxLine($value, $type);
+        return static::$ModuleAdmin->addConfigBoxLine($value, $type);
     }
 
     /**
@@ -361,8 +360,8 @@ class Admin
      */
     public function addConfigWarning($value = '')
     {
-        if (self::is26()) {
-            return self::$ModuleAdmin->addConfigWarning($value);
+        if (static::is26()) {
+            return static::$ModuleAdmin->addConfigWarning($value);
         }
 
         $path = XOOPS_URL . '/Frameworks/moduleclasses/icons/16/';
@@ -374,7 +373,7 @@ class Admin
         $value = $line;
         $type = 'default';
 
-        return self::$ModuleAdmin->addConfigBoxLine($value, $type);
+        return static::$ModuleAdmin->addConfigBoxLine($value, $type);
     }
 
 
@@ -388,8 +387,8 @@ class Admin
      */
     public function addConfigModuleVersion($moddir, $minversion)
     {
-        if (self::is26()) {
-            return self::$ModuleAdmin->addConfigModuleVersion($moddir, $minversion);
+        if (static::is26()) {
+            return static::$ModuleAdmin->addConfigModuleVersion($moddir, $minversion);
         }
 
         Language::load('xmf');
@@ -450,13 +449,13 @@ class Admin
             case '/':
                 $path='';
                 break;
-            default:
             case '32':
+            default:
                 $path='32/';
                 break;
         }
 
-        if (self::is26()) {
+        if (static::is26()) {
             $path='/media/xoops/images/icons/'.$path;
         } else {
             $path='/Frameworks/moduleclasses/icons/'.$path;

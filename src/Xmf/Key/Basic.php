@@ -31,7 +31,7 @@ class Basic extends KeyAbstract
     /**
      * get key for use in signing
      *
-     * @return string signing key
+     * @return string|false verifying key, false on error
      */
     public function getSigning()
     {
@@ -41,7 +41,7 @@ class Basic extends KeyAbstract
     /**
      * get key for use in verifying
      *
-     * @return string verifying key
+     * @return string|false verifying key, false on error
      */
     public function getVerifying()
     {

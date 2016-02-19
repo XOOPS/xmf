@@ -19,3 +19,4 @@
 /_archive export-ignore
 .gitattributes export-ignore
 .gitignore export-ignore
+.scrutinizer.yml export-ignore

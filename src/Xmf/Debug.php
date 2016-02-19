@@ -64,7 +64,7 @@ class Debug
      */
     public static function backtrace()
     {
-        self::dump(debug_backtrace());
+        static::dump(debug_backtrace());
     }
 
     /**

@@ -36,7 +36,7 @@ class Helper
      *
      * @param string $dirname module directory
      *
-     * @return bool|\Xoops\Module\Helper\HelperAbstract
+     * @return bool|\Xoops\Module\Helper|GenericHelper
      */
     public static function getHelper($dirname = 'system')
     {
