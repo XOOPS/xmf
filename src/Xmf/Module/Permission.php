@@ -207,7 +207,7 @@ class Permission extends AbstractHelper
         $multiple = true
     ) {
         if (!class_exists('XoopsFormSelectGroup', true)) {
-            Loader::loadFile(XOOPS_ROOT_PATH.'/class/xoopsformloader.php');
+            Loader::loadFile(XOOPS_ROOT_PATH . '/class/xoopsformloader.php');
         }
         if (empty($name)) {
             $name = $this->defaultFieldName($gperm_name, $gperm_itemid);

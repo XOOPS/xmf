@@ -49,7 +49,7 @@ class Metagen
     {
         $title = trim($title);
         $title = static::asPlainText($title);
-        static::assignTemplateMeta('title', $title);
+        static::assignTemplateVar('xoops_pagetitle', $title);
     }
 
     /**
@@ -63,7 +63,7 @@ class Metagen
     {
         if (!empty($keywords) && is_array($keywords)) {
             $keyword_tag = implode(', ', $keywords);
-            static::assignTemplateMeta('keywords', $keyword_tag);
+            static::assignThemeMeta('keywords', $keyword_tag);
         }
     }
 
@@ -78,24 +78,39 @@ class Metagen
     {
         $description = trim($description);
         if (!empty($description)) {
-            static::assignTemplateMeta('description', $description);
+            static::assignThemeMeta('description', $description);
         }
     }
 
     /**
      * assign meta variables in template engine
      *
-     * @param string $name  meta name (title, keywords, description)
+     * @param string $name  meta name (keywords, description)
      * @param string $value meta value
      */
-    protected static function assignTemplateMeta($name, $value)
+    protected static function assignThemeMeta($name, $value)
     {
         if (class_exists('Xoops', false)) {
             \Xoops::getInstance()->theme()->addMeta('meta', $name, $value);
         } else {
+            global $xoTheme;
+            $xoTheme->addMeta('meta', $name, $value);
+        }
+    }
+
+    /**
+     * assign meta variables in template engine
+     *
+     * @param string $name  variable name (i.e. xoops_pagtitle)
+     * @param string $value meta value
+     */
+    protected static function assignTemplateVar($name, $value)
+    {
+        if (class_exists('Xoops', false)) {
+            \Xoops::getInstance()->tpl()->assign($name, $value);
+        } else {
             global $xoopsTpl;
-            $varName =  ($name === 'title') ? 'xoops_pagetitle' : 'xoops_meta_' . $name;
-            $xoopsTpl->assign($varName, $value);
+            $xoopsTpl->assign($name, $value);
         }
     }
 
@@ -180,7 +195,7 @@ class Metagen
                 $sw = explode(' ', _XMF_STOPWORDS);
                 $stopwords = array_fill_keys($sw, true);
             } else {
-                $stopwords = array('_'=> true);
+                $stopwords = array('_' => true);
             }
         }
         if (!empty($stopwords)) {

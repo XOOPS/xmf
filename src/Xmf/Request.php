@@ -544,7 +544,7 @@ class Request
             if ($mask & static::MASK_ALLOW_HTML) {
                 // If the allow html flag is set, apply a safe html filter to the variable
                 if (null === $safeHtmlFilter) {
-                    $safeHtmlFilter = FilterInput::getInstance(null, null, 1, 1);
+                    $safeHtmlFilter = FilterInput::getInstance(array(), array(), 1, 1);
                 }
                 $var = $safeHtmlFilter->clean($var, $type);
             } else {
