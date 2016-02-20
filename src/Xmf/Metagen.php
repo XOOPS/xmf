@@ -28,6 +28,11 @@ class Metagen
 {
 
     /**
+     * mb_string encoding
+     */
+    const ENCODING = 'UTF-8';
+
+    /**
      * horizontal ellipsis
      * This will be used to replace omitted text.
      */
@@ -42,39 +47,23 @@ class Metagen
      */
     public static function assignTitle($title)
     {
-        global $xoopsTpl, $xoTheme;
-
         $title = trim($title);
         $title = static::asPlainText($title);
-        if (!empty($title)) {
-            if (is_object($xoTheme)) {
-                $xoTheme->addMeta('meta', 'title', $title);
-            }
-            $xoopsTpl->assign('xoops_pagetitle', $title);
-        }
+        static::assignTemplateMeta('title', $title);
     }
 
     /**
      * assignKeywords set the meta keywords tag
      *
-     * @param array $keywords keywords for page
+     * @param string[] $keywords keywords list
      *
      * @return void
      */
     public static function assignKeywords($keywords)
     {
-        global $xoopsTpl, $xoTheme;
-
         if (!empty($keywords) && is_array($keywords)) {
             $keyword_tag = implode(', ', $keywords);
-
-            if (!empty($keyword_tag)) {
-                if (is_object($xoTheme)) {
-                    $xoTheme->addMeta('meta', 'keywords', $keyword_tag);
-                } else {
-                    $xoopsTpl->assign('xoops_meta_keywords', $keyword_tag);
-                }
-            }
+            static::assignTemplateMeta('keywords', $keyword_tag);
         }
     }
 
@@ -87,15 +76,26 @@ class Metagen
      */
     public static function assignDescription($description)
     {
-        global $xoopsTpl, $xoTheme;
-
         $description = trim($description);
         if (!empty($description)) {
-            if (is_object($xoTheme)) {
-                $xoTheme->addMeta('meta', 'description', $description);
-            } else {
-                $xoopsTpl->assign('xoops_meta_description', $description);
-            }
+            static::assignTemplateMeta('description', $description);
+        }
+    }
+
+    /**
+     * assign meta variables in template engine
+     *
+     * @param string $name  meta name (title, keywords, description)
+     * @param string $value meta value
+     */
+    protected static function assignTemplateMeta($name, $value)
+    {
+        if (class_exists('Xoops', false)) {
+            \Xoops::getInstance()->theme()->addMeta('meta', $name, $value);
+        } else {
+            global $xoopsTpl;
+            $varName =  ($name === 'title') ? 'xoops_pagetitle' : 'xoops_meta_' . $name;
+            $xoopsTpl->assign($varName, $value);
         }
     }
 
@@ -121,7 +121,11 @@ class Metagen
         }
 
         $text = static::asPlainText($body);
-        $text = mb_strtolower($text);
+        if (function_exists('mb_strtolower')) {
+            $text = mb_strtolower($text, static::ENCODING);
+        } else {
+            $text = strtolower($text);
+        }
 
         $originalKeywords = preg_split(
             '/[^a-zA-Z\'"-]+/',
@@ -164,7 +168,7 @@ class Metagen
      *
      * @return bool True if word is significant, false if it is a stop word
      */
-    protected static function checkStopWords($key)
+    public static function checkStopWords($key)
     {
         static $stopwords = null;
 
@@ -181,7 +185,7 @@ class Metagen
         }
         if (!empty($stopwords)) {
             if (function_exists('mb_strtolower')) {
-                return !isset($stopwords[mb_strtolower($key)]);
+                return !isset($stopwords[mb_strtolower($key, static::ENCODING)]);
             } else {
                 return !isset($stopwords[strtolower($key)]);
             }
@@ -212,11 +216,11 @@ class Metagen
         }
         $ret = implode(' ', $newWords);
         if (function_exists('mb_strlen')) {
-            $len = mb_strlen($ret);
-            $lastPeriod = mb_strrpos($ret, '.');
+            $len = mb_strlen($ret, static::ENCODING);
+            $lastPeriod = mb_strrpos($ret, '.', 0, static::ENCODING);
             $ret .= ($lastPeriod === false) ? static::ELLIPSIS : '';
             if ($len > 100 && ($len - $lastPeriod) < 30) {
-                $ret = mb_substr($ret, 0, $lastPeriod + 1);
+                $ret = mb_substr($ret, 0, $lastPeriod + 1, static::ENCODING);
             }
         } else {
             $len = strlen($ret);
@@ -329,8 +333,6 @@ class Metagen
      */
     public static function getSearchSummary($haystack, $needles = null, $length = 120)
     {
-        $encoding = 'UTF-8';
-
         $haystack = static::asPlainText($haystack);
         $pos = static::getNeedlePositions($haystack, $needles);
 
@@ -339,22 +341,39 @@ class Metagen
         $start = max($start - (int) ($length / 2), 0);
 
         $pre = ($start > 0); // need an ellipsis in front?
-        if ($pre) {
-            // we are not at the beginning so find first blank
-            $temp = mb_strpos($haystack, ' ', $start, $encoding);
-            $start = ($temp === false) ? $start : $temp;
-            $haystack = mb_substr($haystack, $start, null, $encoding);
-        }
+        if (function_exists('mb_strlen')) {
+            if ($pre) {
+                // we are not at the beginning so find first blank
+                $temp = mb_strpos($haystack, ' ', $start, static::ENCODING);
+                $start = ($temp === false) ? $start : $temp;
+                $haystack = mb_substr($haystack, $start, null, static::ENCODING);
+            }
 
-        $post = !(mb_strlen($haystack, $encoding) < $length); // need an ellipsis in back?
-        if ($post) {
-            $haystack = mb_substr($haystack, 0, $length, $encoding);
-            $end = mb_strrpos($haystack, ' ', 0, $encoding);
-            if ($end) {
-                $haystack = mb_substr($haystack, 0, $end, $encoding);
+            $post = !(mb_strlen($haystack, static::ENCODING) < $length); // need an ellipsis in back?
+            if ($post) {
+                $haystack = mb_substr($haystack, 0, $length, static::ENCODING);
+                $end = mb_strrpos($haystack, ' ', 0, static::ENCODING);
+                if ($end) {
+                    $haystack = mb_substr($haystack, 0, $end, static::ENCODING);
+                }
+            }
+        } else {
+            if ($pre) {
+                // we are not at the beginning so find first blank
+                $temp = strpos($haystack, ' ', $start);
+                $start = ($temp === false) ? $start : $temp;
+                $haystack = substr($haystack, $start);
+            }
+
+            $post = !(strlen($haystack) < $length); // need an ellipsis in back?
+            if ($post) {
+                $haystack = substr($haystack, 0, $length);
+                $end = strrpos($haystack, ' ', 0);
+                if ($end) {
+                    $haystack = substr($haystack, 0, $end);
+                }
             }
         }
-
         $haystack = ($pre ? static::ELLIPSIS : '') . trim($haystack) . ($post ? static::ELLIPSIS : '');
         return $haystack;
     }
@@ -395,7 +414,11 @@ class Metagen
         $pos = array();
         $needles = empty($needles) ? array() : (array) $needles;
         foreach ($needles as $needle) {
-            $i = mb_stripos($haystack, $needle, 0, 'UTF-8');
+            if (function_exists('mb_stripos')) {
+                $i = mb_stripos($haystack, $needle, 0, static::ENCODING);
+            } else {
+                $i = stripos($haystack, $needle, 0);
+            }
             if ($i !== false) {
                 $pos[] = $i; // only store matches
             }
