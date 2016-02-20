@@ -31,21 +31,21 @@ class Basic extends KeyAbstract
     /**
      * get key for use in signing
      *
-     * @return string|false verifying key, false on error
+     * @return string verifying key, false on error
      */
     public function getSigning()
     {
-        return $this->storage->fetch($this->name);
+        return (string) $this->storage->fetch($this->name);
     }
 
     /**
      * get key for use in verifying
      *
-     * @return string|false verifying key, false on error
+     * @return string verifying key, false on error
      */
     public function getVerifying()
     {
-        return $this->storage->fetch($this->name);
+        return (string) $this->storage->fetch($this->name);
     }
 
     /**
