@@ -26,6 +26,11 @@ namespace Xmf;
 class Highlighter
 {
     /**
+     * mbstring encoding
+     */
+    const ENCODING = 'UTF-8';
+
+    /**
      * Apply highlight to words in body text
      *
      * Surround occurrences of words in body with pre in front and post
@@ -63,17 +68,30 @@ class Highlighter
      */
     protected static function splitOnTag($needle, $haystack, $pre, $post)
     {
+        $encoding = static::ENCODING;
         return preg_replace_callback(
             '#((?:(?!<[/a-z]).)*)([^>]*>|$)#si',
-            function ($capture) use ($needle, $pre, $post) {
+            function ($capture) use ($needle, $pre, $post, $encoding) {
                 $haystack = $capture[1];
-                $p1 = stripos($haystack, $needle);
-                $l1 = strlen($needle);
-                $ret = '';
-                while ($p1 !== false) {
-                    $ret .= substr($haystack, 0, $p1) . $pre . substr($haystack, $p1, $l1) . $post;
-                    $haystack = substr($haystack, $p1 + $l1);
+                if (function_exists('mb_substr')) {
+                    $p1 = mb_stripos($haystack, $needle, 0, $encoding);
+                    $l1 = mb_strlen($needle, $encoding);
+                    $ret = '';
+                    while ($p1 !== false) {
+                        $ret .= mb_substr($haystack, 0, $p1, $encoding) . $pre
+                            . mb_substr($haystack, $p1, $l1, $encoding) . $post;
+                        $haystack = mb_substr($haystack, $p1 + $l1, null, $encoding);
+                        $p1 = mb_stripos($haystack, $needle, 0, $encoding);
+                    }
+                } else {
                     $p1 = stripos($haystack, $needle);
+                    $l1 = strlen($needle);
+                    $ret = '';
+                    while ($p1 !== false) {
+                        $ret .= substr($haystack, 0, $p1) . $pre . substr($haystack, $p1, $l1) . $post;
+                        $haystack = substr($haystack, $p1 + $l1);
+                        $p1 = stripos($haystack, $needle);
+                    }
                 }
                 $ret .= $haystack . $capture[2];
 

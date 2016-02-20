@@ -28,7 +28,7 @@ class Metagen
 {
 
     /**
-     * mb_string encoding
+     * mbstring encoding
      */
     const ENCODING = 'UTF-8';
 

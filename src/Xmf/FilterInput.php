@@ -104,7 +104,7 @@ class FilterInput
     }
 
     /**
-     * Returns a reference to an input filter object, only creating it if it doesn't already exist.
+     * Returns a reference to an input filter object, only creating it if it does not already exist.
      *
      * This method must be invoked as:
      *   $filter = FilterInput::getInstance();
