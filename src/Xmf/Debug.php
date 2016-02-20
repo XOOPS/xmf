@@ -43,7 +43,7 @@ class Debug
 
         $config = array(
             'skin' => array('selected' => 'modern'),
-            'css' => array('url' => XOOPS_URL  . '/include/krumo/'),
+            'css' => array('url' => XOOPS_URL . '/include/krumo/'),
             'display' => array(
                 'show_version' => false,
                 'show_call_info' => false,

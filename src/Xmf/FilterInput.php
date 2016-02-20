@@ -96,8 +96,8 @@ class FilterInput
             $attrArray[$i] = strtolower($attrArray[$i]);
         }
         // assign to member vars
-        $this->tagsArray  = (array)$tagsArray;
-        $this->attrArray  = (array)$attrArray;
+        $this->tagsArray  = (array) $tagsArray;
+        $this->attrArray  = (array) $attrArray;
         $this->tagsMethod = $tagsMethod;
         $this->attrMethod = $attrMethod;
         $this->xssAuto    = $xssAuto;
@@ -187,8 +187,7 @@ class FilterInput
         // need an instance for methods, since this is supposed to be static
         // we must instantiate the class - this will take defaults
         if (!is_object($filter)) {
-            $classname = get_called_class() ;
-            $filter = $classname::getInstance();
+            $filter = static::getInstance();
         }
 
         // Handle the type constraint
@@ -197,7 +196,7 @@ class FilterInput
             case 'INTEGER':
                 // Only use the first integer value
                 preg_match('/-?\d+/', (string) $source, $matches);
-                $result = @ (int)$matches[0];
+                $result = @ (int) $matches[0];
                 break;
 
             case 'FLOAT':
@@ -251,15 +250,15 @@ class FilterInput
             case 'WEBURL':
                 $result = (string) $filter->process($source);
                 // allow only relative, http or https
-                $urlparts=parse_url($result);
+                $urlparts = parse_url($result);
                 if (!empty($urlparts['scheme'])
-                    && !($urlparts['scheme']==='http' || $urlparts['scheme']==='https')
+                    && !($urlparts['scheme'] === 'http' || $urlparts['scheme'] === 'https')
                 ) {
-                    $result='';
+                    $result = '';
                 }
                 // do not allow quotes, tag brackets or controls
                 if (!preg_match('#^[^"<>\x00-\x1F]+$#', $result)) {
-                    $result='';
+                    $result = '';
                 }
                 break;
 
@@ -376,7 +375,7 @@ class FilterInput
                 $fromSpace = substr($tagLeft, ($currentSpace + 1));
                 $nextSpace = strpos($fromSpace, ' ');
                 $openQuotes = strpos($fromSpace, '"');
-                $closeQuotes = strpos(substr($fromSpace, ($openQuotes+1)), '"') + $openQuotes + 1;
+                $closeQuotes = strpos(substr($fromSpace, ($openQuotes + 1)), '"') + $openQuotes + 1;
                 // another equals exists
                 if (strpos($fromSpace, '=') !== false) {
                     // opening and closing quotes exists

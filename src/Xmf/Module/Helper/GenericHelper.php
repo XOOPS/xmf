@@ -191,7 +191,7 @@ class GenericHelper
             && $xoopsModule->getVar('dirname') == $this->dirname
         ) {
             global $xoopsModuleConfig;
-            $this->configs =& $xoopsModuleConfig;
+            $this->configs = $xoopsModuleConfig;
         } else {
             /* @var $config_handler XoopsConfigHandler */
             $config_handler = xoops_getHandler('config');
@@ -211,8 +211,7 @@ class GenericHelper
         $this->addLog('INIT ' . $name . ' HANDLER');
 
         if (!isset($this->handlers[$name])) {
-            $hnd_file = XOOPS_ROOT_PATH .
-                "/modules/{$this->dirname}/class/{$name}.php";
+            $hnd_file = XOOPS_ROOT_PATH . "/modules/{$this->dirname}/class/{$name}.php";
             if (file_exists($hnd_file)) {
                 include_once $hnd_file;
             }

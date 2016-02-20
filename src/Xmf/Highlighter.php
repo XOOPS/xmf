@@ -41,11 +41,11 @@ class Highlighter
     public static function apply($words, $body, $pre = '<strong>', $post = '</strong>')
     {
         if (!is_array($words)) {
-            $words=str_replace('  ', ' ', $words);
-            $words=explode(' ', $words);
+            $words = str_replace('  ', ' ', $words);
+            $words = explode(' ', $words);
         }
         foreach ($words as $word) {
-            $body=static::splitOnTag($word, $body, $pre, $post);
+            $body = static::splitOnTag($word, $body, $pre, $post);
         }
 
         return $body;
@@ -66,20 +66,18 @@ class Highlighter
         return preg_replace_callback(
             '#((?:(?!<[/a-z]).)*)([^>]*>|$)#si',
             function ($capture) use ($needle, $pre, $post) {
-                $haystack=$capture[1];
-                $p1=stripos($haystack, $needle);
-                $l1=strlen($needle);
+                $haystack = $capture[1];
+                $p1 = stripos($haystack, $needle);
+                $l1 = strlen($needle);
                 $ret='';
-                while ($p1!==false) {
-                    $ret .= substr($haystack, 0, $p1) . $pre
-                        . substr($haystack, $p1, $l1) . $post;
-                    $haystack=substr($haystack, $p1+$l1);
-                    $p1=stripos($haystack, $needle);
+                while ($p1 !== false) {
+                    $ret .= substr($haystack, 0, $p1) . $pre . substr($haystack, $p1, $l1) . $post;
+                    $haystack = substr($haystack, $p1 + $l1);
+                    $p1 = stripos($haystack, $needle);
                 }
-                $ret.=$haystack.$capture[2];
+                $ret .= $haystack . $capture[2];
 
                 return $ret;
-
             },
             $haystack
         );

@@ -78,33 +78,37 @@ class Utilities
      */
     public static function html2text($document)
     {
-        $search = array ("'<script[^>]*?>.*?</script>'si",  // Strip out javascript
-        "'<img.*?/>'si",       // Strip out img tags
-        "'<[\/\!]*?[^<>]*?>'si",          // Strip out HTML tags
-        "'([\r\n])[\s]+'",                // Strip out white space
-        "'&(quot|#34);'i",                // Replace HTML entities
-        "'&(amp|#38);'i",
-        "'&(lt|#60);'i",
-        "'&(gt|#62);'i",
-        "'&(nbsp|#160);'i",
-        "'&(iexcl|#161);'i",
-        "'&(cent|#162);'i",
-        "'&(pound|#163);'i",
-        "'&(copy|#169);'i");
+        $search = array (
+            "'<script[^>]*?>.*?</script>'si", // Strip out javascript
+            "'<img.*?/>'si",                  // Strip out img tags
+            "'<[\/\!]*?[^<>]*?>'si",          // Strip out HTML tags
+            "'([\r\n])[\s]+'",                // Strip out white space
+            "'&(quot|#34);'i",                // Replace HTML entities
+            "'&(amp|#38);'i",
+            "'&(lt|#60);'i",
+            "'&(gt|#62);'i",
+            "'&(nbsp|#160);'i",
+            "'&(iexcl|#161);'i",
+            "'&(cent|#162);'i",
+            "'&(pound|#163);'i",
+            "'&(copy|#169);'i"
+        );
 
-        $replace = array ("",
-        "",
-        "",
-        "\\1",
-        "\"",
-        "&",
-        "<",
-        ">",
-        " ",
-        chr(161),
-        chr(162),
-        chr(163),
-        chr(169));
+        $replace = array (
+            "",
+            "",
+            "",
+            "\\1",
+            "\"",
+            "&",
+            "<",
+            ">",
+            " ",
+            chr(161),
+            chr(162),
+            chr(163),
+            chr(169)
+        );
 
         $text = preg_replace($search, $replace, $document);
 

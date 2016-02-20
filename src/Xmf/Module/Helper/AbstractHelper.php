@@ -56,7 +56,7 @@ abstract class AbstractHelper
             // nothing specified, use current module
             // check if we are running in 2.6
             if (class_exists('Xoops', false)) {
-                $xoops=\Xoops::getInstance();
+                $xoops = \Xoops::getInstance();
                 if ($xoops->isModule()) {
                     $this->module = $xoops->module;
                 }

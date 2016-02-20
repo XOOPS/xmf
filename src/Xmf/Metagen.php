@@ -215,15 +215,15 @@ class Metagen
             $len = mb_strlen($ret);
             $lastPeriod = mb_strrpos($ret, '.');
             $ret .= ($lastPeriod === false) ? static::ELLIPSIS : '';
-            if ($len>100 && ($len-$lastPeriod)<30) {
-                $ret = mb_substr($ret, 0, $lastPeriod+1);
+            if ($len > 100 && ($len - $lastPeriod) < 30) {
+                $ret = mb_substr($ret, 0, $lastPeriod + 1);
             }
         } else {
             $len = strlen($ret);
             $lastPeriod = strrpos($ret, '.');
             $ret .= ($lastPeriod === false) ? static::ELLIPSIS : '';
-            if ($len>100 && ($len-$lastPeriod)<30) {
-                $ret = substr($ret, 0, $lastPeriod+1);
+            if ($len > 100 && ($len - $lastPeriod) < 30) {
+                $ret = substr($ret, 0, $lastPeriod + 1);
             }
         }
 
@@ -336,7 +336,7 @@ class Metagen
 
         $start = empty($pos) ? 0 : min($pos);
 
-        $start = max($start - (int)($length/2), 0);
+        $start = max($start - (int) ($length / 2), 0);
 
         $pre = ($start > 0); // need an ellipsis in front?
         if ($pre) {
@@ -346,7 +346,7 @@ class Metagen
             $haystack = mb_substr($haystack, $start, null, $encoding);
         }
 
-        $post = !(mb_strlen($haystack, $encoding) < $length);  // need an ellipsis in back?
+        $post = !(mb_strlen($haystack, $encoding) < $length); // need an ellipsis in back?
         if ($post) {
             $haystack = mb_substr($haystack, 0, $length, $encoding);
             $end = mb_strrpos($haystack, ' ', 0, $encoding);
@@ -392,11 +392,11 @@ class Metagen
      */
     protected static function getNeedlePositions($haystack, $needles)
     {
-        $pos=array();
+        $pos = array();
         $needles = empty($needles) ? array() : (array) $needles;
         foreach ($needles as $needle) {
             $i = mb_stripos($haystack, $needle, 0, 'UTF-8');
-            if ($i!==false) {
+            if ($i !== false) {
                 $pos[] = $i; // only store matches
             }
         }

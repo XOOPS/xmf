@@ -71,7 +71,7 @@ class Admin
 
         if ($instance === null) {
             if (class_exists('\Xoops\Module\Admin', true)) {
-                $instance  = new \Xoops\Module\Admin;
+                $instance = new \Xoops\Module\Admin;
                 static::$ModuleAdmin = $instance;
             } else {
                 Loader::loadFile(
@@ -79,7 +79,7 @@ class Admin
                     '/Frameworks/moduleclasses/moduleadmin/moduleadmin.php'
                 );
                 static::$ModuleAdmin = new \ModuleAdmin;
-                $instance  = new Admin;
+                $instance = new Admin;
             }
 
         }
@@ -113,9 +113,9 @@ class Admin
         if (static::is26()) {
             return($image);
         } else {
-            $path='../../Frameworks/moduleclasses/icons/32/';
+            $path = '../../Frameworks/moduleclasses/icons/32/';
 
-            return($path.$image);
+            return($path . $image);
         }
     }
 
@@ -395,18 +395,18 @@ class Admin
         $return = false;
         $helper = Helper::getHelper($moddir);
         if (is_object($helper) && is_object($helper->getModule())) {
-            $mod_modversion=$helper->getModule()->getVar('version');
-            $mod_version_f = $mod_modversion/100;
-            $min_version_f = $minversion/100;
+            $mod_modversion = $helper->getModule()->getVar('version');
+            $mod_version_f = $mod_modversion / 100;
+            $min_version_f = $minversion / 100;
             $value = sprintf(
                 _AM_XMF_MODULE_VERSION,
                 strtoupper($moddir),
                 $min_version_f,
                 $mod_version_f
             );
-            if ($mod_modversion>=$minversion) {
+            if ($mod_modversion >= $minversion) {
                 $this->addConfigAccept($value);
-                $return=true;
+                $return = true;
             } else {
                 $this->addConfigError($value);
             }
@@ -414,7 +414,7 @@ class Admin
             $value = sprintf(
                 _AM_XMF_MODULE_NOTFOUND,
                 strtoupper($moddir),
-                $minversion/100
+                $minversion / 100
             );
             $this->addConfigError($value);
         }
@@ -444,21 +444,21 @@ class Admin
     {
         switch ($size) {
             case '16':
-                $path='16/';
+                $path = '16/';
                 break;
             case '/':
-                $path='';
+                $path = '';
                 break;
             case '32':
             default:
-                $path='32/';
+                $path = '32/';
                 break;
         }
 
         if (static::is26()) {
-            $path='/media/xoops/images/icons/'.$path;
+            $path = '/media/xoops/images/icons/'.$path;
         } else {
-            $path='/Frameworks/moduleclasses/icons/'.$path;
+            $path = '/Frameworks/moduleclasses/icons/'.$path;
         }
 
         return(XOOPS_URL . $path . $name);

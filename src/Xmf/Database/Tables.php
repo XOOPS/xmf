@@ -23,7 +23,7 @@ use Xmf\Language;
  * change(s). If the changes are already in place (i.e. the new column
  * already exists) no work is added. Then queueExecute() to process the
  * whole set.
-  *
+ *
  * @category  Xmf\Database\Tables
  * @package   Xmf
  * @author    Richard Griffith <richard@geekwright.com>
@@ -102,10 +102,10 @@ class Tables
      */
     public function addColumn($table, $column, $attributes, $position = null)
     {
-        $columnDef=array(
-            'name'=>$column,
-            'position'=>$position,
-            'attributes'=>$attributes
+        $columnDef = array(
+            'name' => $column,
+            'position' => $position,
+            'attributes' => $attributes
         );
 
         // Find table def.
@@ -125,10 +125,10 @@ class Tables
                     default:
                         // should be a column name to add after
                         // loop thru and find that column
-                        $i=0;
+                        $i = 0;
                         foreach ($tableDef['columns'] as $col) {
                             ++$i;
-                            if (strcasecmp($col['name'], $position)==0) {
+                            if (strcasecmp($col['name'], $position) == 0) {
                                 array_splice($tableDef['columns'], $i, 0, array($columnDef));
                                 break;
                             }
@@ -138,23 +138,23 @@ class Tables
                 return true;
             } else {
                 foreach ($tableDef['columns'] as $col) {
-                    if (strcasecmp($col['name'], $column)==0) {
+                    if (strcasecmp($col['name'], $column) == 0) {
                         return true;
                     }
                 }
                 switch ($position) {
                     case Tables::POSITION_FIRST:
-                        $pos='FIRST';
+                        $pos = 'FIRST';
                         break;
                     case '':
                     case null:
                     case false:
-                        $pos='';
+                        $pos = '';
                         break;
                     default:
-                        $pos="AFTER `{$position}`";
+                        $pos = "AFTER `{$position}`";
                 }
-                $this->queue[]="ALTER TABLE `{$tableDef['name']}`"
+                $this->queue[] = "ALTER TABLE `{$tableDef['name']}`"
                     . " ADD COLUMN {$column} {$columnDef['attributes']} {$pos} ";
             }
         } else { // no table established
@@ -179,8 +179,7 @@ class Tables
     public function addPrimaryKey($table, $column)
     {
         if (isset($this->tables[$table])) {
-            $this->queue[]
-                = "ALTER TABLE `{$table}` ADD PRIMARY KEY({$column})";
+            $this->queue[] = "ALTER TABLE `{$table}` ADD PRIMARY KEY({$column})";
         } else { // no table established
             $this->lastError = _DB_XMF_TABLE_IS_NOT_DEFINED;
             $this->lastErrNo = -1;
@@ -204,20 +203,21 @@ class Tables
         if (isset($this->tables[$table])) {
             return true;
         }
-        $tableDef=$this->getTable($table);
+        $tableDef = $this->getTable($table);
         if (is_array($tableDef)) {
             $this->tables[$table] = $tableDef;
 
             return true;
         } else {
-            if ($tableDef===true) {
+            if ($tableDef === true) {
                 $tableDef = array(
-                      'name' => $this->db->prefix($table)
-                    , 'options' => 'ENGINE=InnoDB');
+                    'name' => $this->db->prefix($table),
+                    'options' => 'ENGINE=InnoDB'
+                );
                 $tableDef['create'] = true;
                 $this->tables[$table] = $tableDef;
 
-                $this->queue[]=array('createtable'=>$table);
+                $this->queue[] = array('createtable' => $table);
 
                 return true;
             } else {
@@ -238,7 +238,7 @@ class Tables
         if (isset($this->tables[$table])) {
             return true;
         }
-        $tableDef=$this->getTable($table);
+        $tableDef = $this->getTable($table);
         if (is_array($tableDef)) {
             $this->tables[$table] = $tableDef;
             return true;
@@ -302,7 +302,7 @@ class Tables
     public function alterColumn($table, $column, $attributes, $newName = '', $position = null)
     {
         if (empty($newName)) {
-            $newName=$column;
+            $newName = $column;
         }
         // Find table def.
         if (isset($this->tables[$table])) {
@@ -313,9 +313,9 @@ class Tables
             ) {
                 // loop thru and find the column
                 foreach ($tableDef['columns'] as &$col) {
-                    if (strcasecmp($col['name'], $column)==0) {
-                        $col['name']=$newName;
-                        $col['attributes']=$attributes;
+                    if (strcasecmp($col['name'], $column) == 0) {
+                        $col['name'] = $newName;
+                        $col['attributes'] = $attributes;
                         break;
                     }
                 }
@@ -324,17 +324,17 @@ class Tables
             } else {
                 switch ($position) {
                     case Tables::POSITION_FIRST:
-                        $pos='FIRST';
+                        $pos = 'FIRST';
                         break;
                     case '':
                     case null:
                     case false:
-                        $pos='';
+                        $pos = '';
                         break;
                     default:
-                        $pos="AFTER `{$position}`";
+                        $pos = "AFTER `{$position}`";
                 }
-                $this->queue[]="ALTER TABLE `{$tableDef['name']}` " .
+                $this->queue[] = "ALTER TABLE `{$tableDef['name']}` " .
                     "CHANGE COLUMN `{$column}` `{$newName}` {$attributes} {$pos} ";
             }
         } else { // no table established
@@ -362,21 +362,20 @@ class Tables
         if (isset($this->tables[$newTable])) {
             return true;
         }
-        $tableDef=$this->getTable($table);
-        $copy=$this->name($newTable);
-        $original=$this->name($table);
+        $tableDef = $this->getTable($table);
+        $copy = $this->name($newTable);
+        $original = $this->name($table);
 
         if (is_array($tableDef)) {
-            $tableDef['name']=$copy;
+            $tableDef['name'] = $copy;
             if ($withData) {
                 $this->queue[] = "CREATE TABLE `{$copy}` LIKE `{$original}` ;";
-                $this->queue[]
-                    = "INSERT INTO `{$copy}` SELECT * FROM `{$original}` ;";
+                $this->queue[] = "INSERT INTO `{$copy}` SELECT * FROM `{$original}` ;";
             } else {
                 $tableDef['create'] = true;
-                $this->queue[]=array('createtable'=>$newTable);
+                $this->queue[] = array('createtable' => $newTable);
             }
-            $this->tables[$newTable]=$tableDef;
+            $this->tables[$newTable] = $tableDef;
 
             return true;
         } else {
@@ -399,9 +398,8 @@ class Tables
     {
         if (isset($this->tables[$table])) {
             //ALTER TABLE `table` ADD INDEX `product_id` (`product_id`)
-            $add = ($unique?'ADD UNIQUE INDEX':'ADD INDEX');
-            $this->queue[]
-                = "ALTER TABLE `{$table}` {$add} {$name} ({$column})";
+            $add = ($unique ? 'ADD UNIQUE INDEX' : 'ADD INDEX');
+            $this->queue[] = "ALTER TABLE `{$table}` {$add} {$name} ({$column})";
         } else { // no table established
             $this->lastError = _DB_XMF_TABLE_IS_NOT_DEFINED;
             $this->lastErrNo = -1;
@@ -425,8 +423,7 @@ class Tables
         // Find table def.
         if (isset($this->tables[$table])) {
             $tableDef = &$this->tables[$table];
-            $this->queue[]
-                = "ALTER TABLE `{$tableDef['name']}` DROP COLUMN `{$column}`";
+            $this->queue[] = "ALTER TABLE `{$tableDef['name']}` DROP COLUMN `{$column}`";
         } else { // no table established
             $this->lastError = _DB_XMF_TABLE_IS_NOT_DEFINED;
             $this->lastErrNo = -1;
@@ -449,7 +446,7 @@ class Tables
     {
         if (isset($this->tables[$table])) {
             $tableDef = &$this->tables[$table];
-            $this->queue[]="ALTER TABLE `{$tableDef['name']}` DROP INDEX `{$name}`";
+            $this->queue[] = "ALTER TABLE `{$tableDef['name']}` DROP INDEX `{$name}`";
         } else { // no table established
             $this->lastError = _DB_XMF_TABLE_IS_NOT_DEFINED;
             $this->lastErrNo = -1;
@@ -477,16 +474,15 @@ class Tables
             if (isset($tableDef['create']) && $tableDef['create']) {
                 // strip everything but the PRIMARY from definition
                 foreach ($tableDef['keys'] as $keyName => $key) {
-                    if ($keyName!=='PRIMARY') {
+                    if ($keyName !== 'PRIMARY') {
                         unset($tableDef['keys'][$keyName]);
                     }
                 }
             } else {
                 // build drops to strip everything but the PRIMARY
                 foreach ($tableDef['keys'] as $keyName => $key) {
-                    if ($keyName!=='PRIMARY') {
-                        $this->queue[] = "ALTER TABLE `{$tableDef['name']}`"
-                            . " DROP INDEX {$keyName}";
+                    if ($keyName !== 'PRIMARY') {
+                        $this->queue[] = "ALTER TABLE `{$tableDef['name']}` DROP INDEX {$keyName}";
                     }
                 }
             }
@@ -511,7 +507,7 @@ class Tables
     {
         if (isset($this->tables[$table])) {
             $tableDef = &$this->tables[$table];
-            $this->queue[]="ALTER TABLE `{$tableDef['name']}` DROP PRIMARY KEY ";
+            $this->queue[] = "ALTER TABLE `{$tableDef['name']}` DROP PRIMARY KEY ";
         } else { // no table established
             $this->lastError = _DB_XMF_TABLE_IS_NOT_DEFINED;
             $this->lastErrNo = -1;
@@ -533,7 +529,7 @@ class Tables
     {
         if (isset($this->tables[$table])) {
             $tableDef = &$this->tables[$table];
-            $this->queue[]="DROP TABLE `{$tableDef['name']}` ";
+            $this->queue[] = "DROP TABLE `{$tableDef['name']}` ";
             unset($this->tables[$table]);
         }
         // no table is not an error since we are dropping it anyway
@@ -554,8 +550,7 @@ class Tables
         if (isset($this->tables[$table])) {
             $tableDef = &$this->tables[$table];
             $newTable = $this->name($newName);
-            $this->queue[]
-                = "ALTER TABLE `{$tableDef['name']}` RENAME TO `{$newTable}`";
+            $this->queue[] = "ALTER TABLE `{$tableDef['name']}` RENAME TO `{$newTable}`";
             $tableDef['name'] = $newTable;
         } else { // no table established
             $this->lastError = _DB_XMF_TABLE_IS_NOT_DEFINED;
@@ -581,7 +576,7 @@ class Tables
         // ENGINE=MEMORY DEFAULT CHARSET=utf8;
         if (isset($this->tables[$table])) {
             $tableDef = &$this->tables[$table];
-            $this->queue[]="ALTER TABLE `{$tableDef['name']}` {$options} ";
+            $this->queue[] = "ALTER TABLE `{$tableDef['name']}` {$options} ";
             $tableDef['options'] = $options;
         } else { // no table established
             $this->lastError = _DB_XMF_TABLE_IS_NOT_DEFINED;
@@ -618,7 +613,7 @@ class Tables
         foreach ($this->queue as &$ddl) {
             if (is_array($ddl)) {
                 if (isset($ddl['createtable'])) {
-                    $ddl=$this->renderTableCreate($ddl['createtable']);
+                    $ddl = $this->renderTableCreate($ddl['createtable']);
                 }
             }
             $result = $this->execSql($ddl, $force);
@@ -648,11 +643,11 @@ class Tables
             $tableDef = &$this->tables[$table];
             $where = '';
             if (is_scalar($criteria)) {
-                $where = 'WHERE '.$criteria;
+                $where = 'WHERE ' . $criteria;
             } elseif (is_object($criteria)) {
                 $where = $criteria->renderWhere();
             }
-            $this->queue[]="DELETE FROM `{$tableDef['name']}` {$where}";
+            $this->queue[] = "DELETE FROM `{$tableDef['name']}` {$where}";
         } else { // no table established
             $this->lastError = _DB_XMF_TABLE_IS_NOT_DEFINED;
             $this->lastErrNo = -1;
@@ -677,14 +672,14 @@ class Tables
             $colSql = '';
             $valSql = '';
             foreach ($tableDef['columns'] as $col) {
-                $comma=empty($colSql)?'':', ';
+                $comma=empty($colSql) ? '' : ', ';
                 if (isset($columns[$col['name']])) {
-                    $colSql .= $comma.$col['name'];
-                    $valSql .= $comma.$this->db->quote($columns[$col['name']]);
+                    $colSql .= $comma . $col['name'];
+                    $valSql .= $comma . $this->db->quote($columns[$col['name']]);
                 }
             }
             $sql = "INSERT INTO `{$tableDef['name']}` ({$colSql}) VALUES({$valSql})";
-            $this->queue[]=$sql;
+            $this->queue[] = $sql;
 
             return true;
         } else { // no table established
@@ -710,20 +705,20 @@ class Tables
             $tableDef = &$this->tables[$table];
             $where = '';
             if (is_scalar($criteria)) {
-                $where = 'WHERE '.$criteria;
+                $where = 'WHERE ' . $criteria;
             } elseif (is_object($criteria)) {
                 $where = $criteria->renderWhere();
             }
             $colSql = '';
             foreach ($tableDef['columns'] as $col) {
-                $comma=empty($colSql)?'':', ';
+                $comma=empty($colSql) ? '' : ', ';
                 if (isset($columns[$col['name']])) {
                     $colSql .= $comma . $col['name'] . ' = '
                         . $this->db->quote($columns[$col['name']]);
                 }
             }
             $sql = "UPDATE `{$tableDef['name']}` SET {$colSql} {$where}";
-            $this->queue[]=$sql;
+            $this->queue[] = $sql;
 
             return true;
         } else { // no table established
@@ -745,7 +740,7 @@ class Tables
     {
         if (isset($this->tables[$table])) {
             $tableDef = &$this->tables[$table];
-            $this->queue[]="TRUNCATE TABLE `{$tableDef['name']}`";
+            $this->queue[] = "TRUNCATE TABLE `{$tableDef['name']}`";
         } else { // no table established
             $this->lastError = _DB_XMF_TABLE_IS_NOT_DEFINED;
             $this->lastErrNo = -1;
@@ -770,18 +765,18 @@ class Tables
     {
         if (isset($this->tables[$table])) {
             $tableDef = &$this->tables[$table];
-            $tableName=($prefixed?$tableDef['name']:$table);
+            $tableName = ($prefixed ? $tableDef['name'] : $table);
             $sql = "CREATE TABLE `{$tableName}` (\n";
             foreach ($tableDef['columns'] as $col) {
                 $sql .= "    {$col['name']}  {$col['attributes']},\n";
             }
-            $keySql='';
+            $keySql = '';
             foreach ($tableDef['keys'] as $keyName => $key) {
-                $comma = empty($keySql)?'  ':', ';
-                if ($keyName==='PRIMARY') {
+                $comma = empty($keySql) ? '  ' : ', ';
+                if ($keyName === 'PRIMARY') {
                     $keySql .= "  {$comma}PRIMARY KEY ({$key['columns']})\n";
                 } else {
-                    $unique=$key['unique']?'UNIQUE ':'';
+                    $unique = $key['unique'] ? 'UNIQUE ' : '';
                     $keySql .= "  {$comma}{$unique}KEY {$keyName} "
                         . " ({$key['columns']})\n";
                 }
@@ -877,17 +872,17 @@ class Tables
 
         $result = $this->execSql($sql);
 
-        while ($column=$this->fetch($result)) {
+        while ($column = $this->fetch($result)) {
             $attributes = ' ' . $column['COLUMN_TYPE'] . ' '
                 . (($column['IS_NULLABLE'] === 'NO') ? ' NOT NULL ' : '')
                 . (($column['COLUMN_DEFAULT'] === null) ? '' :
-                        " DEFAULT '". $column['COLUMN_DEFAULT'] . "' ")
+                        " DEFAULT '" . $column['COLUMN_DEFAULT'] . "' ")
                 . $column['EXTRA'];
 
-            $columnDef=array(
-                'name'=>$column['COLUMN_NAME'],
-                'position'=>$column['ORDINAL_POSITION'],
-                'attributes'=>$attributes
+            $columnDef = array(
+                'name' => $column['COLUMN_NAME'],
+                'position' => $column['ORDINAL_POSITION'],
+                'attributes' => $attributes
             );
 
             $tableDef['columns'][] = $columnDef;
@@ -903,9 +898,9 @@ class Tables
         $result = $this->execSql($sql);
 
         $lastKey = '';
-        $keyCols='';
+        $keyCols = '';
         $keyUnique = false;
-        while ($key=$this->fetch($result)) {
+        while ($key = $this->fetch($result)) {
             if ($lastKey != $key['INDEX_NAME']) {
                 if (!empty($lastKey)) {
                     $tableDef['keys'][$lastKey]['columns'] = $keyCols;
@@ -923,7 +918,6 @@ class Tables
                     $keyCols .= ' ('.$key['SUB_PART'].')';
                 }
             }
-            //$tableDef['keys'][$key['INDEX_NAME']][$key['SEQ_IN_INDEX']] = $key;
         };
         if (!empty($lastKey)) {
             $tableDef['keys'][$lastKey]['columns'] = $keyCols;
@@ -935,7 +929,7 @@ class Tables
 
     /**
      * During processing, tables to be created are put in the queue as
-     * an array('createtable'=>tablename) since the definition is not
+     * an array('createtable' => tablename) since the definition is not
      * complete. This method will expand those references to the full
      * ddl to create the table.
      *
@@ -946,7 +940,7 @@ class Tables
         foreach ($this->queue as &$ddl) {
             if (is_array($ddl)) {
                 if (isset($ddl['createtable'])) {
-                    $ddl=$this->renderTableCreate($ddl['createtable'], true);
+                    $ddl = $this->renderTableCreate($ddl['createtable'], true);
                 }
             }
         }
