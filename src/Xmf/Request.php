@@ -570,12 +570,12 @@ class Request
      */
     protected static function cleanVars($var, $mask = 0, $type = null)
     {
-        if (is_string($var)) {
-            $var = static::cleanVar($var, $mask, $type);
-        } else {
+        if (is_array($var)) {
             foreach ($var as $key => &$value) {
                 $value = static::cleanVars($value, $mask, $type);
             }
+        } else {
+            $var = static::cleanVar($var, $mask, $type);
         }
 
         return $var;
@@ -584,7 +584,7 @@ class Request
     /**
      * Strips slashes recursively on an array
      *
-     * @param array $value Array of (nested arrays of) strings
+     * @param string|array $value string of Array of (nested arrays of) strings
      *
      * @return array The input array with stripslashes applied to it
      */

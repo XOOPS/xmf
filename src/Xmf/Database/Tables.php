@@ -397,7 +397,6 @@ class Tables
     public function createIndex($name, $table, $column, $unique = false)
     {
         if (isset($this->tables[$table])) {
-            //ALTER TABLE `table` ADD INDEX `product_id` (`product_id`)
             $add = ($unique ? 'ADD UNIQUE INDEX' : 'ADD INDEX');
             $this->queue[] = "ALTER TABLE `{$table}` {$add} {$name} ({$column})";
         } else { // no table established

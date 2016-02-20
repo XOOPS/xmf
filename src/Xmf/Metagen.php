@@ -179,7 +179,7 @@ class Metagen
                 $stopwords = array('_'=> true);
             }
         }
-        if ($stopwords) {
+        if (!empty($stopwords)) {
             if (function_exists('mb_strtolower')) {
                 return !isset($stopwords[mb_strtolower($key)]);
             } else {

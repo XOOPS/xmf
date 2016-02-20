@@ -46,14 +46,14 @@ abstract class KeyAbstract
     /**
      * get key for use in signing
      *
-     * @return string signing key
+     * @return string|false signing key, or false on error
      */
     abstract public function getSigning();
 
     /**
      * get key for use in verifying
      *
-     * @return string verifying key
+     * @return string|false verifying key, or false on error
      */
     abstract public function getVerifying();
 

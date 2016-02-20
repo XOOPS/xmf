@@ -36,13 +36,13 @@ namespace Xmf;
  */
 class FilterInput
 {
-    protected $tagsArray;         // default = empty array
-    protected $attrArray;         // default = empty array
+    protected $tagsArray;         // default is empty array
+    protected $attrArray;         // default is empty array
 
-    protected $tagsMethod;        // default = 0
-    protected $attrMethod;        // default = 0
+    protected $tagsMethod;        // default is 0
+    protected $attrMethod;        // default is 0
 
-    protected $xssAuto;           // default = 1
+    protected $xssAuto;           // default is 1
     protected $tagBlacklist = array(
         'applet',
         'body',
@@ -338,12 +338,10 @@ class FilterInput
                 $tagOpen_start = strpos($postTag, '<');
                 continue;
             }
-            $tagOpen_nested = (strpos($fromTagOpen, '<') + $tagOpen_start + 1);
             $currentTag = substr($fromTagOpen, 0, $tagOpen_end);
             $tagLength = strlen($currentTag);
             if (!$tagOpen_end) {
                 $preTag .= $postTag;
-                $tagOpen_start = strpos($postTag, '<');
             }
             // iterate through tag finding attribute pairs - setup
             $tagLeft = $currentTag;
