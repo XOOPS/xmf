@@ -456,9 +456,9 @@ class Admin
         }
 
         if (static::is26()) {
-            $path = '/media/xoops/images/icons/'.$path;
+            $path = '/media/xoops/images/icons/' . $path;
         } else {
-            $path = '/Frameworks/moduleclasses/icons/'.$path;
+            $path = '/Frameworks/moduleclasses/icons/' . $path;
         }
 
         return(XOOPS_URL . $path . $name);

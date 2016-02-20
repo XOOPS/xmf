@@ -532,14 +532,14 @@ class FilterInput
             },
             $source
         );
-        // convert hex
+        // convert hex notation
         $source = preg_replace_callback(
             '/&#x([a-f0-9]+);/mi',
             function ($matches) {
-                return chr('0x'.$matches[1]);
+                return chr('0x' . $matches[1]);
             },
             $source
-        );   // hex notation
+        );
 
         return $source;
     }

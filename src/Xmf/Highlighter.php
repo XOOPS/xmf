@@ -69,7 +69,7 @@ class Highlighter
                 $haystack = $capture[1];
                 $p1 = stripos($haystack, $needle);
                 $l1 = strlen($needle);
-                $ret='';
+                $ret = '';
                 while ($p1 !== false) {
                     $ret .= substr($haystack, 0, $p1) . $pre . substr($haystack, $p1, $l1) . $post;
                     $haystack = substr($haystack, $p1 + $l1);

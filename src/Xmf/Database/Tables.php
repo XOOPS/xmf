@@ -672,7 +672,7 @@ class Tables
             $colSql = '';
             $valSql = '';
             foreach ($tableDef['columns'] as $col) {
-                $comma=empty($colSql) ? '' : ', ';
+                $comma = empty($colSql) ? '' : ', ';
                 if (isset($columns[$col['name']])) {
                     $colSql .= $comma . $col['name'];
                     $valSql .= $comma . $this->db->quote($columns[$col['name']]);
@@ -711,7 +711,7 @@ class Tables
             }
             $colSql = '';
             foreach ($tableDef['columns'] as $col) {
-                $comma=empty($colSql) ? '' : ', ';
+                $comma = empty($colSql) ? '' : ', ';
                 if (isset($columns[$col['name']])) {
                     $colSql .= $comma . $col['name'] . ' = '
                         . $this->db->quote($columns[$col['name']]);
@@ -860,7 +860,7 @@ class Tables
         if (empty($tableSchema)) {
             return true;
         }
-        $tableDef['name'] =  $tableSchema['TABLE_NAME'];
+        $tableDef['name'] = $tableSchema['TABLE_NAME'];
         $tableDef['options'] = 'ENGINE=' . $tableSchema['ENGINE'] . ' '
             . 'DEFAULT CHARSET=' . $tableSchema['CHARACTER_SET_NAME'];
 
@@ -875,8 +875,7 @@ class Tables
         while ($column = $this->fetch($result)) {
             $attributes = ' ' . $column['COLUMN_TYPE'] . ' '
                 . (($column['IS_NULLABLE'] === 'NO') ? ' NOT NULL ' : '')
-                . (($column['COLUMN_DEFAULT'] === null) ? '' :
-                        " DEFAULT '" . $column['COLUMN_DEFAULT'] . "' ")
+                . (($column['COLUMN_DEFAULT'] === null) ? '' : " DEFAULT '" . $column['COLUMN_DEFAULT'] . "' ")
                 . $column['EXTRA'];
 
             $columnDef = array(
@@ -915,7 +914,7 @@ class Tables
             } else {
                 $keyCols .= ', ' . $key['COLUMN_NAME'];
                 if (!empty($key['SUB_PART'])) {
-                    $keyCols .= ' ('.$key['SUB_PART'].')';
+                    $keyCols .= ' (' . $key['SUB_PART'] . ')';
                 }
             }
         };

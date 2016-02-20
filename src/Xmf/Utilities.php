@@ -78,7 +78,7 @@ class Utilities
      */
     public static function html2text($document)
     {
-        $search = array (
+        $search = array(
             "'<script[^>]*?>.*?</script>'si", // Strip out javascript
             "'<img.*?/>'si",                  // Strip out img tags
             "'<[\/\!]*?[^<>]*?>'si",          // Strip out HTML tags
@@ -94,7 +94,7 @@ class Utilities
             "'&(copy|#169);'i"
         );
 
-        $replace = array (
+        $replace = array(
             "",
             "",
             "",
