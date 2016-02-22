@@ -36,10 +36,10 @@ class Highlighter
      * Surround occurrences of words in body with pre in front and post
      * behind. Considers only occurrences of words outside of HTML tags.
      *
-     * @param mixed  $words words to highlight
-     * @param string $body  body of html text to highlight
-     * @param string $pre   string to begin a highlight
-     * @param string $post  string to end a highlight
+     * @param string|string[] $words words to highlight
+     * @param string          $body  body of html text to highlight
+     * @param string          $pre   string to begin a highlight
+     * @param string          $post  string to end a highlight
      *
      * @return string highlighted body
      */

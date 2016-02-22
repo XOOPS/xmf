@@ -46,6 +46,11 @@ class Tables
     protected $db;
 
     /**
+     * @var string
+     */
+    protected $databaseName;
+
+    /**
      * @var array Tables
      */
     protected $tables;
@@ -74,6 +79,7 @@ class Tables
         Language::load('xmf');
 
         $this->db = \XoopsDatabaseFactory::getDatabaseConnection();
+        $this->databaseName = XOOPS_DB_NAME;
         $this->queueReset();
     }
 
@@ -84,7 +90,7 @@ class Tables
      *
      * @return string table name with prefix
      */
-    public function name($table)
+    protected function name($table)
     {
         return $this->db->prefix($table);
     }
@@ -157,11 +163,8 @@ class Tables
                 $this->queue[] = "ALTER TABLE `{$tableDef['name']}`"
                     . " ADD COLUMN {$column} {$columnDef['attributes']} {$pos} ";
             }
-        } else { // no table established
-            $this->lastError = _DB_XMF_TABLE_IS_NOT_DEFINED;
-            $this->lastErrNo = -1;
-
-            return false;
+        } else {
+            return $this->tableNotEstablished();
         }
 
         return true; // exists or is added to queue
@@ -180,11 +183,8 @@ class Tables
     {
         if (isset($this->tables[$table])) {
             $this->queue[] = "ALTER TABLE `{$table}` ADD PRIMARY KEY({$column})";
-        } else { // no table established
-            $this->lastError = _DB_XMF_TABLE_IS_NOT_DEFINED;
-            $this->lastErrNo = -1;
-
-            return false;
+        } else {
+            return $this->tableNotEstablished();
         }
 
         return true;
@@ -337,11 +337,8 @@ class Tables
                 $this->queue[] = "ALTER TABLE `{$tableDef['name']}` " .
                     "CHANGE COLUMN `{$column}` `{$newName}` {$attributes} {$pos} ";
             }
-        } else { // no table established
-            $this->lastError = _DB_XMF_TABLE_IS_NOT_DEFINED;
-            $this->lastErrNo = -1;
-
-            return false;
+        } else {
+            return $this->tableNotEstablished();
         }
 
         return true;
@@ -399,11 +396,8 @@ class Tables
         if (isset($this->tables[$table])) {
             $add = ($unique ? 'ADD UNIQUE INDEX' : 'ADD INDEX');
             $this->queue[] = "ALTER TABLE `{$table}` {$add} {$name} ({$column})";
-        } else { // no table established
-            $this->lastError = _DB_XMF_TABLE_IS_NOT_DEFINED;
-            $this->lastErrNo = -1;
-
-            return false;
+        } else {
+            return $this->tableNotEstablished();
         }
 
         return true;
@@ -423,11 +417,8 @@ class Tables
         if (isset($this->tables[$table])) {
             $tableDef = &$this->tables[$table];
             $this->queue[] = "ALTER TABLE `{$tableDef['name']}` DROP COLUMN `{$column}`";
-        } else { // no table established
-            $this->lastError = _DB_XMF_TABLE_IS_NOT_DEFINED;
-            $this->lastErrNo = -1;
-
-            return false;
+        } else {
+            return $this->tableNotEstablished();
         }
 
         return true;
@@ -446,11 +437,8 @@ class Tables
         if (isset($this->tables[$table])) {
             $tableDef = &$this->tables[$table];
             $this->queue[] = "ALTER TABLE `{$tableDef['name']}` DROP INDEX `{$name}`";
-        } else { // no table established
-            $this->lastError = _DB_XMF_TABLE_IS_NOT_DEFINED;
-            $this->lastErrNo = -1;
-
-            return false;
+        } else {
+            return $this->tableNotEstablished();
         }
 
         return true;
@@ -485,11 +473,8 @@ class Tables
                     }
                 }
             }
-        } else { // no table established
-            $this->lastError = _DB_XMF_TABLE_IS_NOT_DEFINED;
-            $this->lastErrNo = -1;
-
-            return false;
+        } else {
+            return $this->tableNotEstablished();
         }
 
         return true;
@@ -507,11 +492,8 @@ class Tables
         if (isset($this->tables[$table])) {
             $tableDef = &$this->tables[$table];
             $this->queue[] = "ALTER TABLE `{$tableDef['name']}` DROP PRIMARY KEY ";
-        } else { // no table established
-            $this->lastError = _DB_XMF_TABLE_IS_NOT_DEFINED;
-            $this->lastErrNo = -1;
-
-            return false;
+        } else {
+            return $this->tableNotEstablished();
         }
 
         return true;
@@ -551,11 +533,8 @@ class Tables
             $newTable = $this->name($newName);
             $this->queue[] = "ALTER TABLE `{$tableDef['name']}` RENAME TO `{$newTable}`";
             $tableDef['name'] = $newTable;
-        } else { // no table established
-            $this->lastError = _DB_XMF_TABLE_IS_NOT_DEFINED;
-            $this->lastErrNo = -1;
-
-            return false;
+        } else {
+            return $this->tableNotEstablished();
         }
 
         return true;
@@ -577,11 +556,8 @@ class Tables
             $tableDef = &$this->tables[$table];
             $this->queue[] = "ALTER TABLE `{$tableDef['name']}` {$options} ";
             $tableDef['options'] = $options;
-        } else { // no table established
-            $this->lastError = _DB_XMF_TABLE_IS_NOT_DEFINED;
-            $this->lastErrNo = -1;
-
-            return false;
+        } else {
+            return $this->tableNotEstablished();
         }
 
         return true;
@@ -631,8 +607,8 @@ class Tables
     /**
      * Create DELETE statement and add to queue
      *
-     * @param string $table    table
-     * @param mixed  $criteria string where clause or object criteria
+     * @param string                 $table    table
+     * @param string|CriteriaElement $criteria string where clause or object criteria
      *
      * @return bool true if no errors, false if errors encountered
      */
@@ -647,11 +623,8 @@ class Tables
                 $where = $criteria->renderWhere();
             }
             $this->queue[] = "DELETE FROM `{$tableDef['name']}` {$where}";
-        } else { // no table established
-            $this->lastError = _DB_XMF_TABLE_IS_NOT_DEFINED;
-            $this->lastErrNo = -1;
-
-            return false;
+        } else {
+            return $this->tableNotEstablished();
         }
 
         return true;
@@ -662,7 +635,7 @@ class Tables
      * @param string $table   table
      * @param array  $columns array of 'column'=>'value' entries
      *
-     * @return boolean|null true if no errors, false if errors encountered
+     * @return boolean true if no errors, false if errors encountered
      */
     public function insert($table, $columns)
     {
@@ -681,22 +654,19 @@ class Tables
             $this->queue[] = $sql;
 
             return true;
-        } else { // no table established
-            $this->lastError = _DB_XMF_TABLE_IS_NOT_DEFINED;
-            $this->lastErrNo = -1;
-
-            return null;
+        } else {
+            return $this->tableNotEstablished();
         }
     }
 
     /**
      * Creates and executes an UPDATE SQL statement.
      *
-     * @param string $table    table
-     * @param array  $columns  array of 'column'=>'value' entries
-     * @param mixed  $criteria string where clause or object criteria
+     * @param string                 $table    table
+     * @param array                  $columns  array of 'column'=>'value' entries
+     * @param string|CriteriaElement $criteria string where clause or object criteria
      *
-     * @return boolean|null true if no errors, false if errors encountered
+     * @return boolean true if no errors, false if errors encountered
      */
     public function update($table, $columns, $criteria)
     {
@@ -720,11 +690,8 @@ class Tables
             $this->queue[] = $sql;
 
             return true;
-        } else { // no table established
-            $this->lastError = _DB_XMF_TABLE_IS_NOT_DEFINED;
-            $this->lastErrNo = -1;
-
-            return null;
+        } else {
+            return $this->tableNotEstablished();
         }
     }
 
@@ -740,11 +707,8 @@ class Tables
         if (isset($this->tables[$table])) {
             $tableDef = &$this->tables[$table];
             $this->queue[] = "TRUNCATE TABLE `{$tableDef['name']}`";
-        } else { // no table established
-            $this->lastError = _DB_XMF_TABLE_IS_NOT_DEFINED;
-            $this->lastErrNo = -1;
-
-            return false;
+        } else {
+            return $this->tableNotEstablished();
         }
 
         return true;
@@ -758,7 +722,7 @@ class Tables
      * @param string $table    table
      * @param bool   $prefixed true to return with table name prefixed
      *
-     * @return string|null string SQL to create table, or null if errors encountered
+     * @return string|false string SQL to create table, or false if errors encountered
      */
     public function renderTableCreate($table, $prefixed = false)
     {
@@ -784,11 +748,8 @@ class Tables
             $sql .= ") {$tableDef['options']};\n";
 
             return $sql;
-        } else { // no table established
-            $this->lastError = _DB_XMF_TABLE_IS_NOT_DEFINED;
-            $this->lastErrNo = -1;
-
-            return null;
+        } else {
+            return $this->tableNotEstablished();
         }
     }
 
@@ -847,7 +808,7 @@ class Tables
         $sql  = 'SELECT TABLE_NAME, ENGINE, CHARACTER_SET_NAME ';
         $sql .= ' FROM `INFORMATION_SCHEMA`.`TABLES` t, ';
         $sql .= ' `INFORMATION_SCHEMA`.`COLLATIONS` c ';
-        $sql .= ' WHERE t.TABLE_SCHEMA = \'' . XOOPS_DB_NAME . '\' ';
+        $sql .= ' WHERE t.TABLE_SCHEMA = \'' . $this->databaseName . '\' ';
         $sql .= ' AND t.TABLE_NAME = \'' . $this->name($table) . '\' ';
         $sql .= ' AND t.TABLE_COLLATION  = c.COLLATION_NAME ';
 
@@ -865,7 +826,7 @@ class Tables
 
         $sql  = 'SELECT * ';
         $sql .= ' FROM `INFORMATION_SCHEMA`.`COLUMNS` ';
-        $sql .= ' WHERE TABLE_SCHEMA = \'' . XOOPS_DB_NAME . '\' ';
+        $sql .= ' WHERE TABLE_SCHEMA = \'' . $this->databaseName . '\' ';
         $sql .= ' AND TABLE_NAME = \'' . $this->name($table) . '\' ';
         $sql .= ' ORDER BY `ORDINAL_POSITION` ';
 
@@ -889,7 +850,7 @@ class Tables
         $sql  = 'SELECT `INDEX_NAME`, `SEQ_IN_INDEX`, `NON_UNIQUE`, ';
         $sql .= ' `COLUMN_NAME`, `SUB_PART` ';
         $sql .= ' FROM `INFORMATION_SCHEMA`.`STATISTICS` ';
-        $sql .= ' WHERE TABLE_SCHEMA = \'' . XOOPS_DB_NAME . '\' ';
+        $sql .= ' WHERE TABLE_SCHEMA = \'' . $this->databaseName . '\' ';
         $sql .= ' AND TABLE_NAME = \'' . $this->name($table) . '\' ';
         $sql .= ' ORDER BY `INDEX_NAME`, `SEQ_IN_INDEX` ';
 
@@ -984,5 +945,17 @@ class Tables
         $this->expandQueue();
 
         return $this->queue;
+    }
+
+    /**
+     * Set lastError as table not established
+     *
+     * @return false
+     */
+    protected function tableNotEstablished()
+    {
+        $this->lastError = _DB_XMF_TABLE_IS_NOT_DEFINED;
+        $this->lastErrNo = -1;
+        return false;
     }
 }

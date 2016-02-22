@@ -36,7 +36,22 @@ class FileStorage implements StorageInterface
      */
     protected function fileName($name)
     {
-        return XOOPS_VAR_PATH . "/data/key-{$name}.php";
+        $syssec = $this->systemSecret();
+        return XOOPS_VAR_PATH . "/data/{$syssec}-key-{$name}.php";
+    }
+
+    /**
+     * Construct a string related to the system to make name less predictable
+     *
+     * @return string
+     */
+    protected function systemSecret()
+    {
+        $db = \XoopsDatabaseFactory::getDatabaseConnection();
+        $prefix = $db->prefix();
+        $secret = md5($prefix);
+        $secret = substr($secret, 8, 8);
+        return $secret;
     }
 
     /**
