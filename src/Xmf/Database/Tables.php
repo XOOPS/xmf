@@ -100,7 +100,7 @@ class Tables
      *
      * @param string $table      table to contain the column
      * @param string $column     name of column to add
-     * @param array  $attributes column_definition
+     * @param string $attributes column_definition
      * @param mixed  $position   FIRST, string of column name to add new
      *                           column after, or null for natural append
      *
@@ -175,7 +175,7 @@ class Tables
      *
      * @param string $table  table
      * @param string $column column or comma separated list of columns
-     *                       to use as primary key
+     *                        to use as primary key
      *
      * @return bool true if no errors, false if errors encountered
      */
@@ -292,7 +292,7 @@ class Tables
      *
      * @param string $table      table containing the column
      * @param string $column     column to alter
-     * @param array  $attributes new column_definition
+     * @param string $attributes new column_definition
      * @param string $newName    new name for column, blank to keep same
      * @param mixed  $position   FIRST, string of column name to add new
      *                           column after, or null for no change
@@ -385,8 +385,8 @@ class Tables
      *
      * @param string $name   name of index to add
      * @param string $table  table indexed
-     * @param string $column column or comma separated list of columns
-     *                       to use as the key
+     * @param string $column column or a comma separated list of columns
+     *                        to use as the key
      * @param bool   $unique true if index is to be unique
      *
      * @return bool true if no errors, false if errors encountered
@@ -576,7 +576,7 @@ class Tables
     }
 
     /**
-     * Execute the work queue
+     * Executes the work queue
      *
      * @param bool $force true to force updates even if this is a 'GET' request
      *
@@ -605,7 +605,7 @@ class Tables
 
 
     /**
-     * Create DELETE statement and add to queue
+     * Create DELETE statement and adds it to the work queue
      *
      * @param string                 $table    table
      * @param string|CriteriaElement $criteria string where clause or object criteria
@@ -630,7 +630,7 @@ class Tables
         return true;
     }
 
-    /** Create an INSERT SQL statement and add to queue.
+    /** Create an INSERT SQL statement and adds to queue.
      *
      * @param string $table   table
      * @param array  $columns array of 'column'=>'value' entries
@@ -660,7 +660,7 @@ class Tables
     }
 
     /**
-     * Creates and executes an UPDATE SQL statement.
+     * Creates an UPDATE SQL statement and adds it to the work queue
      *
      * @param string                 $table    table
      * @param array                  $columns  array of 'column'=>'value' entries
@@ -696,7 +696,7 @@ class Tables
     }
 
     /**
-     * Add statement to Empty a table to the queue
+     * Add statement to remove all rows from a table to the work queue
      *
      * @param string $table table
      *
@@ -718,6 +718,8 @@ class Tables
 
     /**
      * return SQL to create the table
+     *
+     * This method does NOT modify the work queue
      *
      * @param string $table    table
      * @param bool   $prefixed true to return with table name prefixed

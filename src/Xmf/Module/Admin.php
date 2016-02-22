@@ -75,9 +75,9 @@ class Admin
             } else {
                 include_once $GLOBALS['xoops']->path('Frameworks/moduleclasses/moduleadmin/moduleadmin.php');
                 static::$ModuleAdmin = new \ModuleAdmin;
-                $instance = new Admin;
+                Language::load('xmf');
+                $instance = new static();
             }
-
         }
 
         return $instance;
@@ -120,11 +120,33 @@ class Admin
      *
      * @param string $value message to include in config box
      * @param string $type  type of line to add
+     *                       minimal set of acceptable types and value expectation
+     *                       'default' - value is message displayed directly (also used for unknown types)
+     *                       'folder'  - value is directory name, will display accept if exists, error if not
+     *                       'chmod'   - value is array(directory, permission) accept if exists with permission,
+     *                                   else error
+     *                       'module'  - value is string module name, or array(module name, errortype)
+     *                                   If module is active, an accept line displays, otherwise, a warning
+     *                                   (if value is array(module, "warning") or an error displays.
      *
      * @return bool
      */
     public function addConfigBoxLine($value = '', $type = 'default')
     {
+        if ($type === 'module') {
+            $mod = (is_array($value)) ? $value[0] : $value;
+            if (xoops_isActiveModule($mod)) {
+                return $this->addConfigAccept(sprintf(_AM_XMF_MODULE_INSTALLED, $mod));
+            } else {
+                $nomod = (is_array($value)) ? $value[1] : 'error';
+                $line = sprintf(_AM_XMF_MODULE_NOT_INSTALLED, $mod);
+                if ($nomod === 'warning') {
+                    return $this->addConfigWarning($line);
+                } else {
+                    return $this->addConfigError($line);
+                }
+            }
+        }
         return static::$ModuleAdmin->addConfigBoxLine($value, $type);
     }
 
@@ -306,10 +328,6 @@ class Admin
      */
     public function addConfigError($value = '')
     {
-        if (static::is26()) {
-            return static::$ModuleAdmin->addConfigError($value);
-        }
-
         $path = XOOPS_URL . '/Frameworks/moduleclasses/icons/16/';
         $line = "";
         $line .= "<span style='color : red; font-weight : bold;'>";
@@ -331,10 +349,6 @@ class Admin
      */
     public function addConfigAccept($value = '')
     {
-        if (static::is26()) {
-            return static::$ModuleAdmin->addConfigAccept($value);
-        }
-
         $path = XOOPS_URL . '/Frameworks/moduleclasses/icons/16/';
         $line = "";
         $line .= "<span style='color : green;'>";
@@ -356,10 +370,6 @@ class Admin
      */
     public function addConfigWarning($value = '')
     {
-        if (static::is26()) {
-            return static::$ModuleAdmin->addConfigWarning($value);
-        }
-
         $path = XOOPS_URL . '/Frameworks/moduleclasses/icons/16/';
         $line = "";
         $line .= "<span style='color : orange; font-weight : bold;'>";
@@ -383,11 +393,6 @@ class Admin
      */
     public function addConfigModuleVersion($moddir, $minversion)
     {
-        if (static::is26()) {
-            return static::$ModuleAdmin->addConfigModuleVersion($moddir, $minversion);
-        }
-
-        Language::load('xmf');
         $return = false;
         $helper = Helper::getHelper($moddir);
         if (is_object($helper) && is_object($helper->getModule())) {
