@@ -12,7 +12,6 @@
 namespace Xmf\Module;
 
 use Xmf\Language;
-use Xmf\Loader;
 
 /**
  * Xmf\Module\Admin provides helpful methods for module administration
@@ -74,10 +73,7 @@ class Admin
                 $instance = new \Xoops\Module\Admin;
                 static::$ModuleAdmin = $instance;
             } else {
-                Loader::loadFile(
-                    XOOPS_ROOT_PATH .
-                    '/Frameworks/moduleclasses/moduleadmin/moduleadmin.php'
-                );
+                include_once $GLOBALS['xoops']->path('Frameworks/moduleclasses/moduleadmin/moduleadmin.php');
                 static::$ModuleAdmin = new \ModuleAdmin;
                 $instance = new Admin;
             }

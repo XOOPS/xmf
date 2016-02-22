@@ -11,7 +11,6 @@
 
 namespace Xmf\Module;
 
-use Xmf\Loader;
 use Xmf\Module\Helper;
 use Xmf\Module\Helper\AbstractHelper;
 
@@ -41,19 +40,9 @@ class Permission extends AbstractHelper
     protected $dirname;
 
     /**
-     * @var \XoopsDatabase
-     */
-    protected $db;
-
-    /**
      * @var \XoopsGrouppermHandler
      */
     protected $permissionHandler;
-
-    /**
-     * @var Xoops instance if available
-     */
-    protected $xoops = null;
 
     /**
      * Initialize parent::__construct calls this after verifying module object.
@@ -62,16 +51,9 @@ class Permission extends AbstractHelper
      */
     public function init()
     {
-        if (!class_exists('XoopsGroupPermHandler', true)) {
-            Loader::loadFile(XOOPS_ROOT_PATH . '/kernel/groupperm.php');
-        }
         $this->mid = $this->module->getVar('mid');
         $this->dirname = $this->module->getVar('dirname');
-        $this->db = \XoopsDatabaseFactory::getDatabaseConnection();
-        $this->permissionHandler = new \XoopsGroupPermHandler($this->db);
-        if (class_exists('Xoops', false)) {
-            $this->xoops = \Xoops::getInstance();
-        }
+        $this->permissionHandler = xoops_getHandler('groupperm');
     }
 
     /**
@@ -207,7 +189,7 @@ class Permission extends AbstractHelper
         $multiple = true
     ) {
         if (!class_exists('XoopsFormSelectGroup', true)) {
-            Loader::loadFile(XOOPS_ROOT_PATH . '/class/xoopsformloader.php');
+            include_once XOOPS_ROOT_PATH . '/class/xoopsformloader.php';
         }
         if (empty($name)) {
             $name = $this->defaultFieldName($gperm_name, $gperm_itemid);
