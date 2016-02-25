@@ -11,10 +11,6 @@
 
 namespace Xmf;
 
-if (!defined('XMF_KRUMO_URL')) {
-    define('XMF_KRUMO_URL', XOOPS_URL . '/include/krumo/');
-}
-
 /**
  * Debugging tools for developers
  *
@@ -42,17 +38,18 @@ class Debug
         $args = func_get_args();
 
         $config = array(
-            'skin' => array('selected' => 'modern'),
+            'skin' => array('selected' => 'stylish'),
             'css' => array('url' => XOOPS_URL . '/include/krumo/'),
             'display' => array(
                 'show_version' => false,
                 'show_call_info' => false,
-                'sort_arrays' => false,
+                'carriage_returns' => false,
             ),
+            'sorting' => array('sort_arrays' => false,),
         );
         \Krumo::setConfig($config);
         foreach ($args as $var) {
-            $msg = \Krumo::dump($var);
+            $msg = \Krumo::dump($var, KRUMO_RETURN);
             echo $msg;
         }
     }

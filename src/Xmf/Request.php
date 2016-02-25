@@ -73,8 +73,8 @@ class Request
      * @param mixed  $default Default value if the variable does not exist
      * @param string $hash    Source of variable value (POST, GET, FILES, COOKIE, METHOD)
      * @param string $type    Return type for the variable (INT, FLOAT, BOOLEAN, WORD,
-     *                        ALNUM, CMD, BASE64, STRING, ARRAY, PATH, NONE) For more
-     *                        information see FilterInput::clean().
+     *                         ALPHANUM, CMD, BASE64, STRING, ARRAY, PATH, NONE) For more
+     *                         information see FilterInput::clean().
      * @param int    $mask    Filter mask for the variable
      *
      * @return mixed Requested variable
@@ -334,9 +334,9 @@ class Request
      * @param string      $headerName name of header to retrieve, case insensitive
      * @param string|null $default    default to return if named header is not found
      *
-     * @return string|null header value or default if header was not found
+     * @return string header value or default if header was not found
      */
-    public static function getHeader($headerName, $default = null)
+    public static function getHeader($headerName, $default = '')
     {
         static $headers = null;
 
@@ -480,9 +480,9 @@ class Request
                 break;
         }
 
-        // Handle magic quotes compatability
+        // Handle magic quotes compatibility
         if (get_magic_quotes_gpc() && ($hash !== 'FILES')) {
-            $input = XoopsRequest::stripSlashesRecursive($input);
+            $input = static::stripSlashesRecursive($input);
         }
 
         $result = static::cleanVars($input, $mask);
@@ -500,7 +500,7 @@ class Request
      *
      * @return void
      */
-    public static function set($array, $hash = 'default', $overwrite = true)
+    public static function set($array, $hash = 'method', $overwrite = true)
     {
         foreach ($array as $key => $value) {
             static::setVar($key, $value, $hash, $overwrite);

@@ -605,7 +605,7 @@ class Tables
 
 
     /**
-     * Create DELETE statement and adds it to the work queue
+     * Create a DELETE statement and add it to the work queue
      *
      * @param string                 $table    table
      * @param string|CriteriaElement $criteria string where clause or object criteria
@@ -630,7 +630,7 @@ class Tables
         return true;
     }
 
-    /** Create an INSERT SQL statement and adds to queue.
+    /** Create an INSERT SQL statement and add it to the work queue.
      *
      * @param string $table   table
      * @param array  $columns array of 'column'=>'value' entries
@@ -660,7 +660,7 @@ class Tables
     }
 
     /**
-     * Creates an UPDATE SQL statement and adds it to the work queue
+     * Create an UPDATE SQL statement and add it to the work queue
      *
      * @param string                 $table    table
      * @param array                  $columns  array of 'column'=>'value' entries
@@ -726,7 +726,7 @@ class Tables
      *
      * @return string|false string SQL to create table, or false if errors encountered
      */
-    public function renderTableCreate($table, $prefixed = false)
+    protected function renderTableCreate($table, $prefixed = false)
     {
         if (isset($this->tables[$table])) {
             $tableDef = &$this->tables[$table];

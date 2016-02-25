@@ -104,7 +104,7 @@ class FilterInput
     }
 
     /**
-     * Returns a reference to an input filter object, only creating it if it does not already exist.
+     * Returns an input filter object, only creating it if it does not already exist.
      *
      * This method must be invoked as:
      *   $filter = FilterInput::getInstance();
@@ -174,7 +174,7 @@ class FilterInput
      *
      * @param mixed  $source Input string/array-of-string to be 'cleaned'
      * @param string $type   Return/cleaning type for the variable, one of
-     *                       (INTEGER, FLOAT, BOOLEAN, WORD, ALNUM, CMD, BASE64,
+     *                       (INTEGER, FLOAT, BOOLEAN, WORD, ALPHANUM, CMD, BASE64,
      *                        STRING, ARRAY, PATH, USERNAME, WEBURL, EMAIL, IP)
      *
      * @return mixed 'Cleaned' version of input parameter
@@ -215,7 +215,8 @@ class FilterInput
                 $result = (string) preg_replace('/[^A-Z_]/i', '', $source);
                 break;
 
-            case 'ALNUM':
+            case 'ALPHANUM':
+            case 'ALNUM': // for BC only
                 $result = (string) preg_replace('/[^A-Z0-9]/i', '', $source);
                 break;
 
