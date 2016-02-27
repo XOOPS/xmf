@@ -9,9 +9,7 @@
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-namespace Xmf\Module;
-
-use Xmf\Module\Helper\AbstractHelper;
+namespace Xmf\Module\Helper;
 
 /**
  * Manage session variables for a module. Session variable will be

@@ -342,7 +342,7 @@ class Metagen
      *
      * @param string $haystack the string to summarize
      * @param mixed  $needles  search term, array of search terms, or null
-     * @param int    $length   maximum length for the summary
+     * @param int    $length   maximum character length for the summary
      *
      * @return string a substring of haystack
      */

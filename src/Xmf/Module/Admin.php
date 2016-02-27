@@ -17,8 +17,8 @@ use Xmf\Language;
  * Xmf\Module\Admin provides helpful methods for module administration
  * uses.
  *
- * Xmf\Module\Admin also provides a method compatible subset of the
- * Xoops 2.6 ModuleAdmin class for use in transition from 2.5 to 2.6
+ * Xmf\Module\Admin provides a method compatible subset of the Xoops\Module\Admin class
+ * (introduced in 2.6) and other convenience methods useful in transition
  *
  * @category  Xmf\Module\Admin
  * @package   Xmf
@@ -51,15 +51,11 @@ class Admin
     /**
      * Retrieve a module admin instance
      *
-     * If we are on 2.6 this will be the a XoopsModuleAdmin instance.
-     * Older systems with the Frameworks based admin class will get
-     * an instance of this class which provides compatible methods
-     * built from the old Frameworks version.
+     * If we are on a next generation system this will be the a native Xoops\Module\Admin instance.
+     * Older systems with the Frameworks based admin class will get an instance of this class which
+     * provides compatible methods built from the old Frameworks version.
      *
-     * **Always use this to get the ModuleAdmin instance if you use
-     * anything (even the static methods) of this class.**
-     *
-     * @return object a ModuleAdmin instance.
+     * @return object a ModuleAdmin or Xoops\Module\Admin instance.
      *
      * @since  1.0
      */
@@ -81,38 +77,6 @@ class Admin
         }
 
         return $instance;
-    }
-
-    /**
-     * Are we in a 2.6 environment?
-     *
-     * @return bool true if we are in a 2.6 environment
-     */
-    protected static function is26()
-    {
-        return class_exists('\Xoops', false);
-    }
-
-    /**
-     * Get an appropriate imagePath for menu.php use.
-     *
-     * just to help with other admin things than ModuleAdmin
-     *
-     * not part of 2.6 module admin
-     *
-     * @param string $image icon name to prepend with path
-     *
-     * @return string true if we are in a 2.6 environment
-     */
-    public static function menuIconPath($image)
-    {
-        if (static::is26()) {
-            return($image);
-        } else {
-            $path = '../../Frameworks/moduleclasses/icons/32/';
-
-            return($path . $image);
-        }
     }
 
     /**
@@ -296,18 +260,6 @@ class Admin
     }
 
     /**
-     * set paypal for 2.5 renderAbout
-     *
-     * @param string $paypal PayPal identifier for donate button
-     *
-     * @return void
-     */
-    public static function setPaypal($paypal = '')
-    {
-        static::$paypal = $paypal;
-    }
-
-    /**
      * Display about page
      *
      * @param bool $logo_xoops display XOOPS logo
@@ -423,21 +375,55 @@ class Admin
         return $return;
     }
 
-    // not in regular ModuleAdmin
+    // the following not part of next generation Xoops\Module\Admin
+
+    /**
+     * Are we in a next generation environment?
+     *
+     * not part of next generation Xoops\Module\Admin
+     *
+     * @return bool true if we are in a post XOOPS 2.5.x environment
+     */
+    protected static function isXng()
+    {
+        return class_exists('\Xoops', false);
+    }
+
+    /**
+     * Get an appropriate imagePath for menu.php use.
+     *
+     * just to help with other admin things than ModuleAdmin
+     *
+     * not part of next generation Xoops\Module\Admin
+     *
+     * @param string $image icon name to prepend with path
+     *
+     * @return string the icon path
+     */
+    public static function menuIconPath($image)
+    {
+        if (static::isXng()) {
+            return($image);
+        } else {
+            $path = '../../Frameworks/moduleclasses/icons/32/';
+
+            return($path . $image);
+        }
+    }
 
     /**
      * Get an appropriate URL for system provided icons.
      *
-     * Things which were in Frameworks in 2.5 are in media in 2.6,
+     * Things which were in Frameworks in 2.5 are in media in later versions,
      * making it harder to use and rely on the standard icons.
      *
-     * not part of 2.6, just a transition assist
+     * not part of next generation Xoops\Module\Admin
      *
      * @param string $name the image name to provide URL for, or blank
-     *                     to just get the URL path.
+     *                      to just get the URL path.
      * @param string $size the icon size (directory). Valid values are
-     *                     16, 32 or /. A '/' slash will simply set the
-     *                     path to the icon directory and append $image.
+     *                      16, 32 or /. A '/' slash will simply set the
+     *                      path to the icon directory and append $image.
      *
      * @return string path to icons
      */
@@ -456,12 +442,26 @@ class Admin
                 break;
         }
 
-        if (static::is26()) {
+        if (static::isXng()) {
             $path = '/media/xoops/images/icons/' . $path;
         } else {
             $path = '/Frameworks/moduleclasses/icons/' . $path;
         }
 
         return(XOOPS_URL . $path . $name);
+    }
+
+    /**
+     * set paypal for 2.5.x renderAbout
+     *
+     * not part of next generation Xoops\Module\Admin
+     *
+     * @param string $paypal PayPal identifier for donate button
+     *
+     * @return void
+     */
+    public static function setPaypal($paypal = '')
+    {
+        static::$paypal = $paypal;
     }
 }

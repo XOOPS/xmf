@@ -24,34 +24,20 @@ namespace Xmf;
  * @link      http://xoops.org
  * @since     1.0
  */
-class Debug
+class Debug extends \Kint
 {
     /**
      * Dump one or more variables
      *
-     * @param mixed $var variable(s) to dump
+     * @param mixed $data variable(s) to dump
      *
      * @return void
      */
-    public static function dump($var)
+    public static function dump($data = NULL)
     {
         $args = func_get_args();
-
-        $config = array(
-            'skin' => array('selected' => 'stylish'),
-            'css' => array('url' => XOOPS_URL . '/include/krumo/'),
-            'display' => array(
-                'show_version' => false,
-                'show_call_info' => false,
-                'carriage_returns' => false,
-            ),
-            'sorting' => array('sort_arrays' => false,),
-        );
-        \Krumo::setConfig($config);
-        foreach ($args as $var) {
-            $msg = \Krumo::dump($var, KRUMO_RETURN);
-            echo $msg;
-        }
+        parent::$theme = 'aante-light'; // options: 'original' (default), 'solarized', 'solarized-dark' and 'aante-light'
+        call_user_func_array('parent::dump', $args);
     }
 
     /**

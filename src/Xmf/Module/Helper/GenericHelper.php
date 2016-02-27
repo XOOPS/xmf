@@ -68,24 +68,6 @@ class GenericHelper
     }
 
     /**
-     * Return instance of module Xmf\Module\GenericHelper for dirname
-     *
-     * @param string $dirname module directory name
-     *
-     * @return GenericHelper
-     */
-    public static function getInstance($dirname)
-    {
-        static $instance = array();
-        if (!isset($instance[$dirname])) {
-            $instance[$dirname] = new static($dirname);
-        }
-
-        return $instance[$dirname];
-
-    }
-
-    /**
      * get the module object
      *
      * @return XoopsModule
@@ -110,12 +92,12 @@ class GenericHelper
      * @return mixed string config item, array of config items,
      *                or null if config not found
      */
-    public function getConfig($name)
+    public function getConfig($name = null)
     {
         if ($this->configs == null) {
             $this->initConfig();
         }
-        if (!$name) {
+        if (empty($name)) {
             $this->addLog("Getting all config");
 
             return $this->configs;
@@ -278,8 +260,6 @@ class GenericHelper
             }
         }
     }
-
-    // these added to mimic 2.6 Xoops\Module\Helper\HelperAbstract
 
     /**
      * Is this the currently active module?
