@@ -531,7 +531,6 @@ class Tables
                 $tableDef['options'] = $options;
                 return true;
             }
-            $tableDef = $this->tables[$table];
         } else {
             return $this->tableNotEstablished();
         }
