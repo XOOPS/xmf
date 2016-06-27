@@ -513,7 +513,7 @@ class Tables
      * to work queue
      *
      * @param string $table   table
-     * @param array  $options table_options
+     * @param string $options table_options
      *
      * @return bool true if no errors, false if errors encountered
      */
