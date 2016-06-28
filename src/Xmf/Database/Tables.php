@@ -602,14 +602,16 @@ class Tables
         return true;
     }
 
-    /** Create an INSERT SQL statement and add it to the work queue.
+    /**
+     * Create an INSERT SQL statement and add it to the work queue.
      *
-     * @param string $table   table
-     * @param array  $columns array of 'column'=>'value' entries
+     * @param string  $table      table
+     * @param array   $columns    array of 'column'=>'value' entries
+     * @param boolean $quoteValue true to quote values, false if caller handles quoting
      *
      * @return boolean true if no errors, false if errors encountered
      */
-    public function insert($table, $columns)
+    public function insert($table, $columns, $quoteValue = true)
     {
         if (isset($this->tables[$table])) {
             $tableDef = $this->tables[$table];
@@ -618,8 +620,9 @@ class Tables
             foreach ($tableDef['columns'] as $col) {
                 $comma = empty($colSql) ? '' : ', ';
                 if (isset($columns[$col['name']])) {
-                    $colSql .= $comma . $col['name'];
-                    $valSql .= $comma . $this->db->quote($columns[$col['name']]);
+                    $colSql .= "{$comma}`{$col['name']}`";
+                    $valSql .= $comma
+                        . ($quoteValue ? $this->db->quote($columns[$col['name']]) : $columns[$col['name']]);
                 }
             }
             $sql = "INSERT INTO `{$tableDef['name']}` ({$colSql}) VALUES({$valSql})";
@@ -634,13 +637,14 @@ class Tables
     /**
      * Create an UPDATE SQL statement and add it to the work queue
      *
-     * @param string                 $table    table
-     * @param array                  $columns  array of 'column'=>'value' entries
-     * @param string|CriteriaElement $criteria string where clause or object criteria
+     * @param string                 $table      table
+     * @param array                  $columns    array of 'column'=>'value' entries
+     * @param string|CriteriaElement $criteria   string where clause or object criteria
+     * @param boolean                $quoteValue true to quote values, false if caller handles quoting
      *
      * @return boolean true if no errors, false if errors encountered
      */
-    public function update($table, $columns, $criteria)
+    public function update($table, $columns, $criteria, $quoteValue = true)
     {
         if (isset($this->tables[$table])) {
             $tableDef = $this->tables[$table];
@@ -654,8 +658,8 @@ class Tables
             foreach ($tableDef['columns'] as $col) {
                 $comma = empty($colSql) ? '' : ', ';
                 if (isset($columns[$col['name']])) {
-                    $colSql .= $comma . $col['name'] . ' = '
-                        . $this->db->quote($columns[$col['name']]);
+                    $colSql .= "{$comma}`{$col['name']}` = "
+                        . ($quoteValue ? $this->db->quote($columns[$col['name']]) : $columns[$col['name']]);
                 }
             }
             $sql = "UPDATE `{$tableDef['name']}` SET {$colSql} {$where}";
