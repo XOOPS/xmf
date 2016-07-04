@@ -53,6 +53,9 @@ class Migrate
      * Migrate constructor
      *
      * @param string $dirname module directory name that defines the tables to be migrated
+     *
+     * @throws \InvalidArgumentException
+     * @throws \RuntimeException
      */
     public function __construct($dirname)
     {
@@ -89,7 +92,6 @@ class Migrate
             unset($schema[$tableName]['name']);
         }
 
-        \Xmf\Debug::dump($schema, $this->tableDefinitionFile);
         return Yaml::save($schema, $this->tableDefinitionFile);
     }
 
@@ -111,6 +113,8 @@ class Migrate
      * Return the target database condition
      *
      * @return array|bool table structure or false on error
+     *
+     * @throws \RuntimeException
      */
     public function getTargetDefinitions()
     {
