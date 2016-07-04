@@ -30,7 +30,6 @@ use Xmf\Language;
  * @copyright 2011-2016 XOOPS Project (http://xoops.org)
  * @license   GNU GPL 2 or later (http://www.gnu.org/licenses/gpl-2.0.html)
  * @link      http://xoops.org
- * @since     1.0
  */
 class Tables
 {
@@ -119,6 +118,7 @@ class Tables
                 }
                 $this->queue[] = "ALTER TABLE `{$tableDef['name']}`"
                     . " ADD COLUMN `{$column}` {$columnDef['attributes']}";
+                array_push($tableDef['columns'], $columnDef);
             }
         } else {
             return $this->tableNotEstablished();
@@ -325,6 +325,14 @@ class Tables
             } else {
                 $this->queue[] = "ALTER TABLE `{$tableDef['name']}` " .
                     "CHANGE COLUMN `{$column}` `{$newName}` {$attributes} ";
+                // loop thru and find the column
+                foreach ($tableDef['columns'] as &$col) {
+                    if (strcasecmp($col['name'], $column) == 0) {
+                        $col['name'] = $newName;
+                        $col['attributes'] = $attributes;
+                        break;
+                    }
+                }
             }
         } else {
             return $this->tableNotEstablished();
@@ -723,7 +731,7 @@ class Tables
                 }
             }
             $sql .= $keySql;
-            $sql .= "\n) {$tableDef['options']};\n";
+            $sql .= "\n) {$tableDef['options']}";
 
             return $sql;
         } else {
@@ -902,7 +910,7 @@ class Tables
     }
 
     /**
-     * dumpTables - development function to dump raw tables array
+     * dumpTables - utility function to dump raw tables array
      *
      * @return array tables
      */
@@ -912,7 +920,7 @@ class Tables
     }
 
     /**
-     * dumpQueue - development function to dump the work queue
+     * dumpQueue - utility function to dump the work queue
      *
      * @return array work queue
      */
@@ -921,6 +929,18 @@ class Tables
         $this->expandQueue();
 
         return $this->queue;
+    }
+
+    /**
+     * addToQueue - utility function to add a statement to the work queue
+     *
+     * @param string $sql an SQL/DDL statement to add
+     *
+     * @return void
+     */
+    public function addToQueue($sql)
+    {
+        $this->queue[] = $sql;
     }
 
     /**
