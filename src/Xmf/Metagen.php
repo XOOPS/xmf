@@ -148,10 +148,10 @@ class Metagen
         );
 
         foreach ($originalKeywords as $originalKeyword) {
-            if (static::checkStopWords($originalKeyword)) {
+            if (static::stopWordsObject()->check($originalKeyword)) {
                 $secondRoundKeywords = explode("'", $originalKeyword);
                 foreach ($secondRoundKeywords as $secondRoundKeyword) {
-                    if (static::checkStopWords($secondRoundKeyword)
+                    if (static::stopWordsObject()->check($secondRoundKeyword)
                         && strlen($secondRoundKeyword) >= $minLength
                     ) {
                         $keyCount[$secondRoundKeyword] =
@@ -171,39 +171,6 @@ class Metagen
         $keywords = array_slice($key, 0, $count);
 
         return $keywords;
-    }
-
-    /**
-     * checkStopWords - look up a word in a list of stop words and
-     * classify it as a significant word or a stop word.
-     *
-     * @param string $key the word to check
-     *
-     * @return bool True if word is significant, false if it is a stop word
-     */
-    public static function checkStopWords($key)
-    {
-        static $stopwords = null;
-
-        if (!$stopwords) {
-            if (!defined('_XMF_STOPWORDS')) {
-                Language::load('stopwords');
-            }
-            if (defined('_XMF_STOPWORDS')) {
-                $sw = explode(' ', _XMF_STOPWORDS);
-                $stopwords = array_fill_keys($sw, true);
-            } else {
-                $stopwords = array('_' => true);
-            }
-        }
-        if (!empty($stopwords)) {
-            if (function_exists('mb_strtolower')) {
-                return !isset($stopwords[mb_strtolower($key, static::ENCODING)]);
-            } else {
-                return !isset($stopwords[strtolower($key)]);
-            }
-        }
-        return true;
     }
 
     /**
@@ -322,7 +289,7 @@ class Metagen
 
         $tableau = explode("-", $title);
         $tableau = array_filter($tableau, 'static::nonEmptyString');
-        $tableau = array_filter($tableau, 'static::checkStopWords');
+        $tableau = array_filter($tableau, array(static::stopWordsObject(), 'check'));
         $title = implode("-", $tableau);
 
         $title = (empty($title)) ? '' : $title . $extension;
@@ -533,5 +500,33 @@ class Metagen
         );
 
         return $text;
+    }
+
+    /**
+     * checkStopWords - look up a word in a list of stop words and
+     * classify it as a significant word or a stop word.
+     *
+     * @param string $key the word to check
+     *
+     * @return bool True if word is significant, false if it is a stop word
+     * @deprecated since v1.2.0 - use Xmf\StopWords::check()
+     */
+    public static function checkStopWords($key)
+    {
+        return static::stopWordsObject()->check($key);
+    }
+
+    /**
+     * Get a StopWords object
+     *
+     * @return StopWords
+     */
+    protected static function stopWordsObject()
+    {
+        static $object;
+        if (null === $object) {
+            $object = new StopWords();
+        }
+        return $object;
     }
 }
