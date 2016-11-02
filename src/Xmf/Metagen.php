@@ -415,14 +415,13 @@ class Metagen
      */
     protected static function purifyText($text, $keyword = false)
     {
-        $myts = \MyTextSanitizer::getInstance();
         $text = str_replace('&nbsp;', ' ', $text);
         $text = str_replace('<br />', ' ', $text);
         $text = str_replace('<br/>', ' ', $text);
         $text = str_replace('<br', ' ', $text);
         $text = strip_tags($text);
         $text = html_entity_decode($text);
-        $text = $myts->undoHtmlSpecialChars($text);
+        $text = htmlspecialchars_decode($text, ENT_QUOTES);
         $text = str_replace(')', ' ', $text);
         $text = str_replace('(', ' ', $text);
         $text = str_replace(':', ' ', $text);
