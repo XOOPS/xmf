@@ -1,6 +1,6 @@
 {
     "name": "xoops/xmf",
-    "license": "GPL-2.0+",
+    "license": "GPL-2.0-or-later",
     "type": "project",
     "description": "XMF - XOOPS Module Framework",
     "autoload": {
