@@ -1,7 +1,7 @@
 XMF
 ===
 
-This is the XOOPS Module Framework for XOOPS 2.5.8
+This is the XOOPS Module Framework for XOOPS 2.5.x
 
 XOOPS Module Framework is a selection of classes and supporting files intended to help simplify
 many of the routine tasks commonly needed in module development. This simplification also gives
