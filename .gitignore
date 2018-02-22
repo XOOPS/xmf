@@ -5,3 +5,4 @@
 .idea/
 vendor/
 composer.lock
+coverage.clover
