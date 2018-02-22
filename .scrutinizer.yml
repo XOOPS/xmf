@@ -4,3 +4,7 @@ imports:
 filter:
     excluded_paths:
         - '_archive/*'
+        - 'tests/*'
+tools:
+    external_code_coverage:
+        timeout: 300    # Timeout in seconds.
