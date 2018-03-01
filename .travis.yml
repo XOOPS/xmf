@@ -15,15 +15,7 @@ install:
 script:
   - vendor/bin/phpunit
   - wget https://github.com/diff-sniffer/git/releases/download/0.1.0/git-phpcs.phar
-  - |
-      if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
-          if [ $TRAVIS_BRANCH != "master" ]; then
-              git remote set-branches --add origin $TRAVIS_BRANCH;
-              git fetch origin $TRAVIS_BRANCH;
-          fi
-          git merge-base origin/$TRAVIS_BRANCH $TRAVIS_PULL_REQUEST_SHA || git fetch origin +refs/pull/$TRAVIS_PULL_REQUEST/merge --unshallow
-      fi
-  - php git-phpcs.phar origin/$TRAVIS_BRANCH...$TRAVIS_PULL_REQUEST_SHA
+  - php git-phpcs.phar $TRAVIS_COMMIT_RANGE
 
 after_script:
   - if [ "$TRAVIS_PHP_VERSION" != "nightly" ]; then wget https://scrutinizer-ci.com/ocular.phar; fi
