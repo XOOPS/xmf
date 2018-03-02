@@ -11,10 +11,10 @@ matrix:
 
 install:
   - composer install
+  - wget https://github.com/diff-sniffer/git/releases/download/0.1.0/git-phpcs.phar
 
 script:
   - vendor/bin/phpunit
-  - wget https://github.com/diff-sniffer/git/releases/download/0.1.0/git-phpcs.phar
   - php git-phpcs.phar $TRAVIS_COMMIT_RANGE
 
 after_script:

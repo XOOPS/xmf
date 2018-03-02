@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <ruleset name="PSR2-XMF">
 
-    <arg name="basepath" value="./src"/>
+    <file>./src</file>
 
     <description>PSR2 standard rules for Xmf</description>
 

@@ -40,7 +40,7 @@ class JsonWebTokenTest extends \PHPUnit\Framework\TestCase
     {
     }
 
-    public function test__construct()
+    public function testContact()
     {
         $this->assertInstanceOf('\Xmf\Jwt\JsonWebToken', $this->object);
 
