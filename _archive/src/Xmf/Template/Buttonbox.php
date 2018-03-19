@@ -18,10 +18,10 @@ namespace Xmf\Template;
  * @package   Xmf
  * @author    Grégory Mage (Aka Mage)
  * @author    trabis <lusopoemas@gmail.com>
- * @copyright 2011-2016 The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @copyright 2011-2016 XOOPS Project (https://xoops.org)
  * @license   GNU GPL 2 or later (http://www.gnu.org/licenses/gpl-2.0.html)
  * @version   Release: 1.0
- * @link      http://xoops.org
+ * @link      https://xoops.org
  * @since     1.0
  */
 class Buttonbox extends AbstractTemplate

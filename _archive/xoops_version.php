@@ -12,7 +12,7 @@
 /**
  * XOOPS version
  *
- * @copyright       The XOOPS Project http://sourceforge.net/projects/xoops/
+ * @copyright       XOOPS Project (https://xoops.org)
  * @license         GNU GPL 2 or later (http://www.gnu.org/licenses/gpl-2.0.html)
  * @package         xmf
  * @since           0.1
@@ -48,7 +48,7 @@ $modversion['module_status'] = "RC";
 $modversion['release_date'] = "02/01/2016";
 
 $modversion['developer_lead'] = "geekwright";
-$modversion['developer_website_url'] = "http://xoops.org";
+$modversion['developer_website_url'] = "https://xoops.org";
 $modversion['developer_website_name'] = "Xoops";
 $modversion['developer_email'] = "richard@geekwright.com";
 
