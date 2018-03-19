@@ -225,7 +225,6 @@ class Permission extends AbstractHelper
         );
 
         return $element;
-
     }
 
     /**

@@ -19,7 +19,7 @@ namespace Xmf\Module\Helper;
  * @package   Xmf
  * @author    trabis <lusopoemas@gmail.com>
  * @author    Richard Griffith <richard@geekwright.com>
- * @copyright 2011-2018 XOOPS Project (https://xoops.org)
+ * @copyright 2016-2018 XOOPS Project (https://xoops.org)
  * @license   GNU GPL 2 or later (http://www.gnu.org/licenses/gpl-2.0.html)
  * @link      https://xoops.org
  */
@@ -47,21 +47,24 @@ abstract class AbstractHelper
     {
         $this->module = null;
 
+        if (class_exists('Xoops', false)) {
+            $xoops = \Xoops::getInstance();
+        }
         if (empty($dirname)) {
             // nothing specified, use current module
-            // check if we are running in 2.6
-            if (class_exists('Xoops', false)) {
-                $xoops = \Xoops::getInstance();
-                if ($xoops->isModule()) {
-                    $this->module = $xoops->module;
-                }
+            if (isset($xoops)) {
+                $this->module = $xoops->module;
             } else {
                 $this->module = $GLOBALS['xoopsModule'];
             }
         } else {
             // assume dirname specified, try to get a module object
-            /* @var $moduleHandler \XoopsModuleHandler */
-            $moduleHandler = xoops_getHandler('module');
+            if (isset($xoops)) {
+                $moduleHandler = $xoops->getHandlerModule();
+            } else {
+                /* @var $moduleHandler \XoopsModuleHandler */
+                $moduleHandler = xoops_getHandler('module');
+            }
             $this->module = $moduleHandler->getByDirname($dirname);
         }
         if (is_object($this->module)) {
@@ -93,16 +96,37 @@ abstract class AbstractHelper
     /**
      * Add a message to the module log
      *
-     * @param string $log log message
+     * @param mixed $log log item, can be message or variable
      *
      * @return void
      */
     public function addLog($log)
     {
         if ($this->debug) {
-            if (is_object($GLOBALS['xoopsLogger'])) {
-                $GLOBALS['xoopsLogger']->addExtra(get_called_class(), $log);
+            $message = $this->serializeForHelperLog($log);
+            if (class_exists('Xoops', false)) {
+                \Xoops::getInstance()->logger()->debug($message, array('channel'=>'Extra'));
+            } elseif (is_object($GLOBALS['xoopsLogger'])) {
+                $GLOBALS['xoopsLogger']->addExtra(get_called_class(), $message);
             }
         }
+    }
+
+    /**
+     * Serialize an arbitrary value to string. Intended for data being addLog()ed
+     *
+     * @param mixed $value
+     *
+     * @return string
+     */
+    protected function serializeForHelperLog($value)
+    {
+        if (is_resource($value) || !is_null(@get_resource_type($value))) {
+            $value = '(resource)';
+        }
+        if (!is_string($value)) {
+            $value = json_encode($value);
+        }
+        return (string) $value;
     }
 }
