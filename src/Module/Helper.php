@@ -40,8 +40,6 @@ class Helper extends GenericHelper
     {
         static $instance = array();
 
-        //$dirname = strtolower($dirname);
-
         if (!isset($instance[$dirname])) {
             $instance[$dirname] = false;
 
@@ -52,6 +50,17 @@ class Helper extends GenericHelper
                 // otherwise get a GenericHelper instance for dirname
                 if (xoops_isActiveModule($dirname)) {
                     $instance[$dirname] = new static($dirname);
+                } elseif (file_exists(XOOPS_ROOT_PATH . '/modules/' . $dirname . '/xoops_version.php')) {
+                    // module exists but is not installed, do best effort to build a temporary helper
+                    $uninstalledHelper = new static($dirname);
+                    $uninstalledModule = new \XoopsModule();
+                    $uninstalledModule->loadInfoAsVar($dirname, false);
+                    $uninstalledHelper->module = $uninstalledModule;
+                    $uninstalledHelper->object = $uninstalledModule;
+                    $uninstalledHelper->dirname = $dirname;
+                    // don't cache this, so a new call to getHelper() will reload -- i.e. after installed
+                    unset($instance[$dirname]);
+                    return $uninstalledHelper;
                 }
             }
         }

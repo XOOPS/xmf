@@ -31,11 +31,6 @@ use Xmf\Language;
 abstract class GenericHelper extends AbstractHelper
 {
     /**
-     * @var string module directory name
-     */
-    protected $dirname;
-
-    /**
      * @var \XoopsModule
      */
     protected $object;
@@ -58,7 +53,6 @@ abstract class GenericHelper extends AbstractHelper
     public function init()
     {
         $this->object = $this->module;
-        $this->dirname = $this->object->getVar('dirname');
     }
 
     /**
