@@ -175,7 +175,7 @@ class Tables
         $columnList = '';
         $firstComma = '';
         foreach ($columns as $col) {
-            $columnList .= $firstComma . quoteIndexColumnName($col);
+            $columnList .= $firstComma . $this->quoteIndexColumnName($col);
             $firstComma = ', ';
         }
         if (isset($this->tables[$table])) {
