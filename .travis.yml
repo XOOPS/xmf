@@ -8,7 +8,7 @@ php:
 
 matrix:
   allow_failures:
-  - php: 7.4snapshot
+  - php: nightly
 
 install:
 - composer install
