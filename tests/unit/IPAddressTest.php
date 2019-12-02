@@ -57,14 +57,14 @@ class IPAddressTest extends \PHPUnit\Framework\TestCase
     public function testFromRequestProxy()
     {
         global $xoopsConfig;
-        $xoopsConfig['PROXY_ENV'] = 'HTTP_CLIENT_IP';
+        $xoopsConfig['proxy_env'] = 'HTTP_CLIENT_IP';
         $testAddress = '203.0.113.195';
         $_SERVER['HTTP_CLIENT_IP'] = $testAddress;
         $_SERVER['REMOTE_ADDR'] = '10.1.1.1';
         $instance = IPAddress::fromRequest();
         $actual = $instance->asReadable();
         $this->assertEquals($testAddress, $actual);
-        unset($xoopsConfig['PROXY_ENV']);
+        unset($xoopsConfig['proxy_env']);
         unset($_SERVER['HTTP_CLIENT_IP']);
     }
 
