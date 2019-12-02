@@ -22,7 +22,7 @@ namespace Xmf;
  */
 class ProxyCheck
 {
-    const PROXY_ENVIRONMENT_VARIABLE = 'PROXY_ENV';
+    const PROXY_ENVIRONMENT_VARIABLE = 'proxy_env';
 
     const FORWARDED = 'HTTP_FORWARDED';
 
@@ -37,13 +37,13 @@ class ProxyCheck
      */
     public function __construct()
     {
-        /* must declare expected proxy in $xoopsConfig['PROXY_ENV'] */
+        /* must declare expected proxy in $xoopsConfig['proxy_env'] */
         $this->proxyHeaderName = $this->getProxyEnvConfig();
         $this->proxyHeader = $this->getProxyHeader();
     }
 
     /**
-     * Get IP address from proxy header specified in $xoopsConfig['PROXY_ENV']
+     * Get IP address from proxy header specified in $xoopsConfig['proxy_env']
      *
      * Returns proxy revealed valid client address, or false if such address was
      * not found.
@@ -55,7 +55,7 @@ class ProxyCheck
         if(false===$this->proxyHeaderName || false===$this->proxyHeader) {
             return false;
         }
-        $proxyVars = self::splitOnComma($this->proxyHeader);
+        $proxyVars = $this->splitOnComma($this->proxyHeader);
         // only consider the first (left most) value
         $header = reset($proxyVars);
         $ip=false;
@@ -93,7 +93,7 @@ class ProxyCheck
     {
         global $xoopsConfig;
 
-        /* must declare expected proxy in $xoopsConfig['PROXY_ENV'] */
+        /* must declare expected proxy in $xoopsConfig['proxy_env'] */
         if (!isset($xoopsConfig[static::PROXY_ENVIRONMENT_VARIABLE])
             || empty($xoopsConfig[static::PROXY_ENVIRONMENT_VARIABLE])) {
             return false;
@@ -101,6 +101,11 @@ class ProxyCheck
         return trim($xoopsConfig[static::PROXY_ENVIRONMENT_VARIABLE]);
     }
 
+    /**
+     * get the configured proxy header
+     * 
+     * @return string|false
+     */
     protected function getProxyHeader()
     {
         if (!isset($_SERVER[$this->proxyHeaderName]) || empty($_SERVER[$this->proxyHeaderName])) {
