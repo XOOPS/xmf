@@ -23,13 +23,13 @@ class YamlTest extends \PHPUnit\Framework\TestCase
 
     public function testDumpAndLoad()
     {
-        $inputArray = array('one' => 1, 'two' => array(1,2), 'three' => '');
+        $inputArray = array('one' => 1, 'two' => array(1, 2), 'three' => '');
 
         $string = Yaml::dump($inputArray);
         $this->assertTrue(!empty($string));
         $this->assertTrue(is_string($string));
 
-        $outputArray = Yaml::load((string) $string);
+        $outputArray = Yaml::load((string)$string);
         $this->assertTrue(is_array($outputArray));
         $this->assertSame($inputArray, $outputArray);
     }
@@ -37,7 +37,7 @@ class YamlTest extends \PHPUnit\Framework\TestCase
     public function testSaveAndRead()
     {
         $tmpfname = tempnam(sys_get_temp_dir(), 'TEST');
-        $inputArray = array('one' => 1, 'two' => array(1,2), 'three' => '');
+        $inputArray = array('one' => 1, 'two' => array(1, 2), 'three' => '');
 
         $byteCount = Yaml::save($inputArray, $tmpfname);
         $this->assertFalse($byteCount === false);
@@ -52,13 +52,13 @@ class YamlTest extends \PHPUnit\Framework\TestCase
 
     public function testDumpAndLoadWrapped()
     {
-        $inputArray = array('one' => 1, 'two' => array(1,2), 'three' => '');
+        $inputArray = array('one' => 1, 'two' => array(1, 2), 'three' => '');
 
         $string = Yaml::dumpWrapped($inputArray);
         $this->assertTrue(!empty($string));
         $this->assertTrue(is_string($string));
 
-        $outputArray = Yaml::loadWrapped((string) $string);
+        $outputArray = Yaml::loadWrapped((string)$string);
         $this->assertTrue(is_array($outputArray));
         $this->assertSame($inputArray, $outputArray);
     }
@@ -71,7 +71,7 @@ class YamlTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue(!empty($string));
         $this->assertTrue(is_string($string));
 
-        $outputArray = Yaml::loadWrapped((string) $string);
+        $outputArray = Yaml::loadWrapped((string)$string);
         $this->assertTrue(is_array($outputArray));
         $this->assertSame($inputArray, $outputArray);
     }
@@ -84,7 +84,7 @@ class YamlTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue(!empty($string));
         $this->assertTrue(is_string($string));
 
-        $outputArray = Yaml::loadWrapped((string) $string);
+        $outputArray = Yaml::loadWrapped((string)$string);
         $this->assertTrue(is_array($outputArray));
         $this->assertSame($inputArray, $outputArray);
     }
@@ -92,7 +92,7 @@ class YamlTest extends \PHPUnit\Framework\TestCase
     public function testSaveAndReadWrapped()
     {
         $tmpfname = tempnam(sys_get_temp_dir(), 'TEST');
-        $inputArray = array('one' => 1, 'two' => array(1,2), 'three' => '');
+        $inputArray = array('one' => 1, 'two' => array(1, 2), 'three' => '');
 
         $byteCount = Yaml::saveWrapped($inputArray, $tmpfname);
         $this->assertFalse($byteCount === false);
@@ -103,5 +103,15 @@ class YamlTest extends \PHPUnit\Framework\TestCase
         $this->assertSame($inputArray, $outputArray);
 
         unlink($tmpfname);
+    }
+
+    public function testReadNoFile()
+    {
+        $this->assertFalse(Yaml::read('./no-such-file'));
+    }
+
+    public function testReadWrappedNoFile()
+    {
+        $this->assertFalse(Yaml::readWrapped('./no-such-file'));
     }
 }
