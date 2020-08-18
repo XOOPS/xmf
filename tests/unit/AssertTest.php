@@ -30,6 +30,7 @@
 namespace Xmf\Test;
 
 use ArrayIterator;
+use ArrayObject;
 use Exception;
 use Error;
 use LogicException;
@@ -37,12 +38,45 @@ use RuntimeException;
 use stdClass;
 use Xmf\Assert;
 
+use PHPUnit\Framework\TestCase;
+
+/**
+ * This class allows us to be compatible with multiple PHPUnit versions.
+ */
+class BaseTestCase extends TestCase
+{
+    /**
+     * The setExpectedException got removed in later phpunit versions,
+     * and instead it got split up into three functions.
+     *
+     * So if the newer functions exist we call those where needed, and otherwise
+     * we just use the original function.
+     *
+     * @param string $exceptionName
+     * @param string $exceptionMessage
+     * @param int $exceptionCode
+     */
+    public function setExpectedException($exceptionName, $exceptionMessage = '', $exceptionCode = null) {
+        if (method_exists($this, 'expectException')) {
+            $this->expectException($exceptionName);
+            if($exceptionMessage) {
+                $this->expectExceptionMessage($exceptionMessage);
+            }
+            if( $exceptionCode) {
+                $this->expectExceptionCode($exceptionCode);
+            }
+            return;
+        }
+        parent::setExpectedException($exceptionName, $exceptionMessage, $exceptionCode);
+    }
+}
+
 /**
  * @since  1.0
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class AssertTest extends \PHPUnit\Framework\TestCase
+class AssertTest extends BaseTestCase
 {
     private static $resource;
 
@@ -69,6 +103,7 @@ class AssertTest extends \PHPUnit\Framework\TestCase
             array('string', array(''), true),
             array('string', array(1234), false),
             array('stringNotEmpty', array('value'), true),
+            array('stringNotEmpty', array('0'), true),
             array('stringNotEmpty', array(''), false),
             array('stringNotEmpty', array(1234), false),
             array('integer', array(123), true),
@@ -88,6 +123,12 @@ class AssertTest extends \PHPUnit\Framework\TestCase
             array('numeric', array(123), true),
             array('numeric', array('123'), true),
             array('numeric', array('foo'), false),
+            array('natural', array(0), true),
+            array('natural', array(1), true),
+            array('natural', array(-1), false),
+            array('natural', array('1'), false),
+            array('natural', array(1.0), false),
+            array('natural', array(1.23), false),
             array('boolean', array(true), true),
             array('boolean', array(false), true),
             array('boolean', array(1), false),
@@ -123,14 +164,53 @@ class AssertTest extends \PHPUnit\Framework\TestCase
             array('isTraversable', array(new ArrayIterator(array())), true),
             array('isTraversable', array(123), false),
             array('isTraversable', array(new stdClass()), false),
+            array('isArrayAccessible', array(array()), true),
+            array('isArrayAccessible', array(array(1, 2, 3)), true),
+            array('isArrayAccessible', array(new ArrayObject(array())), true),
+            array('isArrayAccessible', array(123), false),
+            array('isArrayAccessible', array(new stdClass()), false),
+            array('isCountable', array(array()), true),
+            array('isCountable', array(array(1, 2)), true),
+            array('isCountable', array(new ArrayIterator(array())), true),
+            array('isCountable', array(new stdClass()), false),
+            array('isCountable', array(new \SimpleXMLElement('<foo>bar</foo>')), true),
+            array('isCountable', array('abcd'), false),
+            array('isCountable', array(123), false),
+            array('isIterable', array(array()), true),
+            array('isIterable', array(array(1, 2, 3)), true),
+            array('isIterable', array(new ArrayIterator(array())), true),
+            array('isIterable', array(123), false),
+            array('isIterable', array(new stdClass()), false),
             array('isInstanceOf', array(new stdClass(), 'stdClass'), true),
             array('isInstanceOf', array(new Exception(), 'stdClass'), false),
             array('isInstanceOf', array(123, 'stdClass'), false),
             array('isInstanceOf', array(array(), 'stdClass'), false),
+            array('isInstanceOf', array(null, 'stdClass'), false),
             array('notInstanceOf', array(new stdClass(), 'stdClass'), false),
             array('notInstanceOf', array(new Exception(), 'stdClass'), true),
             array('notInstanceOf', array(123, 'stdClass'), true),
             array('notInstanceOf', array(array(), 'stdClass'), true),
+            array('isInstanceOfAny', array(new ArrayIterator(), array('Iterator', 'ArrayAccess')), true),
+            array('isInstanceOfAny', array(new Exception(), array('Exception', 'Countable')), true),
+            array('isInstanceOfAny', array(new Exception(), array('ArrayAccess', 'Countable')), false),
+            array('isInstanceOfAny', array(123, array('stdClass')), false),
+            array('isInstanceOfAny', array(array(), array('stdClass')), false),
+            array('isAOf', array('stdClass', 'stdClass'), true),
+            array('isAOf', array('stdClass', 123), false),
+            array('isAOf', array('Iterator', 'ArrayIterator'), false),
+            array('isAOf', array(123, 'Iterator'), false),
+            array('isAOf', array(array(), 'Iterator'), false),
+            array('isAnyOf', array('ArrayIterator', array('Iterator', 'ArrayAccess')), true),
+            array('isAnyOf', array('ArrayIterator', array(123)), false),
+            array('isAnyOf', array('Exception', array('Exception', 'Countable')), true),
+            array('isAnyOf', array('Exception', array('ArrayAccess', 'Countable')), false),
+            array('isAnyOf', array(123, array('stdClass')), false),
+            array('isAnyOf', array(array(), array('stdClass')), false),
+            array('isNotA', array('stdClass', 'stdClass'), false),
+            array('isNotA', array('stdClass', 123), false),
+            array('isNotA', array('Iterator', 'ArrayIterator'), true),
+            array('isNotA', array(123, 'Iterator'), true),
+            array('isNotA', array(array(), 'Iterator'), true),
             array('true', array(true), true),
             array('true', array(false), false),
             array('true', array(1), false),
@@ -140,6 +220,11 @@ class AssertTest extends \PHPUnit\Framework\TestCase
             array('false', array(1), false),
             array('false', array(0), false),
             array('false', array(null), false),
+            array('notFalse', array(false), false),
+            array('notFalse', array(true), true),
+            array('notFalse', array(1), true),
+            array('notFalse', array(0), true),
+            array('notFalse', array(null), true),
             array('null', array(null), true),
             array('null', array(false), false),
             array('null', array(0), false),
@@ -190,26 +275,133 @@ class AssertTest extends \PHPUnit\Framework\TestCase
             array('range', array(3, 1, 2), false),
             array('oneOf', array(1, array(1, 2, 3)), true),
             array('oneOf', array(1, array('1', '2', '3')), false),
+            array('inArray', array(1, array(1, 2, 3)), true),
+            array('inArray', array(1, array('1', '2', '3')), false),
             array('contains', array('abcd', 'ab'), true),
             array('contains', array('abcd', 'bc'), true),
             array('contains', array('abcd', 'cd'), true),
             array('contains', array('abcd', 'de'), false),
             array('contains', array('', 'de'), false),
+            array('contains', array('äþçð', 'äþ'), true),
+            array('contains', array('äþçð', 'þç'), true),
+            array('contains', array('äþçð', 'çð'), true),
+            array('contains', array('äþçð', 'ðé'), false),
+            array('contains', array('', 'ðé'), false),
+            array('contains', array('あいうえ', 'あい'), true),
+            array('contains', array('あいうえ', 'いう'), true),
+            array('contains', array('あいうえ', 'うえ'), true),
+            array('contains', array('あいうえ', 'えお'), false),
+            array('contains', array('', 'えお'), false),
+            array('contains', array('😄😑☹️', '😄'), true),
+            array('contains', array('😄😑☹️', '😑'), true),
+            array('contains', array('😄😑☹️', '☹️'), true),
+            array('contains', array('😄😑☹️', '😄☹️'), false),
+            array('contains', array('', '😑'), false),
+            array('notContains', array('abcd', 'ab'), false),
+            array('notContains', array('abcd', 'bc'), false),
+            array('notContains', array('abcd', 'cd'), false),
+            array('notContains', array('abcd', 'de'), true),
+            array('notContains', array('', 'de'), true),
+            array('notContains', array('äþçð', 'äþ'), false),
+            array('notContains', array('äþçð', 'þç'), false),
+            array('notContains', array('äþçð', 'çð'), false),
+            array('notContains', array('äþçð', 'ðé'), true),
+            array('notContains', array('', 'ðé'), true),
+            array('notContains', array('あいうえ', 'あい'), false),
+            array('notContains', array('あいうえ', 'いう'), false),
+            array('notContains', array('あいうえ', 'うえ'), false),
+            array('notContains', array('あいうえ', 'えお'), true),
+            array('notContains', array('', 'えお'), true),
+            array('notContains', array('😄😑☹️', '😄'), false),
+            array('notContains', array('😄😑☹️', '😑'), false),
+            array('notContains', array('😄😑☹️', '☹️'), false),
+            array('notContains', array('😄😑☹️', '😄☹️'), true),
+            array('notContains', array('', '😑'), true),
+            array('notWhitespaceOnly', array('abc'), true),
+            array('notWhitespaceOnly', array('123'), true),
+            array('notWhitespaceOnly', array(' abc '), true),
+            array('notWhitespaceOnly', array('a b c'), true),
+            array('notWhitespaceOnly', array(''), false),
+            array('notWhitespaceOnly', array(' '), false),
+            array('notWhitespaceOnly', array("\t"), false),
+            array('notWhitespaceOnly', array("\n"), false),
+            array('notWhitespaceOnly', array("\r"), false),
+            array('notWhitespaceOnly', array("\r\n\t "), false),
             array('startsWith', array('abcd', 'ab'), true),
             array('startsWith', array('abcd', 'bc'), false),
             array('startsWith', array('', 'bc'), false),
+            array('startsWith', array('äþçð', 'äþ'), true),
+            array('startsWith', array('äþçð', 'þç'), false),
+            array('startsWith', array('', 'þç'), false),
+            array('startsWith', array('あいうえ', 'あい'), true),
+            array('startsWith', array('あいうえ', 'いう'), false),
+            array('startsWith', array('', 'いう'), false),
+            array('startsWith', array('😄😑☹️', '😄'), true),
+            array('startsWith', array('😄😑☹️', '😑'), false),
+            array('startsWith', array('', '😑'), false),
             array('startsWithLetter', array('abcd'), true),
+            array('startsWithLetter', array(array(66)), false),
+            array('startsWithLetter', array('a'), true),
+            array('startsWithLetter', array('a1'), true),
             array('startsWithLetter', array('1abcd'), false),
+            array('startsWithLetter', array('1'), false),
             array('startsWithLetter', array(''), false),
+            array('startsWithLetter', array(null), false),
+            array('startsWithLetter', array(66), false),
+            array('notStartsWith', array('abcd', 'ab'), false),
+            array('notStartsWith', array('abcd', 'bc'), true),
+            array('notStartsWith', array('', 'bc'), true),
+            array('notStartsWith', array('äþçð', 'äþ'), false),
+            array('notStartsWith', array('äþçð', 'þç'), true),
+            array('notStartsWith', array('', 'þç'), true),
+            array('notStartsWith', array('あいうえ', 'あい'), false),
+            array('notStartsWith', array('あいうえ', 'いう'), true),
+            array('notStartsWith', array('', 'いう'), true),
+            array('notStartsWith', array('😄😑☹️', '😄'), false),
+            array('notStartsWith', array('😄😑☹️', '😑'), true),
+            array('notStartsWith', array('', '😑'), true),
             array('endsWith', array('abcd', 'cd'), true),
             array('endsWith', array('abcd', 'bc'), false),
             array('endsWith', array('', 'bc'), false),
+            array('endsWith', array('äþçð', 'çð'), true),
+            array('endsWith', array('äþçð', 'þç'), false),
+            array('endsWith', array('', 'þç'), false),
+            array('endsWith', array('あいうえ', 'うえ'), true),
+            array('endsWith', array('あいうえ', 'いう'), false),
+            array('endsWith', array('', 'いう'), false),
+            array('endsWith', array('😄😑☹️', '☹️'), true),
+            array('endsWith', array('😄😑☹️', '😑'), false),
+            array('endsWith', array('', '😑'), false),
+            array('notEndsWith', array('abcd', 'cd'), false),
+            array('notEndsWith', array('abcd', 'bc'), true),
+            array('notEndsWith', array('', 'bc'), true),
+            array('notEndsWith', array('äþçð', 'çð'), false),
+            array('notEndsWith', array('äþçð', 'þç'), true),
+            array('notEndsWith', array('', 'þç'), true),
+            array('notEndsWith', array('あいうえ', 'うえ'), false),
+            array('notEndsWith', array('あいうえ', 'いう'), true),
+            array('notEndsWith', array('', 'いう'), true),
+            array('notEndsWith', array('😄😑☹️', '☹️'), false),
+            array('notEndsWith', array('😄😑☹️', '😑'), true),
+            array('notEndsWith', array('', '😑'), true),
             array('regex', array('abcd', '~^ab~'), true),
             array('regex', array('abcd', '~^bc~'), false),
             array('regex', array('', '~^bc~'), false),
+            array('notRegex', array('abcd', '{^ab}'), false),
+            array('notRegex', array('abcd', '{^bc}'), true),
+            array('notRegex', array('', '{^bc}'), true),
+            array('unicodeLetters', array('abcd'), true),
+            array('unicodeLetters', array('ᴁڅਘธブ乶'), true),
+            array('unicodeLetters', array('ȁȄ'), true),
+            array('unicodeLetters', array('ȁ1Ȅ'), false),
+            array('unicodeLetters', array('©'), false),
+            array('unicodeLetters', array('🙁'), false),
+            array('unicodeLetters', array(''), false),
             array('alpha', array('abcd'), true),
             array('alpha', array('ab1cd'), false),
             array('alpha', array(''), false),
+            array('alpha', array(66), false),
+            array('alpha', array(array()), false),
             array('digits', array('1234'), true),
             array('digits', array('12a34'), false),
             array('digits', array(''), false),
@@ -230,18 +422,27 @@ class AssertTest extends \PHPUnit\Framework\TestCase
             array('length', array('äbcd', 4), true, true),
             array('length', array('äbc', 4), false, true),
             array('length', array('äbcde', 4), false, true),
+            array('length', array('あbcd', 4), true, true), // 'HIRAGANA LETTER A' (U+3042)
+            array('length', array('あbc', 4), false, true),
+            array('length', array('あbcde', 4), false, true),
             array('minLength', array('abcd', 4), true),
             array('minLength', array('abcde', 4), true),
             array('minLength', array('abc', 4), false),
             array('minLength', array('äbcd', 4), true, true),
             array('minLength', array('äbcde', 4), true, true),
             array('minLength', array('äbc', 4), false, true),
+            array('minLength', array('あbcd', 4), true, true),
+            array('minLength', array('あbcde', 4), true, true),
+            array('minLength', array('あbc', 4), false, true),
             array('maxLength', array('abcd', 4), true),
             array('maxLength', array('abc', 4), true),
             array('maxLength', array('abcde', 4), false),
             array('maxLength', array('äbcd', 4), true, true),
             array('maxLength', array('äbc', 4), true, true),
             array('maxLength', array('äbcde', 4), false, true),
+            array('maxLength', array('あbcd', 4), true, true),
+            array('maxLength', array('あbc', 4), true, true),
+            array('maxLength', array('あbcde', 4), false, true),
             array('lengthBetween', array('abcd', 3, 5), true),
             array('lengthBetween', array('abc', 3, 5), true),
             array('lengthBetween', array('abcde', 3, 5), true),
@@ -252,6 +453,11 @@ class AssertTest extends \PHPUnit\Framework\TestCase
             array('lengthBetween', array('äbcde', 3, 5), true, true),
             array('lengthBetween', array('äb', 3, 5), false, true),
             array('lengthBetween', array('äbcdef', 3, 5), false, true),
+            array('lengthBetween', array('あbcd', 3, 5), true, true),
+            array('lengthBetween', array('あbc', 3, 5), true, true),
+            array('lengthBetween', array('あbcde', 3, 5), true, true),
+            array('lengthBetween', array('あb', 3, 5), false, true),
+            array('lengthBetween', array('あbcdef', 3, 5), false, true),
             array('fileExists', array(__FILE__), true),
             array('fileExists', array(__DIR__), true),
             array('fileExists', array(__DIR__.'/foobar'), false),
@@ -264,8 +470,10 @@ class AssertTest extends \PHPUnit\Framework\TestCase
             // no tests for readable()/writable() for now
             array('classExists', array(__CLASS__), true),
             array('classExists', array(__NAMESPACE__.'\Foobar'), false),
-            array('subclassOf', array(__CLASS__, 'PHPUnit\Framework\TestCase'), true),
+            array('subclassOf', array(__CLASS__, __NAMESPACE__.'\BaseTestCase'), true),
             array('subclassOf', array(__CLASS__, 'stdClass'), false),
+            array('interfaceExists', array('\Countable'), true),
+            array('interfaceExists', array(__CLASS__), false),
             array('implementsInterface', array('ArrayIterator', 'Traversable'), true),
             array('implementsInterface', array(__CLASS__, 'Traversable'), false),
             array('propertyExists', array((object) array('property' => 0), 'property'), true),
@@ -294,9 +502,57 @@ class AssertTest extends \PHPUnit\Framework\TestCase
             array('keyNotExists', array(array('key' => 0), 'key'), false),
             array('keyNotExists', array(array('key' => null), 'key'), false),
             array('keyNotExists', array(array('key' => null), 'foo'), true),
+            array('validArrayKey', array('abcd'), true),
+            array('validArrayKey', array(1), true),
+            array('validArrayKey', array(false), false),
+            array('validArrayKey', array(true), false),
+            array('validArrayKey', array(new stdClass()), false),
+            array('validArrayKey', array(new ToStringClass('testString')), false),
+            array('validArrayKey', array(self::getResource()), false),
             array('count', array(array(0, 1, 2), 3), true),
             array('count', array(array(0, 1, 2), 2), false),
+            array('minCount', array(array(0), 2), false),
+            array('minCount', array(array(0, 1), 2), true),
+            array('minCount', array(array(0, 1, 2), 2), true),
+            array('maxCount', array(array(0, 1, 2), 2), false),
+            array('maxCount', array(array(0, 1), 2), true),
+            array('maxCount', array(array(0), 2), true),
+            array('countBetween', array(array(0, 1, 2), 4, 5), false),
+            array('countBetween', array(array(0, 1, 2), 3, 5), true),
+            array('countBetween', array(array(0, 1, 2), 1, 2), false),
+            array('countBetween', array(array(0, 1, 2), 2, 5), true),
+            array('countBetween', array(array(0, 1, 2), 2, 3), true),
+            array('isList', array(array(1, 2, 3)), true),
+            array('isList', array(array()), true),
+            array('isList', array(array(0 => 1, 2 => 3)), false),
+            array('isList', array(array('key' => 1, 'foo' => 2)), false),
+            array('isList', array(true), false),
+            array('isList', array(false), false),
+            array('isList', array(array(true)), true),
+            array('isList', array(array(false)), true),
+            array('isList', array(array(array(1), array(2))), true),
+            array('isList', array(array(array('foo' => 'bar'), array('baz' => 'tab'))), true),
+            array('isNonEmptyList', array(array(1, 2, 3)), true),
+            array('isNonEmptyList', array(array()), false),
+            array('isNonEmptyList', array(array(0 => 1, 2 => 3)), false),
+            array('isNonEmptyList', array(array('key' => 1, 'foo' => 2)), false),
+            array('isNonEmptyList', array(true), false),
+            array('isNonEmptyList', array(false), false),
+            array('isNonEmptyList', array(array(true)), true),
+            array('isNonEmptyList', array(array(false)), true),
+            array('isNonEmptyList', array(array(array(1), array(2))), true),
+            array('isNonEmptyList', array(array(array('foo' => 'bar'), array('baz' => 'tab'))), true),
+            array('isMap', array(array('key' => 1, 'foo' => 2)), true),
+            array('isMap', array(array()), true),
+            array('isMap', array(array(1, 2, 3)), false),
+            array('isMap', array(array(0 => 1, 2 => 3)), false),
+            array('isNonEmptyMap', array(array('key' => 1, 'foo' => 2)), true),
+            array('isNonEmptyMap', array(array()), false),
+            array('isNonEmptyMap', array(array(1, 2, 3)), false),
+            array('isNonEmptyMap', array(array(0 => 1, 2 => 3)), false),
             array('uuid', array('00000000-0000-0000-0000-000000000000'), true),
+            array('uuid', array('urn:ff6f8cb0-c57d-21e1-9b21-0800200c9a66'), true),
+            array('uuid', array('uuid:{ff6f8cb0-c57d-21e1-9b21-0800200c9a66}'), true),
             array('uuid', array('ff6f8cb0-c57d-21e1-9b21-0800200c9a66'), true),
             array('uuid', array('ff6f8cb0-c57d-11e1-9b21-0800200c9a66'), true),
             array('uuid', array('ff6f8cb0-c57d-31e1-9b21-0800200c9a66'), true),
@@ -311,9 +567,56 @@ class AssertTest extends \PHPUnit\Framework\TestCase
             array('throws', array(function() { throw new LogicException('test'); }, 'LogicException'), true),
             array('throws', array(function() { throw new LogicException('test'); }, 'IllogicException'), false),
             array('throws', array(function() { throw new Exception('test'); }), true),
-            //array('throws', array(function() { trigger_error('test'); }, 'Throwable'), true, false, 70000),
+            array('throws', array(function() { trigger_error('test'); }, 'Throwable'), true, false, 70000),
             array('throws', array(function() { trigger_error('test'); }, 'Unthrowable'), false, false, 70000),
             array('throws', array(function() { throw new Error(); }, 'Throwable'), true, true, 70000),
+            array('ip', array('192.168.0.1'), true),
+            array('ip', array(new ToStringClass('192.168.0.1')), true),
+            array('ip', array('255.255.255.255'), true),
+            array('ip', array('0.0.0.0'), true),
+            array('ip', array('2001:0db8:0000:0042:0000:8a2e:0370:7334'), true),
+            array('ip', array('::ffff:192.0.2.1'), true),
+            array('ip', array('::1'), true),
+            array('ip', array('::'), true),
+            array('ip', array('foo'), false),
+            array('ip', array(123), false),
+            array('ip', array(array()), false),
+            array('ip', array(null), false),
+            array('ip', array(false), false),
+            array('ipv4', array('192.168.0.1'), true),
+            array('ipv4', array(new ToStringClass('192.168.0.1')), true),
+            array('ipv4', array('255.255.255.255'), true),
+            array('ipv4', array('0.0.0.0'), true),
+            array('ipv4', array('2001:0db8:0000:0042:0000:8a2e:0370:7334'), false),
+            array('ipv4', array('::ffff:192.0.2.1'), false),
+            array('ipv4', array('::1'), false),
+            array('ipv4', array('::'), false),
+            array('ipv4', array('foo'), false),
+            array('ipv4', array(123), false),
+            array('ipv4', array(array()), false),
+            array('ipv4', array(null), false),
+            array('ipv4', array(false), false),
+            array('ipv6', array('192.168.0.1'), false),
+            array('ipv6', array('255.255.255.255'), false),
+            array('ipv6', array('0.0.0.0'), false),
+            array('ipv6', array('2001:0db8:0000:0042:0000:8a2e:0370:7334'), true),
+            array('ipv6', array(new ToStringClass('2001:0db8:0000:0042:0000:8a2e:0370:7334')), true),
+            array('ipv6', array('::ffff:192.0.2.1'), true),
+            array('ipv6', array('::1'), true),
+            array('ipv6', array('::'), true),
+            array('ipv6', array('foo'),  false),
+            array('ipv6', array(123), false),
+            array('ipv6', array(array()), false),
+            array('ipv6', array(null), false),
+            array('ipv6', array(false), false),
+            array('email', array('foo'), false),
+            array('email', array(123), false),
+            array('email', array('foo.com'), false),
+            array('email', array('foo@bar.com'), true),
+            array('email', array(new ToStringClass('foo@bar.com')), true),
+            array('uniqueValues', array(array('qwerty', 'qwerty')), false),
+            array('uniqueValues', array(array('asdfg', 'qwerty')), true),
+            array('uniqueValues', array(array(123, '123')), false),
         );
     }
 
@@ -340,16 +643,14 @@ class AssertTest extends \PHPUnit\Framework\TestCase
         }
         if ($multibyte && !function_exists('mb_strlen')) {
             $this->markTestSkipped('The function mb_strlen() is not available');
-
-            return;
         }
 
         if (!$success) {
-            $this->expectException('\InvalidArgumentException');
+            $this->setExpectedException('\InvalidArgumentException');
         }
 
-        call_user_func_array(array('Xmf\Assert', $method), $args);
-        self::assertTrue(true, 'Return type ensures this assertion is never reached on failure');
+        call_user_func_array(array('Webmozart\Assert\Assert', $method), $args);
+        $this->addToAssertionCount(1);
     }
 
     /**
@@ -364,16 +665,14 @@ class AssertTest extends \PHPUnit\Framework\TestCase
         }
         if ($multibyte && !function_exists('mb_strlen')) {
             $this->markTestSkipped('The function mb_strlen() is not available');
-
-            return;
         }
 
         if (!$success && null !== reset($args)) {
-            $this->expectException('\InvalidArgumentException');
+            $this->setExpectedException('\InvalidArgumentException');
         }
 
-        call_user_func_array(array('Xmf\Assert', 'nullOr'.ucfirst($method)), $args);
-        self::assertTrue(true, 'Return type ensures this assertion is never reached on failure');
+        call_user_func_array(array('Webmozart\Assert\Assert', 'nullOr'.ucfirst($method)), $args);
+        $this->addToAssertionCount(1);
     }
 
     /**
@@ -381,8 +680,8 @@ class AssertTest extends \PHPUnit\Framework\TestCase
      */
     public function testNullOrAcceptsNull($method)
     {
-        call_user_func(array('Xmf\Assert', 'nullOr'.ucfirst($method)), null);
-        self::assertTrue(true, 'Return type ensures this assertion is never reached on failure');
+        call_user_func(array('Webmozart\Assert\Assert', 'nullOr'.ucfirst($method)), null);
+        $this->addToAssertionCount(1);
     }
 
     /**
@@ -397,19 +696,17 @@ class AssertTest extends \PHPUnit\Framework\TestCase
         }
         if ($multibyte && !function_exists('mb_strlen')) {
             $this->markTestSkipped('The function mb_strlen() is not available');
-
-            return;
         }
 
         if (!$success) {
-            $this->expectException('\InvalidArgumentException');
+            $this->setExpectedException('\InvalidArgumentException');
         }
 
         $arg = array_shift($args);
         array_unshift($args, array($arg));
 
-        call_user_func_array(array('Xmf\Assert', 'all'.ucfirst($method)), $args);
-        self::assertTrue(true, 'Return type ensures this assertion is never reached on failure');
+        call_user_func_array(array('Webmozart\Assert\Assert', 'all'.ucfirst($method)), $args);
+        $this->addToAssertionCount(1);
     }
 
     /**
@@ -424,19 +721,17 @@ class AssertTest extends \PHPUnit\Framework\TestCase
         }
         if ($multibyte && !function_exists('mb_strlen')) {
             $this->markTestSkipped('The function mb_strlen() is not available');
-
-            return;
         }
 
         if (!$success) {
-            $this->expectException('\InvalidArgumentException');
+            $this->setExpectedException('\InvalidArgumentException');
         }
 
         $arg = array_shift($args);
         array_unshift($args, new ArrayIterator(array($arg)));
 
-        call_user_func_array(array('Xmf\Assert', 'all'.ucfirst($method)), $args);
-        self::assertTrue(true, 'Return type ensures this assertion is never reached on failure');
+        call_user_func_array(array('Webmozart\Assert\Assert', 'all'.ucfirst($method)), $args);
+        $this->addToAssertionCount(1);
     }
 
     public function getStringConversions()
@@ -451,6 +746,7 @@ class AssertTest extends \PHPUnit\Framework\TestCase
             array('string', array(self::getResource()), 'Expected a string. Got: resource'),
 
             array('eq', array('1', '2'), 'Expected a value equal to "2". Got: "1"'),
+            array('eq', array(new ToStringClass("XXX"), new ToStringClass("YYY")), 'Expected a value equal to '. __NAMESPACE__ . '\ToStringClass: "YYY". Got: '. __NAMESPACE__ . '\ToStringClass: "XXX"'),
             array('eq', array(1, 2), 'Expected a value equal to 2. Got: 1'),
             array('eq', array(true, false), 'Expected a value equal to false. Got: true'),
             array('eq', array(true, null), 'Expected a value equal to null. Got: true'),
@@ -458,6 +754,8 @@ class AssertTest extends \PHPUnit\Framework\TestCase
             array('eq', array(array(1), array(2)), 'Expected a value equal to array. Got: array'),
             array('eq', array(new ArrayIterator(array()), new stdClass()), 'Expected a value equal to stdClass. Got: ArrayIterator'),
             array('eq', array(1, self::getResource()), 'Expected a value equal to resource. Got: 1'),
+
+            array('lessThan', array(new \DateTime('2020-01-01 00:00:00'), new \DateTime('1999-01-01 00:00:00')), 'Expected a value less than DateTime: "1999-01-01T00:00:00+00:00". Got: DateTime: "2020-01-01T00:00:00+00:00"'),
         );
     }
 
@@ -466,8 +764,36 @@ class AssertTest extends \PHPUnit\Framework\TestCase
      */
     public function testConvertValuesToStrings($method, $args, $exceptionMessage)
     {
-        $this->expectException('\InvalidArgumentException', $exceptionMessage);
+        $this->setExpectedException('\InvalidArgumentException', $exceptionMessage);
 
-        call_user_func_array(array('Xmf\Assert', $method), $args);
+        call_user_func_array(array('Webmozart\Assert\Assert', $method), $args);
+    }
+
+    public function testAnUnknownMethodThrowsABadMethodCall()
+    {
+        $this->setExpectedException('\BadMethodCallException');
+
+        Assert::nonExistentMethod();
+    }
+}
+
+/**
+ * @ignore
+ */
+class ToStringClass {
+
+    /**
+     * @var string
+     */
+    private $value;
+
+    public function __construct($value)
+    {
+        $this->value = $value;
+    }
+
+    public function __toString()
+    {
+        return $this->value;
     }
 }
