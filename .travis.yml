@@ -15,7 +15,7 @@ install:
 - wget https://github.com/diff-sniffer/git/releases/download/0.3.2/git-phpcs.phar
 
 script:
-- vendor/bin/phpunit
+- vendor/bin/phpunit --stderr
 - php git-phpcs.phar $TRAVIS_COMMIT_RANGE
 
 after_script:
