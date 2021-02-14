@@ -38,6 +38,12 @@ class Debug extends \Kint
             $class = get_called_class();
             parent::$aliases[] = [$class, 'dump'];
             parent::$aliases[] = [$class, 'backtrace'];
+            parent::$enabled_mode = true;
+            parent::$mode_default = \Kint::MODE_RICH;
+            // display output inline ::folder = false, true puts all output at bottom of window
+            \Kint\Renderer\RichRenderer::$folder = false;
+            // options: 'original' (default), 'solarized', 'solarized-dark' and 'aante-light'
+            \Kint\Renderer\RichRenderer::$theme = 'aante-light.css';
         }
     }
 
@@ -53,8 +59,6 @@ class Debug extends \Kint
         $args = func_get_args();
 
         static::doOnce();
-        // options: 'original' (default), 'solarized', 'solarized-dark' and 'aante-light'
-        \Kint_Renderer_Rich::$theme = 'aante-light.css';
         forward_static_call_array(array('parent', 'dump'), $args);
     }
 
