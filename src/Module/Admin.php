@@ -232,6 +232,18 @@ class Admin
     }
 
     /**
+     * Render the navigation menu
+     *
+     * @param string $menu menu key (script name, i.e. index.php)
+     *
+     * @return bool|mixed|string
+     */
+    public function renderNavigation($menu = '')
+    {
+        return static::$ModuleAdmin->addNavigation($menu);
+    }
+    
+    /**
      * Display the navigation menu
      *
      * @param string $menu menu key (script name, i.e. index.php)
