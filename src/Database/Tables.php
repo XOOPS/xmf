@@ -599,8 +599,6 @@ class Tables
             if (!$result) {
                 $this->lastError = $this->db->error();
                 $this->lastErrNo = $this->db->errno();
-
-                return false;
             }
         }
 
