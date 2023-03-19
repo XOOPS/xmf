@@ -12,9 +12,9 @@
 namespace Xmf\Key;
 
 /**
- * Xmf\Key\StorageInterface
+ * Xmf\Key\KeyAbstract
  *
- * load a database table
+ * manage key and related storage
  *
  * @category  Xmf\Key\KeyAbstract
  * @package   Xmf
