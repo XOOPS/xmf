@@ -19,7 +19,7 @@ namespace Xmf\Key;
  * @category  Xmf\Key\KeyAbstract
  * @package   Xmf
  * @author    Richard Griffith <richard@geekwright.com>
- * @copyright 2018 XOOPS Project (https://xoops.org)
+ * @copyright 2018-2023 XOOPS Project (https://xoops.org)
  * @license   GNU GPL 2 or later (http://www.gnu.org/licenses/gpl-2.0.html)
  * @link      https://xoops.org
  */
@@ -34,7 +34,7 @@ abstract class KeyAbstract
     /**
      * KeyAbstract constructor.
      * @param StorageInterface $storage key store
-     * @param string           $name    case insensitive key name, allow only A-Z, 0-9, _ and -
+     * @param string           $name    case-insensitive key name, allow only A-Z, 0-9, _ and -
      */
     public function __construct(StorageInterface $storage, $name)
     {
