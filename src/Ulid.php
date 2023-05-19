@@ -22,39 +22,52 @@ namespace Xmf;
  */
 class Ulid
 {
+    const ENCODING_CHARS = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+    const ENCODING_LENGTH = 32;
     /**
      * Generate a new ULID.
      *
      * @return string The generated ULID.
      * @throws \Exception
      */
-    public static function generate()
-    {
-        $time = microtime(true) * 1000;
-        $timestamp = sprintf('%012x', (int)($time));
-        $randomness = self::generateRandomness(true);
 
-        return $timestamp . $randomness;
+    public static function generate(bool $upperCase = true): string
+    {
+        $time      = (int)(microtime(true) * 1000);
+        $timeChars = self::encodeTime($time);
+        $randChars = self::encodeRandomness();
+        $ulid      = $timeChars . $randChars;
+
+        return $upperCase ? strtoupper($ulid) : strtolower($ulid);
+    }
+
+    private static function encodeTime(int $time): string
+    {
+        $timeChars = '';
+        for ($i = 0; $i < 10; $i++) {
+            $mod       = $time % self::ENCODING_LENGTH;
+            $timeChars = self::ENCODING_CHARS[$mod] . $timeChars;
+            $time      = ($time - $mod) / self::ENCODING_LENGTH;
+        }
+        return $timeChars;
     }
 
     /**
-     * Generate a random 80-bit randomness component for the ULID.
-     *
-     * @param bool $strongAlgorithm Determines if the algorithm used should be cryptographically strong.
-     * @return string The generated randomness component.
      * @throws \Exception
      */
-    private static function generateRandomness(bool $strongAlgorithm): string
+    private static function encodeRandomness(): string
     {
-        if ($strongAlgorithm && function_exists('random_bytes')) {
-            $bytes = random_bytes(10);
-        } else {
-            $bytes = '';
-            for ($i = 0; $i < 10; $i++) {
-                $bytes .= chr(random_int(0, 255));
+        $randomBytes = random_bytes(10); // 80 bits
+        $randChars   = '';
+        for ($i = 0; $i < 16; $i++) {
+            $randValue = ord($randomBytes[$i % 10]);
+            if ($i % 2 === 0) {
+                $randValue >>= 3; // take the upper 5 bits
+            } else {
+                $randValue &= 31; // take the lower 5 bits
             }
+            $randChars .= self::ENCODING_CHARS[$randValue];
         }
-
-        return bin2hex($bytes);
+        return $randChars;
     }
 }
