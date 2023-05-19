@@ -12,7 +12,7 @@
 namespace Xmf;
 
 /**
- * Generate UUID
+ * Generate ULID
  *
  * @category  Xmf\Ulid
  * @package   Xmf
