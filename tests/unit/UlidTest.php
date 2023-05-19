@@ -28,7 +28,7 @@ class UlidTest extends \PHPUnit\Framework\TestCase
     {
         $ulid = Ulid::generate();
 
-        $this->assertMatchesRegularExpression('/^[0-9A-Z]{26}$/', \strtoupper($ulid));
+        $this->assertRegExp('/^[0-9A-Z]{26}$/', \strtoupper($ulid));
     }
 }
 
