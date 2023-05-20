@@ -34,7 +34,7 @@ class UlidTest extends \PHPUnit\Framework\TestCase
     {
         $ulid = Ulid::generate(false); //generate lower case
 
-        $this->assertMatchesRegularExpression('/[0-9][a-z]/', $ulid);
+        $this->assertRegExp('/[0-9][a-z]/', $ulid);
     }
 
     public function testGeneratesTwentySixChars(): void
