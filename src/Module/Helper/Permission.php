@@ -68,13 +68,17 @@ class Permission extends AbstractHelper
         $gperm_itemid = (int) $gperm_itemid;
         $gperm_groupid = $this->getUserGroups();
 
-        return $this->permissionHandler->checkRight(
-            $gperm_name,
-            $gperm_itemid,
-            $gperm_groupid,
-            $this->mid,
-            (bool) $trueifadmin
-        );
+        if ($this->permissionHandle) {
+            return $this->permissionHandler->checkRight(
+                $gperm_name,
+                $gperm_itemid,
+                $gperm_groupid,
+                $this->mid,
+                (bool)$trueifadmin
+            );
+        } else {
+            return false;
+        }
     }
 
     /**
