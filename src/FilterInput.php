@@ -214,14 +214,14 @@ class FilterInput
             case 'INTEGER':
                 // Only use the first integer value
                 preg_match('/-?\d+/', (string) $source, $matches);
-                $result = @ (int) $matches[0];
+                $result = isset($matches[0]) ? (int) $matches[0] : 0;
                 break;
 
             case 'FLOAT':
             case 'DOUBLE':
                 // Only use the first floating point value
                 preg_match('/-?\d+(\.\d+)?/', (string) $source, $matches);
-                $result = @ (float) $matches[0];
+                $result = isset($matches[0]) ? (float) $matches[0] : 0;
                 break;
 
             case 'BOOL':
@@ -259,7 +259,7 @@ class FilterInput
                 $source = trim((string) $source);
                 $pattern = '/^([-_\.\/A-Z0-9=&%?~]+)(.*)$/i';
                 preg_match($pattern, $source, $matches);
-                $result = @ (string) $matches[1];
+                $result = isset($matches[1]) ? (string) $matches[1] : '';
                 break;
 
             case 'USERNAME':
