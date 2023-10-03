@@ -24,11 +24,6 @@ class Ulid
 {
     const ENCODING_CHARS = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
     const ENCODING_LENGTH = 32;
-    /**
-     * Last generated timestamp.
-     * @var int
-     */
-    private static $lastTime = 0;
 
     /**
      * Generate a new ULID.
@@ -39,16 +34,7 @@ class Ulid
 
     public static function generate(bool $upperCase = true): string
     {
-        $time      = (int)(microtime(true) * 1000);
-
-        // If the current timestamp is equal or less than the last generated one,
-        // increase it by one millisecond to ensure ULIDs are always sorted correctly.
-        if ($time <= self::$lastTime) {
-            $time = self::$lastTime + 1;
-        }
-
-        self::$lastTime = $time;
-
+        $time      = (int)(microtime(true) * 1000000);
         $timeChars = self::encodeTime($time);
         $randChars = self::encodeRandomness();
         $ulid      = $timeChars . $randChars;

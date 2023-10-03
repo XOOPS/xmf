@@ -9,7 +9,7 @@ class UlidTest extends \PHPUnit\Framework\TestCase
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
      */
-    protected function setUp()
+    protected function setUp(): void
     {
     }
 
@@ -17,7 +17,7 @@ class UlidTest extends \PHPUnit\Framework\TestCase
      * Tears down the fixture, for example, closes a network connection.
      * This method is called after a test is executed.
      */
-    protected function tearDown()
+    protected function tearDown(): void
     {
     }
 
@@ -26,15 +26,18 @@ class UlidTest extends \PHPUnit\Framework\TestCase
      */
     public function testGenerate()
     {
-        $ulid = Ulid::generate();
+        $ulid1 = Ulid::generate();
+        usleep(2000);  // Wait for 2 milliseconds to ensure a different timestamp
+        $ulid2 = Ulid::generate();
 
-        $this->assertRegExp('/^[0-9A-Z]{26}$/', \strtoupper($ulid));
+        $this->assertNotEquals($ulid1, $ulid2, 'ULIDs should be unique');
+        $this->assertTrue(strcasecmp($ulid1, $ulid2) < 0, 'ULIDs should collate correctly');
     }
     public function testGeneratesLowercaseIdentifierWhenConfigured(): void
     {
         $ulid = Ulid::generate(false); //generate lower case
 
-        $this->assertRegExp('/[0-9][a-z]/', $ulid);
+        $this->assertMatchesRegularExpression('/[0-9][a-z]/', $ulid);
     }
 
     public function testGeneratesTwentySixChars(): void
