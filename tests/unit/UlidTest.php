@@ -30,6 +30,7 @@ class UlidTest extends \PHPUnit\Framework\TestCase
     public function testGenerate()
     {
         $ulid1 = Ulid::generate();
+        $this->assertTrue(Ulid::isValid($ulid1));
         usleep(2000);  // Wait for 2 milliseconds to ensure a different timestamp
         $ulid2 = Ulid::generate();
 
@@ -73,7 +74,9 @@ class UlidTest extends \PHPUnit\Framework\TestCase
     public function testRandomnessWhenGeneratedMultipleTimes()
     {
         $a = Ulid::generate();
+        usleep(100);  // Wait for 100 microseconds to ensure a different timestamp
         $b = Ulid::generate();
+        $this->assertLessThan($a, $b);
 
         // The time parts are different.
         $this->assertNotEquals(substr($a, 0, 10), substr($b, 0, 10));
