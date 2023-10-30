@@ -122,13 +122,12 @@ class Request
             ) {
                 $var = static::stripSlashesRecursive($var);
             }
+        } elseif ($default !== null) {
+            // Clean the default value
+            $var = static::cleanVar($default, $mask, $type);
         } else {
-            if ($default !== null) {
-                // Clean the default value
-                $var = static::cleanVar($default, $mask, $type);
-            } else {
-                $var = $default;
-            }
+            $var = $default;
+
         }
 
         return $var;
