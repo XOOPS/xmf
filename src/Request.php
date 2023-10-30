@@ -24,7 +24,7 @@ namespace Xmf;
  * @author    trabis <lusopoemas@gmail.com>
  * @author    Joomla!
  * @copyright 2011-2023 XOOPS Project (https://xoops.org)
- * @license   GNU GPL 2 or later (http://www.gnu.org/licenses/gpl-2.0.html)
+ * @license   GNU GPL 2.0 or later (https://www.gnu.org/licenses/gpl-2.0.html)
  * @link      https://xoops.org
  */
 class Request
@@ -339,6 +339,7 @@ class Request
      */
     public static function getHeader($headerName, $default = '')
     {
+        /** @var string[] $headers */
         static $headers = null;
 
         if (null === $headers) {
@@ -349,10 +350,10 @@ class Request
                     $headers[strtolower($name)] = $value;
                 }
             } else {
-                // From joyview - http://php.net/manual/en/function.getallheaders.php
+                // From joyview - https://php.net/manual/en/function.getallheaders.php
                 foreach ($_SERVER as $name => $value) {
                     if (substr($name, 0, 5) === 'HTTP_') {
-                        $translatedName = str_replace(' ', '-', strtolower(str_replace('_', ' ', substr($name, 5))));
+                        $translatedName = (string)str_replace(' ', '-', strtolower(str_replace('_', ' ', substr($name, 5))));
                         $headers[$translatedName] = $value;
                     }
                 }
@@ -372,7 +373,7 @@ class Request
      * @param string $name variable to look for
      * @param string $hash hash to check
      *
-     * @return boolean True if hash has an element 'name', otherwise false
+     * @return bool True if hash has an element 'name', otherwise false
      */
     public static function hasVar($name, $hash = 'default')
     {
@@ -392,10 +393,10 @@ class Request
     /**
      * Set a variable in one of the request variables
      *
-     * @param string  $name      Name
-     * @param string  $value     Value
-     * @param string  $hash      Hash
-     * @param boolean $overwrite Boolean
+     * @param string $name      Name
+     * @param string $value     Value
+     * @param string $hash      Hash
+     * @param bool   $overwrite Boolean
      *
      * @return string Previous value
      */
@@ -517,9 +518,9 @@ class Request
     /**
      * Sets a request variable
      *
-     * @param array   $array     An associative array of key-value pairs
-     * @param string  $hash      The request variable to set (POST, GET, FILES, METHOD)
-     * @param boolean $overwrite If true and an existing key is found, the value is overwritten,
+     * @param array  $array       An associative array of key-value pairs
+     * @param string $hash        The request variable to set (POST, GET, FILES, METHOD)
+     * @param bool   $overwrite   If true and an existing key is found, the value is overwritten,
      *                            otherwise it is ignored
      *
      * @return void
@@ -576,7 +577,7 @@ class Request
                 if (null === $noHtmlFilter) {
                     $noHtmlFilter = FilterInput::getInstance();
                 }
-                $var = $noHtmlFilter->clean($var, $type);
+                $var = $noHtmlFilter::clean($var, $type);
             }
         }
 
