@@ -9,7 +9,7 @@ class UlidTest extends \PHPUnit\Framework\TestCase
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
      */
-    protected function setUp(): void
+    protected function setUp()
     {
     }
 
@@ -17,7 +17,7 @@ class UlidTest extends \PHPUnit\Framework\TestCase
      * Tears down the fixture, for example, closes a network connection.
      * This method is called after a test is executed.
      */
-    protected function tearDown(): void
+    protected function tearDown()
     {
     }
 
@@ -33,19 +33,23 @@ class UlidTest extends \PHPUnit\Framework\TestCase
         $this->assertNotEquals($ulid1, $ulid2, 'ULIDs should be unique');
         $this->assertTrue(strcasecmp($ulid1, $ulid2) < 0, 'ULIDs should collate correctly');
     }
-    public function testGeneratesLowercaseIdentifierWhenConfigured(): void
+    public function testGeneratesLowercaseIdentifierWhenConfigured()
     {
         $ulid = Ulid::generate(false); //generate lower case
 
-        $this->assertMatchesRegularExpression('/[0-9][a-z]/', $ulid);
+        if (method_exists($this, 'assertMatchesRegularExpression')) {
+            $this->assertMatchesRegularExpression('/[0-9][a-z]/', $ulid);
+        } else {
+            $this->assertRegExp('/[0-9][a-z]/', $ulid);
+        }
     }
 
-    public function testGeneratesTwentySixChars(): void
+    public function testGeneratesTwentySixChars()
     {
         $this->assertSame(26, strlen(Ulid::generate()));
     }
 
-    public function testRandomnessWhenGeneratedMultipleTimes(): void
+    public function testRandomnessWhenGeneratedMultipleTimes()
     {
         $a = Ulid::generate();
         $b = Ulid::generate();
@@ -63,7 +67,7 @@ class UlidTest extends \PHPUnit\Framework\TestCase
         $this->assertNotEquals(substr($a, 10), substr($b, 10));
     }
 
-    public function testGeneratesLexographicallySortableUlids(): void
+    public function testGeneratesLexographicallySortableUlids()
     {
         $a = Ulid::generate();
 
