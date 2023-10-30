@@ -90,7 +90,9 @@ class JsonWebToken
         foreach ($assertClaims as $claim => $assert) {
             if (!property_exists($values, $claim)) {
                 return false;
-            } elseif ($values->$claim != $assert) {
+            }
+
+            if ($values->$claim != $assert) {
                 return false;
             }
         }
