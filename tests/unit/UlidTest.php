@@ -22,6 +22,9 @@ class UlidTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * Tests that the `generate()` method generates a unique ULID.
+     *
+     * @covers Xmf\Ulid::generate
      * @throws \Exception
      */
     public function testGenerate()
@@ -33,6 +36,12 @@ class UlidTest extends \PHPUnit\Framework\TestCase
         $this->assertNotEquals($ulid1, $ulid2, 'ULIDs should be unique');
         $this->assertTrue(strcasecmp($ulid1, $ulid2) < 0, 'ULIDs should collate correctly');
     }
+
+    /**
+     * Tests that the `generate()` method generates a lowercase ULID when configured to do so.
+     *
+     * @covers Xmf\Ulid::generate
+     */
     public function testGeneratesLowercaseIdentifierWhenConfigured()
     {
         $ulid = Ulid::generate(false); //generate lower case
@@ -44,11 +53,23 @@ class UlidTest extends \PHPUnit\Framework\TestCase
         }
     }
 
+    /**
+     * Tests that the `generate()` method generates a 26-character ULID.
+     *
+     * @covers Xmf\Ulid::generate
+     */
     public function testGeneratesTwentySixChars()
     {
-        $this->assertSame(26, strlen(Ulid::generate()));
+        $ulid = Ulid::generate();
+
+        $this->assertSame(26, strlen($ulid));
     }
 
+    /**
+     * Tests that the `generate()` method generates ULIDs with different random characters when generated multiple times.
+     *
+     * @covers Xmf\Ulid::generate
+     */
     public function testRandomnessWhenGeneratedMultipleTimes()
     {
         $a = Ulid::generate();
@@ -67,6 +88,11 @@ class UlidTest extends \PHPUnit\Framework\TestCase
         $this->assertNotEquals(substr($a, 10), substr($b, 10));
     }
 
+    /**
+     * Tests that the `generate()` method generates lexicographically sortable ULIDs.
+     *
+     * @covers Xmf\Ulid::generate
+     */
     public function testGeneratesLexographicallySortableUlids()
     {
         $a = Ulid::generate();

@@ -31,7 +31,6 @@ class Ulid
      * @return string The generated ULID.
      * @throws \Exception
      */
-
     public static function generate(bool $upperCase = true): string
     {
         $time      = (int)(microtime(true) * 1000000);
