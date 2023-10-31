@@ -111,24 +111,23 @@ class Request
                 break;
         }
 
-        if (isset($input[$name]) && $input[$name] !== null) {
+        if (isset($input[$name]) && null !== $input[$name]) {
             // Get the variable from the input hash and clean it
             $var = static::cleanVar($input[$name], $mask, $type);
 
             // Handle magic quotes compatibility
             if (function_exists('get_magic_quotes_gpc')
                 && @get_magic_quotes_gpc() && ($var != $default)
-                && ($hash !== 'FILES')
+                && ('FILES' !== $hash)
             ) {
                 $var = static::stripSlashesRecursive($var);
             }
-        } else {
-            if ($default !== null) {
+        } elseif (null !== $default) {
                 // Clean the default value
                 $var = static::cleanVar($default, $mask, $type);
             } else {
                 $var = $default;
-            }
+
         }
 
         return $var;
@@ -352,7 +351,7 @@ class Request
             } else {
                 // From joyview - https://php.net/manual/en/function.getallheaders.php
                 foreach ($_SERVER as $name => $value) {
-                    if (substr($name, 0, 5) === 'HTTP_') {
+                    if ('HTTP_' === substr($name, 0, 5)) {
                         $translatedName = (string)str_replace(' ', '-', strtolower(str_replace('_', ' ', substr($name, 5))));
                         $headers[$translatedName] = $value;
                     }
@@ -378,7 +377,7 @@ class Request
     public static function hasVar($name, $hash = 'default')
     {
         $hash = strtoupper($hash);
-        if ($hash === 'METHOD') {
+        if ('METHOD' === $hash) {
             $hash = strtoupper($_SERVER['REQUEST_METHOD']);
         }
 
@@ -393,9 +392,9 @@ class Request
     /**
      * Set a variable in one of the request variables
      *
-     * @param string $name      Name
-     * @param string $value     Value
-     * @param string $hash      Hash
+     * @param string  $name      Name
+     * @param string  $value     Value
+     * @param string  $hash      Hash
      * @param bool   $overwrite Boolean
      *
      * @return string Previous value
@@ -403,7 +402,7 @@ class Request
     public static function setVar($name, $value = null, $hash = 'method', $overwrite = true)
     {
         $hash = strtoupper($hash);
-        if ($hash === 'METHOD') {
+        if ('METHOD' === $hash) {
             $hash = strtoupper($_SERVER['REQUEST_METHOD']);
         }
 
@@ -477,7 +476,7 @@ class Request
     {
         $hash = strtoupper($hash);
 
-        if ($hash === 'METHOD') {
+        if ('METHOD' === $hash) {
             $hash = strtoupper($_SERVER['REQUEST_METHOD']);
         }
 
@@ -506,7 +505,7 @@ class Request
         }
 
         // Handle magic quotes compatibility
-        if (function_exists('get_magic_quotes_gpc') && @get_magic_quotes_gpc() && ($hash !== 'FILES')) {
+        if (function_exists('get_magic_quotes_gpc') && @get_magic_quotes_gpc() && ('FILES' !== $hash)) {
             $input = static::stripSlashesRecursive($input);
         }
 
@@ -518,8 +517,8 @@ class Request
     /**
      * Sets a request variable
      *
-     * @param array  $array       An associative array of key-value pairs
-     * @param string $hash        The request variable to set (POST, GET, FILES, METHOD)
+     * @param array   $array     An associative array of key-value pairs
+     * @param string  $hash      The request variable to set (POST, GET, FILES, METHOD)
      * @param bool   $overwrite   If true and an existing key is found, the value is overwritten,
      *                            otherwise it is ignored
      *
@@ -554,7 +553,7 @@ class Request
         static $safeHtmlFilter = null;
 
         // convert $var in array if $type is ARRAY
-        if (strtolower((string)$type) === 'array' && !is_array($var)) {
+        if ('array' === strtolower((string)$type) && !is_array($var)) {
             $var = array($var);
         }
 
