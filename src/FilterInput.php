@@ -29,7 +29,7 @@ namespace Xmf;
  * @copyright 2005 Daniel Morris
  * @copyright 2005 - 2013 Open Source Matters, Inc. All rights reserved.
  * @copyright 2011-2023 XOOPS Project (https://xoops.org)
- * @license   GNU GPL 2 or later (http://www.gnu.org/licenses/gpl-2.0.html)
+ * @license   GNU GPL 2.0 or later (https://www.gnu.org/licenses/gpl-2.0.html)
  * @link      https://xoops.org
  */
 class FilterInput
@@ -146,7 +146,7 @@ class FilterInput
      *
      * @param mixed $source - input string/array-of-string to be 'cleaned'
      *
-     * @return string $source - 'cleaned' version of input parameter
+     * @return string|array $source - 'cleaned' version of input parameter
      */
     public function process($source)
     {
@@ -159,7 +159,8 @@ class FilterInput
                 }
             }
             return $source;
-        } elseif (is_string($source)) {
+        }
+        if (is_string($source)) {
             // clean this string
             return $this->remove($this->decode($source));
         } else {
@@ -421,7 +422,7 @@ class FilterInput
             // appears in array specified by user
             $tagFound = in_array(strtolower($tagName), $this->tagsArray);
             // remove this tag on condition
-            if ((!$tagFound && $this->tagsMethod) || ($tagFound && !$this->tagsMethod)) {
+            if ($tagFound !== (bool) $this->tagsMethod) {
                 // reconstruct tag with allowed attributes
                 if (!$isCloseTag) {
                     $attrSet = $this->filterAttr($attrSet);
@@ -512,7 +513,7 @@ class FilterInput
             // if matches user defined array
             $attrFound = in_array(strtolower($attrSubSet[0]), $this->attrArray);
             // keep this attr on condition
-            if ((!$attrFound && $this->attrMethod) || ($attrFound && !$this->attrMethod)) {
+            if ($attrFound !== (bool) $this->attrMethod) {
                 if ($attrSubSet[1]) {
                     // attr has value
                     $newSet[] = $attrSubSet[0] . '="' . $attrSubSet[1] . '"';

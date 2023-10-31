@@ -18,7 +18,7 @@ namespace Xmf;
  * @package   Xmf
  * @author    Richard Griffith <richard@geekwright.com>
  * @copyright 2019-2020 XOOPS Project (https://xoops.org)
- * @license   GNU GPL 2 or later (https://www.gnu.org/licenses/gpl-2.0.html)
+ * @license   GNU GPL 2.0 or later (https://www.gnu.org/licenses/gpl-2.0.html)
  */
 class ProxyCheck
 {
@@ -108,10 +108,12 @@ class ProxyCheck
      */
     protected function getProxyHeader()
     {
-        if (!isset($_SERVER[$this->proxyHeaderName]) || empty($_SERVER[$this->proxyHeaderName])) {
+        if (false === $this->proxyHeaderName || empty($_SERVER[$this->proxyHeaderName])) {
             return false;
         }
-        return $_SERVER[$this->proxyHeaderName];
+
+        // Use PHP 5.3 compatible type casting
+        return (string)$_SERVER[$this->proxyHeaderName];
     }
 
     /**
