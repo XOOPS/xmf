@@ -29,45 +29,165 @@ class Ulid
      * Generate a new ULID.
      *
      * @return string The generated ULID.
-     * @throws \Exception
      */
     public static function generate(bool $upperCase = true): string
     {
-        $time      = (int)(microtime(true) * 1000000);
+        $time = self::microtimeToUlidTime(\microtime(true));
         $timeChars = self::encodeTime($time);
         $randChars = self::encodeRandomness();
         $ulid      = $timeChars . $randChars;
 
-        return $upperCase ? strtoupper($ulid) : strtolower($ulid);
+        $ulid = $upperCase ? \strtoupper($ulid) : \strtolower($ulid);
+
+        return $ulid;
     }
 
-    private static function encodeTime(int $time): string
+    /**
+     * @param int $time
+     *
+     * @return string
+     */
+    public static function encodeTime(int $time): string
     {
+        $encodingCharsArray = str_split(self::ENCODING_CHARS);
         $timeChars = '';
         for ($i = 0; $i < 10; $i++) {
-            $mod       = $time % self::ENCODING_LENGTH;
-            $timeChars = self::ENCODING_CHARS[$mod] . $timeChars;
-            $time      = ($time - $mod) / self::ENCODING_LENGTH;
+            $mod = \floor($time % self::ENCODING_LENGTH);
+            $timeChars = $encodingCharsArray[$mod] . $timeChars;
+            $time = (int)(($time - $mod) / self::ENCODING_LENGTH);
         }
         return $timeChars;
     }
 
-    /**
-     * @throws \Exception
-     */
-    private static function encodeRandomness(): string
+    public static function encodeRandomness(): string
     {
-        $randomBytes = random_bytes(10); // 80 bits
+        $encodingCharsArray = str_split(self::ENCODING_CHARS);
+        $randomBytes = \random_bytes(10); // 80 bits
+        // Check if the random bytes were generated successfully.
+        if (false === $randomBytes) {
+            throw new \RuntimeException('Failed to generate random bytes');
+        }
+
         $randChars   = '';
         for ($i = 0; $i < 16; $i++) {
-            $randValue = ord($randomBytes[$i % 10]);
-            if ($i % 2 === 0) {
+            $randValue = \ord($randomBytes[$i % 10]);
+            if (0 === $i % 2) {
                 $randValue >>= 3; // take the upper 5 bits
             } else {
                 $randValue &= 31; // take the lower 5 bits
             }
-            $randChars .= self::ENCODING_CHARS[$randValue];
+            $randChars .= $encodingCharsArray[$randValue];
         }
         return $randChars;
     }
+
+    /**
+     * @param string $ulid
+     *
+     * @return array
+     */
+    public static function decode(string $ulid): array
+    {
+        if (!self::isValid($ulid)) {
+            throw new \InvalidArgumentException('Invalid ULID string');
+        }
+
+        $time = self::decodeTime($ulid);
+        $rand = self::decodeRandomness($ulid);
+
+        return [
+            'time' => $time,
+            'rand' => $rand,
+        ];
+    }
+
+    /**
+     * @param string $ulid
+     *
+     * @return int
+     */
+    public static function decodeTime(string $ulid): int
+    {
+//        $encodingCharsArray = str_split(self::ENCODING_CHARS);
+
+        // Check if the ULID string is valid.
+        if (!self::isValid($ulid)) {
+            throw new \InvalidArgumentException('Invalid ULID string');
+        }
+
+        $time = 0;
+        for ($i = 0; $i < 10; $i++) {
+            $char = $ulid[$i];
+            $value = \strpos(self::ENCODING_CHARS, $char);
+            $exponent = 9 - $i;
+            $time += $value * \bcpow((string)self::ENCODING_LENGTH, (string)$exponent);
+        }
+
+        return $time;
+    }
+
+    /**
+     * @param string $ulid
+     *
+     * @return int
+     */
+    public static function decodeRandomness(string $ulid): int
+    {
+        if (26 !== strlen($ulid)) {
+            throw new \InvalidArgumentException('Invalid ULID length');  // Changed line
+        }
+
+        $rand = 0;
+        for ($i = 10; $i < 26; $i++) {
+            $char = $ulid[$i];
+            $value = \strpos(self::ENCODING_CHARS, $char);
+
+            // Check if the random value is within the valid range.
+            if ($value < 0 || $value >= self::ENCODING_LENGTH) {
+                throw new \InvalidArgumentException('Invalid ULID random value');
+            }
+            $exponent = 15 - $i;
+            $rand += $value * \bcpow((string)self::ENCODING_LENGTH, (string)$exponent);
+        }
+
+        return $rand;
+    }
+
+    /**
+     * @param string $ulid
+     *
+     * @return bool
+     */
+    public static function isValid(string $ulid): bool
+    {
+        // Check the length of the ULID string before throwing an exception.
+        if (26 !== strlen($ulid)) {
+            return false;
+        }
+
+        // Throw an exception if the ULID is invalid.
+        try {
+            self::decodeRandomness($ulid);
+        } catch (\InvalidArgumentException $e) {
+                return false;
 }
+
+        return true;
+    }
+
+    /**
+     * @param float $microtime
+     *
+     * @return int
+     */
+    public static function microtimeToUlidTime(float $microtime): int
+    {
+        $timestamp = $microtime * 1000000;
+        $unixEpoch = 946684800000000; // Microseconds since the Unix epoch.
+
+        return (int)($timestamp - $unixEpoch);
+    }
+}
+
+
+
