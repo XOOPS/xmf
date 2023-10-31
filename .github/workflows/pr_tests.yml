@@ -7,7 +7,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php_version: ["7.1", "7.4", "8.1"]
+        php_version: ["7.1", "7.4"]
     runs-on: ubuntu-latest
 
     steps:
@@ -27,7 +27,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php_version: ["7.1", "7.4", "8.1"]
+        php_version: ["8.1"]
     runs-on: ubuntu-latest
 
     steps:
