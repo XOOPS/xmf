@@ -81,7 +81,7 @@ class Request
     {
         // Ensure hash and type are uppercase
         $hash = strtoupper($hash);
-        if ($hash === 'METHOD') {
+        if ('METHOD' === $hash) {
             $hash = static::getMethod();
         }
         $type = strtoupper($type);
@@ -123,10 +123,10 @@ class Request
                 $var = static::stripSlashesRecursive($var);
             }
         } elseif (null !== $default) {
-                // Clean the default value
-                $var = static::cleanVar($default, $mask, $type);
-            } else {
-                $var = $default;
+            // Clean the default value
+            $var = static::cleanVar($default, $mask, $type);
+        } else {
+            $var = $default;
 
         }
 
@@ -392,9 +392,9 @@ class Request
     /**
      * Set a variable in one of the request variables
      *
-     * @param string  $name      Name
-     * @param string  $value     Value
-     * @param string  $hash      Hash
+     * @param string $name      Name
+     * @param string $value     Value
+     * @param string $hash      Hash
      * @param bool   $overwrite Boolean
      *
      * @return string Previous value
@@ -517,8 +517,8 @@ class Request
     /**
      * Sets a request variable
      *
-     * @param array   $array     An associative array of key-value pairs
-     * @param string  $hash      The request variable to set (POST, GET, FILES, METHOD)
+     * @param array  $array       An associative array of key-value pairs
+     * @param string $hash        The request variable to set (POST, GET, FILES, METHOD)
      * @param bool   $overwrite   If true and an existing key is found, the value is overwritten,
      *                            otherwise it is ignored
      *

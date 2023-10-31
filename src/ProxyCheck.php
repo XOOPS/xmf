@@ -108,14 +108,12 @@ class ProxyCheck
      */
     protected function getProxyHeader()
     {
-        if (($this->proxyHeaderName === false) ||  (!isset($_SERVER[$this->proxyHeaderName])) || (empty($_SERVER[$this->proxyHeaderName]))) {
+        if (false === $this->proxyHeaderName || empty($_SERVER[$this->proxyHeaderName])) {
             return false;
-    }
+        }
 
         // Use PHP 5.3 compatible type casting
-        $proxyHeader = (string)$_SERVER[$this->proxyHeaderName];
-
-        return $proxyHeader;
+        return (string)$_SERVER[$this->proxyHeaderName];
     }
 
     /**
