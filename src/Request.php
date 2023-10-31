@@ -81,7 +81,7 @@ class Request
     {
         // Ensure hash and type are uppercase
         $hash = strtoupper($hash);
-        if ($hash === 'METHOD') {
+        if ('METHOD' === $hash) {
             $hash = static::getMethod();
         }
         $type = strtoupper($type);
@@ -111,24 +111,23 @@ class Request
                 break;
         }
 
-        if (isset($input[$name]) && $input[$name] !== null) {
+        if (isset($input[$name]) && null !== $input[$name]) {
             // Get the variable from the input hash and clean it
             $var = static::cleanVar($input[$name], $mask, $type);
 
             // Handle magic quotes compatibility
             if (function_exists('get_magic_quotes_gpc')
                 && @get_magic_quotes_gpc() && ($var != $default)
-                && ($hash !== 'FILES')
+                && ('FILES' !== $hash)
             ) {
                 $var = static::stripSlashesRecursive($var);
             }
+        } elseif (null !== $default) {
+            // Clean the default value
+            $var = static::cleanVar($default, $mask, $type);
         } else {
-            if ($default !== null) {
-                // Clean the default value
-                $var = static::cleanVar($default, $mask, $type);
-            } else {
-                $var = $default;
-            }
+            $var = $default;
+
         }
 
         return $var;
@@ -351,7 +350,7 @@ class Request
             } else {
                 // From joyview - http://php.net/manual/en/function.getallheaders.php
                 foreach ($_SERVER as $name => $value) {
-                    if (substr($name, 0, 5) === 'HTTP_') {
+                    if ('HTTP_' === substr($name, 0, 5)) {
                         $translatedName = str_replace(' ', '-', strtolower(str_replace('_', ' ', substr($name, 5))));
                         $headers[$translatedName] = $value;
                     }
@@ -377,7 +376,7 @@ class Request
     public static function hasVar($name, $hash = 'default')
     {
         $hash = strtoupper($hash);
-        if ($hash === 'METHOD') {
+        if ('METHOD' === $hash) {
             $hash = strtoupper($_SERVER['REQUEST_METHOD']);
         }
 
@@ -402,7 +401,7 @@ class Request
     public static function setVar($name, $value = null, $hash = 'method', $overwrite = true)
     {
         $hash = strtoupper($hash);
-        if ($hash === 'METHOD') {
+        if ('METHOD' === $hash) {
             $hash = strtoupper($_SERVER['REQUEST_METHOD']);
         }
 
@@ -476,7 +475,7 @@ class Request
     {
         $hash = strtoupper($hash);
 
-        if ($hash === 'METHOD') {
+        if ('METHOD' === $hash) {
             $hash = strtoupper($_SERVER['REQUEST_METHOD']);
         }
 
@@ -505,7 +504,7 @@ class Request
         }
 
         // Handle magic quotes compatibility
-        if (function_exists('get_magic_quotes_gpc') && @get_magic_quotes_gpc() && ($hash !== 'FILES')) {
+        if (function_exists('get_magic_quotes_gpc') && @get_magic_quotes_gpc() && ('FILES' !== $hash)) {
             $input = static::stripSlashesRecursive($input);
         }
 
@@ -553,7 +552,7 @@ class Request
         static $safeHtmlFilter = null;
 
         // convert $var in array if $type is ARRAY
-        if (strtolower((string)$type) === 'array' && !is_array($var)) {
+        if ('array' === strtolower((string)$type) && !is_array($var)) {
             $var = array($var);
         }
 
