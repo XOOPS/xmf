@@ -101,4 +101,20 @@ class Random
         $token = hash($hash, $randomData);
         return $token;
     }
+
+    public static function generateSecureRandomBytes($length) {
+        if (function_exists('random_bytes')) {
+            return random_bytes($length);
+        } elseif (function_exists('openssl_random_pseudo_bytes')) {
+            return openssl_random_pseudo_bytes($length);
+        } else {
+            // Fallback to less secure random generation using mt_rand()
+            $randomString = '';
+            for ($i = 0; $i < $length; $i++) {
+                $randomString .= chr(mt_rand(0, 255));
+            }
+            return $randomString;
+        }
+    }
+
 }

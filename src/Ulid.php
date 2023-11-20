@@ -62,7 +62,7 @@ class Ulid
     public static function encodeRandomness(): string
     {
         $encodingCharsArray = str_split(self::ENCODING_CHARS);
-        $randomBytes = \random_bytes(10); // 80 bits
+        $randomBytes = Random::generateSecureRandomBytess(10); // 80 bits
         // Check if the random bytes were generated successfully.
         if (false === $randomBytes) {
             throw new \RuntimeException('Failed to generate random bytes');
