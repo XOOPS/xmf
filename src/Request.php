@@ -116,11 +116,12 @@ class Request
             $var = static::cleanVar($input[$name], $mask, $type);
 
             // Handle magic quotes compatibility
-            if (function_exists('get_magic_quotes_gpc')
-                && @get_magic_quotes_gpc() && ($var != $default)
-                && ('FILES' !== $hash)
-            ) {
-                $var = static::stripSlashesRecursive($var);
+            if (PHP_VERSION_ID < 50400) {
+                if (get_magic_quotes_gpc() && ($var != $default)
+                    && ('FILES' !== $hash)
+                ) {
+                    $var = static::stripSlashesRecursive($var);
+                }
             }
         } elseif (null !== $default) {
             // Clean the default value
@@ -505,8 +506,10 @@ class Request
         }
 
         // Handle magic quotes compatibility
-        if (function_exists('get_magic_quotes_gpc') && @get_magic_quotes_gpc() && ('FILES' !== $hash)) {
-            $input = static::stripSlashesRecursive($input);
+        if (PHP_VERSION_ID < 50400) {
+            if (get_magic_quotes_gpc() && ('FILES' !== $hash)) {
+                $input = static::stripSlashesRecursive($input);
+            }
         }
 
         $result = static::cleanVars($input, $mask);
