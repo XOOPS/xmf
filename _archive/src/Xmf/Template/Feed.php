@@ -119,7 +119,7 @@ class Feed extends AbstractTemplate
     /**
      * @var array
      */
-    private $items = array();
+    private $items = [];
 
     /**
      * init - called by parent::_construct

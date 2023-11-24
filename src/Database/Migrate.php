@@ -33,7 +33,6 @@ use Xmf\Yaml;
  */
 class Migrate
 {
-
     /** @var false|\Xmf\Module\Helper|\Xoops\Module\Helper\HelperAbstract  */
     protected $helper;
 
@@ -78,7 +77,8 @@ class Migrate
                 }
                 return $semver;
             },
-            $module->getInfo('version'));
+            $module->getInfo('version')
+        );
 
         $this->tableDefinitionFile = $this->helper->path("sql/{$dirname}_{$version}_migrate.yml");
         $this->tableHandler = new Tables();

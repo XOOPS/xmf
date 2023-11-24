@@ -1,4 +1,5 @@
 <?php
+
 namespace Xmf\Test;
 
 use Xmf\ProxyCheck;
@@ -44,7 +45,7 @@ class ProxyCheckTest extends \PHPUnit\Framework\TestCase
 
     public function getProxyCheckTestData()
     {
-        return array(
+        return [
 //          ['name', 'header', 'expected'],
             ['HTTP_FORWARDED', 'for=192.168.2.60;proto=http;by=203.0.113.43, for=192.0.2.43, for=198.51.100.17', false],
             ['HTTP_FORWARDED', 'for=203.0.113.195;proto=http;by=203.0.113.43, for=192.0.2.43, for=198.51.100.17', '203.0.113.195'],
@@ -52,7 +53,7 @@ class ProxyCheckTest extends \PHPUnit\Framework\TestCase
             ['HTTP_NOT_FORWARDED', 'for="[2020:db8:85a3:8d3:1319:8a2e:370:7348]";proto=http;by=203.0.113.43', false],
             ['HTTP_CLIENT_IP', '203.0.113.195, 70.41.3.18, 150.172.238.178', '203.0.113.195'],
             ['STUFF', '2020:db8:85a3:8d3:1319:8a2e:370:7348', '2020:db8:85a3:8d3:1319:8a2e:370:7348'],
-        );
+        ];
     }
 
     /**

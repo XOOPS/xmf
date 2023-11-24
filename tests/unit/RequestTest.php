@@ -1,4 +1,5 @@
 <?php
+
 namespace Xmf\Test;
 
 use Xmf\Request;
@@ -16,7 +17,7 @@ class RequestTest extends \PHPUnit\Framework\TestCase
      */
     protected function setUp()
     {
-        $this->object = new Request;
+        $this->object = new Request();
     }
 
     /**
@@ -31,7 +32,7 @@ class RequestTest extends \PHPUnit\Framework\TestCase
     {
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $method = Request::getMethod();
-        $this->assertTrue(in_array($method, array('GET', 'HEAD', 'POST', 'PUT')));
+        $this->assertTrue(in_array($method, ['GET', 'HEAD', 'POST', 'PUT']));
     }
 
     public function testGetVar()
@@ -176,14 +177,14 @@ class RequestTest extends \PHPUnit\Framework\TestCase
     {
         $varname = 'RequestTest';
 
-        $testArray = array('one', 'two', 'three');
+        $testArray = ['one', 'two', 'three'];
         $_REQUEST[$varname] = $testArray;
 
         $get = Request::getArray($varname, null, 'request');
         $this->assertTrue(is_array($get));
         $this->assertEquals($get, $testArray);
 
-        $testArray2 = array('one', 'two', '<script>three</script>');
+        $testArray2 = ['one', 'two', '<script>three</script>'];
         $_REQUEST[$varname] = $testArray2;
 
         $get = Request::getArray($varname, null, 'request');
@@ -233,7 +234,7 @@ class RequestTest extends \PHPUnit\Framework\TestCase
     public function testSet()
     {
         $varname = 'RequestTest';
-        Request::set(array($varname => 'Pourquoi'), 'get');
+        Request::set([$varname => 'Pourquoi'], 'get');
         $this->assertEquals($_REQUEST[$varname], 'Pourquoi');
     }
 }
