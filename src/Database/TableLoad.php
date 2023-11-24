@@ -27,7 +27,6 @@ use Xmf\Yaml;
  */
 class TableLoad
 {
-
     /**
      * loadTableFromArray
      *
@@ -149,7 +148,7 @@ class TableLoad
      *
      * @return array of table rows
      */
-    public static function extractRows($table, $criteria = null, $skipColumns = array())
+    public static function extractRows($table, $criteria = null, $skipColumns = [])
     {
         /** @var \XoopsDatabase */
         $db = \XoopsDatabaseFactory::getDatabaseConnection();
@@ -160,7 +159,7 @@ class TableLoad
             /** @var  \CriteriaCompo $criteria */
             $sql .= $criteria->renderWhere();
         }
-        $rows = array();
+        $rows = [];
         $result = $db->query($sql);
         if ($result) {
             while (false !== ($row = $db->fetchArray($result))) {
@@ -191,7 +190,7 @@ class TableLoad
      *
      * @return bool true on success, false on error
      */
-    public static function saveTableToYamlFile($table, $yamlFile, $criteria = null, $skipColumns = array())
+    public static function saveTableToYamlFile($table, $yamlFile, $criteria = null, $skipColumns = [])
     {
         $rows = static::extractRows($table, $criteria, $skipColumns);
 

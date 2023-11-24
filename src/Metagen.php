@@ -24,17 +24,16 @@ namespace Xmf;
  */
 class Metagen
 {
-
     /**
      * mbstring encoding
      */
-    const ENCODING = 'UTF-8';
+    public const ENCODING = 'UTF-8';
 
     /**
      * horizontal ellipsis
      * This will be used to replace omitted text.
      */
-    const ELLIPSIS = "...";
+    public const ELLIPSIS = "...";
 
     /**
      * assignTitle set the page title
@@ -128,9 +127,9 @@ class Metagen
         $minLength = 4,
         $forceKeys = null
     ) {
-        $keyCount = array();
+        $keyCount = [];
         if (!is_array($forceKeys)) {
-            $forceKeys = array();
+            $forceKeys = [];
         }
 
         $text = static::asPlainText($body);
@@ -188,7 +187,7 @@ class Metagen
         $words = explode(" ", $text);
 
         // Only keep $maxWords words
-        $newWords = array();
+        $newWords = [];
         $i = 0;
         while ($i < $wordCount - 1 && $i < count($words)) {
             $newWords[] = $words[$i];
@@ -272,7 +271,7 @@ class Metagen
 
         $tableau = explode("-", $title);
         $tableau = array_filter($tableau, 'static::nonEmptyString');
-        $tableau = array_filter($tableau, array(static::stopWordsObject(), 'check'));
+        $tableau = array_filter($tableau, [static::stopWordsObject(), 'check']);
         $title = implode("-", $tableau);
 
         $title = (empty($title)) ? '' : $title . $extension;
@@ -355,7 +354,7 @@ class Metagen
         $text = static::html2text($text);
         $text = static::purifyText($text);
 
-        $text = str_replace(array("\n", "\r"), ' ', $text);
+        $text = str_replace(["\n", "\r"], ' ', $text);
         $text = preg_replace('/[ ]* [ ]*/', ' ', $text);
 
         return trim($text);
@@ -373,8 +372,8 @@ class Metagen
      */
     protected static function getNeedlePositions($haystack, $needles)
     {
-        $pos = array();
-        $needles = empty($needles) ? array() : (array) $needles;
+        $pos = [];
+        $needles = empty($needles) ? [] : (array) $needles;
         foreach ($needles as $needle) {
             if (function_exists('mb_stripos')) {
                 $i = mb_stripos($haystack, $needle, 0, static::ENCODING);
@@ -439,7 +438,7 @@ class Metagen
      */
     protected static function html2text($document)
     {
-        $search = array(
+        $search = [
             "'<script[^>]*?>.*?</script>'si", // Strip out javascript
             "'<img.*?/>'si",                  // Strip out img tags
             "'<[\/\!]*?[^<>]*?>'si",          // Strip out HTML tags
@@ -453,9 +452,9 @@ class Metagen
             "'&(cent|#162);'i",
             "'&(pound|#163);'i",
             "'&(copy|#169);'i"
-        );
+        ];
 
-        $replace = array(
+        $replace = [
             "",
             "",
             "",
@@ -469,7 +468,7 @@ class Metagen
             chr(162),
             chr(163),
             chr(169)
-        );
+        ];
 
         $text = preg_replace($search, $replace, $document);
 

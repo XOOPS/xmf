@@ -1,4 +1,5 @@
 <?php
+
 namespace Xmf\Test\Jwt;
 
 use Xmf\Jwt\KeyFactory;
@@ -55,6 +56,6 @@ class KeyFactoryTest extends \PHPUnit\Framework\TestCase
     public function testBuildException()
     {
         $this->expectException('\InvalidArgumentException');
-        $instance = KeyFactory::build(array('muck'), $this->storage);
+        $instance = KeyFactory::build(['muck'], $this->storage);
     }
 }

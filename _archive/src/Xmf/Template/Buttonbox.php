@@ -29,7 +29,7 @@ class Buttonbox extends AbstractTemplate
     /**
      * @var array
      */
-    private $items = array();
+    private $items = [];
 
     /**
      * @var string

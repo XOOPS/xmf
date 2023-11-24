@@ -25,14 +25,13 @@ namespace Xmf;
  */
 class StopWords
 {
-
     /**
      * mbstring encoding
      */
-    const ENCODING = 'UTF-8';
+    public const ENCODING = 'UTF-8';
 
     /** @var string[] */
-    protected $stopwordList = array();
+    protected $stopwordList = [];
 
     /**
      * StopWords constructor - load stop words for current locale

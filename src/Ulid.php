@@ -22,8 +22,8 @@ namespace Xmf;
  */
 class Ulid
 {
-    const ENCODING_CHARS = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
-    const ENCODING_LENGTH = 32;
+    public const ENCODING_CHARS = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+    public const ENCODING_LENGTH = 32;
 
     /**
      * Generate a new ULID.
@@ -108,7 +108,7 @@ class Ulid
      */
     public static function decodeTime(string $ulid): int
     {
-//        $encodingCharsArray = str_split(self::ENCODING_CHARS);
+        //        $encodingCharsArray = str_split(self::ENCODING_CHARS);
 
         // Check if the ULID string is valid.
         if (!self::isValid($ulid)) {
@@ -169,8 +169,8 @@ class Ulid
         try {
             self::decodeRandomness($ulid);
         } catch (\InvalidArgumentException $e) {
-                return false;
-}
+            return false;
+        }
 
         return true;
     }
@@ -188,6 +188,3 @@ class Ulid
         return (int)($timestamp - $unixEpoch);
     }
 }
-
-
-
