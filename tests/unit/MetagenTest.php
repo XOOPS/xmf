@@ -1,4 +1,5 @@
 <?php
+
 namespace Xmf\Test;
 
 use Xmf\Metagen;
@@ -11,7 +12,7 @@ class MetagenTest extends \PHPUnit\Framework\TestCase
     protected $object;
 
     // a known block of text used in some tests
-    const DOI_TEXT = <<<EOT
+    public const DOI_TEXT = <<<EOT
 When in the Course of human events, it becomes necessary for one people to dissolve
 the political bands which have connected them with another, and to assume among the
 powers of the earth, the separate and equal station to which the Laws of Nature and
@@ -43,7 +44,7 @@ EOT;
      */
     protected function setUp()
     {
-        $this->object = new Metagen;
+        $this->object = new Metagen();
     }
 
     /**
@@ -58,7 +59,7 @@ EOT;
     {
         // Remove the following lines when you implement this test.
         $this->markTestIncomplete(
-          'This test has not been implemented yet.'
+            'This test has not been implemented yet.'
         );
     }
 
@@ -66,7 +67,7 @@ EOT;
     {
         // Remove the following lines when you implement this test.
         $this->markTestIncomplete(
-          'This test has not been implemented yet.'
+            'This test has not been implemented yet.'
         );
     }
 
@@ -74,7 +75,7 @@ EOT;
     {
         // Remove the following lines when you implement this test.
         $this->markTestIncomplete(
-          'This test has not been implemented yet.'
+            'This test has not been implemented yet.'
         );
     }
 
@@ -85,7 +86,7 @@ EOT;
         );
         $body = self::DOI_TEXT;
         $numKeys = 20;
-        $forced = array('declaration', 'independence');
+        $forced = ['declaration', 'independence'];
         $keys = $this->object->generateKeywords($body, $numKeys, 3, $forced);
         $this->assertTrue(count($keys) == $numKeys);
         // test that forced keywords and words with more than 2 occurances are present
@@ -132,7 +133,7 @@ EOT;
     {
         // Remove the following lines when you implement this test.
         $this->markTestIncomplete(
-          'This test has not been implemented yet.'
+            'This test has not been implemented yet.'
         );
     }
 
@@ -163,43 +164,43 @@ characters and will need to have in the middle and at each end some very differe
 significant keywords.
 EOT;
 
-        $needles = array();
+        $needles = [];
         $expected = 'Testing this method will require a long' . $ellipsis;
         $actual = Metagen::getSearchSummary($haystack, $needles, 40);
         $this->assertEquals($expected, $actual, $actual);
 
-        $needles = array('testing');
+        $needles = ['testing'];
         $expected = 'Testing this method will require a long' . $ellipsis;
         $actual = Metagen::getSearchSummary($haystack, $needles, 40);
         $this->assertEquals($expected, $actual, $actual);
 
-        $needles = array('significant');
+        $needles = ['significant'];
         $expected = $ellipsis . 'very different significant keywords.';
         $actual = Metagen::getSearchSummary($haystack, $needles, 40);
         $this->assertEquals($expected, $actual, $actual);
 
-        $needles = array('one hundred');
+        $needles = ['one hundred'];
         $expected = $ellipsis . 'that will exceed one hundred twenty' . $ellipsis;
         $actual = Metagen::getSearchSummary($haystack, $needles, 40);
         $this->assertEquals($expected, $actual, $actual);
 
-        $needles = array('testing', 'significant', 'one hundred');
+        $needles = ['testing', 'significant', 'one hundred'];
         $expected = 'Testing this method will require a long' . $ellipsis;
         $actual = Metagen::getSearchSummary($haystack, $needles, 40);
         $this->assertEquals($expected, $actual, $actual);
 
-        $needles = array('significant', 'one hundred', 'testing');
+        $needles = ['significant', 'one hundred', 'testing'];
         $expected = 'Testing this method will require a long' . $ellipsis;
         $actual = Metagen::getSearchSummary($haystack, $needles, 40);
         $this->assertEquals($expected, $actual, $actual);
 
-        $needles = array('will');
+        $needles = ['will'];
         $expected = 'Testing this method will require a long' . $ellipsis;
         $actual = Metagen::getSearchSummary($haystack, $needles, 40);
         $this->assertEquals($expected, $actual, $actual);
 
         $nowhitespace = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0abcdefghijklmnopqrstuvwxyz';
-        $needles = array('0');
+        $needles = ['0'];
         $expected = $ellipsis . 'GHIJKLMNOPQRSTUVWXYZ0abcdefghijklmnopqrs' . $ellipsis;
         $actual = Metagen::getSearchSummary($nowhitespace, $needles, 40);
         $this->assertEquals($expected, $actual, $actual);
@@ -211,7 +212,7 @@ EOT;
         $method->setAccessible(true);
         $input = " <p><pre> This is\r\na test   of\ncleaning\rup <i>a string.  </pre> ";
         $expected = 'This is a test of cleaning up a string.';
-        $actual = $method->invokeArgs($this->object, array($input));
+        $actual = $method->invokeArgs($this->object, [$input]);
         $this->assertEquals($expected, $actual, $actual);
     }
 }

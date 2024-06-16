@@ -25,7 +25,6 @@ namespace Xmf;
  */
 class Utilities
 {
-
     /**
      * purifyText
      *
@@ -78,7 +77,7 @@ class Utilities
      */
     public static function html2text($document)
     {
-        $search = array(
+        $search = [
             "'<script[^>]*?>.*?</script>'si", // Strip out javascript
             "'<img.*?/>'si",                  // Strip out img tags
             "'<[\/\!]*?[^<>]*?>'si",          // Strip out HTML tags
@@ -92,9 +91,9 @@ class Utilities
             "'&(cent|#162);'i",
             "'&(pound|#163);'i",
             "'&(copy|#169);'i"
-        );
+        ];
 
-        $replace = array(
+        $replace = [
             "",
             "",
             "",
@@ -108,7 +107,7 @@ class Utilities
             chr(162),
             chr(163),
             chr(169)
-        );
+        ];
 
         $text = preg_replace($search, $replace, $document);
 

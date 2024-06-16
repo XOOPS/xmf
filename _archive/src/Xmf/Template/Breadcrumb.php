@@ -29,7 +29,7 @@ class Breadcrumb extends AbstractTemplate
     /**
      * @var array
      */
-    private $items = array();
+    private $items = [];
 
     /**
      * initialization run by parent::__construct

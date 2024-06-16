@@ -26,7 +26,7 @@ class Highlighter
     /**
      * mbstring encoding
      */
-    const ENCODING = 'UTF-8';
+    public const ENCODING = 'UTF-8';
 
     /**
      * Apply highlight to words in body text
