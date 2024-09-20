@@ -1,6 +1,10 @@
 xmf ChangeLog
 =============
 
+Sep 19, 2024 v1.2.31
+------------------
+* updated Debug for Kint changes
+
 May 30, 2024 v1.2.30
 ------------------
 * upgrade Smarty to 4.5.3
