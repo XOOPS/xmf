@@ -1,5 +1,5 @@
 name: Feature Request
-description: This XOOPS Module is a work in progress! Let us know about a feature you would like to see in the module.
+description: XMF (XOOPS Module Framework)  is a work in progress! Let us know about a feature you would like to see in the module.
 title: "[Feature Request]: "
 labels: ['Triage', 'Feature Request']
 body:

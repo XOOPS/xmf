@@ -5,7 +5,7 @@ labels: ['Triage', 'Bug']
 body:
 - type: input
   attributes:
-    label: Module Version
+    label: XOOPS Version
     description: Provide the XOOPS version that you are using.
     value: 2.5.12
   validations:
