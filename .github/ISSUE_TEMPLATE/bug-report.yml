@@ -6,8 +6,8 @@ body:
 - type: input
   attributes:
     label: Module Version
-    description: Provide the Module version that you are using.
-    value: 1.54-beta
+    description: Provide the XOOPS version that you are using.
+    value: 2.5.12
   validations:
     required: true
 - type: dropdown
