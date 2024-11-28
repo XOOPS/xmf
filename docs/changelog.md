@@ -3,7 +3,8 @@ xmf ChangeLog
 
 Sep 19, 2024 v1.2.31
 ------------------
-* updated Debug for Kint changes
+* updated Debug for Kint changes (mamba)
+* added Issues Template (mamba)
 
 May 30, 2024 v1.2.30
 ------------------
