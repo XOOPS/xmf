@@ -1,19 +1,29 @@
 {
   "name": "xoops/xmf",
-  "license": "GPL-2.0-or-later",
-  "type": "project",
   "description": "XMF - XOOPS Module Framework",
-  "autoload": {
-    "psr-4": {
-      "Xmf\\": "src"
+  "keywords": [
+    "xoops",
+    "xmf",
+    "framework",
+    "module"
+  ],
+  "type": "library",
+  "license": "GPL-2.0-or-later",
+  "homepage": "https://github.com/XOOPS/xmf",
+  "authors": [
+    {
+      "name": "XOOPS Project",
+      "email": "contact@xoops.org",
+      "homepage": "https://xoops.org",
+      "role": "Maintainer"
     }
-  },
+  ],
   "require": {
-    "php": ">=7.4.0",
+    "php": "^7.4.0 || ^8.4.0",
     "firebase/php-jwt": "^6.10.0|^6.11.1",
     "kint-php/kint": "^6.0",
     "paragonie/random_compat": "^9.99.100",
-    "symfony/yaml": "^5.4.45|7.3.2",
+    "symfony/yaml": "^5.4.45|^7.3.2",
     "webmozart/assert": "^1.11.0"
   },
   "require-dev": {
@@ -22,9 +32,31 @@
     "phpstan/phpstan": "^2.1",
     "squizlabs/php_codesniffer": "^3.13"
   },
+  "autoload": {
+    "psr-4": {
+      "Xmf\\": "src"
+    }
+  },
   "autoload-dev": {
     "psr-4": {
       "Xmf\\Test\\": "tests/unit/"
     }
+  },
+  "scripts": {
+    "test": "phpunit",
+    "lint": "php -l src",
+    "fix": "phpcbf --standard=PSR12 src"
+  },
+  "config": {
+    "sort-packages": true,
+    "optimize-autoloader": true,
+    "preferred-install": "dist"
+  },
+  "minimum-stability": "beta",
+  "prefer-stable": true,
+  "support": {
+    "issues": "https://github.com/XOOPS/XMF/issues",
+    "source": "https://github.com/XOOPS/XMF"
   }
 }
+
