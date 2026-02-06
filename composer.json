@@ -70,8 +70,8 @@
   "minimum-stability": "stable",
   "prefer-stable": true,
   "support": {
-    "issues": "https://github.com/XOOPS/XoopsCore25/issues",
-    "source": "https://github.com/XOOPS/XoopsCore25"
+    "issues": "https://github.com/XOOPS/xmf/issues",
+    "source": "https://github.com/XOOPS/xmf"
   },
   "funding": [
     {
