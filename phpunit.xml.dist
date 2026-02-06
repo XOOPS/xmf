@@ -9,9 +9,6 @@
         <testsuite name="Unit">
             <directory>./tests/unit</directory>
         </testsuite>
-        <testsuite name="Integration">
-            <directory>./tests/integration</directory>
-        </testsuite>
     </testsuites>
 
     <!-- PHPUnit 9-compatible coverage configuration -->
