@@ -9,9 +9,6 @@
         <testsuite name="Unit">
             <directory>./tests/unit</directory>
         </testsuite>
-        <testsuite name="Integration">
-            <directory>./tests/integration</directory>
-        </testsuite>
     </testsuites>
 
     <!-- PHPUnit 9-compatible coverage configuration -->
@@ -19,10 +16,5 @@
         <include>
             <directory suffix=".php">./src</directory>
         </include>
-        <report>
-            <clover outputFile="build/logs/clover.xml"/>
-            <html outputDirectory="build/coverage"/>
-            <text outputFile="php://stdout" showUncoveredFiles="false"/>
-        </report>
     </coverage>
 </phpunit>

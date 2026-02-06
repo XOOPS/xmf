@@ -1,13 +1,19 @@
 {
   "name": "xoops/xmf",
   "description": "XMF - XOOPS Module Framework",
+  "keywords": [
+    "xoops",
+    "xmf",
+    "framework",
+    "module"
+  ],
   "type": "library",
   "license": "GPL-2.0-or-later",
-  "homepage": "https://xoops.org",
+  "homepage": "https://github.com/XOOPS/xmf",
   "authors": [
     {
-      "name": "XOOPS Development Team",
-      "email": "info@xoops.org",
+      "name": "XOOPS Project",
+      "email": "contact@xoops.org",
       "homepage": "https://xoops.org",
       "role": "Maintainer"
     }
@@ -31,9 +37,9 @@
       "Xmf\\": "src/"
     }
   },
-  "autoload-dev": {
+ "autoload-dev": {
     "psr-4": {
-      "Xmf\\Tests\\": "tests/"
+      "Xmf\\Test\\": "tests/unit/"
     }
   },
   "scripts": {
@@ -64,8 +70,8 @@
   "minimum-stability": "stable",
   "prefer-stable": true,
   "support": {
-    "issues": "https://github.com/XOOPS/XoopsCore25/issues",
-    "source": "https://github.com/XOOPS/XoopsCore25"
+    "issues": "https://github.com/XOOPS/xmf/issues",
+    "source": "https://github.com/XOOPS/xmf"
   },
   "funding": [
     {
@@ -82,3 +88,4 @@
     }
   ]
 }
+
