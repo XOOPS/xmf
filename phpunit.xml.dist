@@ -2,20 +2,27 @@
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="vendor/autoload.php"
-         colors="true">
+         colors="true"
+         failOnRisky="true"
+         failOnWarning="true">
     <testsuites>
-        <testsuite name="xmftestsuite">
+        <testsuite name="Unit">
             <directory>./tests/unit</directory>
+        </testsuite>
+        <testsuite name="Integration">
+            <directory>./tests/integration</directory>
         </testsuite>
     </testsuites>
 
-    <filter>
-        <whitelist processUncoveredFilesFromWhitelist="true">
+    <!-- PHPUnit 9-compatible coverage configuration -->
+    <coverage processUncoveredFiles="true">
+        <include>
             <directory suffix=".php">./src</directory>
-        </whitelist>
-    </filter>
-
-    <logging>
-        <log type="coverage-clover" target="coverage.clover" />
-    </logging>
+        </include>
+        <report>
+            <clover outputFile="build/logs/clover.xml"/>
+            <html outputDirectory="build/coverage"/>
+            <text outputFile="php://stdout" showUncoveredFiles="false"/>
+        </report>
+    </coverage>
 </phpunit>

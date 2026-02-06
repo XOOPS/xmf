@@ -1,0 +1,85 @@
+name: CI
+on: [push, pull_request]
+
+jobs:
+  tests:
+    name: PHP ${{ matrix.php }}${{ matrix.deps && format(' / {0}', matrix.deps) || '' }}${{ matrix.coverage && ' / Coverage' || '' }}
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.experimental || false }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Lowest supported dependencies test
+          - php: "7.4"
+            deps: "lowest"
+          # Standard tests across all supported versions
+          - php: "7.4"
+          - php: "8.0"
+          - php: "8.1"
+          - php: "8.2"
+          - php: "8.3"
+            coverage: true   # Generate coverage only on stable modern PHP
+          - php: "8.4"
+          # Experimental future PHP (optional, uncomment when PHP 8.5 RC available)
+          # - php: "8.5"
+          #   experimental: true
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: intl, mbstring
+          tools: composer
+          coverage: ${{ matrix.coverage && 'xdebug' || 'none' }}
+
+      - name: Show versions
+        run: |
+          php -v
+          composer --version
+
+      - name: Get Composer cache dir
+        id: composer-cache
+        run: echo "dir=$(composer config cache-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ runner.os }}-${{ matrix.php }}-${{ matrix.deps || 'stable' }}-${{ hashFiles('**/composer.json') }}
+          restore-keys: |
+            composer-${{ runner.os }}-${{ matrix.php }}-
+
+      - name: Validate composer.json
+        run: composer validate --strict --no-check-publish
+
+      - name: Install dependencies
+        run: |
+          if [ "${{ matrix.deps }}" = "lowest" ]; then
+            composer update --prefer-lowest --prefer-stable --no-interaction --prefer-dist --no-progress
+          else
+            composer update --prefer-stable --no-interaction --prefer-dist --no-progress
+          fi
+
+      - name: Check platform requirements
+        run: composer check-platform-reqs
+
+      - name: Show PHPUnit version
+        run: vendor/bin/phpunit --version
+
+      - name: Run tests
+        run: |
+          mkdir -p build/logs
+          vendor/bin/phpunit --stderr ${{ matrix.coverage && '--coverage-clover=build/logs/clover.xml' || '' }}
+
+      - name: Upload coverage to Codecov
+        if: matrix.coverage
+        uses: codecov/codecov-action@v5
+        with:
+          file: ./build/logs/clover.xml
+          fail_ci_if_error: false
+          flags: php-${{ matrix.php }}
