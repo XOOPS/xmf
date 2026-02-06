@@ -87,7 +87,7 @@ class FilterInputTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($xssTestExpect, $filter->cleanVar($xssTest));
     }
 
-    public function getTestForCleanVarType()
+    public static function getTestForCleanVarType()
     {
         return array(
             array('100', 'int', 100),

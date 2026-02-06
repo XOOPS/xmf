@@ -69,8 +69,8 @@ class JsonWebTokenTest extends \PHPUnit\Framework\TestCase
         $this->assertNotSame($this->object, $decoder);
 
         $actual = $decoder->decode($token, ['test' => 'create']);
-        $this->assertObjectHasAttribute('exp', $actual);
-        $this->assertObjectHasAttribute('test', $actual);
+        $this->assertTrue(property_exists($actual, 'exp'));
+        $this->assertTrue(property_exists($actual, 'test'));
 
         // create expired token
         $token = $this->object->create(['test' => 'create', 'exp' => (time() - 30)]);

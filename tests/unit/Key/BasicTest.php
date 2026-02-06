@@ -43,7 +43,7 @@ class BasicTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($actual);
         $actual = $this->object->getSigning();
         $this->assertTrue(is_string($actual));
-        $this->assertRegExp('/^[0-9a-f]{128}$/', $actual);
+        $this->assertMatchesRegularExpression('/^[0-9a-f]{128}$/', $actual);
     }
 
     public function testGetVerifying()
@@ -54,7 +54,7 @@ class BasicTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($actual);
         $actual = $this->object->getVerifying();
         $this->assertTrue(is_string($actual));
-        $this->assertRegExp('/^[0-9a-f]{128}$/', $actual);
+        $this->assertMatchesRegularExpression('/^[0-9a-f]{128}$/', $actual);
     }
 
     public function testCreate()

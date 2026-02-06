@@ -42,7 +42,7 @@ class ProxyCheckTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($ip);
     }
 
-    public function getProxyCheckTestData()
+    public static function getProxyCheckTestData()
     {
         return array(
 //          ['name', 'header', 'expected'],
