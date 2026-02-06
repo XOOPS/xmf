@@ -2,9 +2,6 @@
 
 namespace Xmf\Security;
 
-use JsonException;
-use RuntimeException;
-use UnexpectedValueException;
 
 /**
  * Format types for serialization (PHP 7.4+ compatible)
