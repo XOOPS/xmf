@@ -44,7 +44,7 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Xmf\\Tests\\": "tests/"
+      "Xmf\\Test\\": "tests/"
     }
   },
   "scripts": {
