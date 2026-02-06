@@ -37,12 +37,7 @@
       "Xmf\\": "src/"
     }
   },
-  "autoload": {
-    "psr-4": {
-      "Xmf\\": "src"
-    }
-  },
-  "autoload-dev": {
+ "autoload-dev": {
     "psr-4": {
       "Xmf\\Test\\": "tests/"
     }
