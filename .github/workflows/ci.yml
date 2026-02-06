@@ -74,7 +74,7 @@ jobs:
       - name: Run tests
         run: |
           mkdir -p build/logs
-          vendor/bin/phpunit --stderr ${{ matrix.coverage && '--coverage-clover=build/logs/clover.xml' || '' }}
+          vendor/bin/phpunit --stderr ${{ matrix.coverage && '--coverage-clover=build/logs/clover.xml' || '--no-coverage' }}
 
       - name: Upload coverage to Codecov
         if: matrix.coverage
