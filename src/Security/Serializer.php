@@ -161,11 +161,6 @@ final class Serializer
      */
     public static function fromPhp(string $payload, array $allowedClasses = [])
     {
-//        self::validateInput($payload);
-//        self::validateSecurity($payload, empty($allowedClasses));
-//
-//        return self::unserialize($payload, $allowedClasses);
-
         $start = self::$debugMode ? microtime(true) : 0;
 
         try {
