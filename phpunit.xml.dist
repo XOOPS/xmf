@@ -19,10 +19,5 @@
         <include>
             <directory suffix=".php">./src</directory>
         </include>
-        <report>
-            <clover outputFile="build/logs/clover.xml"/>
-            <html outputDirectory="build/coverage"/>
-            <text outputFile="php://stdout" showUncoveredFiles="false"/>
-        </report>
     </coverage>
 </phpunit>
