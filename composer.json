@@ -1,13 +1,19 @@
 {
   "name": "xoops/xmf",
   "description": "XMF - XOOPS Module Framework",
+  "keywords": [
+    "xoops",
+    "xmf",
+    "framework",
+    "module"
+  ],
   "type": "library",
   "license": "GPL-2.0-or-later",
-  "homepage": "https://xoops.org",
+  "homepage": "https://github.com/XOOPS/xmf",
   "authors": [
     {
-      "name": "XOOPS Development Team",
-      "email": "info@xoops.org",
+      "name": "XOOPS Project",
+      "email": "contact@xoops.org",
       "homepage": "https://xoops.org",
       "role": "Maintainer"
     }
@@ -29,6 +35,11 @@
   "autoload": {
     "psr-4": {
       "Xmf\\": "src/"
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "Xmf\\": "src"
     }
   },
   "autoload-dev": {
@@ -82,3 +93,4 @@
     }
   ]
 }
+
