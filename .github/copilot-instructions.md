@@ -1,6 +1,19 @@
 # XMF — XOOPS Module Framework: Copilot Instructions
 
+<!-- Generic XOOPS conventions: see .github/xoops-copilot-template.md for reuse in other repos -->
+
+## About This Repository
+
 XMF is a PHP utility library for the XOOPS CMS. It provides input filtering, database helpers, JWT tokens, meta tag generation, YAML handling, ULID/UUID generation, and module administration tools.
+
+## Project Layout
+
+```
+src/                      # Library source (namespace: Xmf\)
+tests/unit/               # PHPUnit tests (namespace: Xmf\Test\)
+stubs/                    # PHPStan stub files for XOOPS core classes
+.github/workflows/ci.yml  # GitHub Actions: tests, PHPStan, PHPCS, coverage
+```
 
 ## Build & Test
 
@@ -16,15 +29,6 @@ composer ci               # Run all checks (lint + analyse + test)
 
 PHPUnit has two config files: `phpunit.xml.dist` (PHPUnit 9) and `phpunit10.xml.dist` (PHPUnit 10+). CI selects automatically based on the installed version.
 
-## Project Layout
-
-```
-src/                      # Library source (namespace: Xmf\)
-tests/unit/               # PHPUnit tests (namespace: Xmf\Test\)
-stubs/                    # PHPStan stub files for XOOPS core classes
-.github/workflows/ci.yml  # GitHub Actions: tests, PHPStan, PHPCS, coverage
-```
-
 ## PHP Compatibility
 
 Code must run on PHP 7.4 through 8.4. Do not use features exclusive to PHP 8.0+ (named arguments, match expressions, union type hints in signatures, enums, fibers, readonly properties). CI tests all versions in the matrix.
@@ -39,11 +43,14 @@ Code must run on PHP 7.4 through 8.4. Do not use features exclusive to PHP 8.0+ 
 - Use `trigger_error()` with `E_USER_WARNING` for non-fatal file operation failures. Use `basename()` in error messages to avoid exposing absolute paths.
 - Suppress PHP-native warnings with `@` when a subsequent `=== false` check and explicit `trigger_error()` provide a cleaner error path (e.g., `@file_get_contents()`, `@filesize()`).
 
-## Architecture Patterns
+## XOOPS Compatibility Layer
+
+Classes check `class_exists('Xoops', false)` to detect XOOPS 2.6+ and fall back to XOOPS 2.5 globals (`$GLOBALS['xoopsModule']`, `xoops_getHandler()`). Never assume XOOPS is present at runtime. This pattern allows XMF to work with both XOOPS generations and in standalone testing.
+
+## XMF-Specific Architecture
 
 - **Static utility classes**: Most classes expose static methods (`Request::getInt()`, `Yaml::read()`, `Metagen::generateSeoTitle()`). This is intentional — do not refactor to instance methods.
 - **Singleton factories**: `FilterInput::getInstance()` caches instances keyed by configuration signature.
-- **XOOPS compatibility layer**: Classes check `class_exists('Xoops', false)` to detect XOOPS 2.6+ and fall back to XOOPS 2.5 globals (`$GLOBALS['xoopsModule']`, `xoops_getHandler()`). Never assume XOOPS is present at runtime.
 - **PHP-wrapped YAML**: `Yaml::dumpWrapped()` / `readWrapped()` embed YAML inside `<?php /* --- ... */ ?>` to prevent direct serving of config files. The `---` and `...` markers delimit the YAML content.
 - **ENCODING constant**: `Metagen::ENCODING` and `Highlighter::ENCODING` are `'UTF-8'`. Always reference the class constant, never hardcode the string.
 
@@ -78,7 +85,7 @@ GitHub Actions runs four jobs on every push and PR:
 
 | Job | PHP | What it does |
 |---|---|---|
-| **Tests** | 7.4–8.4 matrix | `composer test` (includes lowest-deps run on 7.4) |
+| **Tests** | 7.4-8.4 matrix | `composer test` (includes lowest-deps run on 7.4) |
 | **PHPStan** | 8.2 | `composer analyse` at level max |
 | **Code Style** | 8.2 | `composer lint` (non-blocking — pre-existing issues) |
 | **Coverage** | 8.2 | PHPUnit + Xdebug, uploads clover.xml to Scrutinizer |
@@ -89,9 +96,9 @@ Scrutinizer runs its own `php_analyzer` tool. It excludes `_archive/`, `tests/`,
 
 1. Code follows PSR-12 and passes `composer lint` (or `composer fix`).
 2. `composer analyse` passes with no new errors beyond the baseline.
-3. `composer test` passes on all PHP versions (7.4–8.4).
+3. `composer test` passes on all PHP versions (7.4-8.4).
 4. New public methods have PHPDoc with `@param`, `@return`, and `@throws` tags.
 5. New functionality has corresponding unit tests in `tests/unit/`.
 6. Changes are documented in `CHANGELOG.md` under `[Unreleased]`.
 7. No hardcoded encoding strings — use the class `ENCODING` constant.
-8. File operations include proper error handling (exists → size → readable → read → check false).
+8. File operations include proper error handling (exists -> size -> readable -> read -> check false).
