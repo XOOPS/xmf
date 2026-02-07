@@ -4,7 +4,14 @@
 
 ### Bug Fixes
 * Fix `Request::setVar()` writing to literal key `'name'` instead of variable `$name` for ENV and SERVER superglobals
-* Fix `FilterInput` hex entity decode (`&#xNN;`) producing null bytes instead of correct characters on PHP 7+
+* Fix `FilterInput` hex entity decode (`&#xNN;`) producing null bytes instead of correct characters on PHP 7+; use `html_entity_decode()` for proper Unicode support
+
+### Changed
+* Use strict comparison (`===`) instead of loose (`==`) in `FilterInput` attribute filtering
+
+### Tests
+* Add unit tests for `Request::setVar()` ENV and SERVER branches
+* Add unit tests for `FilterInput` hex and decimal entity decode
 
 ## [1.2.32] - 2025-02-06
 
