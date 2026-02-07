@@ -97,8 +97,12 @@ class Yaml
             trigger_error("YAML file exceeds maximum size of 2MB", E_USER_WARNING);
             return false;
         }
+        if (!is_readable($yamlFile)) {
+            trigger_error("Failed to read YAML file (not readable): {$yamlFile}", E_USER_WARNING);
+            return false;
+        }
         try {
-            $yamlString = file_get_contents($yamlFile);
+            $yamlString = @file_get_contents($yamlFile);
             if ($yamlString === false) {
                 return false;
             }
@@ -224,7 +228,11 @@ class Yaml
             trigger_error("YAML file exceeds maximum size of 2MB", E_USER_WARNING);
             return false;
         }
-        $yamlString = file_get_contents($yamlFile);
+        if (!is_readable($yamlFile)) {
+            trigger_error("Failed to read YAML file (not readable): {$yamlFile}", E_USER_WARNING);
+            return false;
+        }
+        $yamlString = @file_get_contents($yamlFile);
         if ($yamlString === false) {
             trigger_error("Failed to read YAML file: {$yamlFile}", E_USER_WARNING);
             return false;

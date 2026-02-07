@@ -219,10 +219,12 @@ EOT;
     {
         $method = new \ReflectionMethod('Xmf\Metagen', 'html2text');
         $method->setAccessible(true);
-        // &#169; is the copyright symbol
-        $input = 'Copyright &#169; 2025';
+        // Use codepoint > 255 (&#8364; = Euro sign €) to test the preg_replace_callback
+        // path, since codepoints <= 255 are already handled by the earlier $search/$replace
+        $input = 'Price: &#8364;50';
         $actual = $method->invokeArgs(null, array($input));
-        $this->assertStringContainsString(chr(169), $actual);
-        $this->assertStringNotContainsString('&#169;', $actual);
+        $expected = html_entity_decode('&#8364;', ENT_NOQUOTES, 'UTF-8'); // €
+        $this->assertStringContainsString($expected, $actual);
+        $this->assertStringNotContainsString('&#8364;', $actual);
     }
 }

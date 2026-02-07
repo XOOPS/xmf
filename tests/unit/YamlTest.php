@@ -118,30 +118,40 @@ class YamlTest extends \PHPUnit\Framework\TestCase
     public function testReadOversizedFile()
     {
         $tmpfname = tempnam(sys_get_temp_dir(), 'YAMLTEST');
-        // Create a file just over 2MB
-        $fh = fopen($tmpfname, 'w');
-        $line = str_repeat('x', 1024) . "\n";
-        for ($i = 0; $i < 2049; $i++) {
-            fwrite($fh, $line);
+        try {
+            // Create a file just over 2MB
+            $fh = fopen($tmpfname, 'w');
+            $line = str_repeat('x', 1024) . "\n";
+            for ($i = 0; $i < 2049; $i++) {
+                fwrite($fh, $line);
+            }
+            fclose($fh);
+            // Suppress the trigger_error warning
+            $result = @Yaml::read($tmpfname);
+            $this->assertFalse($result);
+        } finally {
+            if (file_exists($tmpfname)) {
+                unlink($tmpfname);
+            }
         }
-        fclose($fh);
-        // Suppress the trigger_error warning
-        $result = @Yaml::read($tmpfname);
-        $this->assertFalse($result);
-        unlink($tmpfname);
     }
 
     public function testReadWrappedOversizedFile()
     {
         $tmpfname = tempnam(sys_get_temp_dir(), 'YAMLTEST');
-        $fh = fopen($tmpfname, 'w');
-        $line = str_repeat('x', 1024) . "\n";
-        for ($i = 0; $i < 2049; $i++) {
-            fwrite($fh, $line);
+        try {
+            $fh = fopen($tmpfname, 'w');
+            $line = str_repeat('x', 1024) . "\n";
+            for ($i = 0; $i < 2049; $i++) {
+                fwrite($fh, $line);
+            }
+            fclose($fh);
+            $result = @Yaml::readWrapped($tmpfname);
+            $this->assertFalse($result);
+        } finally {
+            if (file_exists($tmpfname)) {
+                unlink($tmpfname);
+            }
         }
-        fclose($fh);
-        $result = @Yaml::readWrapped($tmpfname);
-        $this->assertFalse($result);
-        unlink($tmpfname);
     }
 }
