@@ -22,7 +22,6 @@
     "php": "^7.4 || ^8.0",
     "firebase/php-jwt": "^6.10",
     "kint-php/kint": "^6.0",
-    "paragonie/random_compat": "^9.99.100",
     "symfony/yaml": "^5.4 || ^6.0 || ^7.0",
     "webmozart/assert": "^1.11"
   },

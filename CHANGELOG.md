@@ -22,6 +22,13 @@
 * Use strict comparison (`===`) instead of loose (`==`) in `FilterInput` attribute filtering and `Database\Tables` column lookups
 * Fix `FileStorageTest` namespace from `Xmf\Key` to `Xmf\Test\Key` to match autoload-dev configuration
 
+### Removed
+* Remove redundant `paragonie/random_compat` dependency (native in PHP 7+)
+
+### Infrastructure
+* Add PHPStan stub files for XOOPS framework classes to eliminate ~524 false-positive errors
+* Configure `phpstan.neon` to scan stubs directory
+
 ## [1.2.32] - 2025-02-06
 
 ### Ulid class overhaul (breaking changes)
