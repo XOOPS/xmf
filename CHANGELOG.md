@@ -5,6 +5,9 @@
 ### Bug Fixes
 * Fix `Request::setVar()` writing to literal key `'name'` instead of variable `$name` for ENV and SERVER superglobals
 * Fix `FilterInput` hex entity decode (`&#xNN;`) producing null bytes instead of correct characters on PHP 7+
+* Fix `Metagen::html2text()` discarding `preg_replace_callback()` result for numeric HTML entities
+* Fix XSS in `Module\Admin` config methods (`addConfigError`, `addConfigAccept`, `addConfigWarning`) by escaping output
+* Fix `IPAddress::normalize()` passing `inet_pton()` false result to `inet_ntop()` for invalid IPs
 
 ## [1.2.32] - 2025-02-06
 
