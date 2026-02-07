@@ -214,4 +214,15 @@ EOT;
         $actual = $method->invokeArgs($this->object, array($input));
         $this->assertEquals($expected, $actual, $actual);
     }
+
+    public function testHtml2textNumericEntities()
+    {
+        $method = new \ReflectionMethod('Xmf\Metagen', 'html2text');
+        $method->setAccessible(true);
+        // &#169; is the copyright symbol
+        $input = 'Copyright &#169; 2025';
+        $actual = $method->invokeArgs(null, array($input));
+        $this->assertStringContainsString(chr(169), $actual);
+        $this->assertStringNotContainsString('&#169;', $actual);
+    }
 }

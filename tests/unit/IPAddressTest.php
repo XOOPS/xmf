@@ -114,4 +114,14 @@ class IPAddressTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($instanceV4->sameSubnet($addressV6, 25, 98));
         $this->assertTrue($instanceV4->sameSubnet($instanceV4->asReadable(), 32, 128));
     }
+
+    public function testNormalizeInvalidIp()
+    {
+        $method = new \ReflectionMethod('Xmf\IPAddress', 'normalize');
+        $method->setAccessible(true);
+        $instance = new IPAddress('127.0.0.1');
+        // Invalid IP should return false without warnings
+        $result = @$method->invoke($instance, 'not-an-ip');
+        $this->assertFalse($result);
+    }
 }
