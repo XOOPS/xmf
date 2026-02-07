@@ -121,6 +121,7 @@ class YamlTest extends \PHPUnit\Framework\TestCase
         try {
             // Create a file just over 2MB
             $fh = fopen($tmpfname, 'w');
+            $this->assertNotFalse($fh, 'Failed to open temp file for writing');
             $line = str_repeat('x', 1024) . "\n";
             for ($i = 0; $i < 2049; $i++) {
                 fwrite($fh, $line);
@@ -141,6 +142,7 @@ class YamlTest extends \PHPUnit\Framework\TestCase
         $tmpfname = tempnam(sys_get_temp_dir(), 'YAMLTEST');
         try {
             $fh = fopen($tmpfname, 'w');
+            $this->assertNotFalse($fh, 'Failed to open temp file for writing');
             $line = str_repeat('x', 1024) . "\n";
             for ($i = 0; $i < 2049; $i++) {
                 fwrite($fh, $line);

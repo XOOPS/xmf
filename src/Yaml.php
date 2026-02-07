@@ -102,7 +102,7 @@ class Yaml
             return false;
         }
         try {
-            $yamlString = file_get_contents($yamlFile);
+            $yamlString = @file_get_contents($yamlFile);
             if ($yamlString === false) {
                 trigger_error("Failed to read YAML file: " . basename($yamlFile), E_USER_WARNING);
                 return false;
