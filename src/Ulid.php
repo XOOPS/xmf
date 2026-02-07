@@ -86,6 +86,23 @@ class Ulid
     private static $lastRandom = null;
 
     /**
+     * Ensure we are running on a 64-bit PHP build.
+     *
+     * All ULID timestamp operations require 64-bit integers because
+     * millisecond timestamps exceed PHP_INT_MAX on 32-bit builds.
+     *
+     * @throws \RuntimeException If PHP_INT_SIZE < 8
+     */
+    private static function require64Bit(): void
+    {
+        if (\PHP_INT_SIZE < 8) {
+            throw new \RuntimeException(
+                'ULID timestamp operations require a 64-bit PHP build.'
+            );
+        }
+    }
+
+    /**
      * Generate a new ULID.
      *
      * @param bool $upperCase Whether to return uppercase (default) or lowercase
@@ -110,11 +127,7 @@ class Ulid
      */
     public static function currentTimeMillis(): int
     {
-        if (\PHP_INT_SIZE < 8) {
-            throw new \RuntimeException(
-                'Ulid::currentTimeMillis() requires a 64-bit PHP build; 32-bit builds cannot represent millisecond timestamps safely.'
-            );
-        }
+        self::require64Bit();
 
         return (int) \floor(\microtime(true) * 1000);
     }
@@ -129,6 +142,8 @@ class Ulid
      */
     public static function encodeTime(int $time): string
     {
+        self::require64Bit();
+
         if ($time < 0) {
             throw new \InvalidArgumentException('Timestamp cannot be negative');
         }
@@ -172,7 +187,9 @@ class Ulid
         $randChars   = '';
 
         // Convert bytes to an array of integers for bit manipulation
-        $bytes = \array_map('ord', \str_split($randomBytes));
+        /** @var string[] $byteChars */
+        $byteChars = \str_split($randomBytes);
+        $bytes = \array_map('ord', $byteChars);
 
         // Extract 16 groups of 5 bits from 80 bits (10 bytes)
         // Process two bytes at a time to avoid any integer overflow concerns
@@ -231,28 +248,17 @@ class Ulid
      */
     public static function decodeTime(string $ulid): int
     {
-        if (\strlen($ulid) !== self::ULID_LENGTH) {
-            throw new \InvalidArgumentException(
-                'Invalid ULID length: expected 26, got ' . \strlen($ulid)
-            );
+        self::require64Bit();
+
+        if (!self::isValid($ulid)) {
+            throw new \InvalidArgumentException('Invalid ULID string');
         }
 
         $ulid = \strtoupper($ulid);
         $time = 0;
 
         for ($i = 0; $i < self::TIME_LENGTH; $i++) {
-            $char = $ulid[$i];
-            $value = \strpos(self::ENCODING_CHARS, $char);
-
-            if ($value === false) {
-                throw new \InvalidArgumentException('Invalid character in ULID: ' . $char);
-            }
-
-            $time = $time * self::ENCODING_LENGTH + $value;
-        }
-
-        if ($time > self::MAX_TIME) {
-            throw new \InvalidArgumentException('ULID timestamp exceeds maximum allowed value');
+            $time = $time * self::ENCODING_LENGTH + \strpos(self::ENCODING_CHARS, $ulid[$i]);
         }
 
         return $time;
@@ -261,42 +267,24 @@ class Ulid
     /**
      * Decode the randomness portion from a ULID string.
      *
-     * Note: This method now returns the 16-character base32 string
-     * representation of the random portion. Previous versions returned
-     * an integer, which is a backward-incompatible change.
+     * Returns the 16-character base32 string representation of the
+     * random portion. Previous versions returned an integer, which is
+     * a backward-incompatible change (see changelog for v1.2.32).
      *
      * @param string $ulid The ULID string
      *
      * @return string The 16-character randomness portion
      * @throws \InvalidArgumentException If the ULID is invalid
+     *
+     * @since 1.2.32 Return type changed from int to string
      */
     public static function decodeRandomness(string $ulid): string
     {
-        if (\strlen($ulid) !== self::ULID_LENGTH) {
-            throw new \InvalidArgumentException(
-                'Invalid ULID length: expected 26, got ' . \strlen($ulid)
-            );
-        }
-
-        $ulid = \strtoupper($ulid);
-
-        // Validate the full ULID (including time portion)
         if (!self::isValid($ulid)) {
             throw new \InvalidArgumentException('Invalid ULID string');
         }
 
-        $randomPart = \substr($ulid, self::TIME_LENGTH);
-
-        // Validate all characters in the random portion
-        for ($i = 0; $i < self::RANDOM_LENGTH; $i++) {
-            if (\strpos(self::ENCODING_CHARS, $randomPart[$i]) === false) {
-                throw new \InvalidArgumentException(
-                    'Invalid character in ULID randomness: ' . $randomPart[$i]
-                );
-            }
-        }
-
-        return $randomPart;
+        return \substr(\strtoupper($ulid), self::TIME_LENGTH);
     }
 
     /**
@@ -400,8 +388,8 @@ class Ulid
         // Convert hex to decimal using BCMath
         $decimal = '0';
         for ($i = 0; $i < 32; $i++) {
-            $decimal = \bcmul($decimal, '16');
-            $decimal = \bcadd($decimal, (string) \hexdec($hex[$i]));
+            $decimal = (string) \bcmul($decimal, '16');
+            $decimal = (string) \bcadd($decimal, (string) \hexdec($hex[$i]));
         }
 
         // Convert decimal to base32 (ULID)
@@ -409,7 +397,7 @@ class Ulid
         for ($i = 0; $i < self::ULID_LENGTH; $i++) {
             $remainder = (int) \bcmod($decimal, '32');
             $ulid = self::ENCODING_CHARS[$remainder] . $ulid;
-            $decimal = \bcdiv($decimal, '32', 0);
+            $decimal = (string) \bcdiv($decimal, '32', 0);
         }
 
         return $ulid;
@@ -432,8 +420,8 @@ class Ulid
 
         for ($i = 0; $i < self::ULID_LENGTH; $i++) {
             $value = \strpos(self::ENCODING_CHARS, $ulid[$i]);
-            $decimal = \bcmul($decimal, '32');
-            $decimal = \bcadd($decimal, (string) $value);
+            $decimal = (string) \bcmul($decimal, '32');
+            $decimal = (string) \bcadd($decimal, (string) $value);
         }
 
         // Convert decimal to hex
@@ -441,7 +429,7 @@ class Ulid
         while (\bccomp($decimal, '0') > 0) {
             $remainder = (int) \bcmod($decimal, '16');
             $hex = \dechex($remainder) . $hex;
-            $decimal = \bcdiv($decimal, '16', 0);
+            $decimal = (string) \bcdiv($decimal, '16', 0);
         }
 
         // Pad to 32 characters
@@ -504,11 +492,24 @@ class Ulid
     {
         $time = self::currentTimeMillis();
 
-        if (self::$lastTime !== null && $time === self::$lastTime && self::$lastRandom !== null) {
-            // Same millisecond — increment the random portion
-            self::$lastRandom = self::incrementBase32(self::$lastRandom);
+        if (self::$lastTime !== null && $time <= self::$lastTime && self::$lastRandom !== null) {
+            // Same or earlier millisecond — use logical time and increment the random portion
+            $time = self::$lastTime;
+
+            $currentRandom = self::$lastRandom;
+            $nextRandom = self::incrementBase32($currentRandom);
+
+            if (\strcmp($nextRandom, $currentRandom) > 0) {
+                // No overflow: random portion increased, keep same logical time
+                self::$lastRandom = $nextRandom;
+            } else {
+                // Overflow: advance logical time by 1 ms and reset randomness
+                $time = self::$lastTime + 1;
+                self::$lastTime = $time;
+                self::$lastRandom = self::encodeRandomness();
+            }
         } else {
-            // New millisecond — generate fresh randomness
+            // New (later) millisecond — generate fresh randomness and update logical time
             self::$lastRandom = self::encodeRandomness();
             self::$lastTime = $time;
         }
@@ -591,11 +592,12 @@ class Ulid
     private static function incrementBase32(string $base32): string
     {
         $chars = self::ENCODING_CHARS;
+        /** @var string[] $result */
         $result = \str_split($base32);
         $carry = true;
 
         for ($i = \count($result) - 1; $i >= 0 && $carry; $i--) {
-            $pos = \strpos($chars, $result[$i]);
+            $pos = (int) \strpos($chars, $result[$i]);
             $pos++;
             if ($pos >= self::ENCODING_LENGTH) {
                 $result[$i] = $chars[0];

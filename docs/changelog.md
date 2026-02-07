@@ -16,7 +16,8 @@ Feb 6, 2025 v1.2.32
 * Add `Ulid::decode()` to split a ULID into its time and randomness components
 * Add `Ulid::isValid()` for full ULID validation including timestamp overflow check
 * Add `BINARY_LENGTH`, `MAX_TIME`, `TIME_LENGTH`, `RANDOM_LENGTH`, `ULID_LENGTH` constants
-* Enforce 64-bit PHP requirement in `currentTimeMillis()` (32-bit builds throw `RuntimeException`)
+* Enforce 64-bit PHP requirement across all timestamp operations (32-bit builds throw `RuntimeException`)
+* `generateMonotonic()` handles random portion overflow by advancing the logical timestamp
 
 **Breaking changes:**
 * `decodeRandomness()` now returns a 16-character base32 string instead of an integer
@@ -26,7 +27,7 @@ Feb 6, 2025 v1.2.32
 
 **Bug fixes:**
 * Fix `getDateTime()` to always return UTC regardless of system timezone
-* Fix `decodeTime()` to reject timestamps exceeding `MAX_TIME` (2^48 - 1)
+* Fix `decodeTime()` to fully validate the ULID via `isValid()` (rejects invalid chars, overflow, wrong length)
 * Fix `decodeRandomness()` to validate the full ULID (including time portion), not just the random part
 * Sanitize exception messages to avoid leaking full ULID values into logs
 
