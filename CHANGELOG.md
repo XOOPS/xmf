@@ -35,7 +35,7 @@
 * Simplify `.scrutinizer.yml` to analysis-only (remove failing PHP 8.3/8.4 build nodes); exclude `stubs/` from analysis
 * Add dedicated PHPStan, PHPCS, and code coverage jobs to GitHub Actions CI workflow
 * Add coverage upload to Scrutinizer via `ocular.phar` from GitHub Actions
-* Generate PHPStan baseline (`phpstan-baseline.neon`) with 596 existing errors for incremental cleanup
+* Generate PHPStan baseline (`phpstan-baseline.neon`) with ~596 existing errors for incremental cleanup
 * Add `composer baseline` script for regenerating PHPStan baseline
 * Update `.gitignore` to exclude `build/` directory (coverage output)
 * Update `.gitattributes` with export-ignore for PHPStan, PHPUnit, and stub files

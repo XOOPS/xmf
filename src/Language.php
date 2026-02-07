@@ -56,6 +56,10 @@ class Language
                 $language = 'english';
             }
         }
+        if (!defined('XOOPS_ROOT_PATH')) {
+            trigger_error('XOOPS_ROOT_PATH is not defined', E_USER_WARNING);
+            return false;
+        }
         $path = \XOOPS_ROOT_PATH . '/' . ((empty($domain) || 'global' === $domain) ? ''
             : "modules/{$domain}/") . 'language';
         if (!$ret = static::loadFile("{$path}/{$language}/{$name}.php")) {

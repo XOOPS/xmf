@@ -118,6 +118,7 @@ class YamlTest extends \PHPUnit\Framework\TestCase
     public function testReadOversizedFile()
     {
         $tmpfname = tempnam(sys_get_temp_dir(), 'YAMLTEST');
+        $this->assertNotFalse($tmpfname, 'Failed to create temp file');
         try {
             // Create a file just over 2MB
             $fh = fopen($tmpfname, 'w');
@@ -140,6 +141,7 @@ class YamlTest extends \PHPUnit\Framework\TestCase
     public function testReadWrappedOversizedFile()
     {
         $tmpfname = tempnam(sys_get_temp_dir(), 'YAMLTEST');
+        $this->assertNotFalse($tmpfname, 'Failed to create temp file');
         try {
             $fh = fopen($tmpfname, 'w');
             $this->assertNotFalse($fh, 'Failed to open temp file for writing');
