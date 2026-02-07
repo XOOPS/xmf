@@ -11,8 +11,15 @@
         </testsuite>
     </testsuites>
 
-    <!-- PHPUnit 9-compatible coverage configuration -->
-    <coverage processUncoveredFiles="true">
+    <!-- PHPUnit 10+ coverage source configuration -->
+    <source>
+        <include>
+            <directory suffix=".php">./src</directory>
+        </include>
+    </source>
+
+    <!-- PHPUnit 9 coverage configuration (ignored by PHPUnit 10+) -->
+    <coverage>
         <include>
             <directory suffix=".php">./src</directory>
         </include>
