@@ -545,16 +545,16 @@ class FilterInput
         // convert decimal
         $source = preg_replace_callback(
             '/&#(\d+);/m',
-            function ($matches) {
-                return chr($matches[1]);
+            function ($matches) use ($charset) {
+                return html_entity_decode('&#' . $matches[1] . ';', ENT_NOQUOTES, $charset);
             },
             $source
         );
         // convert hex notation
         $source = preg_replace_callback(
             '/&#x([a-f0-9]+);/mi',
-            function ($matches) {
-                return chr(hexdec($matches[1]));
+            function ($matches) use ($charset) {
+                return html_entity_decode('&#x' . $matches[1] . ';', ENT_NOQUOTES, $charset);
             },
             $source
         );
