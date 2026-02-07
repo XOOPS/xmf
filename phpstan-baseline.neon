@@ -1,0 +1,2257 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 6
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Call to method getModule\(\) on an unknown class Xoops\\Module\\Helper\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Call to method path\(\) on an unknown class Xoops\\Module\\Helper\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Cannot access offset ''attributes'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 4
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Cannot access offset ''columns'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 14
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Cannot access offset ''keys'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 3
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Cannot access offset ''name'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 8
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Cannot access offset ''options'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Cannot access offset ''unique'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 5
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Cannot access offset \(int\|string\) on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Method Xmf\\Database\\Migrate\:\:getCurrentSchema\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Method Xmf\\Database\\Migrate\:\:getSynchronizeDDL\(\) should return array\<string\> but returns array\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Method Xmf\\Database\\Migrate\:\:getTargetDefinitions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Method Xmf\\Database\\Migrate\:\:saveCurrentSchema\(\) should return int\|false but returns bool\|int\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Parameter \#1 \$name of method Xmf\\Database\\Tables\:\:addIndex\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 3
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Parameter \#1 \$name of method Xmf\\Database\\Tables\:\:dropIndex\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Parameter \#1 \$string1 of function strcasecmp expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Parameter \#2 \$column of method Xmf\\Database\\Tables\:\:addColumn\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Parameter \#2 \$column of method Xmf\\Database\\Tables\:\:addPrimaryKey\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 3
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Parameter \#2 \$column of method Xmf\\Database\\Tables\:\:alterColumn\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Parameter \#2 \$column of method Xmf\\Database\\Tables\:\:dropColumn\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Parameter \#2 \$column of method Xmf\\Database\\Tables\:\:getColumnAttributes\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Parameter \#2 \$columnName of method Xmf\\Database\\Migrate\:\:targetHasColumn\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Parameter \#2 \$options of method Xmf\\Database\\Tables\:\:setTableOptions\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Parameter \#3 \$attributes of method Xmf\\Database\\Tables\:\:addColumn\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Parameter \#3 \$attributes of method Xmf\\Database\\Tables\:\:alterColumn\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Parameter \#3 \$column of method Xmf\\Database\\Tables\:\:addIndex\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 3
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Parameter \#3 \$subject of function preg_replace_callback expects array\<float\|int\|string\>\|string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Parameter \#4 \$unique of method Xmf\\Database\\Tables\:\:addIndex\(\) expects bool, mixed given\.$#'
+			identifier: argument.type
+			count: 3
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Possibly invalid array key type mixed\.$#'
+			identifier: offsetAccess.invalidOffset
+			count: 3
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Property Xmf\\Database\\Migrate\:\:\$helper \(Xmf\\Module\\Helper\|Xoops\\Module\\Helper\\HelperAbstract\|false\) does not accept Xmf\\Module\\Helper\|Xoops\\Module\\Helper\|false\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Property Xmf\\Database\\Migrate\:\:\$helper has unknown class Xoops\\Module\\Helper\\HelperAbstract as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Property Xmf\\Database\\Migrate\:\:\$moduleTables \(array\<string\>\) does not accept mixed\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Property Xmf\\Database\\Migrate\:\:\$targetDefinitions \(array\) does not accept array\|false\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Property Xmf\\Database\\Migrate\:\:\$targetDefinitions \(array\) in isset\(\) is not nullable\.$#'
+			identifier: isset.property
+			count: 1
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Property Xmf\\Database\\Migrate\:\:\$targetDefinitions type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Database/Migrate.php
+
+		-
+			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: src/Database/TableLoad.php
+
+		-
+			message: '#^Binary operation "\." between ''`'' and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Database/TableLoad.php
+
+		-
+			message: '#^Binary operation "\.\=" between non\-falsy\-string and mixed results in an error\.$#'
+			identifier: assignOp.invalid
+			count: 1
+			path: src/Database/TableLoad.php
+
+		-
+			message: '#^Call to an undefined method XoopsDatabase\:\:quote\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Database/TableLoad.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 1
+			path: src/Database/TableLoad.php
+
+		-
+			message: '#^Method Xmf\\Database\\TableLoad\:\:extractRows\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Database/TableLoad.php
+
+		-
+			message: '#^Method Xmf\\Database\\TableLoad\:\:loadTableFromArray\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Database/TableLoad.php
+
+		-
+			message: '#^Method Xmf\\Database\\TableLoad\:\:truncateTable\(\) should return int but returns int\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Database/TableLoad.php
+
+		-
+			message: '#^Offset ''count'' might not exist on array\|null\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: src/Database/TableLoad.php
+
+		-
+			message: '#^Parameter \#1 \$result of method XoopsDatabase\:\:fetchArray\(\) expects mysqli_result, bool\|mysqli_result given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Database/TableLoad.php
+
+		-
+			message: '#^Parameter \#1 \$result of method XoopsDatabase\:\:fetchArray\(\) expects mysqli_result, mysqli_result\|true given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Database/TableLoad.php
+
+		-
+			message: '#^Parameter \#1 \$result of method XoopsDatabase\:\:freeRecordSet\(\) expects mysqli_result, bool\|mysqli_result given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Database/TableLoad.php
+
+		-
+			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 10
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Binary operation "\." between '' '' and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Binary operation "\." between '' \('' and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 2
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Binary operation "\." between ''''\|'', '' and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Binary operation "\." between '', '' and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Binary operation "\." between ''ENGINE\='' and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Binary operation "\." between non\-falsy\-string and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 2
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Binary operation "\.\=" between mixed and non\-falsy\-string results in an error\.$#'
+			identifier: assignOp.invalid
+			count: 2
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Call to an undefined method XoopsDatabase\:\:errno\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Call to an undefined method XoopsDatabase\:\:error\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Call to an undefined method XoopsDatabase\:\:quote\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Cannot access offset ''CHARACTER_SET_NAME'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Cannot access offset ''COLUMN_DEFAULT'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Cannot access offset ''COLUMN_NAME'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 3
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Cannot access offset ''COLUMN_TYPE'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Cannot access offset ''ENGINE'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Cannot access offset ''EXTRA'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Cannot access offset ''INDEX_NAME'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Cannot access offset ''IS_NULLABLE'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Cannot access offset ''NON_UNIQUE'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Cannot access offset ''PRIMARY'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Cannot access offset ''SUB_PART'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Cannot access offset ''TABLE_NAME'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Cannot access offset ''attributes'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 4
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Cannot access offset ''columns'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 14
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Cannot access offset ''create'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 6
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Cannot access offset ''keys'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 7
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Cannot access offset ''name'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 26
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Cannot access offset ''options'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 3
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Cannot access offset ''unique'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 4
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Cannot access offset mixed on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 3
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Cannot access offset string on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Constant _DB_XMF_TABLE_IS_NOT_DEFINED not found\.$#'
+			identifier: constant.notFound
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Method Xmf\\Database\\Tables\:\:dumpQueue\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Method Xmf\\Database\\Tables\:\:dumpTables\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Method Xmf\\Database\\Tables\:\:getColumnAttributes\(\) should return string\|false but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Method Xmf\\Database\\Tables\:\:getTable\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Method Xmf\\Database\\Tables\:\:getTableIndexes\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Method Xmf\\Database\\Tables\:\:getTableIndexes\(\) should return array\|false but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Method Xmf\\Database\\Tables\:\:insert\(\) has parameter \$columns with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Method Xmf\\Database\\Tables\:\:update\(\) has parameter \$columns with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Parameter \#1 \$array of function array_push expects array, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Parameter \#1 \$columnName of method Xmf\\Database\\Tables\:\:quoteIndexColumnName\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Parameter \#1 \$default of method Xmf\\Database\\Tables\:\:quoteDefaultClause\(\) expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Parameter \#1 \$result of method Xmf\\Database\\Tables\:\:fetch\(\) expects resource, mixed given\.$#'
+			identifier: argument.type
+			count: 3
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Parameter \#1 \$result of method XoopsDatabase\:\:fetchArray\(\) expects mysqli_result, resource given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Parameter \#1 \$sql of method Xmf\\Database\\Tables\:\:execSql\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Parameter \#1 \$string1 of function strcasecmp expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 4
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Parameter \#1 \$table of method Xmf\\Database\\Tables\:\:renderTableCreate\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Parameter \$criteria of method Xmf\\Database\\Tables\:\:delete\(\) has invalid type Xmf\\Database\\CriteriaElement\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Parameter \$criteria of method Xmf\\Database\\Tables\:\:update\(\) has invalid type Xmf\\Database\\CriteriaElement\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Part \$col\[''attributes''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Part \$col\[''name''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 3
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Part \$keyName \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 2
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Part \$key\[''columns''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 2
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Part \$tableDef\[''name''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 13
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Part \$tableDef\[''options''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Part \$tableName \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Part \$this\-\>tables\[\$table\]\[''name''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 2
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Possibly invalid array key type mixed\.$#'
+			identifier: offsetAccess.invalidOffset
+			count: 6
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Property Xmf\\Database\\Tables\:\:\$lastErrNo \(int\) does not accept mixed\.$#'
+			identifier: assign.propertyType
+			count: 2
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Property Xmf\\Database\\Tables\:\:\$lastError \(string\) does not accept mixed\.$#'
+			identifier: assign.propertyType
+			count: 3
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Property Xmf\\Database\\Tables\:\:\$queue type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Property Xmf\\Database\\Tables\:\:\$tables type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Database/Tables.php
+
+		-
+			message: '#^Method Xmf\\Debug\:\:dump\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Debug.php
+
+		-
+			message: '#^Unsafe call to private method Xmf\\Debug\:\:doOnce\(\) through static\:\:\.$#'
+			identifier: staticClassAccess.privateMethod
+			count: 2
+			path: src/Debug.php
+
+		-
+			message: '#^Binary operation "\." between '' '' and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/FilterInput.php
+
+		-
+			message: '#^Call to an undefined method object\:\:cleanVar\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/FilterInput.php
+
+		-
+			message: '#^Cannot access offset non\-falsy\-string on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: src/FilterInput.php
+
+		-
+			message: '#^Cannot cast array\|string to string\.$#'
+			identifier: cast.string
+			count: 2
+			path: src/FilterInput.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 7
+			path: src/FilterInput.php
+
+		-
+			message: '#^Method Xmf\\FilterInput\:\:__construct\(\) has parameter \$attrArray with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/FilterInput.php
+
+		-
+			message: '#^Method Xmf\\FilterInput\:\:__construct\(\) has parameter \$tagsArray with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/FilterInput.php
+
+		-
+			message: '#^Method Xmf\\FilterInput\:\:decode\(\) should return string but returns string\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: src/FilterInput.php
+
+		-
+			message: '#^Method Xmf\\FilterInput\:\:filterAttr\(\) has parameter \$attrSet with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/FilterInput.php
+
+		-
+			message: '#^Method Xmf\\FilterInput\:\:filterAttr\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/FilterInput.php
+
+		-
+			message: '#^Method Xmf\\FilterInput\:\:getInstance\(\) has parameter \$attrArray with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/FilterInput.php
+
+		-
+			message: '#^Method Xmf\\FilterInput\:\:getInstance\(\) has parameter \$tagsArray with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/FilterInput.php
+
+		-
+			message: '#^Method Xmf\\FilterInput\:\:getInstance\(\) should return Xmf\\FilterInput but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/FilterInput.php
+
+		-
+			message: '#^Method Xmf\\FilterInput\:\:process\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/FilterInput.php
+
+		-
+			message: '#^Method Xmf\\FilterInput\:\:process\(\) should return array\|string but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/FilterInput.php
+
+		-
+			message: '#^Parameter \#1 \$string of function strtolower expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/FilterInput.php
+
+		-
+			message: '#^Parameter \#1 \$string of function trim expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/FilterInput.php
+
+		-
+			message: '#^Parameter \#1 \$url of function parse_url expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/FilterInput.php
+
+		-
+			message: '#^Parameter \#2 \$haystack of function in_array expects array, mixed given\.$#'
+			identifier: argument.type
+			count: 4
+			path: src/FilterInput.php
+
+		-
+			message: '#^Parameter \#2 \$subject of function preg_match expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/FilterInput.php
+
+		-
+			message: '#^Parameter \#3 \$encoding of function html_entity_decode expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 3
+			path: src/FilterInput.php
+
+		-
+			message: '#^Parameter \#3 \$length of function substr expects int\|null, int\<0, max\>\|false given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/FilterInput.php
+
+		-
+			message: '#^Parameter \#3 \$subject of function preg_replace expects array\<float\|int\|string\>\|string, mixed given\.$#'
+			identifier: argument.type
+			count: 5
+			path: src/FilterInput.php
+
+		-
+			message: '#^Parameter \#3 \$subject of function preg_replace_callback expects array\<float\|int\|string\>\|string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/FilterInput.php
+
+		-
+			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/FilterInput.php
+
+		-
+			message: '#^Property Xmf\\FilterInput\:\:\$attrArray has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/FilterInput.php
+
+		-
+			message: '#^Property Xmf\\FilterInput\:\:\$attrBlacklist has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/FilterInput.php
+
+		-
+			message: '#^Property Xmf\\FilterInput\:\:\$attrMethod has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/FilterInput.php
+
+		-
+			message: '#^Property Xmf\\FilterInput\:\:\$tagBlacklist has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/FilterInput.php
+
+		-
+			message: '#^Property Xmf\\FilterInput\:\:\$tagsArray has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/FilterInput.php
+
+		-
+			message: '#^Property Xmf\\FilterInput\:\:\$tagsMethod has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/FilterInput.php
+
+		-
+			message: '#^Property Xmf\\FilterInput\:\:\$xssAuto has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/FilterInput.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: src/FilterInput.php
+
+		-
+			message: '#^Method Xmf\\Highlighter\:\:apply\(\) should return string but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Highlighter.php
+
+		-
+			message: '#^Parameter \#2 \$encoding of function mb_strlen expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Highlighter.php
+
+		-
+			message: '#^Parameter \#2 \$haystack of static method Xmf\\Highlighter\:\:splitOnTag\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Highlighter.php
+
+		-
+			message: '#^Parameter \#2 \$string of function explode expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Highlighter.php
+
+		-
+			message: '#^Parameter \#4 \$encoding of function mb_stripos expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Highlighter.php
+
+		-
+			message: '#^Parameter \#4 \$encoding of function mb_substr expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 3
+			path: src/Highlighter.php
+
+		-
+			message: '#^Cannot access offset int\<0, 15\> on string\|false\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/IPAddress.php
+
+		-
+			message: '#^Parameter \#1 \$ip of class Xmf\\IPAddress constructor expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/IPAddress.php
+
+		-
+			message: '#^Parameter \#1 \$ip of function ip2long expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/IPAddress.php
+
+		-
+			message: '#^Method Xmf\\Jwt\\JsonWebToken\:\:create\(\) has parameter \$payload with generic class ArrayObject but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Jwt/JsonWebToken.php
+
+		-
+			message: '#^Method Xmf\\Jwt\\JsonWebToken\:\:create\(\) has parameter \$payload with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Jwt/JsonWebToken.php
+
+		-
+			message: '#^Method Xmf\\Jwt\\JsonWebToken\:\:create\(\) has parameter \$payload with no value type specified in iterable type array\|ArrayObject\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Jwt/JsonWebToken.php
+
+		-
+			message: '#^Method Xmf\\Jwt\\JsonWebToken\:\:decode\(\) has parameter \$assertClaims with no value type specified in iterable type Traversable\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Jwt/JsonWebToken.php
+
+		-
+			message: '#^Method Xmf\\Jwt\\JsonWebToken\:\:decode\(\) has parameter \$assertClaims with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Jwt/JsonWebToken.php
+
+		-
+			message: '#^Method Xmf\\Jwt\\JsonWebToken\:\:decode\(\) has parameter \$assertClaims with no value type specified in iterable type array\|Traversable\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Jwt/JsonWebToken.php
+
+		-
+			message: '#^PHPDoc tag @throws has invalid value \(\\DomainException;\)\: Unexpected token ";", expected TOKEN_HORIZONTAL_WS at offset 466 on line 10$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Jwt/JsonWebToken.php
+
+		-
+			message: '#^PHPDoc tag @throws has invalid value \(\\InvalidArgumentException;\)\: Unexpected token ";", expected TOKEN_HORIZONTAL_WS at offset 509 on line 11$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Jwt/JsonWebToken.php
+
+		-
+			message: '#^PHPDoc tag @throws has invalid value \(\\UnexpectedValueException;\)\: Unexpected token ";", expected TOKEN_HORIZONTAL_WS at offset 552 on line 12$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Jwt/JsonWebToken.php
+
+		-
+			message: '#^Parameter \#1 \$payload of static method Firebase\\JWT\\JWT\:\:encode\(\) expects array\<mixed\>, array\|ArrayObject given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Jwt/JsonWebToken.php
+
+		-
+			message: '#^Parameter \#2 \$property of function property_exists expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Jwt/JsonWebToken.php
+
+		-
+			message: '#^Property Xmf\\Jwt\\JsonWebToken\:\:\$claims type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Jwt/JsonWebToken.php
+
+		-
+			message: '#^Method Xmf\\Jwt\\TokenFactory\:\:build\(\) has parameter \$payload with no value type specified in iterable type Traversable\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Jwt/TokenFactory.php
+
+		-
+			message: '#^Method Xmf\\Jwt\\TokenFactory\:\:build\(\) has parameter \$payload with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Jwt/TokenFactory.php
+
+		-
+			message: '#^Method Xmf\\Jwt\\TokenFactory\:\:build\(\) has parameter \$payload with no value type specified in iterable type array\|Traversable\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Jwt/TokenFactory.php
+
+		-
+			message: '#^Parameter \#1 \$payload of method Xmf\\Jwt\\JsonWebToken\:\:create\(\) expects array\|ArrayObject, array\|Traversable given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Jwt/TokenFactory.php
+
+		-
+			message: '#^Method Xmf\\Jwt\\TokenReader\:\:fromCookie\(\) has parameter \$assertClaims with no value type specified in iterable type Traversable\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Jwt/TokenReader.php
+
+		-
+			message: '#^Method Xmf\\Jwt\\TokenReader\:\:fromCookie\(\) has parameter \$assertClaims with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Jwt/TokenReader.php
+
+		-
+			message: '#^Method Xmf\\Jwt\\TokenReader\:\:fromCookie\(\) has parameter \$assertClaims with no value type specified in iterable type array\|Traversable\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Jwt/TokenReader.php
+
+		-
+			message: '#^Method Xmf\\Jwt\\TokenReader\:\:fromHeader\(\) has parameter \$assertClaims with no value type specified in iterable type Traversable\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Jwt/TokenReader.php
+
+		-
+			message: '#^Method Xmf\\Jwt\\TokenReader\:\:fromHeader\(\) has parameter \$assertClaims with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Jwt/TokenReader.php
+
+		-
+			message: '#^Method Xmf\\Jwt\\TokenReader\:\:fromHeader\(\) has parameter \$assertClaims with no value type specified in iterable type array\|Traversable\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Jwt/TokenReader.php
+
+		-
+			message: '#^Method Xmf\\Jwt\\TokenReader\:\:fromRequest\(\) has parameter \$assertClaims with no value type specified in iterable type Traversable\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Jwt/TokenReader.php
+
+		-
+			message: '#^Method Xmf\\Jwt\\TokenReader\:\:fromRequest\(\) has parameter \$assertClaims with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Jwt/TokenReader.php
+
+		-
+			message: '#^Method Xmf\\Jwt\\TokenReader\:\:fromRequest\(\) has parameter \$assertClaims with no value type specified in iterable type array\|Traversable\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Jwt/TokenReader.php
+
+		-
+			message: '#^Method Xmf\\Jwt\\TokenReader\:\:fromString\(\) has parameter \$assertClaims with no value type specified in iterable type Traversable\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Jwt/TokenReader.php
+
+		-
+			message: '#^Method Xmf\\Jwt\\TokenReader\:\:fromString\(\) has parameter \$assertClaims with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Jwt/TokenReader.php
+
+		-
+			message: '#^Method Xmf\\Jwt\\TokenReader\:\:fromString\(\) has parameter \$assertClaims with no value type specified in iterable type array\|Traversable\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Jwt/TokenReader.php
+
+		-
+			message: '#^Method Xmf\\Jwt\\TokenReader\:\:fromString\(\) should return stdClass\|false but returns object\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Jwt/TokenReader.php
+
+		-
+			message: '#^Class Xmf\\Key\\ArrayStorage extends generic class ArrayObject but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Key/ArrayStorage.php
+
+		-
+			message: '#^Method Xmf\\Key\\ArrayStorage\:\:fetch\(\) should return string\|false but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Key/ArrayStorage.php
+
+		-
+			message: '#^Method Xmf\\Key\\FileStorage\:\:fetch\(\) should return string\|false but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Key/FileStorage.php
+
+		-
+			message: '#^Parameter \#1 \$string of function strtolower expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Key/KeyAbstract.php
+
+		-
+			message: '#^Cannot access offset ''language'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Language.php
+
+		-
+			message: '#^Part \$language \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: src/Language.php
+
+		-
+			message: '#^Method Xmf\\Mail\\SendmailRunner\:\:__construct\(\) has parameter \$allowlist with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Mail/SendmailRunner.php
+
+		-
+			message: '#^Parameter \#1 \$path of function realpath expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Mail/SendmailRunner.php
+
+		-
+			message: '#^Property Xmf\\Mail\\SendmailRunner\:\:\$allowlist \(array\<string\>\) does not accept array\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Mail/SendmailRunner.php
+
+		-
+			message: '#^Argument of an invalid type list\<string\>\|false supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: src/Metagen.php
+
+		-
+			message: '#^Binary operation "\." between mixed and string results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Metagen.php
+
+		-
+			message: '#^Binary operation "\." between string and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Metagen.php
+
+		-
+			message: '#^Binary operation "\.\=" between string and mixed results in an error\.$#'
+			identifier: assignOp.invalid
+			count: 2
+			path: src/Metagen.php
+
+		-
+			message: '#^Call to an undefined method Xoops\:\:theme\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Metagen.php
+
+		-
+			message: '#^Call to an undefined method Xoops\:\:tpl\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Metagen.php
+
+		-
+			message: '#^Cannot call method addMeta\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: src/Metagen.php
+
+		-
+			message: '#^Cannot call method assign\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: src/Metagen.php
+
+		-
+			message: '#^Method Xmf\\Metagen\:\:assignTemplateVar\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Metagen.php
+
+		-
+			message: '#^Method Xmf\\Metagen\:\:assignThemeMeta\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Metagen.php
+
+		-
+			message: '#^Method Xmf\\Metagen\:\:generateKeywords\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Metagen.php
+
+		-
+			message: '#^Method Xmf\\Metagen\:\:html2text\(\) should return string but returns string\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Metagen.php
+
+		-
+			message: '#^Method Xmf\\Metagen\:\:stopWordsObject\(\) should return Xmf\\StopWords but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Metagen.php
+
+		-
+			message: '#^Parameter \#1 \$keywords of static method Xmf\\Metagen\:\:assignKeywords\(\) expects array\<string\>, array given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Metagen.php
+
+		-
+			message: '#^Parameter \#1 \$string of function trim expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Metagen.php
+
+		-
+			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(string\)\: bool\)\|null, ''static\:…'' given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Metagen.php
+
+		-
+			message: '#^Parameter \#2 \$encoding of function mb_strlen expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Metagen.php
+
+		-
+			message: '#^Parameter \#2 \$encoding of function mb_strtolower expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Metagen.php
+
+		-
+			message: '#^Parameter \#2 \$needle of function mb_stripos expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Metagen.php
+
+		-
+			message: '#^Parameter \#2 \$needle of function stripos expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Metagen.php
+
+		-
+			message: '#^Parameter \#2 \$string of function explode expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Metagen.php
+
+		-
+			message: '#^Parameter \#3 \$subject of function preg_replace_callback expects array\<float\|int\|string\>\|string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Metagen.php
+
+		-
+			message: '#^Parameter \#4 \$encoding of function mb_stripos expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Metagen.php
+
+		-
+			message: '#^Parameter \#4 \$encoding of function mb_strpos expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Metagen.php
+
+		-
+			message: '#^Parameter \#4 \$encoding of function mb_strrpos expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Metagen.php
+
+		-
+			message: '#^Parameter \#4 \$encoding of function mb_substr expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 4
+			path: src/Metagen.php
+
+		-
+			message: '#^Parameter \#4 \$forceKeys of static method Xmf\\Metagen\:\:generateKeywords\(\) expects array\<string\>\|null, array given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Metagen.php
+
+		-
+			message: '#^Call to an undefined method XoopsModule\:\:versionCompare\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Call to an undefined method object\:\:addConfigBoxLine\(\)\.$#'
+			identifier: method.notFound
+			count: 4
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Call to an undefined method object\:\:addInfoBox\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Call to an undefined method object\:\:addInfoBoxLine\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Call to an undefined method object\:\:addItemButton\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Call to an undefined method object\:\:addNavigation\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Call to an undefined method object\:\:renderAbout\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Call to an undefined method object\:\:renderButton\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Call to an undefined method object\:\:renderIndex\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Call to an undefined method object\:\:renderInfoBox\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Call to function is_array\(\) with mixed will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Call to method getModule\(\) on an unknown class Xoops\\Module\\Helper\.$#'
+			identifier: class.notFound
+			count: 3
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Cannot call method path\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Constant _AM_XMF_MODULE_INSTALLED not found\.$#'
+			identifier: constant.notFound
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Constant _AM_XMF_MODULE_NOTFOUND not found\.$#'
+			identifier: constant.notFound
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Constant _AM_XMF_MODULE_NOT_INSTALLED not found\.$#'
+			identifier: constant.notFound
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Constant _AM_XMF_MODULE_VERSION not found\.$#'
+			identifier: constant.notFound
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Instantiated class ModuleAdmin not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Method Xmf\\Module\\Admin\:\:addConfigAccept\(\) should return bool but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Method Xmf\\Module\\Admin\:\:addConfigBoxLine\(\) should return bool but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Method Xmf\\Module\\Admin\:\:addConfigError\(\) should return bool but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Method Xmf\\Module\\Admin\:\:addConfigWarning\(\) should return bool but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Method Xmf\\Module\\Admin\:\:addInfoBox\(\) should return bool but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Method Xmf\\Module\\Admin\:\:addInfoBoxLine\(\) should return bool but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Method Xmf\\Module\\Admin\:\:addItemButton\(\) should return bool but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Method Xmf\\Module\\Admin\:\:getInstance\(\) should return object but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Method Xmf\\Module\\Admin\:\:renderButton\(\) should return string but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Method Xmf\\Module\\Admin\:\:renderIndex\(\) should return string but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Method Xmf\\Module\\Admin\:\:renderInfoBox\(\) should return string but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Method Xmf\\Module\\Admin\:\:renderNavigation\(\) should return string but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Parameter \#1 \$format of function sprintf expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 4
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Parameter \#1 \(mixed\) of echo cannot be converted to string\.$#'
+			identifier: echo.nonString
+			count: 2
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Parameter \#3 \$encoding of function htmlspecialchars expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 3
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Parameter \#4 \.\.\.\$values of function sprintf expects bool\|float\|int\|string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Property Xmf\\Module\\Admin\:\:\$lastInfoBoxTitle has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Property Xmf\\Module\\Admin\:\:\$paypal has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Call to static method getHelper\(\) on an unknown class Xoops\\Module\\Helper\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Module/Helper.php
+
+		-
+			message: '#^Cannot access offset string on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: src/Module/Helper.php
+
+		-
+			message: '#^Method Xmf\\Module\\Helper\:\:getHelper\(\) has invalid return type Xoops\\Module\\Helper\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Module/Helper.php
+
+		-
+			message: '#^Method Xmf\\Module\\Helper\:\:getHelper\(\) should return Xmf\\Module\\Helper\|Xoops\\Module\\Helper\|false but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Module/Helper.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: src/Module/Helper.php
+
+		-
+			message: '#^Access to an undefined property Xoops\:\:\$module\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Module/Helper/AbstractHelper.php
+
+		-
+			message: '#^Call to an undefined method Xoops\:\:getHandlerModule\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Module/Helper/AbstractHelper.php
+
+		-
+			message: '#^Call to an undefined method Xoops\:\:logger\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Module/Helper/AbstractHelper.php
+
+		-
+			message: '#^Call to an undefined method object\:\:addExtra\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Module/Helper/AbstractHelper.php
+
+		-
+			message: '#^Call to an undefined method object\:\:getVar\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Module/Helper/AbstractHelper.php
+
+		-
+			message: '#^Cannot call method debug\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Module/Helper/AbstractHelper.php
+
+		-
+			message: '#^Cannot call method getByDirname\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Module/Helper/AbstractHelper.php
+
+		-
+			message: '#^Property Xmf\\Module\\Helper\\AbstractHelper\:\:\$dirname \(string\) does not accept mixed\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Module/Helper/AbstractHelper.php
+
+		-
+			message: '#^Property Xmf\\Module\\Helper\\AbstractHelper\:\:\$module \(Xmf\\Module\\Helper\\XoopsModule\) does not accept mixed\.$#'
+			identifier: assign.propertyType
+			count: 3
+			path: src/Module/Helper/AbstractHelper.php
+
+		-
+			message: '#^Property Xmf\\Module\\Helper\\AbstractHelper\:\:\$module \(Xmf\\Module\\Helper\\XoopsModule\) does not accept null\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Module/Helper/AbstractHelper.php
+
+		-
+			message: '#^Property Xmf\\Module\\Helper\\AbstractHelper\:\:\$module has unknown class Xmf\\Module\\Helper\\XoopsModule as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Module/Helper/AbstractHelper.php
+
+		-
+			message: '#^Binary operation "\." between mixed and ''_'' results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Module/Helper/Cache.php
+
+		-
+			message: '#^Call to method delete\(\) on an unknown class Xmf\\Module\\Helper\\XoopsCache\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Module/Helper/Cache.php
+
+		-
+			message: '#^Call to method getVar\(\) on an unknown class Xmf\\Module\\Helper\\XoopsModule\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Module/Helper/Cache.php
+
+		-
+			message: '#^Call to method read\(\) on an unknown class Xmf\\Module\\Helper\\XoopsCache\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Module/Helper/Cache.php
+
+		-
+			message: '#^Call to method write\(\) on an unknown class Xmf\\Module\\Helper\\XoopsCache\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Module/Helper/Cache.php
+
+		-
+			message: '#^Method Xmf\\Module\\Helper\\Cache\:\:write\(\) should return bool but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Module/Helper/Cache.php
+
+		-
+			message: '#^Property Xmf\\Module\\Helper\\Cache\:\:\$cache \(Xmf\\Module\\Helper\\XoopsCache\) does not accept XoopsCache\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Module/Helper/Cache.php
+
+		-
+			message: '#^Property Xmf\\Module\\Helper\\Cache\:\:\$cache has unknown class Xmf\\Module\\Helper\\XoopsCache as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Module/Helper/Cache.php
+
+		-
+			message: '#^Call to an undefined method object\:\:getVar\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Module/Helper/GenericHelper.php
+
+		-
+			message: '#^Cannot call method getVar\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Module/Helper/GenericHelper.php
+
+		-
+			message: '#^Method Xmf\\Module\\Helper\\GenericHelper\:\:getHandler\(\) has invalid return type Xmf\\Module\\Helper\\XoopsObjectHandler\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Module/Helper/GenericHelper.php
+
+		-
+			message: '#^Method Xmf\\Module\\Helper\\GenericHelper\:\:getHandler\(\) has invalid return type Xmf\\Module\\Helper\\XoopsPersistableObjectHandler\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Module/Helper/GenericHelper.php
+
+		-
+			message: '#^Method Xmf\\Module\\Helper\\GenericHelper\:\:getHandler\(\) should return bool\|Xmf\\Module\\Helper\\XoopsObjectHandler\|Xmf\\Module\\Helper\\XoopsPersistableObjectHandler but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Module/Helper/GenericHelper.php
+
+		-
+			message: '#^Method Xmf\\Module\\Helper\\GenericHelper\:\:getModule\(\) should return XoopsModule but returns Xmf\\Module\\Helper\\XoopsModule\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Module/Helper/GenericHelper.php
+
+		-
+			message: '#^Method XoopsUser\:\:isAdmin\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Module/Helper/GenericHelper.php
+
+		-
+			message: '#^Parameter \#2 \$conf_modid of method XoopsConfigHandler\:\:getConfigsByCat\(\) expects int, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Module/Helper/GenericHelper.php
+
+		-
+			message: '#^Property Xmf\\Module\\Helper\\AbstractHelper\:\:\$module \(Xmf\\Module\\Helper\\XoopsModule\) does not accept XoopsModule\|false\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Module/Helper/GenericHelper.php
+
+		-
+			message: '#^Property Xmf\\Module\\Helper\\AbstractHelper\:\:\$module \(Xmf\\Module\\Helper\\XoopsModule\) does not accept object\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Module/Helper/GenericHelper.php
+
+		-
+			message: '#^Property Xmf\\Module\\Helper\\GenericHelper\:\:\$configs \(array\) does not accept mixed\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Module/Helper/GenericHelper.php
+
+		-
+			message: '#^Property Xmf\\Module\\Helper\\GenericHelper\:\:\$configs type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Module/Helper/GenericHelper.php
+
+		-
+			message: '#^Property Xmf\\Module\\Helper\\GenericHelper\:\:\$handlers type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Module/Helper/GenericHelper.php
+
+		-
+			message: '#^Property Xmf\\Module\\Helper\\GenericHelper\:\:\$object \(XoopsModule\) does not accept Xmf\\Module\\Helper\\XoopsModule\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Module/Helper/GenericHelper.php
+
+		-
+			message: '#^Binary operation "\." between mixed and ''_'' results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Module/Helper/Permission.php
+
+		-
+			message: '#^Call to an undefined method XoopsGrouppermHandler\:\:addRight\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Module/Helper/Permission.php
+
+		-
+			message: '#^Call to an undefined method XoopsGrouppermHandler\:\:deleteByModule\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Module/Helper/Permission.php
+
+		-
+			message: '#^Call to an undefined method XoopsGrouppermHandler\:\:getGroupIds\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Module/Helper/Permission.php
+
+		-
+			message: '#^Call to method getVar\(\) on an unknown class Xmf\\Module\\Helper\\XoopsModule\.$#'
+			identifier: class.notFound
+			count: 3
+			path: src/Module/Helper/Permission.php
+
+		-
+			message: '#^Cannot call method getGroups\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Module/Helper/Permission.php
+
+		-
+			message: '#^Cannot call method redirect\(\) on Xmf\\Module\\Helper\|Xoops\\Module\\Helper\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Module/Helper/Permission.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 1
+			path: src/Module/Helper/Permission.php
+
+		-
+			message: '#^Method Xmf\\Module\\Helper\\Permission\:\:getGroupsForItem\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Module/Helper/Permission.php
+
+		-
+			message: '#^Method Xmf\\Module\\Helper\\Permission\:\:getGroupsForItem\(\) should return array but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Module/Helper/Permission.php
+
+		-
+			message: '#^Method Xmf\\Module\\Helper\\Permission\:\:getItemIds\(\) has parameter \$gperm_groupid with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Module/Helper/Permission.php
+
+		-
+			message: '#^Method Xmf\\Module\\Helper\\Permission\:\:getItemIds\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Module/Helper/Permission.php
+
+		-
+			message: '#^Method Xmf\\Module\\Helper\\Permission\:\:getUserGroups\(\) should return array\<int\>\|int but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Module/Helper/Permission.php
+
+		-
+			message: '#^Method Xmf\\Module\\Helper\\Permission\:\:savePermissionForItem\(\) has parameter \$groups with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Module/Helper/Permission.php
+
+		-
+			message: '#^Method XoopsGrouppermHandler\:\:checkRight\(\) invoked with 5 parameters, 3\-4 required\.$#'
+			identifier: arguments.count
+			count: 2
+			path: src/Module/Helper/Permission.php
+
+		-
+			message: '#^PHPDoc tag @var has invalid value \(\$this\-\>permissionHandler XoopsGroupPermHandler\)\: Unexpected token "\-\>", expected TOKEN_HORIZONTAL_WS at offset 14 on line 1$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Module/Helper/Permission.php
+
+		-
+			message: '#^Path in include_once\(\) "/class/xoopsformloader\.php" is not a file or it does not exist\.$#'
+			identifier: includeOnce.fileNotFound
+			count: 1
+			path: src/Module/Helper/Permission.php
+
+		-
+			message: '#^Property Xmf\\Module\\Helper\\Permission\:\:\$dirname \(string\) does not accept mixed\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Module/Helper/Permission.php
+
+		-
+			message: '#^Property Xmf\\Module\\Helper\\Permission\:\:\$mid \(int\) does not accept mixed\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Module/Helper/Permission.php
+
+		-
+			message: '#^Property Xmf\\Module\\Helper\\Permission\:\:\$permissionHandler \(XoopsGrouppermHandler\) does not accept XoopsObjectHandler\|false\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Module/Helper/Permission.php
+
+		-
+			message: '#^Binary operation "\." between mixed and ''_'' results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Module/Helper/Session.php
+
+		-
+			message: '#^Call to method getVar\(\) on an unknown class Xmf\\Module\\Helper\\XoopsModule\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Module/Helper/Session.php
+
+		-
+			message: '#^Parameter \#1 \$data of function unserialize expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Module/Helper/Session.php
+
+		-
+			message: '#^Cannot access offset mixed on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/ProxyCheck.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: src/ProxyCheck.php
+
+		-
+			message: '#^Parameter \#1 \$header of method Xmf\\ProxyCheck\:\:getFor\(\) expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/ProxyCheck.php
+
+		-
+			message: '#^Parameter \#1 \$ip of method Xmf\\ProxyCheck\:\:getXForwardedFor\(\) expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/ProxyCheck.php
+
+		-
+			message: '#^Parameter \#1 \$string of function trim expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/ProxyCheck.php
+
+		-
+			message: '#^Property Xmf\\ProxyCheck\:\:\$proxyHeaderName \(string\|false\) does not accept bool\|string\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/ProxyCheck.php
+
+		-
+			message: '#^Parameter \#1 \$length of function random_bytes expects int\<1, max\>, int given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Random.php
+
+		-
+			message: '#^Binary operation "&" between int and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 3
+			path: src/Request.php
+
+		-
+			message: '#^Cannot access offset string on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: src/Request.php
+
+		-
+			message: '#^Cannot call method cleanVar\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Request.php
+
+		-
+			message: '#^Cannot call static method clean\(\) on mixed\.$#'
+			identifier: staticMethod.nonObject
+			count: 1
+			path: src/Request.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 6
+			path: src/Request.php
+
+		-
+			message: '#^Method Xmf\\Request\:\:cleanVar\(\) should return string but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Request.php
+
+		-
+			message: '#^Method Xmf\\Request\:\:cleanVars\(\) should return string but returns array\<string\>\|string\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Request.php
+
+		-
+			message: '#^Method Xmf\\Request\:\:getArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Request.php
+
+		-
+			message: '#^Method Xmf\\Request\:\:getArray\(\) should return array but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Request.php
+
+		-
+			message: '#^Method Xmf\\Request\:\:getBool\(\) should return bool but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Request.php
+
+		-
+			message: '#^Method Xmf\\Request\:\:getCmd\(\) should return string but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Request.php
+
+		-
+			message: '#^Method Xmf\\Request\:\:getFloat\(\) should return float but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Request.php
+
+		-
+			message: '#^Method Xmf\\Request\:\:getHeader\(\) should return string but returns string\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Request.php
+
+		-
+			message: '#^Method Xmf\\Request\:\:getInt\(\) should return int but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Request.php
+
+		-
+			message: '#^Method Xmf\\Request\:\:getWord\(\) should return string but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Request.php
+
+		-
+			message: '#^Method Xmf\\Request\:\:set\(\) has parameter \$array with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Request.php
+
+		-
+			message: '#^Method Xmf\\Request\:\:setVar\(\) should return string but returns mixed\.$#'
+			identifier: return.type
+			count: 2
+			path: src/Request.php
+
+		-
+			message: '#^Method Xmf\\Request\:\:stripSlashesRecursive\(\) has parameter \$value with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Request.php
+
+		-
+			message: '#^Method Xmf\\Request\:\:stripSlashesRecursive\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Request.php
+
+		-
+			message: '#^Method Xmf\\Request\:\:stripSlashesRecursive\(\) should return array but returns array\<array\>\|string\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Request.php
+
+		-
+			message: '#^PHPDoc tag @var with type array\<string\> is not subtype of native type null\.$#'
+			identifier: varTag.nativeType
+			count: 1
+			path: src/Request.php
+
+		-
+			message: '#^Parameter \#1 \$string of function strtoupper expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 4
+			path: src/Request.php
+
+		-
+			message: '#^Parameter \#2 \$mask of static method Xmf\\Request\:\:get\(\) expects int, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Request.php
+
+		-
+			message: '#^Parameter \#2 \$value of static method Xmf\\Request\:\:setVar\(\) expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Request.php
+
+		-
+			message: '#^Parameter \#5 \$mask of static method Xmf\\Request\:\:getVar\(\) expects int, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Request.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between null and mixed will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: src/Request.php
+
+		-
+			message: '#^Parameter \#2 \$encoding of function mb_strtolower expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/StopWords.php
+
+		-
+			message: '#^Parameter \#2 \$string of function explode expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/StopWords.php
+
+		-
+			message: '#^Property Xmf\\StopWords\:\:\$stopwordList \(array\<string\>\) does not accept array\<string, bool\>\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/StopWords.php
+
+		-
+			message: '#^Method Xmf\\Ulid\:\:toBinary\(\) should return string but returns string\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Ulid.php
+
+		-
+			message: '#^Parameter \#2 \$num2 of function bcadd expects numeric\-string, ''''\|numeric\-string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Ulid.php
+
+		-
+			message: '#^Parameter \#1 \$pattern of function preg_match expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Uuid.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between false and string will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Uuid.php
+
+		-
+			message: '#^Call to an undefined method object\:\:triggerEvent\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Yaml.php
+
+		-
+			message: '#^Cannot access offset \(float\|int\<1, max\>\) on list\<string\>\|false\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Yaml.php
+
+		-
+			message: '#^Cannot access offset int\<2, max\> on list\<string\>\|false\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Yaml.php
+
+		-
+			message: '#^Method Xmf\\Yaml\:\:load\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Yaml.php
+
+		-
+			message: '#^Method Xmf\\Yaml\:\:load\(\) should return array\|bool but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Yaml.php
+
+		-
+			message: '#^Method Xmf\\Yaml\:\:loadWrapped\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Yaml.php
+
+		-
+			message: '#^Method Xmf\\Yaml\:\:loadWrapped\(\) should return array\|bool but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Yaml.php
+
+		-
+			message: '#^Method Xmf\\Yaml\:\:logError\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Yaml.php
+
+		-
+			message: '#^Method Xmf\\Yaml\:\:read\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Yaml.php
+
+		-
+			message: '#^Method Xmf\\Yaml\:\:read\(\) should return array\|false but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Yaml.php
+
+		-
+			message: '#^Method Xmf\\Yaml\:\:readWrapped\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Yaml.php
+
+		-
+			message: '#^Method Xmf\\Yaml\:\:readWrapped\(\) should return array\|false but returns array\|bool\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Yaml.php
+
+		-
+			message: '#^Method Xmf\\Yaml\:\:save\(\) has parameter \$var with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Yaml.php
+
+		-
+			message: '#^Method Xmf\\Yaml\:\:saveWrapped\(\) has parameter \$var with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Yaml.php
+
+		-
+			message: '#^Parameter \#1 \$value of function count expects array\|Countable, list\<string\>\|false given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Yaml.php
+
+		-
+			message: '#^Parameter \#2 \$array of function implode expects array, list\<string\>\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Yaml.php
