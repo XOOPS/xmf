@@ -214,6 +214,26 @@ class RequestTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($_REQUEST[$varname], 'Porshca');
     }
 
+    public function testSetVarEnv()
+    {
+        $varname = 'XMF_TEST_ENV_VAR';
+        $value = 'env_test_value';
+        Request::setVar($varname, $value, 'env');
+        $this->assertArrayHasKey($varname, $_ENV);
+        $this->assertEquals($value, $_ENV[$varname]);
+        unset($_ENV[$varname]);
+    }
+
+    public function testSetVarServer()
+    {
+        $varname = 'XMF_TEST_SERVER_VAR';
+        $value = 'server_test_value';
+        Request::setVar($varname, $value, 'server');
+        $this->assertArrayHasKey($varname, $_SERVER);
+        $this->assertEquals($value, $_SERVER[$varname]);
+        unset($_SERVER[$varname]);
+    }
+
     public function testGet()
     {
         $varname = 'RequestTest';

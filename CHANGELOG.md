@@ -30,6 +30,21 @@
 * Add unit test for `IPAddress::normalize()` invalid IP handling
 * Add unit tests for `Yaml::read()` and `Yaml::readWrapped()` file size limits
 
+### Removed
+* Remove redundant `paragonie/random_compat` dependency (native in PHP 7+)
+
+### Infrastructure
+* Add PHPStan stub files for XOOPS framework classes to eliminate ~524 false-positive errors
+* Configure `phpstan.neon` to scan stubs directory
+* Move changelog to `CHANGELOG.md` at repo root; `docs/changelog.md` now redirects
+
+### Tests
+* Add unit tests for `Request::setVar()` ENV and SERVER branches
+* Add unit tests for `FilterInput` hex and decimal entity decode
+* Add unit test for `Metagen::html2text()` numeric entity conversion
+* Add unit test for `IPAddress::normalize()` invalid IP handling
+* Add unit tests for `Yaml::read()` and `Yaml::readWrapped()` file size limits
+
 ## [1.2.32] - 2025-02-06
 
 ### Ulid class overhaul (breaking changes)
