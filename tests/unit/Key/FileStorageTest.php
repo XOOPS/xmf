@@ -1,5 +1,7 @@
 <?php
-namespace Xmf\Key;
+namespace Xmf\Test\Key;
+
+use Xmf\Key\FileStorage;
 
 class FileStorageTest extends \PHPUnit\Framework\TestCase
 {

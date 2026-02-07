@@ -19,6 +19,8 @@
 * Remove dead `get_magic_quotes_gpc()` calls from `Request` (function removed in PHP 8.0)
 
 ### Changed
+* Use strict comparison (`===`) instead of loose (`==`) in `FilterInput` attribute filtering and `Database\Tables` column lookups
+* Fix `FileStorageTest` namespace from `Xmf\Key` to `Xmf\Test\Key` to match autoload-dev configuration
 * Use strict comparison (`===`) instead of loose (`==`) in `FilterInput` attribute filtering
 
 ### Tests
