@@ -5,7 +5,7 @@
 ### Bug Fixes
 * Fix `Request::setVar()` writing to literal key `'name'` instead of variable `$name` for ENV and SERVER superglobals
 * Fix `FilterInput` hex entity decode (`&#xNN;`) producing null bytes instead of correct characters on PHP 7+; use `html_entity_decode()` for proper Unicode support
-* Fix `Metagen::html2text()` discarding `preg_replace_callback()` result for numeric HTML entities; use `html_entity_decode()` with `static::ENCODING` for codepoints > 255
+* Fix `Metagen::html2text()` discarding `preg_replace_callback()` result for numeric HTML entities; use `html_entity_decode()` with `self::ENCODING` for codepoints > 255
 * Fix XSS in `Module\Admin` config methods (`addConfigError`, `addConfigAccept`, `addConfigWarning`) by escaping output with charset-aware `htmlspecialchars()`
 * Fix `IPAddress::normalize()` passing `inet_pton()` false result to `inet_ntop()` for invalid IPs
 
@@ -21,14 +21,7 @@
 ### Changed
 * Use strict comparison (`===`) instead of loose (`==`) in `FilterInput` attribute filtering and `Database\Tables` column lookups
 * Fix `FileStorageTest` namespace from `Xmf\Key` to `Xmf\Test\Key` to match autoload-dev configuration
-* Use strict comparison (`===`) instead of loose (`==`) in `FilterInput` attribute filtering
-
-### Tests
-* Add unit tests for `Request::setVar()` ENV and SERVER branches
-* Add unit tests for `FilterInput` hex and decimal entity decode
-* Add unit test for `Metagen::html2text()` numeric entity conversion
-* Add unit test for `IPAddress::normalize()` invalid IP handling
-* Add unit tests for `Yaml::read()` and `Yaml::readWrapped()` file size limits
+* Fix trailing semicolons in `@throws` PHPDoc tags in `Jwt\JsonWebToken::create()`
 
 ### Removed
 * Remove redundant `paragonie/random_compat` dependency (native in PHP 7+)
@@ -40,7 +33,7 @@
 * Simplify `.scrutinizer.yml` to analysis-only (remove failing PHP 8.3/8.4 build nodes); exclude `stubs/` from analysis
 * Add dedicated PHPStan, PHPCS, and code coverage jobs to GitHub Actions CI workflow
 * Add coverage upload to Scrutinizer via `ocular.phar` from GitHub Actions
-* Generate PHPStan baseline (`phpstan-baseline.neon`) with 600 existing errors for incremental cleanup
+* Generate PHPStan baseline (`phpstan-baseline.neon`) with 597 existing errors for incremental cleanup
 * Add `composer baseline` script for regenerating PHPStan baseline
 * Update `.gitignore` to exclude `build/` directory (coverage output)
 * Update `.gitattributes` with export-ignore for PHPStan, PHPUnit, and stub files
