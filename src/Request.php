@@ -141,7 +141,7 @@ class Request
      */
     public static function getInt($name, $default = 0, $hash = 'default')
     {
-        return static::getVar($name, $default, $hash, 'int');
+        return (int) static::getVar($name, $default, $hash, 'int');
     }
 
     /**
@@ -159,7 +159,7 @@ class Request
      */
     public static function getFloat($name, $default = 0.0, $hash = 'default')
     {
-        return static::getVar($name, $default, $hash, 'float');
+        return (float) static::getVar($name, $default, $hash, 'float');
     }
 
     /**
@@ -177,7 +177,7 @@ class Request
      */
     public static function getBool($name, $default = false, $hash = 'default')
     {
-        return static::getVar($name, $default, $hash, 'bool');
+        return (bool) static::getVar($name, $default, $hash, 'bool');
     }
 
     /**

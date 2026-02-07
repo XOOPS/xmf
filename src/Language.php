@@ -56,7 +56,7 @@ class Language
                 $language = 'english';
             }
         }
-        $path = XOOPS_ROOT_PATH . '/' . ((empty($domain) || 'global' === $domain) ? ''
+        $path = \XOOPS_ROOT_PATH . '/' . ((empty($domain) || 'global' === $domain) ? ''
             : "modules/{$domain}/") . 'language';
         if (!$ret = static::loadFile("{$path}/{$language}/{$name}.php")) {
             $ret = static::loadFile("{$path}/english/{$name}.php");
@@ -83,7 +83,7 @@ class Language
         if ($realPath === false) {
             return false;
         }
-        $allowedDir = defined('XOOPS_ROOT_PATH') ? realpath(XOOPS_ROOT_PATH) : false;
+        $allowedDir = defined('XOOPS_ROOT_PATH') ? realpath(\XOOPS_ROOT_PATH) : false;
         if ($allowedDir !== false) {
             $allowedDirWithSep = rtrim($allowedDir, '/\\') . DIRECTORY_SEPARATOR;
             if (strpos($realPath, $allowedDirWithSep) !== 0 && $realPath !== $allowedDir) {
