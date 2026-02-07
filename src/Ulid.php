@@ -116,7 +116,7 @@ class Ulid
             );
         }
 
-        return (int) \round(\microtime(true) * 1000);
+        return (int) \floor(\microtime(true) * 1000);
     }
 
     /**
@@ -210,7 +210,7 @@ class Ulid
     public static function decode(string $ulid): array
     {
         if (!self::isValid($ulid)) {
-            throw new \InvalidArgumentException('Invalid ULID string: ' . $ulid);
+            throw new \InvalidArgumentException('Invalid ULID string');
         }
 
         $ulid = \strtoupper($ulid);
@@ -261,9 +261,13 @@ class Ulid
     /**
      * Decode the randomness portion from a ULID string.
      *
+     * Note: This method now returns the 16-character base32 string
+     * representation of the random portion. Previous versions returned
+     * an integer, which is a backward-incompatible change.
+     *
      * @param string $ulid The ULID string
      *
-     * @return string The 16-character randomness portion (for verification)
+     * @return string The 16-character randomness portion
      * @throws \InvalidArgumentException If the ULID is invalid
      */
     public static function decodeRandomness(string $ulid): string
@@ -278,7 +282,7 @@ class Ulid
 
         // Validate the full ULID (including time portion)
         if (!self::isValid($ulid)) {
-            throw new \InvalidArgumentException('Invalid ULID string: ' . $ulid);
+            throw new \InvalidArgumentException('Invalid ULID string');
         }
 
         $randomPart = \substr($ulid, self::TIME_LENGTH);
@@ -347,7 +351,7 @@ class Ulid
         }
 
         if (!self::isValid($ulid)) {
-            throw new \InvalidArgumentException('Invalid ULID string: ' . $ulid);
+            throw new \InvalidArgumentException('Invalid ULID string');
         }
 
         $hex = self::toHex($ulid);
@@ -543,7 +547,7 @@ class Ulid
         }
 
         if (!self::isValid($ulid)) {
-            throw new \InvalidArgumentException('Invalid ULID string: ' . $ulid);
+            throw new \InvalidArgumentException('Invalid ULID string');
         }
 
         $hex = self::toHex($ulid);
@@ -618,11 +622,11 @@ class Ulid
      */
     public static function microtimeToUlidTime($microtime): int
     {
-        @\trigger_error(
+        \trigger_error(
             'Ulid::microtimeToUlidTime() is deprecated. Use Ulid::currentTimeMillis() instead.',
             \E_USER_DEPRECATED
         );
 
-        return (int) \round($microtime * 1000);
+        return (int) \floor($microtime * 1000);
     }
 }

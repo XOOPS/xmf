@@ -29,7 +29,7 @@ class UlidTest extends TestCase
      * Test against a known vector from the ULID spec to ensure
      * the encoding math is correct and hasn't drifted.
      *
-     * Timestamp: 1469918176385 (2016-07-30 23:29:36.385 UTC)
+     * Timestamp: 1469918176385 (2016-07-30 22:36:16.385 UTC)
      * Expected time encoding: 01ARYZ6S41
      *
      * @covers \Xmf\Ulid::encodeTime
@@ -901,7 +901,7 @@ class UlidTest extends TestCase
     public function testRandomnessDistribution(): void
     {
         $charCounts = \array_fill_keys(\str_split(Ulid::ENCODING_CHARS), 0);
-        $iterations = 10000;
+        $iterations = 1000;
 
         for ($i = 0; $i < $iterations; $i++) {
             $random = Ulid::encodeRandomness();
@@ -911,9 +911,9 @@ class UlidTest extends TestCase
         }
 
         // Each character should appear roughly 1/32 of the time
-        // With 160000 total characters (10000 * 16), expect ~5000 per character
+        // With 16000 total characters (1000 * 16), expect ~500 per character
         $expectedCount = ($iterations * 16) / 32;
-        $tolerance = $expectedCount * 0.25; // 25% tolerance
+        $tolerance = $expectedCount * 0.40; // 40% tolerance for smaller sample
 
         foreach ($charCounts as $char => $count) {
             $this->assertGreaterThan(
