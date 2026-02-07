@@ -1,6 +1,44 @@
 xmf ChangeLog
 =============
 
+Feb 6, 2025 v1.2.32
+------------------
+### Ulid class overhaul (breaking changes)
+
+**New features:**
+* Add `Ulid::generateMonotonic()` for strictly increasing ULIDs within the same millisecond
+* Add `Ulid::resetMonotonicState()` to reset monotonic generation state
+* Add `Ulid::currentTimeMillis()` as the canonical way to get millisecond timestamps
+* Add `Ulid::getDateTime()` to extract a `DateTimeImmutable` (UTC) from a ULID
+* Add `Ulid::compare()` for case-insensitive ULID comparison
+* Add `Ulid::toBinary()` / `Ulid::fromBinary()` for 16-byte binary conversion (requires ext-bcmath)
+* Add `Ulid::toUuid()` / `Ulid::fromUuid()` for UUID bidirectional conversion (requires ext-bcmath)
+* Add `Ulid::decode()` to split a ULID into its time and randomness components
+* Add `Ulid::isValid()` for full ULID validation including timestamp overflow check
+* Add `BINARY_LENGTH`, `MAX_TIME`, `TIME_LENGTH`, `RANDOM_LENGTH`, `ULID_LENGTH` constants
+* Enforce 64-bit PHP requirement in `currentTimeMillis()` (32-bit builds throw `RuntimeException`)
+
+**Breaking changes:**
+* `decodeRandomness()` now returns a 16-character base32 string instead of an integer
+* `microtimeToUlidTime()` is deprecated; use `currentTimeMillis()` instead
+  - The old method incorrectly subtracted a Y2K epoch offset; the new behavior uses standard Unix epoch milliseconds per the ULID spec
+* `encodeRandomness()` reimplemented with optimized bit-packing algorithm for correct 80-bit extraction
+
+**Bug fixes:**
+* Fix `getDateTime()` to always return UTC regardless of system timezone
+* Fix `decodeTime()` to reject timestamps exceeding `MAX_TIME` (2^48 - 1)
+* Fix `decodeRandomness()` to validate the full ULID (including time portion), not just the random part
+* Sanitize exception messages to avoid leaking full ULID values into logs
+
+**Test improvements:**
+* Replace sleep-based ordering tests with `generateMonotonic()` to eliminate CI flakiness
+* Fix spec vector test comment and assertion (correct UTC time: 22:36:16, not 23:29:36)
+* Fix `testDecodeTimeThrowsExceptionForInvalidCharacter` to place invalid char in time portion
+* Fix `testGenerateMonotonicIncrementsRandomPortion` to always perform assertions (retry loop)
+* Update all `@covers` annotations to use FQCN (`\Xmf\Ulid::method`) for PHPUnit 10+ compatibility
+* Use `expectExceptionMessageMatches()` for more robust exception message assertions
+* Reduce `testRandomnessDistribution` iterations (10000 to 1000) with wider tolerance to improve speed
+
 Nov 27, 2024 v1.2.31
 ------------------
 * updated Debug for Kint changes (mamba)
