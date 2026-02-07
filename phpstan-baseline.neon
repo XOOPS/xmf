@@ -475,12 +475,6 @@ parameters:
 			path: src/Database/Tables.php
 
 		-
-			message: '#^Parameter \#1 \$result of method XoopsDatabase\:\:fetchArray\(\) expects mysqli_result, bool\|mysqli_result given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Database/Tables.php
-
-		-
 			message: '#^Parameter \#1 \$sql of method Xmf\\Database\\Tables\:\:execSql\(\) expects string, mixed given\.$#'
 			identifier: argument.type
 			count: 1
@@ -507,12 +501,6 @@ parameters:
 		-
 			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, mixed given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Parameter \$criteria of method Xmf\\Database\\Tables\:\:update\(\) has invalid type Xmf\\Database\\CriteriaElement\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Database/Tables.php
 

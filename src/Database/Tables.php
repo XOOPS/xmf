@@ -672,7 +672,7 @@ class Tables
      *
      * @param string                 $table      table
      * @param array                  $columns    array of 'column'=>'value' entries
-     * @param string|CriteriaElement $criteria   string where clause or object criteria
+     * @param string|\CriteriaElement $criteria   string where clause or object criteria
      * @param boolean                $quoteValue true to quote values, false if caller handles quoting
      *
      * @return boolean true if no errors, false if errors encountered
@@ -801,6 +801,9 @@ class Tables
      */
     protected function fetch($result)
     {
+        if (!$result instanceof \mysqli_result) {
+            return null;
+        }
         return $this->db->fetchArray($result);
     }
 
