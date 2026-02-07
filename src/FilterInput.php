@@ -517,7 +517,7 @@ class FilterInput
                 if ($attrSubSet[1]) {
                     // attr has value
                     $newSet[] = $attrSubSet[0] . '="' . $attrSubSet[1] . '"';
-                } elseif ($attrSubSet[1] == "0") {
+                } elseif ($attrSubSet[1] === "0") {
                     // attr has decimal zero as value
                     $newSet[] = $attrSubSet[0] . '="0"';
                 } else {

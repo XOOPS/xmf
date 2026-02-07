@@ -112,7 +112,7 @@ class Tables
                 array_push($tableDef['columns'], $columnDef);
             } else {
                 foreach ($tableDef['columns'] as $col) {
-                    if (strcasecmp($col['name'], $column) == 0) {
+                    if (strcasecmp($col['name'], $column) === 0) {
                         return true;
                     }
                 }
@@ -338,7 +338,7 @@ class Tables
             if (isset($tableDef['create']) && $tableDef['create']) {
                 // loop through and find the column
                 foreach ($tableDef['columns'] as &$col) {
-                    if (strcasecmp($col['name'], $column) == 0) {
+                    if (strcasecmp($col['name'], $column) === 0) {
                         $col['name'] = $newName;
                         $col['attributes'] = $attributes;
                         break;
@@ -351,7 +351,7 @@ class Tables
                     "CHANGE COLUMN `{$column}` `{$newName}` {$attributes} ";
                 // loop through and find the column
                 foreach ($tableDef['columns'] as &$col) {
-                    if (strcasecmp($col['name'], $column) == 0) {
+                    if (strcasecmp($col['name'], $column) === 0) {
                         $col['name'] = $newName;
                         $col['attributes'] = $attributes;
                         break;
