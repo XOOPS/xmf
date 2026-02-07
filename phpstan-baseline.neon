@@ -1969,6 +1969,18 @@ parameters:
 			path: src/Request.php
 
 		-
+			message: '#^Cannot cast mixed to float\.$#'
+			identifier: cast.double
+			count: 1
+			path: src/Request.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 1
+			path: src/Request.php
+
+		-
 			message: '#^Cannot cast mixed to string\.$#'
 			identifier: cast.string
 			count: 6
@@ -1999,31 +2011,13 @@ parameters:
 			path: src/Request.php
 
 		-
-			message: '#^Method Xmf\\Request\:\:getBool\(\) should return bool but returns mixed\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Request.php
-
-		-
 			message: '#^Method Xmf\\Request\:\:getCmd\(\) should return string but returns mixed\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Request.php
 
 		-
-			message: '#^Method Xmf\\Request\:\:getFloat\(\) should return float but returns mixed\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Request.php
-
-		-
 			message: '#^Method Xmf\\Request\:\:getHeader\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Request.php
-
-		-
-			message: '#^Method Xmf\\Request\:\:getInt\(\) should return int but returns mixed\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Request.php
