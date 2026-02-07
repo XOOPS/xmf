@@ -79,10 +79,18 @@ class Language
         if (preg_match('/[[:cntrl:]]/i', $filename)) {
             throw new \InvalidArgumentException('Security check: Illegal character in filename');
         }
-        if (file_exists($filename)) {
-            include_once $filename;
-            return true;
+        $realPath = realpath($filename);
+        if ($realPath === false) {
+            return false;
         }
-        return false;
+        $allowedDir = defined('XOOPS_ROOT_PATH') ? realpath(XOOPS_ROOT_PATH) : false;
+        if ($allowedDir !== false) {
+            $allowedDirWithSep = rtrim($allowedDir, '/\\') . DIRECTORY_SEPARATOR;
+            if (strpos($realPath, $allowedDirWithSep) !== 0 && $realPath !== $allowedDir) {
+                return false;
+            }
+        }
+        include_once $realPath;
+        return true;
     }
 }

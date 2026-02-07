@@ -115,13 +115,6 @@ class Request
             // Get the variable from the input hash and clean it
             $var = static::cleanVar($input[$name], $mask, $type);
 
-            // Handle magic quotes compatibility
-            if (function_exists('get_magic_quotes_gpc')
-                && @get_magic_quotes_gpc() && ($var != $default)
-                && ('FILES' !== $hash)
-            ) {
-                $var = static::stripSlashesRecursive($var);
-            }
         } elseif (null !== $default) {
             // Clean the default value
             $var = static::cleanVar($default, $mask, $type);
@@ -502,11 +495,6 @@ class Request
             default:
                 $input = $_REQUEST;
                 break;
-        }
-
-        // Handle magic quotes compatibility
-        if (function_exists('get_magic_quotes_gpc') && @get_magic_quotes_gpc() && ('FILES' !== $hash)) {
-            $input = static::stripSlashesRecursive($input);
         }
 
         $result = static::cleanVars($input, $mask);

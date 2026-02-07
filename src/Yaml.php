@@ -50,7 +50,7 @@ class Yaml
     {
         try {
             $ret = VendorYaml::dump($var, $inline, $indent);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             static::logError($e);
             $ret = false;
         }
@@ -68,7 +68,7 @@ class Yaml
     {
         try {
             $ret = VendorYaml::parse($yamlString);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             static::logError($e);
             $ret = false;
         }
@@ -87,10 +87,23 @@ class Yaml
         if (!file_exists($yamlFile)) {
             return false;
         }
+        $maxSize = 2 * 1024 * 1024; // 2 MB
+        $fileSize = @filesize($yamlFile);
+        if ($fileSize === false) {
+            trigger_error("Unable to determine YAML file size", E_USER_WARNING);
+            return false;
+        }
+        if ($fileSize > $maxSize) {
+            trigger_error("YAML file exceeds maximum size of 2MB", E_USER_WARNING);
+            return false;
+        }
         try {
             $yamlString = file_get_contents($yamlFile);
+            if ($yamlString === false) {
+                return false;
+            }
             $ret = VendorYaml::parse($yamlString);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             static::logError($e);
             $ret = false;
         }
@@ -112,7 +125,7 @@ class Yaml
         try {
             $yamlString = VendorYaml::dump($var, $inline, $indent);
             $ret = file_put_contents($yamlFile, $yamlString);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             static::logError($e);
             $ret = false;
         }
@@ -138,7 +151,7 @@ class Yaml
         try {
             $yamlString = VendorYaml::dump($var, $inline, $indent);
             $ret = empty($yamlString) ? false : "<?php\n/*\n---\n" . $yamlString . "\n...\n*/\n";
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             static::logError($e);
             $ret = false;
         }
@@ -177,7 +190,7 @@ class Yaml
             }
             $unwrapped = implode("\n", $lines);
             $ret = VendorYaml::parse($unwrapped);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             static::logError($e);
             $ret = false;
         }
@@ -201,10 +214,24 @@ class Yaml
         if (!file_exists($yamlFile)) {
             return false;
         }
+        $maxSize = 2 * 1024 * 1024; // 2 MB
+        $fileSize = @filesize($yamlFile);
+        if ($fileSize === false) {
+            trigger_error("Unable to determine YAML file size", E_USER_WARNING);
+            return false;
+        }
+        if ($fileSize > $maxSize) {
+            trigger_error("YAML file exceeds maximum size of 2MB", E_USER_WARNING);
+            return false;
+        }
+        $yamlString = file_get_contents($yamlFile);
+        if ($yamlString === false) {
+            trigger_error("Failed to read YAML file: {$yamlFile}", E_USER_WARNING);
+            return false;
+        }
         try {
-            $yamlString = file_get_contents($yamlFile);
             $ret = static::loadWrapped($yamlString);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             static::logError($e);
             $ret = false;
         }
@@ -231,7 +258,7 @@ class Yaml
         try {
             $yamlString = static::dumpWrapped($var, $inline, $indent);
             $ret = file_put_contents($yamlFile, $yamlString);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             static::logError($e);
             $ret = false;
         }
@@ -239,7 +266,7 @@ class Yaml
     }
 
     /**
-     * @param \Exception $e throwable to log
+     * @param \Throwable $e throwable to log
      */
     protected static function logError($e)
     {
