@@ -995,25 +995,29 @@ class UlidTest extends TestCase
      */
     public function testGenerateMonotonicIncrementsRandomPortion(): void
     {
-        Ulid::resetMonotonicState();
+        // Retry until both ULIDs land in the same millisecond so we can
+        // verify the random portion was incremented rather than regenerated.
+        for ($attempt = 0; $attempt < 100; $attempt++) {
+            Ulid::resetMonotonicState();
 
-        // Generate two ULIDs very quickly (should be same millisecond)
-        $ulid1 = Ulid::generateMonotonic();
-        $ulid2 = Ulid::generateMonotonic();
+            $ulid1 = Ulid::generateMonotonic();
+            $ulid2 = Ulid::generateMonotonic();
 
-        // Time portions should be the same (or very close)
-        $time1 = \substr($ulid1, 0, 10);
-        $time2 = \substr($ulid2, 0, 10);
+            $time1 = \substr($ulid1, 0, 10);
+            $time2 = \substr($ulid2, 0, 10);
 
-        // Random portions should be different
-        $rand1 = \substr($ulid1, 10);
-        $rand2 = \substr($ulid2, 10);
+            if ($time1 === $time2) {
+                $rand1 = \substr($ulid1, 10);
+                $rand2 = \substr($ulid2, 10);
 
-        if ($time1 === $time2) {
-            // If same millisecond, random should be incremented
-            $this->assertNotSame($rand1, $rand2);
-            $this->assertLessThan(0, \strcmp($rand1, $rand2));
+                // Same millisecond: random portion must be incremented
+                $this->assertNotSame($rand1, $rand2);
+                $this->assertLessThan(0, \strcmp($rand1, $rand2));
+                return;
+            }
         }
+
+        $this->fail('Could not generate two monotonic ULIDs within the same millisecond after 100 attempts');
     }
 
     /**
