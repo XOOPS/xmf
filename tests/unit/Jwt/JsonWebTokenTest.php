@@ -69,6 +69,7 @@ class JsonWebTokenTest extends \PHPUnit\Framework\TestCase
         $this->assertNotSame($this->object, $decoder);
 
         $actual = $decoder->decode($token, ['test' => 'create']);
+        $this->assertTrue(is_object($actual));
         $this->assertTrue(property_exists($actual, 'exp'));
         $this->assertTrue(property_exists($actual, 'test'));
 
