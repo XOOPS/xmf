@@ -178,8 +178,16 @@ Contributions are welcome! Please see our [Contributing Guide](.github/CONTRIBUT
 
 XMF is licensed under the [GPL-2.0-or-later](docs/license.md).
 
+## Acknowledgments
+
+<a href="https://www.jetbrains.com/community/opensource/">
+  <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg" alt="JetBrains Logo" width="120" />
+</a>
+
+Thank you to [JetBrains](https://www.jetbrains.com/community/opensource/) for supporting open-source development by providing free IDE licenses to this project.
+
 ---
 
 <p align="center">
-  Made with care by the <a href="https://github.com/XOOPS">XOOPS Project</a> community
+  Made with ❤️ by the <a href="https://github.com/XOOPS">XOOPS Project</a> community
 </p>
