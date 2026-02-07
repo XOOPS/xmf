@@ -802,11 +802,18 @@ class Tables
      *
      * @param \mysqli_result|bool $result as returned by query
      *
-     * @return array|null
+     * @return array|false|null array for a fetched row, null for no rows or
+     *                          non-result queries, false if the query failed
      */
     protected function fetch($result)
     {
+        // distinguish query failure (false) from other non-result values
+        if ($result === false) {
+            return false;
+        }
+
         if (!$result instanceof \mysqli_result) {
+            // e.g. true from execSql() on statements without a result set
             return null;
         }
         return $this->db->fetchArray($result);
@@ -876,6 +883,9 @@ class Tables
         $sql .= ' ORDER BY `ORDINAL_POSITION` ';
 
         $result = $this->execSql($sql);
+        if (!$result) {
+            return false;
+        }
 
         while ($column = $this->fetch($result)) {
             $attributes = ' ' . $column['COLUMN_TYPE'] . ' '
@@ -900,6 +910,9 @@ class Tables
         $sql .= ' ORDER BY `INDEX_NAME`, `SEQ_IN_INDEX` ';
 
         $result = $this->execSql($sql);
+        if (!$result) {
+            return false;
+        }
 
         $lastKey = '';
         $keyCols = '';

@@ -11,7 +11,7 @@ class XoopsObject
      * @param string $format
      * @return mixed
      */
-    public function getVar($key, $format = 's') { return ''; }
+    public function getVar($key, $format = 's') {}
 
     /**
      * @param string $key
