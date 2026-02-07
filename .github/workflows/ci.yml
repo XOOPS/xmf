@@ -184,6 +184,9 @@ jobs:
             echo "config=phpunit.xml.dist" >> $GITHUB_OUTPUT
           fi
 
+      - name: Prepare coverage directory
+        run: mkdir -p build/logs
+
       - name: Run tests with coverage
         run: vendor/bin/phpunit --configuration ${{ steps.phpunit-config.outputs.config }} --stderr --coverage-clover build/logs/clover.xml
 
