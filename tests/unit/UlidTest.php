@@ -179,9 +179,9 @@ class UlidTest extends TestCase
      */
     public function testGenerateProducesLexicographicallySortableValues(): void
     {
-        $ulid1 = Ulid::generate();
-        \usleep(2000); // Wait 2ms to ensure different timestamp
-        $ulid2 = Ulid::generate();
+        Ulid::resetMonotonicState();
+        $ulid1 = Ulid::generateMonotonic();
+        $ulid2 = Ulid::generateMonotonic();
 
         $this->assertLessThan(0, \strcmp($ulid1, $ulid2), 'Earlier ULID should sort before later ULID');
     }
@@ -191,11 +191,11 @@ class UlidTest extends TestCase
      */
     public function testGenerateProducesCorrectlySortedArray(): void
     {
+        Ulid::resetMonotonicState();
         $ulids = [];
 
         for ($i = 0; $i < 10; $i++) {
-            $ulids[] = Ulid::generate();
-            \usleep(1000); // 1ms between each
+            $ulids[] = Ulid::generateMonotonic();
         }
 
         $sortedUlids = $ulids;
@@ -266,7 +266,7 @@ class UlidTest extends TestCase
     public function testEncodeTimeThrowsExceptionForOverflow(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('exceeds maximum');
+        $this->expectExceptionMessageMatches('/exceeds maximum/');
 
         Ulid::encodeTime(Ulid::MAX_TIME + 1);
     }
@@ -516,7 +516,7 @@ class UlidTest extends TestCase
     public function testDecodeTimeThrowsExceptionForWrongLength(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid ULID length');
+        $this->expectExceptionMessageMatches('/^Invalid ULID length/');
 
         Ulid::decodeTime('01ARZ3NDEK'); // Only 10 chars
     }
@@ -527,9 +527,9 @@ class UlidTest extends TestCase
     public function testDecodeTimeThrowsExceptionForInvalidCharacter(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid character');
+        $this->expectExceptionMessage('Invalid character in ULID: I');
 
-        Ulid::decodeTime('01ARZ3NDEKTSV4RRFFQI9G5FAV'); // Contains 'I'
+        Ulid::decodeTime('01ARI3NDEKTSV4RRFFQ09G5FAV'); // Contains 'I' in time portion
     }
 
     /**
@@ -561,9 +561,9 @@ class UlidTest extends TestCase
      */
     public function testCompareReturnNegativeForEarlierUlid(): void
     {
-        $ulid1 = Ulid::generate();
-        \usleep(2000);
-        $ulid2 = Ulid::generate();
+        Ulid::resetMonotonicState();
+        $ulid1 = Ulid::generateMonotonic();
+        $ulid2 = Ulid::generateMonotonic();
 
         $this->assertSame(-1, Ulid::compare($ulid1, $ulid2));
     }
@@ -573,9 +573,9 @@ class UlidTest extends TestCase
      */
     public function testCompareReturnPositiveForLaterUlid(): void
     {
-        $ulid1 = Ulid::generate();
-        \usleep(2000);
-        $ulid2 = Ulid::generate();
+        Ulid::resetMonotonicState();
+        $ulid1 = Ulid::generateMonotonic();
+        $ulid2 = Ulid::generateMonotonic();
 
         $this->assertSame(1, Ulid::compare($ulid2, $ulid1));
     }
@@ -692,7 +692,7 @@ class UlidTest extends TestCase
     public function testFromUuidThrowsExceptionForInvalidLength(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('expected 32 hex characters');
+        $this->expectExceptionMessageMatches('/Invalid UUID format: expected 32 hex characters/');
 
         Ulid::fromUuid('f47ac10b-58cc-4372-a567');
     }
@@ -704,7 +704,7 @@ class UlidTest extends TestCase
     public function testFromUuidThrowsExceptionForInvalidCharacters(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('non-hexadecimal');
+        $this->expectExceptionMessageMatches('/non-hexadecimal/');
 
         Ulid::fromUuid('g47ac10b-58cc-4372-a567-0e02b2c3d479'); // 'g' is invalid
     }
@@ -1150,7 +1150,7 @@ class UlidTest extends TestCase
     public function testFromBinaryThrowsExceptionForInvalidLength(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid binary length');
+        $this->expectExceptionMessageMatches('/^Invalid binary length: expected 16, got \d+/');
 
         Ulid::fromBinary('short');
     }
@@ -1226,9 +1226,9 @@ class UlidTest extends TestCase
      */
     public function testBinaryPreservesOrdering(): void
     {
-        $ulid1 = Ulid::generate();
-        \usleep(2000);
-        $ulid2 = Ulid::generate();
+        Ulid::resetMonotonicState();
+        $ulid1 = Ulid::generateMonotonic();
+        $ulid2 = Ulid::generateMonotonic();
 
         $binary1 = Ulid::toBinary($ulid1);
         $binary2 = Ulid::toBinary($ulid2);

@@ -30,7 +30,7 @@ namespace Xmf;
  *
  * Requirements:
  * - PHP 7.4+ (per composer.json requirement)
- * - ext-bcmath (for UUID conversion methods)
+ * - ext-bcmath (for UUID and binary conversion methods)
  *
  * @category  Xmf\Ulid
  * @package   Xmf
@@ -110,7 +110,13 @@ class Ulid
      */
     public static function currentTimeMillis(): int
     {
-        return (int) (\microtime(true) * 1000);
+        if (\PHP_INT_SIZE < 8) {
+            throw new \RuntimeException(
+                'Ulid::currentTimeMillis() requires a 64-bit PHP build; 32-bit builds cannot represent millisecond timestamps safely.'
+            );
+        }
+
+        return (int) \round(\microtime(true) * 1000);
     }
 
     /**
@@ -245,6 +251,10 @@ class Ulid
             $time = $time * self::ENCODING_LENGTH + $value;
         }
 
+        if ($time > self::MAX_TIME) {
+            throw new \InvalidArgumentException('ULID timestamp exceeds maximum allowed value');
+        }
+
         return $time;
     }
 
@@ -265,6 +275,12 @@ class Ulid
         }
 
         $ulid = \strtoupper($ulid);
+
+        // Validate the full ULID (including time portion)
+        if (!self::isValid($ulid)) {
+            throw new \InvalidArgumentException('Invalid ULID string: ' . $ulid);
+        }
+
         $randomPart = \substr($ulid, self::TIME_LENGTH);
 
         // Validate all characters in the random portion
@@ -444,14 +460,15 @@ class Ulid
 
         $dateTime = \DateTimeImmutable::createFromFormat(
             'U u',
-            \sprintf('%d %06d', $seconds, $microseconds)
+            \sprintf('%d %06d', $seconds, $microseconds),
+            new \DateTimeZone('UTC')
         );
 
         if ($dateTime === false) {
             throw new \RuntimeException('Failed to create DateTime from ULID timestamp');
         }
 
-        return $dateTime;
+        return $dateTime->setTimezone(new \DateTimeZone('UTC'));
     }
 
     /**
@@ -586,5 +603,26 @@ class Ulid
         }
 
         return \implode('', $result);
+    }
+
+    /**
+     * Convert microtime to ULID-compatible millisecond timestamp.
+     *
+     * @param float $microtime Microtime value (e.g. from microtime(true))
+     *
+     * @return int Milliseconds since Unix Epoch
+     *
+     * @deprecated Use Ulid::currentTimeMillis() instead. This method previously
+     *             subtracted a Y2K epoch offset which does not match the ULID spec.
+     *             It now returns standard Unix epoch milliseconds for correctness.
+     */
+    public static function microtimeToUlidTime($microtime): int
+    {
+        @\trigger_error(
+            'Ulid::microtimeToUlidTime() is deprecated. Use Ulid::currentTimeMillis() instead.',
+            \E_USER_DEPRECATED
+        );
+
+        return (int) \round($microtime * 1000);
     }
 }
