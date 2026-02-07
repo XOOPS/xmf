@@ -188,6 +188,7 @@ jobs:
         run: vendor/bin/phpunit --configuration ${{ steps.phpunit-config.outputs.config }} --stderr --coverage-clover build/logs/clover.xml
 
       - name: Upload coverage to Scrutinizer
+        continue-on-error: true  # Upload may fail on forks or PRs; coverage generation is the important part
         run: |
           wget -q https://scrutinizer-ci.com/ocular.phar
           php ocular.phar code-coverage:upload --format=php-clover build/logs/clover.xml
