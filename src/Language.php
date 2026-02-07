@@ -84,8 +84,11 @@ class Language
             return false;
         }
         $allowedDir = defined('XOOPS_ROOT_PATH') ? realpath(XOOPS_ROOT_PATH) : false;
-        if ($allowedDir !== false && strpos($realPath, $allowedDir) !== 0) {
-            return false;
+        if ($allowedDir !== false) {
+            $allowedDirWithSep = rtrim($allowedDir, '/\\') . DIRECTORY_SEPARATOR;
+            if (strpos($realPath, $allowedDirWithSep) !== 0 && $realPath !== $allowedDir) {
+                return false;
+            }
         }
         include_once $realPath;
         return true;

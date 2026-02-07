@@ -4,19 +4,29 @@
 
 ### Bug Fixes
 * Fix `Request::setVar()` writing to literal key `'name'` instead of variable `$name` for ENV and SERVER superglobals
-* Fix `FilterInput` hex entity decode (`&#xNN;`) producing null bytes instead of correct characters on PHP 7+
-* Fix `Metagen::html2text()` discarding `preg_replace_callback()` result for numeric HTML entities
-* Fix XSS in `Module\Admin` config methods (`addConfigError`, `addConfigAccept`, `addConfigWarning`) by escaping output
+* Fix `FilterInput` hex entity decode (`&#xNN;`) producing null bytes instead of correct characters on PHP 7+; use `html_entity_decode()` for proper Unicode support
+* Fix `Metagen::html2text()` discarding `preg_replace_callback()` result for numeric HTML entities; use `html_entity_decode()` for codepoints > 255
+* Fix XSS in `Module\Admin` config methods (`addConfigError`, `addConfigAccept`, `addConfigWarning`) by escaping output with charset-aware `htmlspecialchars()`
 * Fix `IPAddress::normalize()` passing `inet_pton()` false result to `inet_ntop()` for invalid IPs
 
 ### Security
 * Harden `Key\FileStorage::save()` to use `var_export()` instead of string interpolation for PHP code generation
 * Add `allowed_classes => false` to `unserialize()` in `Module\Helper\Session::get()` to prevent PHP Object Injection
-* Harden `Language::loadFile()` with `realpath()` validation to prevent path traversal
+* Harden `Language::loadFile()` with `realpath()` and boundary-safe directory validation to prevent path traversal
 * Add 2MB file size limit to `Yaml::read()` and `Yaml::readWrapped()` to prevent memory exhaustion
-* Narrow `Yaml` exception handling from `\Exception` to `ParseException` to avoid hiding unrelated errors
-* Replace `trigger_error()` with `RuntimeException` in `Jwt\JsonWebToken::decode()` for structured error handling
+* Harden `Yaml` with `file_get_contents()` and `filesize()` false checks; widen exception catches to `\Throwable`
+* Preserve `Jwt\JsonWebToken::decode()` `object|false` API contract (no longer throws on decode failure)
 * Remove dead `get_magic_quotes_gpc()` calls from `Request` (function removed in PHP 8.0)
+
+### Changed
+* Use strict comparison (`===`) instead of loose (`==`) in `FilterInput` attribute filtering
+
+### Tests
+* Add unit tests for `Request::setVar()` ENV and SERVER branches
+* Add unit tests for `FilterInput` hex and decimal entity decode
+* Add unit test for `Metagen::html2text()` numeric entity conversion
+* Add unit test for `IPAddress::normalize()` invalid IP handling
+* Add unit tests for `Yaml::read()` and `Yaml::readWrapped()` file size limits
 
 ## [1.2.32] - 2025-02-06
 
