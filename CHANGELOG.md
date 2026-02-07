@@ -21,6 +21,14 @@
 ### Changed
 * Use strict comparison (`===`) instead of loose (`==`) in `FilterInput` attribute filtering and `Database\Tables` column lookups
 * Fix `FileStorageTest` namespace from `Xmf\Key` to `Xmf\Test\Key` to match autoload-dev configuration
+* Use strict comparison (`===`) instead of loose (`==`) in `FilterInput` attribute filtering
+
+### Tests
+* Add unit tests for `Request::setVar()` ENV and SERVER branches
+* Add unit tests for `FilterInput` hex and decimal entity decode
+* Add unit test for `Metagen::html2text()` numeric entity conversion
+* Add unit test for `IPAddress::normalize()` invalid IP handling
+* Add unit tests for `Yaml::read()` and `Yaml::readWrapped()` file size limits
 
 ### Removed
 * Remove redundant `paragonie/random_compat` dependency (native in PHP 7+)
