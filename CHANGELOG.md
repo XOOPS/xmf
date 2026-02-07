@@ -32,11 +32,10 @@
 * Add PHPStan stub files for XOOPS framework classes to eliminate ~524 false-positive errors
 * Configure `phpstan.neon` to scan stubs directory
 * Move changelog to `CHANGELOG.md` at repo root; `docs/changelog.md` now redirects
-* Simplify `.scrutinizer.yml` to analysis-only (remove failing PHP 8.3/8.4 build nodes); exclude `stubs/` from analysis
+* Simplify `.scrutinizer.yml` to analysis-only; move `stubs/` from `excluded_paths` to `dependency_paths` for constant/class resolution
 * Add dedicated PHPStan, PHPCS, and code coverage jobs to GitHub Actions CI workflow
-* Add coverage upload to Scrutinizer via `ocular.phar` from GitHub Actions
-* Generate PHPStan baseline (`phpstan-baseline.neon`) with ~596 existing errors for incremental cleanup
-* Add `composer baseline` script for regenerating PHPStan baseline
+* Generate PHPStan baseline (`phpstan-baseline.neon`) with ~586 existing errors for incremental cleanup
+* Add `composer baseline` script with backup/restore safety for PHPStan baseline regeneration
 * Update `.gitignore` to exclude `build/` directory (coverage output)
 * Update `.gitattributes` with export-ignore for PHPStan, PHPUnit, and stub files
 * Add GitHub Copilot custom instructions (`.github/copilot-instructions.md`) and reusable XOOPS template

@@ -77,6 +77,14 @@ class XoopsModule extends XoopsObject
      * @return XoopsModule|false
      */
     public static function getByDirname($dirname) {}
+
+    /**
+     * @param string $version1
+     * @param string $version2
+     * @param string $operator
+     * @return bool
+     */
+    public function versionCompare($version1, $version2, $operator = '') {}
 }
 
 class XoopsObjectHandler

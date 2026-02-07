@@ -16,7 +16,3 @@ filter:
 
 tools:
   php_analyzer: true
-  # external_code_coverage:
-  #   timeout: 600
-  #   TODO: Re-enable once ocular.phar upload is working from GitHub Actions.
-  #   See: https://scrutinizer-ci.com/docs/tools/external-code-coverage/

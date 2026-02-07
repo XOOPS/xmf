@@ -27,6 +27,16 @@ class Xoops
      * @return string
      */
     public function url($name) {}
+
+    /**
+     * @return object
+     */
+    public function theme() {}
+
+    /**
+     * @return object
+     */
+    public function tpl() {}
 }
 
 class XoopsCache

@@ -57,6 +57,22 @@ class XoopsDatabase
      * @return string
      */
     public function quoteString($str) {}
+
+    /**
+     * @param string $str
+     * @return string
+     */
+    public function quote($str) {}
+
+    /**
+     * @return string
+     */
+    public function error() {}
+
+    /**
+     * @return int
+     */
+    public function errno() {}
 }
 
 class XoopsDatabaseFactory

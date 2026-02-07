@@ -229,18 +229,6 @@ parameters:
 			path: src/Database/TableLoad.php
 
 		-
-			message: '#^Binary operation "\.\=" between non\-falsy\-string and mixed results in an error\.$#'
-			identifier: assignOp.invalid
-			count: 1
-			path: src/Database/TableLoad.php
-
-		-
-			message: '#^Call to an undefined method XoopsDatabase\:\:quote\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Database/TableLoad.php
-
-		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
 			count: 1
@@ -289,6 +277,12 @@ parameters:
 			path: src/Database/TableLoad.php
 
 		-
+			message: '#^Parameter \#1 \$str of method XoopsDatabase\:\:quote\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Database/TableLoad.php
+
+		-
 			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 10
@@ -333,24 +327,6 @@ parameters:
 		-
 			message: '#^Binary operation "\.\=" between mixed and non\-falsy\-string results in an error\.$#'
 			identifier: assignOp.invalid
-			count: 2
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Call to an undefined method XoopsDatabase\:\:errno\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Call to an undefined method XoopsDatabase\:\:error\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Call to an undefined method XoopsDatabase\:\:quote\(\)\.$#'
-			identifier: method.notFound
 			count: 2
 			path: src/Database/Tables.php
 
@@ -571,6 +547,12 @@ parameters:
 			path: src/Database/Tables.php
 
 		-
+			message: '#^Parameter \#1 \$str of method XoopsDatabase\:\:quote\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Database/Tables.php
+
+		-
 			message: '#^Parameter \#1 \$string1 of function strcasecmp expects string, mixed given\.$#'
 			identifier: argument.type
 			count: 4
@@ -655,15 +637,9 @@ parameters:
 			path: src/Database/Tables.php
 
 		-
-			message: '#^Property Xmf\\Database\\Tables\:\:\$lastErrNo \(int\) does not accept mixed\.$#'
-			identifier: assign.propertyType
-			count: 2
-			path: src/Database/Tables.php
-
-		-
 			message: '#^Property Xmf\\Database\\Tables\:\:\$lastError \(string\) does not accept mixed\.$#'
 			identifier: assign.propertyType
-			count: 3
+			count: 1
 			path: src/Database/Tables.php
 
 		-
@@ -1177,13 +1153,13 @@ parameters:
 			path: src/Metagen.php
 
 		-
-			message: '#^Call to an undefined method Xoops\:\:theme\(\)\.$#'
+			message: '#^Call to an undefined method object\:\:addMeta\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: src/Metagen.php
 
 		-
-			message: '#^Call to an undefined method Xoops\:\:tpl\(\)\.$#'
+			message: '#^Call to an undefined method object\:\:assign\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: src/Metagen.php
@@ -1191,13 +1167,13 @@ parameters:
 		-
 			message: '#^Cannot call method addMeta\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 2
+			count: 1
 			path: src/Metagen.php
 
 		-
 			message: '#^Cannot call method assign\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 2
+			count: 1
 			path: src/Metagen.php
 
 		-
@@ -1313,12 +1289,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Metagen.php
-
-		-
-			message: '#^Call to an undefined method XoopsModule\:\:versionCompare\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Module/Admin.php
 
 		-
 			message: '#^Call to an undefined method object\:\:addConfigBoxLine\(\)\.$#'
@@ -1501,9 +1471,21 @@ parameters:
 			path: src/Module/Admin.php
 
 		-
+			message: '#^Parameter \#1 \$version1 of method XoopsModule\:\:versionCompare\(\) expects string, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Module/Admin.php
+
+		-
 			message: '#^Parameter \#1 \(mixed\) of echo cannot be converted to string\.$#'
 			identifier: echo.nonString
 			count: 2
+			path: src/Module/Admin.php
+
+		-
+			message: '#^Parameter \#2 \$version2 of method XoopsModule\:\:versionCompare\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
 			path: src/Module/Admin.php
 
 		-
@@ -2231,3 +2213,4 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Yaml.php
+
