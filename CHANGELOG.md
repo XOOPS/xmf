@@ -5,7 +5,7 @@
 ### Bug Fixes
 * Fix `Request::setVar()` writing to literal key `'name'` instead of variable `$name` for ENV and SERVER superglobals
 * Fix `FilterInput` hex entity decode (`&#xNN;`) producing null bytes instead of correct characters on PHP 7+; use `html_entity_decode()` for proper Unicode support
-* Fix `Metagen::html2text()` discarding `preg_replace_callback()` result for numeric HTML entities; use `html_entity_decode()` for codepoints > 255
+* Fix `Metagen::html2text()` discarding `preg_replace_callback()` result for numeric HTML entities; use `html_entity_decode()` with `static::ENCODING` for codepoints > 255
 * Fix XSS in `Module\Admin` config methods (`addConfigError`, `addConfigAccept`, `addConfigWarning`) by escaping output with charset-aware `htmlspecialchars()`
 * Fix `IPAddress::normalize()` passing `inet_pton()` false result to `inet_ntop()` for invalid IPs
 
@@ -14,7 +14,7 @@
 * Add `allowed_classes => false` to `unserialize()` in `Module\Helper\Session::get()` to prevent PHP Object Injection
 * Harden `Language::loadFile()` with `realpath()` and boundary-safe directory validation to prevent path traversal
 * Add 2MB file size limit to `Yaml::read()` and `Yaml::readWrapped()` to prevent memory exhaustion
-* Harden `Yaml` with `file_get_contents()` and `filesize()` false checks; widen exception catches to `\Throwable`
+* Harden `Yaml` with `is_readable()` pre-check, suppressed `file_get_contents()` warnings, `filesize()` false checks; widen exception catches to `\Throwable`
 * Preserve `Jwt\JsonWebToken::decode()` `object|false` API contract (no longer throws on decode failure)
 * Remove dead `get_magic_quotes_gpc()` calls from `Request` (function removed in PHP 8.0)
 
