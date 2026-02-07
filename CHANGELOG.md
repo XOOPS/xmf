@@ -10,6 +10,9 @@
 * Fix `IPAddress::normalize()` passing `inet_pton()` false result to `inet_ntop()` for invalid IPs
 * Fix `Language` using unqualified `XOOPS_ROOT_PATH` constant (resolved as `Xmf\XOOPS_ROOT_PATH` in namespaced context)
 * Fix `Request::getInt()`, `getFloat()`, `getBool()` return types to match PHPDoc via explicit casts
+* Fix `Migrate::getTargetDefinitions()` checking `null` instead of `false` for `Yaml::read()` failure
+* Fix `Tables::executeQueue()` passing potentially non-string `$ddl` to `execSql()` after `renderTableCreate()` failure
+* Fix `JsonWebToken::create()` passing `ArrayObject` to `JWT::encode()` which only accepts `array`
 
 ### Security
 * Harden `Key\FileStorage::save()` to use `var_export()` instead of string interpolation for PHP code generation
@@ -34,7 +37,7 @@
 * Move changelog to `CHANGELOG.md` at repo root; `docs/changelog.md` now redirects
 * Simplify `.scrutinizer.yml` to analysis-only; move `stubs/` from `excluded_paths` to `dependency_paths` for constant/class resolution
 * Add dedicated PHPStan, PHPCS, and code coverage jobs to GitHub Actions CI workflow
-* Generate PHPStan baseline (`phpstan-baseline.neon`) with ~569 existing errors for incremental cleanup
+* Generate PHPStan baseline (`phpstan-baseline.neon`) with ~547 existing errors for incremental cleanup
 * Add `composer baseline` script with backup/restore safety for PHPStan baseline regeneration
 * Update `.gitignore` to exclude `build/` directory (coverage output)
 * Update `.gitattributes` with export-ignore for PHPStan, PHPUnit, and stub files

@@ -595,6 +595,11 @@ class Tables
                     $ddl = $this->renderTableCreate($ddl['createtable']);
                 }
             }
+            if (!is_string($ddl)) {
+                $this->lastError = 'Failed to render DDL';
+                $this->lastErrNo = -1;
+                return false;
+            }
             $result = $this->execSql($ddl, $force);
             if (!$result) {
                 $this->lastError = $this->db->error();

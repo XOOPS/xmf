@@ -133,7 +133,7 @@ class Migrate
     {
         if (!isset($this->targetDefinitions)) {
             $this->targetDefinitions = Yaml::read($this->tableDefinitionFile);
-            if (null === $this->targetDefinitions) {
+            if (empty($this->targetDefinitions)) {
                 throw new \RuntimeException("No schema definition " . $this->tableDefinitionFile);
             }
         }

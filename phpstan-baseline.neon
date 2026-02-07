@@ -7,18 +7,6 @@ parameters:
 			path: src/Database/Migrate.php
 
 		-
-			message: '#^Call to method getModule\(\) on an unknown class Xoops\\Module\\Helper\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Database/Migrate.php
-
-		-
-			message: '#^Call to method path\(\) on an unknown class Xoops\\Module\\Helper\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Database/Migrate.php
-
-		-
 			message: '#^Cannot access offset ''attributes'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 4
@@ -183,12 +171,6 @@ parameters:
 		-
 			message: '#^Property Xmf\\Database\\Migrate\:\:\$helper \(Xmf\\Module\\Helper\|Xoops\\Module\\Helper\\HelperAbstract\|false\) does not accept Xmf\\Module\\Helper\|Xoops\\Module\\Helper\|false\.$#'
 			identifier: assign.propertyType
-			count: 1
-			path: src/Database/Migrate.php
-
-		-
-			message: '#^Property Xmf\\Database\\Migrate\:\:\$helper has unknown class Xoops\\Module\\Helper\\HelperAbstract as its type\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Database/Migrate.php
 
@@ -391,12 +373,6 @@ parameters:
 			path: src/Database/Tables.php
 
 		-
-			message: '#^Constant _DB_XMF_TABLE_IS_NOT_DEFINED not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Database/Tables.php
-
-		-
 			message: '#^Method Xmf\\Database\\Tables\:\:dumpQueue\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -475,12 +451,6 @@ parameters:
 			path: src/Database/Tables.php
 
 		-
-			message: '#^Parameter \#1 \$sql of method Xmf\\Database\\Tables\:\:execSql\(\) expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Database/Tables.php
-
-		-
 			message: '#^Parameter \#1 \$str of method XoopsDatabase\:\:quote\(\) expects string, mixed given\.$#'
 			identifier: argument.type
 			count: 2
@@ -556,12 +526,6 @@ parameters:
 			message: '#^Possibly invalid array key type mixed\.$#'
 			identifier: offsetAccess.invalidOffset
 			count: 6
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Property Xmf\\Database\\Tables\:\:\$lastError \(string\) does not accept mixed\.$#'
-			identifier: assign.propertyType
-			count: 1
 			path: src/Database/Tables.php
 
 		-
@@ -873,12 +837,6 @@ parameters:
 		-
 			message: '#^Method Xmf\\Jwt\\JsonWebToken\:\:decode\(\) has parameter \$assertClaims with no value type specified in iterable type array\|Traversable\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: src/Jwt/JsonWebToken.php
-
-		-
-			message: '#^Parameter \#1 \$payload of static method Firebase\\JWT\\JWT\:\:encode\(\) expects array\<mixed\>, array\|ArrayObject given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Jwt/JsonWebToken.php
 
@@ -1273,44 +1231,8 @@ parameters:
 			path: src/Module/Admin.php
 
 		-
-			message: '#^Call to method getModule\(\) on an unknown class Xoops\\Module\\Helper\.$#'
-			identifier: class.notFound
-			count: 3
-			path: src/Module/Admin.php
-
-		-
 			message: '#^Cannot call method path\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: src/Module/Admin.php
-
-		-
-			message: '#^Constant _AM_XMF_MODULE_INSTALLED not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Module/Admin.php
-
-		-
-			message: '#^Constant _AM_XMF_MODULE_NOTFOUND not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Module/Admin.php
-
-		-
-			message: '#^Constant _AM_XMF_MODULE_NOT_INSTALLED not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Module/Admin.php
-
-		-
-			message: '#^Constant _AM_XMF_MODULE_VERSION not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Module/Admin.php
-
-		-
-			message: '#^Instantiated class ModuleAdmin not found\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Module/Admin.php
 
@@ -1387,12 +1309,6 @@ parameters:
 			path: src/Module/Admin.php
 
 		-
-			message: '#^Parameter \#1 \$format of function sprintf expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Module/Admin.php
-
-		-
 			message: '#^Parameter \#1 \$version1 of method XoopsModule\:\:versionCompare\(\) expects string, int given\.$#'
 			identifier: argument.type
 			count: 1
@@ -1441,21 +1357,9 @@ parameters:
 			path: src/Module/Admin.php
 
 		-
-			message: '#^Call to static method getHelper\(\) on an unknown class Xoops\\Module\\Helper\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Module/Helper.php
-
-		-
 			message: '#^Cannot access offset string on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 2
-			path: src/Module/Helper.php
-
-		-
-			message: '#^Method Xmf\\Module\\Helper\:\:getHelper\(\) has invalid return type Xoops\\Module\\Helper\.$#'
-			identifier: class.notFound
-			count: 1
 			path: src/Module/Helper.php
 
 		-
@@ -2000,12 +1904,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#2 \$encoding of function mb_strtolower expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/StopWords.php
-
-		-
-			message: '#^Parameter \#2 \$string of function explode expects string, mixed given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/StopWords.php

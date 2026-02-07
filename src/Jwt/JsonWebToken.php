@@ -116,7 +116,7 @@ class JsonWebToken
         if ((int) $expirationOffset > 0) {
             $payload['exp'] = time() + (int) $expirationOffset;
         }
-        $value = JWT::encode($payload, $this->key->getSigning(), $this->algorithm);
+        $value = JWT::encode((array) $payload, $this->key->getSigning(), $this->algorithm);
         return $value;
     }
 }
