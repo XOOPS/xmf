@@ -111,4 +111,20 @@ class FilterInputTest extends \PHPUnit\Framework\TestCase
     {
         $this->assertSame($expected, $this->object->cleanVar($value, $type));
     }
+
+    public function testHexEntityDecode()
+    {
+        // &#x41; = 'A', &#x42; = 'B', &#x43; = 'C'
+        $input = '&#x41;&#x42;&#x43;';
+        $result = FilterInput::clean($input, 'string');
+        $this->assertStringContainsString('ABC', $result);
+    }
+
+    public function testDecimalEntityDecode()
+    {
+        // &#65; = 'A', &#66; = 'B'
+        $input = '&#65;&#66;';
+        $result = FilterInput::clean($input, 'string');
+        $this->assertStringContainsString('AB', $result);
+    }
 }

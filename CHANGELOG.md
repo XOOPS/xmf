@@ -21,6 +21,7 @@
 ### Changed
 * Use strict comparison (`===`) instead of loose (`==`) in `FilterInput` attribute filtering and `Database\Tables` column lookups
 * Fix `FileStorageTest` namespace from `Xmf\Key` to `Xmf\Test\Key` to match autoload-dev configuration
+* Use strict comparison (`===`) instead of loose (`==`) in `FilterInput` attribute filtering
 
 ### Tests
 * Add unit tests for `Request::setVar()` ENV and SERVER branches

@@ -236,4 +236,20 @@ class RequestTest extends \PHPUnit\Framework\TestCase
         Request::set(array($varname => 'Pourquoi'), 'get');
         $this->assertEquals($_REQUEST[$varname], 'Pourquoi');
     }
+
+    public function testSetVarEnv()
+    {
+        $varname = 'XMF_TEST_ENV_VAR';
+        Request::setVar($varname, 'env_value', 'env');
+        $this->assertEquals('env_value', $_ENV[$varname]);
+        unset($_ENV[$varname]);
+    }
+
+    public function testSetVarServer()
+    {
+        $varname = 'XMF_TEST_SERVER_VAR';
+        Request::setVar($varname, 'server_value', 'server');
+        $this->assertEquals('server_value', $_SERVER[$varname]);
+        unset($_SERVER[$varname]);
+    }
 }
