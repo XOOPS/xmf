@@ -1,602 +1,1378 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Xmf\Test;
 
+use PHPUnit\Framework\TestCase;
 use Xmf\Ulid;
 
 /**
+ * Comprehensive test suite for Xmf\Ulid
  *
+ * Tests cover:
+ * - ULID generation and format
+ * - Uniqueness and lexicographic ordering
+ * - Encoding/decoding consistency
+ * - Known vector validation (spec compliance)
+ * - UUID bidirectional conversion
+ * - Validation and error handling
+ * - Edge cases
  */
-class UlidTest extends \PHPUnit\Framework\TestCase
+class UlidTest extends TestCase
 {
-    /**
-     * Sets up the fixture, for example, opens a network connection.
-     * This method is called before a test is executed.
-     */
-    protected function setUp(): void
-    {
-
-    }
+    // =========================================================================
+    // KNOWN VECTOR TESTS (Spec Compliance)
+    // =========================================================================
 
     /**
-     * It tears down the fixture, for example, closes a network connection.
-     * This method is called after a test is executed.
-     */
-    protected function tearDown(): void
-    {
-    }
-
-    /**
-     * Tests that the `generate()` method generates a unique ULID.
+     * Test against a known vector from the ULID spec to ensure
+     * the encoding math is correct and hasn't drifted.
+ *
+     * Timestamp: 1469918176385 (2016-07-30 23:29:36.385 UTC)
+     * Expected time encoding: 01ARYZ6S41
      *
-     * @covers Xmf\Ulid::generate
-     * @throws \Exception
+     * @covers Ulid::encodeTime
+ */
+    public function testEncodeTimeMatchesSpecVector(): void
+{
+        $timestamp = 1469918176385;
+        $encoded = Ulid::encodeTime($timestamp);
+
+        $this->assertSame('01ARYZ6S41', $encoded);
+    }
+
+    /**
+     * Test decoding the spec vector timestamp.
+     *
+     * @covers Ulid::decodeTime
      */
-    public function testGenerate()
+    public function testDecodeTimeMatchesSpecVector(): void
+    {
+        // Create a valid ULID with the known timestamp
+        $ulid = '01ARYZ6S410000000000000000';
+        $decoded = Ulid::decodeTime($ulid);
+
+        $this->assertSame(1469918176385, $decoded);
+    }
+
+    /**
+     * Test round-trip encoding/decoding with spec vector.
+     *
+     * @covers Ulid::encodeTime
+     * @covers Ulid::decodeTime
+     */
+    public function testSpecVectorRoundTrip(): void
+    {
+        $originalTimestamp = 1469918176385;
+        $encoded = Ulid::encodeTime($originalTimestamp);
+        $ulid = $encoded . '0000000000000000'; // Add dummy random part
+        $decoded = Ulid::decodeTime($ulid);
+
+        $this->assertSame($originalTimestamp, $decoded);
+    }
+
+    /**
+     * Test another known vector: Unix epoch (timestamp 0)
+     *
+     * @covers Ulid::encodeTime
+     */
+    public function testEncodeTimeAtEpoch(): void
+    {
+        $encoded = Ulid::encodeTime(0);
+
+        $this->assertSame('0000000000', $encoded);
+    }
+
+    /**
+     * Test known vector: maximum timestamp (year ~10889)
+     *
+     * @covers Ulid::encodeTime
+     */
+    public function testEncodeTimeAtMaximum(): void
+    {
+        $maxTime = 281474976710655; // 2^48 - 1
+        $encoded = Ulid::encodeTime($maxTime);
+
+        $this->assertSame('7ZZZZZZZZZ', $encoded);
+    }
+
+    // =========================================================================
+    // GENERATION TESTS
+    // =========================================================================
+
+    /**
+     * @covers Ulid::generate
+     */
+    public function testGenerateReturns26Characters(): void
     {
         $ulid = Ulid::generate();
 
-        // Assert that the ULID string is valid.
-        $this->assertTrue(Ulid::isValid($ulid));
-
-        // Assert that the ULID string is always in uppercase.
-        $this->assertEquals($ulid, \strtoupper($ulid));
-
-        // Assert that the ULID string is unique.
-        $this->assertNotEquals($ulid, Ulid::generate());
-
-        $ulid1 = Ulid::generate();
-        $this->assertTrue(Ulid::isValid($ulid1));
-        \usleep(2000);  // Wait for 2 milliseconds to ensure a different timestamp
-        $ulid2 = Ulid::generate();
-
-        $this->assertNotEquals($ulid1, $ulid2, 'ULIDs should be unique');
-        $this->assertTrue(\strcasecmp($ulid1, $ulid2) < 0, 'ULIDs should collate correctly');
+        $this->assertSame(26, \strlen($ulid));
     }
 
     /**
-     * @return void
-     * @throws \Exception
+     * @covers Ulid::generate
      */
-    public function testGenerateUlidUpperCase()
+    public function testGenerateReturnsValidUlid(): void
     {
-        $ulid = Ulid::generate(true);
+        $ulid = Ulid::generate();
+
         $this->assertTrue(Ulid::isValid($ulid));
-        $this->assertEquals(\strtoupper($ulid), $ulid);
     }
 
     /**
-     * @return void
-     * @throws \Exception
+     * @covers Ulid::generate
      */
-    public function testGenerateUlidLowerCase()
+    public function testGenerateReturnsUppercaseByDefault(): void
+    {
+        $ulid = Ulid::generate();
+
+        $this->assertSame($ulid, \strtoupper($ulid));
+    }
+
+    /**
+     * @covers Ulid::generate
+     */
+    public function testGenerateReturnsLowercaseWhenRequested(): void
     {
         $ulid = Ulid::generate(false);
-        $this->assertTrue(Ulid::isValid($ulid));
-        $this->assertEquals(\strtolower($ulid), $ulid);
+
+        $this->assertSame($ulid, \strtolower($ulid));
+        $this->assertTrue(Ulid::isValid($ulid)); // Should still be valid
     }
 
     /**
-     * @return void
-     * @throws \Exception
+     * @covers Ulid::generate
      */
-    public function testDecode()
+    public function testGenerateUsesOnlyCrockfordBase32Characters(): void
     {
         $ulid = Ulid::generate();
+        $validChars = Ulid::ENCODING_CHARS;
 
-        // Decode the ULID string.
-        $components = Ulid::decode($ulid);
-
-        // Assert that the decoded time and randomness components are valid.
-        $this->assertGreaterThan(0, $components['time']);
-        $this->assertGreaterThan(0, $components['rand']);
-
-        // Assert that the decoded time and randomness components are within the valid range.
-        $this->assertLessThanOrEqual(PHP_INT_MAX, $components['time']);
-        $this->assertLessThanOrEqual(PHP_INT_MAX, $components['rand']);
-    }
-
-    /**
-     * Tests that the `generate()` method generates a lowercase ULID when configured to do so.
-     *
-     * @covers Xmf\Ulid::generate
-     * @throws \Exception
-     */
-    public function testGeneratesLowercaseIdentifierWhenConfigured()
-    {
-        $ulid = Ulid::generate(false); //generate lower case
-
-        if (\method_exists($this, 'assertMatchesRegularExpression')) {
-            $this->assertMatchesRegularExpression('/[0-9][a-z]/', $ulid);
-        } else {
-            $this->assertRegExp('/[0-9][a-z]/', $ulid);
+        for ($i = 0; $i < 26; $i++) {
+            $this->assertNotFalse(
+                \strpos($validChars, $ulid[$i]),
+                "Character '{$ulid[$i]}' at position $i is not a valid Crockford Base32 character"
+            );
         }
     }
 
     /**
-     * Tests that the `generate()` method generates a 26-character ULID.
-     *
-     * @covers Xmf\Ulid::generate
-     * @throws \Exception
+     * @covers Ulid::generate
      */
-    public function testGeneratesTwentySixChars()
+    public function testGenerateProducesUniqueValues(): void
+    {
+        $ulids = [];
+
+        for ($i = 0; $i < 1000; $i++) {
+            $ulids[] = Ulid::generate();
+        }
+
+        $uniqueUlids = \array_unique($ulids);
+
+        $this->assertCount(1000, $uniqueUlids, 'All 1000 generated ULIDs should be unique');
+    }
+
+    /**
+     * @covers Ulid::generate
+     */
+    public function testGenerateProducesLexicographicallySortableValues(): void
+    {
+        $ulid1 = Ulid::generate();
+        \usleep(2000); // Wait 2ms to ensure different timestamp
+        $ulid2 = Ulid::generate();
+
+        $this->assertLessThan(0, \strcmp($ulid1, $ulid2), 'Earlier ULID should sort before later ULID');
+    }
+
+    /**
+     * @covers Ulid::generate
+     */
+    public function testGenerateProducesCorrectlySortedArray(): void
+    {
+        $ulids = [];
+
+        for ($i = 0; $i < 10; $i++) {
+            $ulids[] = Ulid::generate();
+            \usleep(1000); // 1ms between each
+    }
+
+        $sortedUlids = $ulids;
+        \sort($sortedUlids, SORT_STRING);
+
+        $this->assertSame($ulids, $sortedUlids, 'ULIDs should already be in sorted order');
+    }
+
+    // =========================================================================
+    // TIMESTAMP TESTS
+    // =========================================================================
+
+    /**
+     * @covers Ulid::currentTimeMillis
+     */
+    public function testCurrentTimeMillisReturnsReasonableValue(): void
+    {
+        $time = Ulid::currentTimeMillis();
+
+        // Should be greater than Jan 1, 2020 in milliseconds
+        $this->assertGreaterThan(1577836800000, $time);
+
+        // Should be less than Jan 1, 2100 in milliseconds
+        $this->assertLessThan(4102444800000, $time);
+    }
+
+    /**
+     * @covers Ulid::encodeTime
+     * @covers Ulid::decodeTime
+     */
+    public function testTimeEncodingDecodingRoundTrip(): void
+    {
+        $originalTime = Ulid::currentTimeMillis();
+        $encoded = Ulid::encodeTime($originalTime);
+
+        // Create a full ULID with random portion for decoding
+        $ulid = $encoded . Ulid::encodeRandomness();
+        $decodedTime = Ulid::decodeTime($ulid);
+
+        $this->assertSame($originalTime, $decodedTime);
+    }
+
+    /**
+     * @covers Ulid::encodeTime
+     */
+    public function testEncodeTimeReturns10Characters(): void
+    {
+        $time = Ulid::currentTimeMillis();
+        $encoded = Ulid::encodeTime($time);
+
+        $this->assertSame(10, \strlen($encoded));
+    }
+
+    /**
+     * @covers Ulid::encodeTime
+     */
+    public function testEncodeTimeThrowsExceptionForNegativeTime(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Timestamp cannot be negative');
+
+        Ulid::encodeTime(-1);
+        }
+
+    /**
+     * @covers Ulid::encodeTime
+     */
+    public function testEncodeTimeThrowsExceptionForOverflow(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('exceeds maximum');
+
+        Ulid::encodeTime(Ulid::MAX_TIME + 1);
+    }
+
+    /**
+     * @covers Ulid::decodeTime
+     */
+    public function testDecodeTimeExtractsCorrectTimestamp(): void
     {
         $ulid = Ulid::generate();
+        $decodedTime = Ulid::decodeTime($ulid);
+        $currentTime = Ulid::currentTimeMillis();
 
-        $this->assertSame(26, \strlen($ulid));
+        // Decoded time should be within 1 second of current time
+        $this->assertLessThan(1000, \abs($currentTime - $decodedTime));
     }
 
     /**
-     * Tests that the `generate()` method generates ULIDs with different random characters when generated multiple times.
-     *
-     * @covers Xmf\Ulid::generate
-     * @throws \Exception
-     * @throws \Exception
+     * @covers Ulid::getDateTime
      */
-    public function testRandomnessWhenGeneratedMultipleTimes()
-    {
-        $a = Ulid::generate();
-        \usleep(100);  // Wait for 100 microseconds to ensure a different timestamp
-        $b = Ulid::generate();
-        $this->assertLessThan($b, $a);
-
-        // Using strcmp for lexicographical comparison
-        $this->assertTrue(\strcmp($a, $b) < 0);
-
-        // The time parts are different.
-        $this->assertNotEquals(\substr($a, 0, 10), \substr($b, 0, 10));
-
-        //the second ULID time part is bigger than the first ULID
-        $this->assertGreaterThan(\substr($a, 0, 10), \substr($b, 0, 10));
-
-        // The first 5-6 characters should be the same
-        $this->assertEquals(\substr($a, 0, 5), \substr($b, 0, 5));
-
-        //the random characters part should be different
-        $this->assertNotEquals(\substr($a, 10), \substr($b, 10));
-    }
-
-    /**
-     * Tests that the `generate()` method generates lexicographically sortable ULIDs.
-     *
-     * @covers Xmf\Ulid::generate
-     * @throws \Exception
-     * @throws \Exception
-     */
-    public function testGeneratesLexographicallySortableUlids()
-    {
-        $a = Ulid::generate();
-
-        \usleep(1000);  // Wait for 1 millisecond to ensure a different timestamp
-
-        $b = Ulid::generate();
-
-        $ulids = [$b, $a];
-        \usort($ulids, 'strcmp');
-
-        $this->assertSame([$a, $b], $ulids);
-    }
-
-    /**
-     * @return void
-     * @throws \Exception
-     */
-    public function testIsValid()
+    public function testGetDateTimeReturnsCorrectDateTime(): void
     {
         $ulid = Ulid::generate();
+        $dateTime = Ulid::getDateTime($ulid);
+        $now = new \DateTimeImmutable();
 
-        // Assert that the isValid() method returns true for valid ULID strings.
+        // Should be within 1 second of now
+        $diff = \abs($now->getTimestamp() - $dateTime->getTimestamp());
+        $this->assertLessThan(2, $diff);
+    }
+
+    /**
+     * @covers Ulid::getDateTime
+     */
+    public function testGetDateTimeWithSpecVector(): void
+    {
+        // Timestamp: 1469918176385 (2016-07-30 23:29:36.385 UTC)
+        $ulid = '01ARYZ6S410000000000000000';
+        $dateTime = Ulid::getDateTime($ulid);
+
+        $this->assertSame('2016-07-30', $dateTime->format('Y-m-d'));
+        $this->assertSame('23:29:36', $dateTime->format('H:i:s'));
+    }
+
+    // =========================================================================
+    // RANDOMNESS TESTS
+    // =========================================================================
+
+    /**
+     * @covers Ulid::encodeRandomness
+     */
+    public function testEncodeRandomnessReturns16Characters(): void
+    {
+        $randomPart = Ulid::encodeRandomness();
+
+        $this->assertSame(16, \strlen($randomPart));
+    }
+
+    /**
+     * @covers Ulid::encodeRandomness
+     */
+    public function testEncodeRandomnessProducesDifferentValues(): void
+    {
+        $random1 = Ulid::encodeRandomness();
+        $random2 = Ulid::encodeRandomness();
+
+        $this->assertNotSame($random1, $random2);
+    }
+
+    /**
+     * @covers Ulid::encodeRandomness
+     */
+    public function testEncodeRandomnessUsesOnlyValidCharacters(): void
+    {
+        for ($i = 0; $i < 100; $i++) {
+            $random = Ulid::encodeRandomness();
+
+            for ($j = 0; $j < 16; $j++) {
+                $this->assertNotFalse(
+                    \strpos(Ulid::ENCODING_CHARS, $random[$j]),
+                    "Random character '{$random[$j]}' at position $j is invalid"
+                );
+            }
+        }
+    }
+
+    /**
+     * @covers Ulid::decodeRandomness
+     */
+    public function testDecodeRandomnessExtractsCorrectPortion(): void
+    {
+        $ulid = Ulid::generate();
+        $randomPart = Ulid::decodeRandomness($ulid);
+
+        $this->assertSame(\substr(\strtoupper($ulid), 10), $randomPart);
+    }
+
+    // =========================================================================
+    // VALIDATION TESTS
+    // =========================================================================
+
+    /**
+     * @covers Ulid::isValid
+     */
+    public function testIsValidReturnsTrueForValidUppercaseUlid(): void
+    {
+        $ulid = Ulid::generate(true);
+
         $this->assertTrue(Ulid::isValid($ulid));
+    }
 
-        // Assert that the isValid() method returns false for invalid ULID strings.
-        $invalidUlid = 'invalid-ulid';
+    /**
+     * @covers Ulid::isValid
+     */
+    public function testIsValidReturnsTrueForValidLowercaseUlid(): void
+    {
+        $ulid = Ulid::generate(false);
+
+        $this->assertTrue(Ulid::isValid($ulid));
+    }
+
+    /**
+     * @covers Ulid::isValid
+     */
+    public function testIsValidReturnsFalseForTooShortString(): void
+    {
+        $this->assertFalse(Ulid::isValid('01ARZ3NDEKTSV4RRFFQ69G5FA')); // 25 chars
+    }
+
+    /**
+     * @covers Ulid::isValid
+     */
+    public function testIsValidReturnsFalseForTooLongString(): void
+    {
+        $this->assertFalse(Ulid::isValid('01ARZ3NDEKTSV4RRFFQ69G5FAXX')); // 28 chars
+    }
+
+    /**
+     * @covers Ulid::isValid
+     */
+    public function testIsValidReturnsFalseForEmptyString(): void
+    {
+        $this->assertFalse(Ulid::isValid(''));
+    }
+
+    /**
+     * @covers Ulid::isValid
+     * @dataProvider invalidCharacterProvider
+     */
+    public function testIsValidReturnsFalseForInvalidCharacters(string $invalidUlid): void
+    {
         $this->assertFalse(Ulid::isValid($invalidUlid));
     }
 
-    /**
-     * @return void
-     */
-    public function testEncodeTime()
+    public static function invalidCharacterProvider(): array
     {
-        $time = 572826470852228;
-        $timeChars = Ulid::encodeTime($time);  // Assumes encodeTime is public
-
-        $this->assertEquals('G8ZE7509M4', $timeChars);
+        return [
+            'contains I' => ['01ARZ3NDEKTSV4RRFFQI9G5FAV'],
+            'contains L' => ['01ARZ3NDEKTSV4RRFFQL9G5FAV'],
+            'contains O' => ['01ARZ3NDEKTSV4RRFFQO9G5FAV'],
+            'contains U' => ['01ARZ3NDEKTSV4RRFFQU9G5FAV'],
+            'contains special char' => ['01ARZ3NDEKTSV4RRFFQ@9G5FAV'],
+            'contains space' => ['01ARZ3NDEKTSV4RRFFQ 9G5FAV'],
+            'contains hyphen' => ['01ARZ3NDEK-SV4RRFFQ69G5FAV'],
+        ];
     }
 
     /**
-     * @return void
-     * @throws \Exception
+     * @covers Ulid::isValid
      */
-    public function testDecodeTime()
+    public function testIsValidIsCaseInsensitive(): void
     {
-        $timeChars = 'G8ZE7509M4SNQGYN4H6GSNQGYN';
-        $time = Ulid::decodeTime($timeChars);
-        $this->assertEquals(572826470852228, $time);
+        $upperUlid = Ulid::generate(true);
+        $lowerUlid = \strtolower($upperUlid);
+        $mixedUlid = '';
+
+        for ($i = 0; $i < 26; $i++) {
+            $mixedUlid .= $i % 2 === 0 ? $upperUlid[$i] : \strtolower($upperUlid[$i]);
     }
 
-    /**
-     * @return void
-     * @throws \Exception
-     */
-    public function testEncodeRandomness()
-    {
-        $randChars = Ulid::encodeRandomness();
-        //Checking the length of randomness characters
-        $this->assertEquals(16, \strlen($randChars));
+        $this->assertTrue(Ulid::isValid($upperUlid));
+        $this->assertTrue(Ulid::isValid($lowerUlid));
+        $this->assertTrue(Ulid::isValid($mixedUlid));
     }
 
-    /**
-     * @return void
-     * @throws \Exception
-     */
-    public function testDecodeRandomness()
-    {
-        $randChars = Ulid::generate();
-
-        $rand = Ulid::decodeRandomness($randChars);
-        // Assert that the randomness value is within the valid range.
-        $this->assertGreaterThanOrEqual(0, $rand);
-        $this->assertLessThanOrEqual(PHP_INT_MAX, $rand);
-
-        // Assert that the randomness value is different from a known value.
-        $this->assertNotEquals(1234567890, $rand);
-    }
-
+    // =========================================================================
+    // DECODE TESTS
+    // =========================================================================
 
     /**
-     * @return void
-     * @throws \Exception
+     * @covers Ulid::decode
      */
-    public function testGenerateUnique()
-    {
-        $ulid1 = Ulid::generate();
-        $ulid2 = Ulid::generate();
-
-        $this->assertNotEquals($ulid1, $ulid2);
-    }
-
-    /**
-     * @return void
-     */
-    public function testDecodeException()
-    {
-
-        $invalidUlid = 'invalid-ulid';
-
-        $this->expectException(\InvalidArgumentException::class);
-        Ulid::decode($invalidUlid);
-    }
-
-    /**
-     * @return void
-     */
-    public function testIsValidException()
-    {
-        $invalidUlid = 'invalid-ulid';
-
-        $isValid = Ulid::isValid($invalidUlid);
-
-        $this->assertFalse($isValid);
-    }
-
-    /**
-     * @return void
-     * @throws \Exception
-     */
-    public function testDecodeUlid()
+    public function testDecodeReturnsArrayWithTimeAndRand(): void
     {
         $ulid = Ulid::generate();
         $components = Ulid::decode($ulid);
 
-        $this->assertTrue($components['rand'] >= 0 && $components['rand'] < (32 ** 16));
-    }
-
-    /**
-     * @return void
-     */
-    public function testDecodeInvalidUlid()
-    {
-        $invalidUlid = 'invalid-ulid';
-
-        // Assert that the decode() method throws an exception of the correct type for invalid ULID strings.
-        $this->expectException(\InvalidArgumentException::class);
-        Ulid::decode($invalidUlid);
-    }
-
-    // Validate ULID
-
-    /**
-     * @return void
-     * @throws \Exception
-     */
-    public function testValidateUlid()
-    {
-        $ulid = Ulid::generate();
-
-        $this->assertTrue(Ulid::isValid($ulid));
-    }
-
-    /**
-     * @return void
-     */
-    public function testValidateInvalidUlid()
-    {
-        //INVALID
-        $this->assertFalse(Ulid::isValid('invalid-ulid-string'));
-    }
-
-    // Test ULID Generation:
-
-    /**
-     * @return void
-     * @throws \Exception
-     */
-    public function testUlidGeneration()
-    {
-        $ulid = Ulid::generate();
-        $this->assertNotEmpty($ulid);
-        $this->assertSame(26, \strlen($ulid));
-    }
-
-    /**
-     * @return void
-     * @throws \Exception
-     */
-    public function testUlidUniqueness()
-    {
-        $ulid1 = Ulid::generate();
-        \usleep(1000);  // Wait for 1 millisecond to ensure a different timestamp
-        $ulid2 = Ulid::generate();
-        $this->assertNotEquals($ulid1, $ulid2);
-    }
-
-    /**
-     * @return void
-     * @throws \Exception
-     */
-    public function testCaseSensitivity()
-    {
-        $ulidUpperCase = Ulid::generate(true);
-        $ulidLowerCase = Ulid::generate(false);
-
-        // Assert that the two ULID strings are different.
-        $this->assertNotEquals($ulidUpperCase, $ulidLowerCase);
-
-        echo "ulidUpperCase: $ulidUpperCase\n";
-        echo "ulidLowerCase: $ulidLowerCase\n";
-    }
-
-    // Test ULID Decoding:
-
-    /**
-     * @return void
-     * @throws \Exception
-     */
-    public function testUlidDecoding()
-    {
-        $ulid = Ulid::generate();
-        $components = Ulid::decode($ulid);
         $this->assertArrayHasKey('time', $components);
         $this->assertArrayHasKey('rand', $components);
     }
 
     /**
-     * @return void
+     * @covers Ulid::decode
      */
-    public function testInvalidUlidDecoding()
-    {
-
-        $this->expectException(\InvalidArgumentException::class);
-        Ulid::decode('invalidulid');
-    }
-
-    // Test ULID Encoding:
-    // (assuming you have a method to encode time and randomness separately)
-    /**
-     * @return void
-     */
-    public function testTimeEncoding()
-    {
-        $time = Ulid::microtimeToUlidTime(\microtime(true));
-        $encodedTime = Ulid::encodeTime($time);  // Assumes encodeTime is public
-        $this->assertNotEmpty($encodedTime);
-    }
-
-    // Test ULID Validity Checking:
-
-    /**
-     * @return void
-     * @throws \Exception
-     */
-    public function testValidUlid()
+    public function testDecodeTimeIsPositiveInteger(): void
     {
         $ulid = Ulid::generate();
-        $this->assertTrue(Ulid::isValid($ulid));
+        $components = Ulid::decode($ulid);
+
+        $this->assertIsInt($components['time']);
+        $this->assertGreaterThan(0, $components['time']);
     }
 
     /**
-     * @return void
+     * @covers Ulid::decode
      */
-    public function testInvalidUlid()
+    public function testDecodeRandIs16Characters(): void
     {
-        $this->assertFalse(Ulid::isValid('invalidulid'));
+        $ulid = Ulid::generate();
+        $components = Ulid::decode($ulid);
+
+        $this->assertSame(16, \strlen($components['rand']));
     }
 
-    // Test Lexicographic Order:
+    /**
+     * @covers Ulid::decode
+     */
+    public function testDecodeThrowsExceptionForInvalidUlid(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        Ulid::decode('invalid-ulid');
+    }
 
     /**
-     * @return void
-     * @throws \Exception
+     * @covers Ulid::decodeTime
      */
-    public function testLexicographicOrder()
+    public function testDecodeTimeThrowsExceptionForWrongLength(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid ULID length');
+
+        Ulid::decodeTime('01ARZ3NDEK'); // Only 10 chars
+    }
+
+    /**
+     * @covers Ulid::decodeTime
+     */
+    public function testDecodeTimeThrowsExceptionForInvalidCharacter(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid character');
+
+        Ulid::decodeTime('01ARZ3NDEKTSV4RRFFQI9G5FAV'); // Contains 'I'
+    }
+
+    /**
+     * @covers Ulid::decodeRandomness
+     */
+    public function testDecodeRandomnessThrowsExceptionForWrongLength(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        Ulid::decodeRandomness('short');
+    }
+
+    /**
+     * @covers Ulid::decodeRandomness
+     */
+    public function testDecodeRandomnessThrowsExceptionForInvalidCharacter(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        Ulid::decodeRandomness('01ARZ3NDEKTSV4RRFFQI9G5FAV'); // Contains 'I'
+    }
+
+    // =========================================================================
+    // COMPARISON TESTS
+    // =========================================================================
+
+    /**
+     * @covers Ulid::compare
+     */
+    public function testCompareReturnNegativeForEarlierUlid(): void
     {
         $ulid1 = Ulid::generate();
-        \usleep(1000);
+        \usleep(2000);
         $ulid2 = Ulid::generate();
-        $this->assertTrue(\strcmp($ulid1, $ulid2) < 0);
+
+        $this->assertSame(-1, Ulid::compare($ulid1, $ulid2));
     }
 
-    // Test Microtime Conversion:
-
     /**
-     * @return void
+     * @covers Ulid::compare
      */
-    public function testMicrotimeConversion()
+    public function testCompareReturnPositiveForLaterUlid(): void
     {
-        $microtime = \microtime(true);
-        $ulidTime = Ulid::microtimeToUlidTime($microtime);
+        $ulid1 = Ulid::generate();
+        \usleep(2000);
+        $ulid2 = Ulid::generate();
 
-        $this->assertIsInt($ulidTime);
-        // Check if the time is within a reasonable range (e.g., since the year 2000)
-        $this->assertGreaterThanOrEqual($ulidTime, 946684800000000);
+        $this->assertSame(1, Ulid::compare($ulid2, $ulid1));
     }
 
-    // Test the decoding of time from a given ULID
-
     /**
-     * @return void
-     * @throws \Exception
+     * @covers Ulid::compare
      */
-    public function testDecodeTimeInt()
+    public function testCompareReturnZeroForSameUlid(): void
     {
         $ulid = Ulid::generate();
-        $decodedTime = Ulid::decodeTime($ulid); // Assumes decodeTime is public
-        $this->assertIsInt($decodedTime);
+
+        $this->assertSame(0, Ulid::compare($ulid, $ulid));
     }
 
-    // Test the decoding of randomness from a given ULID
-
     /**
-     * @return void
-     * @throws \Exception
+     * @covers Ulid::compare
      */
-    public function testDecodeRandomnessInt()
+    public function testCompareIsCaseInsensitive(): void
     {
         $ulid = Ulid::generate();
-        $decodedRandomness = Ulid::decodeRandomness($ulid); // Assumes decodeRandomness is public
+        $lowerUlid = \strtolower($ulid);
 
-        $this->assertIsInt($decodedRandomness);
+        $this->assertSame(0, Ulid::compare($ulid, $lowerUlid));
     }
 
-    // Test the encoding of randomness
+    // =========================================================================
+    // UUID CONVERSION TESTS
+    // =========================================================================
 
     /**
-     * @return void
-     * @throws \Exception
+     * @covers Ulid::toUuid
      */
-    public function testEncodeRandomnessNotEmpty()
+    public function testToUuidReturnsValidUuidFormat(): void
     {
-        $encodedRandomness = Ulid::encodeRandomness(); // Assumes encodeRandomness is public
-        $this->assertNotEmpty($encodedRandomness);
+        $ulid = Ulid::generate();
+        $uuid = Ulid::toUuid($ulid);
+
+        // UUID format: 8-4-4-4-12 hex characters
+        $this->assertMatchesRegularExpression(
+            '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i',
+            $uuid
+        );
     }
 
-    // Test for valid random value range
+    /**
+     * @covers Ulid::toUuid
+     */
+    public function testToUuidReturns36Characters(): void
+    {
+        $ulid = Ulid::generate();
+        $uuid = Ulid::toUuid($ulid);
+
+        $this->assertSame(36, \strlen($uuid));
+    }
 
     /**
-     * @return void
-     * @throws \Exception
+     * @covers Ulid::toUuid
      */
-    public function testRandomValueRange()
+    public function testToUuidThrowsExceptionForInvalidUlid(): void
     {
+        $this->expectException(\InvalidArgumentException::class);
+
+        Ulid::toUuid('invalid-ulid');
+    }
+
+    /**
+     * @covers Ulid::toUuid
+     */
+    public function testToUuidProducesConsistentResult(): void
+    {
+        $ulid = Ulid::generate();
+        $uuid1 = Ulid::toUuid($ulid);
+        $uuid2 = Ulid::toUuid($ulid);
+
+        $this->assertSame($uuid1, $uuid2);
+    }
+
+    /**
+     * @covers Ulid::fromUuid
+     */
+    public function testFromUuidReturnsValidUlid(): void
+    {
+        $uuid = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
+        $ulid = Ulid::fromUuid($uuid);
+
+        $this->assertTrue(Ulid::isValid($ulid));
+        $this->assertSame(26, \strlen($ulid));
+    }
+
+    /**
+     * @covers Ulid::fromUuid
+     */
+    public function testFromUuidWorksWithoutHyphens(): void
+    {
+        $uuidWithHyphens = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
+        $uuidWithoutHyphens = 'f47ac10b58cc4372a5670e02b2c3d479';
+
+        $ulid1 = Ulid::fromUuid($uuidWithHyphens);
+        $ulid2 = Ulid::fromUuid($uuidWithoutHyphens);
+
+        $this->assertSame($ulid1, $ulid2);
+    }
+
+    /**
+     * @covers Ulid::fromUuid
+     */
+    public function testFromUuidThrowsExceptionForInvalidLength(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('expected 32 hex characters');
+
+        Ulid::fromUuid('f47ac10b-58cc-4372-a567');
+    }
+
+    /**
+     * @covers Ulid::fromUuid
+     */
+    public function testFromUuidThrowsExceptionForInvalidCharacters(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('non-hexadecimal');
+
+        Ulid::fromUuid('g47ac10b-58cc-4372-a567-0e02b2c3d479'); // 'g' is invalid
+    }
+
+    /**
+     * @covers Ulid::toUuid
+     * @covers Ulid::fromUuid
+     */
+    public function testUuidRoundTrip(): void
+    {
+        $originalUlid = Ulid::generate();
+        $uuid = Ulid::toUuid($originalUlid);
+        $convertedBack = Ulid::fromUuid($uuid);
+
+        $this->assertSame($originalUlid, $convertedBack);
+    }
+
+    /**
+     * @covers Ulid::toUuid
+     * @covers Ulid::fromUuid
+     */
+    public function testUuidRoundTripMultiple(): void
+    {
+        for ($i = 0; $i < 100; $i++) {
+            $originalUlid = Ulid::generate();
+            $uuid = Ulid::toUuid($originalUlid);
+            $convertedBack = Ulid::fromUuid($uuid);
+
+            $this->assertSame(
+                $originalUlid,
+                $convertedBack,
+                "Round-trip failed for ULID: $originalUlid"
+            );
+        }
+    }
+
+    /**
+     * @covers Ulid::fromUuid
+     * @covers Ulid::toUuid
+     */
+    public function testFromUuidRoundTrip(): void
+    {
+        $originalUuid = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
+        $ulid = Ulid::fromUuid($originalUuid);
+        $convertedBack = Ulid::toUuid($ulid);
+
+        $this->assertSame(\strtolower($originalUuid), \strtolower($convertedBack));
+    }
+
+    /**
+     * Test known UUID to ULID conversion vector.
+     *
+     * @covers Ulid::fromUuid
+     */
+    public function testFromUuidKnownVector(): void
+    {
+        // UUID: 00000000-0000-0000-0000-000000000000 should convert to all zeros
+        $zeroUuid = '00000000-0000-0000-0000-000000000000';
+        $ulid = Ulid::fromUuid($zeroUuid);
+
+        $this->assertSame('00000000000000000000000000', $ulid);
+    }
+
+    // =========================================================================
+    // EDGE CASE TESTS
+    // =========================================================================
+
+    /**
+     * Test minimum timestamp (epoch)
+     */
+    public function testMinimumTimestamp(): void
+    {
+        $encoded = Ulid::encodeTime(0);
+        $ulid = $encoded . '0000000000000000';
+
+        $this->assertTrue(Ulid::isValid($ulid));
+        $this->assertSame(0, Ulid::decodeTime($ulid));
+    }
+
+    /**
+     * Test that generating many ULIDs in rapid succession still produces unique values
+     */
+    public function testRapidGenerationUniqueness(): void
+    {
+        $ulids = [];
+
+        for ($i = 0; $i < 100; $i++) {
+            $ulids[] = Ulid::generate();
+        }
+
+        $uniqueCount = \count(\array_unique($ulids));
+
+        $this->assertSame(100, $uniqueCount, 'All rapidly generated ULIDs should be unique');
+    }
+
+    /**
+     * Test that ULID works correctly around midnight/day boundaries
+     */
+    public function testTimestampPrecision(): void
+    {
+        $ulid1 = Ulid::generate();
+        $time1 = Ulid::decodeTime($ulid1);
+
+        \usleep(1500); // Wait 1.5ms
+
+        $ulid2 = Ulid::generate();
+        $time2 = Ulid::decodeTime($ulid2);
+
+        // Times should be different (at least 1ms apart)
+        $this->assertGreaterThanOrEqual(1, $time2 - $time1);
+    }
+
+    // =========================================================================
+    // ENCODING ALPHABET TESTS
+    // =========================================================================
+
+    /**
+     * Verify Crockford Base32 alphabet is correct
+     */
+    public function testCrockfordBase32Alphabet(): void
+    {
+        $expected = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+
+        $this->assertSame($expected, Ulid::ENCODING_CHARS);
+        $this->assertSame(32, \strlen(Ulid::ENCODING_CHARS));
+
+        // Verify excluded characters are not present
+        $this->assertStringNotContainsString('I', Ulid::ENCODING_CHARS);
+        $this->assertStringNotContainsString('L', Ulid::ENCODING_CHARS);
+        $this->assertStringNotContainsString('O', Ulid::ENCODING_CHARS);
+        $this->assertStringNotContainsString('U', Ulid::ENCODING_CHARS);
+    }
+
+    /**
+     * Test constants are correctly defined
+     */
+    public function testConstants(): void
+    {
+        $this->assertSame(32, Ulid::ENCODING_LENGTH);
+        $this->assertSame(10, Ulid::TIME_LENGTH);
+        $this->assertSame(16, Ulid::RANDOM_LENGTH);
+        $this->assertSame(26, Ulid::ULID_LENGTH);
+        $this->assertSame(281474976710655, Ulid::MAX_TIME);
+    }
+
+    // =========================================================================
+    // CONSISTENCY TESTS
+    // =========================================================================
+
+    /**
+     * Test that encoding and decoding are inverse operations
+     */
+    public function testEncodingDecodingConsistency(): void
+    {
+        for ($i = 0; $i < 100; $i++) {
         $ulid = Ulid::generate();
         $components = Ulid::decode($ulid);
-        $this->assertGreaterThanOrEqual(0, $components['rand']);
-        // Assuming a maximum value for the random component:
-        $this->assertLessThanOrEqual(PHP_INT_MAX, $components['rand']);
-    }
+            $reEncodedTime = Ulid::encodeTime($components['time']);
 
-    // Test encoding and decoding consistency
-
-    /**
-     * @return void
-     * @throws \Exception
-     */
-    public function testEncodingDecodingConsistency()
-    {
-        $ulid = Ulid::generate();
-        $components = Ulid::decode($ulid);
-        $encodedTime = Ulid::encodeTime($components['time']); // Assumes encodeTime is public
-        $this->assertEquals(\substr($ulid, 0, 10), $encodedTime);
-    }
-
-    // Test if the microtimeToUlidTime function is working as expected
-
-    /**
-     * @return void
-     */
-    public function testMicrotimeToUlidTimeFunction()
-    {
-        $microtime = \microtime(true);
-        $ulidTime = Ulid::microtimeToUlidTime($microtime);
-
-        $this->assertIsInt($ulidTime);
-
-        // Check if the time is within a reasonable range (e.g., since the year 2000)
-        $this->assertGreaterThanOrEqual($ulidTime, 946684800000000);
+            $this->assertSame(
+                \substr(\strtoupper($ulid), 0, 10),
+                $reEncodedTime,
+                'Time portion should be consistent after decode/encode cycle'
+            );
+        }
     }
 
     /**
-     * Test for valid ULID string format
-     * @throws \Exception
+     * Test decoding works with mixed case input
      */
-    public function testValidUlidString()
+    public function testDecodingWithMixedCase(): void
     {
-        $ulid = Ulid::generate();
+        $upperUlid = Ulid::generate(true);
+        $lowerUlid = \strtolower($upperUlid);
+
+        $upperComponents = Ulid::decode($upperUlid);
+        $lowerComponents = Ulid::decode($lowerUlid);
+
+        $this->assertSame($upperComponents['time'], $lowerComponents['time']);
+        $this->assertSame($upperComponents['rand'], $lowerComponents['rand']);
+    }
+
+    // =========================================================================
+    // BIT-PACKING TESTS (for optimized encodeRandomness)
+    // =========================================================================
+
+    /**
+     * Test that encodeRandomness produces evenly distributed characters
+     */
+    public function testRandomnessDistribution(): void
+    {
+        $charCounts = \array_fill_keys(\str_split(Ulid::ENCODING_CHARS), 0);
+        $iterations = 10000;
+
+        for ($i = 0; $i < $iterations; $i++) {
+            $random = Ulid::encodeRandomness();
+            for ($j = 0; $j < 16; $j++) {
+                $charCounts[$random[$j]]++;
+    }
+        }
+
+        // Each character should appear roughly 1/32 of the time
+        // With 160000 total characters (10000 * 16), expect ~5000 per character
+        $expectedCount = ($iterations * 16) / 32;
+        $tolerance = $expectedCount * 0.25; // 25% tolerance
+
+        foreach ($charCounts as $char => $count) {
+            $this->assertGreaterThan(
+                $expectedCount - $tolerance,
+                $count,
+                "Character '$char' appeared too few times: $count (expected ~$expectedCount)"
+            );
+            $this->assertLessThan(
+                $expectedCount + $tolerance,
+                $count,
+                "Character '$char' appeared too many times: $count (expected ~$expectedCount)"
+            );
+        }
+    }
+
+    // =========================================================================
+    // MONOTONIC GENERATION TESTS
+    // =========================================================================
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // Reset monotonic state before each test
+        Ulid::resetMonotonicState();
+    }
+
+    /**
+     * @covers Ulid::generateMonotonic
+     */
+    public function testGenerateMonotonicReturnsValidUlid(): void
+    {
+        $ulid = Ulid::generateMonotonic();
+
+        $this->assertTrue(Ulid::isValid($ulid));
+        $this->assertSame(26, \strlen($ulid));
+    }
+
+    /**
+     * @covers Ulid::generateMonotonic
+     */
+    public function testGenerateMonotonicReturnsUppercaseByDefault(): void
+    {
+        $ulid = Ulid::generateMonotonic();
+
+        $this->assertSame($ulid, \strtoupper($ulid));
+    }
+
+    /**
+     * @covers Ulid::generateMonotonic
+     */
+    public function testGenerateMonotonicReturnsLowercaseWhenRequested(): void
+    {
+        $ulid = Ulid::generateMonotonic(false);
+
+        $this->assertSame($ulid, \strtolower($ulid));
+    }
+
+    /**
+     * @covers Ulid::generateMonotonic
+     */
+    public function testGenerateMonotonicProducesStrictlyIncreasingValues(): void
+    {
+        $ulids = [];
+
+        // Generate many ULIDs rapidly (within same millisecond)
+        for ($i = 0; $i < 100; $i++) {
+            $ulids[] = Ulid::generateMonotonic();
+    }
+
+        // Verify strict ordering
+        for ($i = 1; $i < count($ulids); $i++) {
+            $this->assertLessThan(
+                0,
+                \strcmp($ulids[$i - 1], $ulids[$i]),
+                "ULID at index $i should be greater than ULID at index " . ($i - 1)
+            );
+        }
+    }
+
+    /**
+     * @covers Ulid::generateMonotonic
+     */
+    public function testGenerateMonotonicIncrementsRandomPortion(): void
+    {
+        Ulid::resetMonotonicState();
+
+        // Generate two ULIDs very quickly (should be same millisecond)
+        $ulid1 = Ulid::generateMonotonic();
+        $ulid2 = Ulid::generateMonotonic();
+
+        // Time portions should be the same (or very close)
+        $time1 = \substr($ulid1, 0, 10);
+        $time2 = \substr($ulid2, 0, 10);
+
+        // Random portions should be different
+        $rand1 = \substr($ulid1, 10);
+        $rand2 = \substr($ulid2, 10);
+
+        if ($time1 === $time2) {
+            // If same millisecond, random should be incremented
+            $this->assertNotSame($rand1, $rand2);
+            $this->assertLessThan(0, \strcmp($rand1, $rand2));
+        }
+    }
+
+    /**
+     * @covers Ulid::generateMonotonic
+     */
+    public function testGenerateMonotonicResetsOnNewMillisecond(): void
+    {
+        $ulid1 = Ulid::generateMonotonic();
+
+        // Wait for a new millisecond
+        \usleep(2000);
+
+        $ulid2 = Ulid::generateMonotonic();
+
+        // Time portions should be different
+        $time1 = Ulid::decodeTime($ulid1);
+        $time2 = Ulid::decodeTime($ulid2);
+
+        $this->assertGreaterThan($time1, $time2);
+    }
+
+    /**
+     * @covers Ulid::resetMonotonicState
+     */
+    public function testResetMonotonicState(): void
+    {
+        // Generate a ULID to set the state
+        Ulid::generateMonotonic();
+
+        // Reset
+        Ulid::resetMonotonicState();
+
+        // Generate another - should start fresh
+        $ulid = Ulid::generateMonotonic();
 
         $this->assertTrue(Ulid::isValid($ulid));
     }
 
     /**
-     * Test for invalid ULID string format
+     * @covers Ulid::generateMonotonic
      */
-    public function testInvalidUlidString()
+    public function testGenerateMonotonicUniqueness(): void
     {
-        $invalidUlid = 'INVALID_ULID_STRING';
+        $ulids = [];
 
-        $this->assertFalse(Ulid::isValid($invalidUlid));
+        for ($i = 0; $i < 1000; $i++) {
+            $ulids[] = Ulid::generateMonotonic();
+        }
+
+        $uniqueCount = \count(\array_unique($ulids));
+
+        $this->assertSame(1000, $uniqueCount, 'All monotonic ULIDs should be unique');
     }
 
     /**
-     * Test for case insensitivity in ULID validation
-     * @throws \Exception
+     * @covers Ulid::generateMonotonic
      */
-    public function testCaseInsensitivity()
+    public function testGenerateMonotonicSortedArray(): void
     {
-        $ulid = Ulid::generate(false);  // generate lowercase ULID
-        $this->assertTrue(Ulid::isValid(\strtoupper($ulid)));
+        $ulids = [];
+
+        for ($i = 0; $i < 100; $i++) {
+            $ulids[] = Ulid::generateMonotonic();
+        }
+
+        $sortedUlids = $ulids;
+        \sort($sortedUlids, SORT_STRING);
+
+        $this->assertSame($ulids, $sortedUlids, 'Monotonic ULIDs should already be in sorted order');
+    }
+
+    // =========================================================================
+    // BINARY CONVERSION TESTS
+    // =========================================================================
+
+    /**
+     * @covers Ulid::toBinary
+     */
+    public function testToBinaryReturns16Bytes(): void
+    {
+        $ulid = Ulid::generate();
+        $binary = Ulid::toBinary($ulid);
+
+        $this->assertSame(16, \strlen($binary));
     }
 
     /**
-     * Test exception handling for invalid ULID string in decode method
+     * @covers Ulid::toBinary
      */
-    public function testDecodeExceptionHandling()
+    public function testToBinaryProducesConsistentResult(): void
     {
+        $ulid = Ulid::generate();
+        $binary1 = Ulid::toBinary($ulid);
+        $binary2 = Ulid::toBinary($ulid);
 
+        $this->assertSame($binary1, $binary2);
+    }
+
+    /**
+     * @covers Ulid::toBinary
+     */
+    public function testToBinaryThrowsExceptionForInvalidUlid(): void
+    {
         $this->expectException(\InvalidArgumentException::class);
-        $invalidUlid = 'INVALID_ULID_STRING';
-        Ulid::decode($invalidUlid);
+
+        Ulid::toBinary('invalid-ulid');
     }
 
     /**
-     * Test exception handling for invalid ULID string in decodeTime method
+     * @covers Ulid::fromBinary
      */
-    public function testDecodeTimeExceptionHandling()
+    public function testFromBinaryReturnsValidUlid(): void
     {
-        $invalidUlid = 'INVALID_ULID_STRING';
+        $originalUlid = Ulid::generate();
+        $binary = Ulid::toBinary($originalUlid);
+        $ulid = Ulid::fromBinary($binary);
 
-        $this->expectException(\InvalidArgumentException::class);
-        Ulid::decodeTime($invalidUlid);  // Assumes decodeTime is public
+        $this->assertTrue(Ulid::isValid($ulid));
+        $this->assertSame(26, \strlen($ulid));
     }
 
     /**
-     * Test exception handling for invalid ULID string in decodeRandomness method
+     * @covers Ulid::fromBinary
      */
-    public function testDecodeRandomnessExceptionHandling()
+    public function testFromBinaryThrowsExceptionForInvalidLength(): void
     {
-        $invalidUlid = 'INVALID_ULID_STRING';
-
         $this->expectException(\InvalidArgumentException::class);
-        Ulid::decodeRandomness($invalidUlid);  // Assumes decodeRandomness is public
+        $this->expectExceptionMessage('Invalid binary length');
+
+        Ulid::fromBinary('short');
+    }
+
+    /**
+     * @covers Ulid::toBinary
+     * @covers Ulid::fromBinary
+     */
+    public function testBinaryRoundTrip(): void
+    {
+        $originalUlid = Ulid::generate();
+        $binary = Ulid::toBinary($originalUlid);
+        $convertedBack = Ulid::fromBinary($binary);
+
+        $this->assertSame($originalUlid, $convertedBack);
+    }
+
+    /**
+     * @covers Ulid::toBinary
+     * @covers Ulid::fromBinary
+     */
+    public function testBinaryRoundTripMultiple(): void
+    {
+        for ($i = 0; $i < 100; $i++) {
+            $originalUlid = Ulid::generate();
+            $binary = Ulid::toBinary($originalUlid);
+            $convertedBack = Ulid::fromBinary($binary);
+
+            $this->assertSame(
+                $originalUlid,
+                $convertedBack,
+                "Binary round-trip failed for ULID: $originalUlid"
+            );
+    }
+    }
+
+    /**
+     * Test known binary vector: all zeros
+     *
+     * @covers Ulid::toBinary
+     */
+    public function testToBinaryKnownVectorZeros(): void
+    {
+        $ulid = '00000000000000000000000000';
+        $binary = Ulid::toBinary($ulid);
+
+        // All zeros ULID should be all zero bytes
+        $this->assertSame(\str_repeat("\x00", 16), $binary);
+    }
+
+    /**
+     * Test known binary vector: all zeros
+     *
+     * @covers Ulid::fromBinary
+     */
+    public function testFromBinaryKnownVectorZeros(): void
+    {
+        $binary = \str_repeat("\x00", 16);
+        $ulid = Ulid::fromBinary($binary);
+
+        $this->assertSame('00000000000000000000000000', $ulid);
+    }
+
+    /**
+     * Test binary preserves lexicographic ordering
+     *
+     * @covers Ulid::toBinary
+     */
+    public function testBinaryPreservesOrdering(): void
+    {
+        $ulid1 = Ulid::generate();
+        \usleep(2000);
+        $ulid2 = Ulid::generate();
+
+        $binary1 = Ulid::toBinary($ulid1);
+        $binary2 = Ulid::toBinary($ulid2);
+
+        // Binary comparison should match string comparison
+        $this->assertLessThan(0, \strcmp($ulid1, $ulid2));
+        $this->assertLessThan(0, \strcmp($binary1, $binary2));
+    }
+
+    /**
+     * Test binary storage efficiency
+     *
+     * @covers Ulid::toBinary
+     */
+    public function testBinaryStorageEfficiency(): void
+    {
+        $ulid = Ulid::generate();
+
+        $stringLength = \strlen($ulid);     // 26 bytes
+        $binaryLength = \strlen(Ulid::toBinary($ulid)); // 16 bytes
+
+        $this->assertSame(26, $stringLength);
+        $this->assertSame(16, $binaryLength);
+
+        // Binary is ~38% smaller
+        $savings = (1 - ($binaryLength / $stringLength)) * 100;
+        $this->assertGreaterThan(38, $savings);
+    }
+
+    // =========================================================================
+    // UUID AND BINARY INTEROPERABILITY TESTS
+    // =========================================================================
+
+    /**
+     * Test that ULID → Binary → ULID → UUID is consistent
+     *
+     * @covers Ulid::toBinary
+     * @covers Ulid::fromBinary
+     * @covers Ulid::toUuid
+     */
+    public function testBinaryUuidInteroperability(): void
+    {
+        $originalUlid = Ulid::generate();
+
+        // ULID → Binary → ULID
+        $binary = Ulid::toBinary($originalUlid);
+        $ulidFromBinary = Ulid::fromBinary($binary);
+
+        // Both should produce the same UUID
+        $uuid1 = Ulid::toUuid($originalUlid);
+        $uuid2 = Ulid::toUuid($ulidFromBinary);
+
+        $this->assertSame($uuid1, $uuid2);
+    }
+
+    /**
+     * Test that Binary and UUID representations are equivalent
+     *
+     * @covers Ulid::toBinary
+     * @covers Ulid::toUuid
+     */
+    public function testBinaryMatchesUuidHex(): void
+    {
+        $ulid = Ulid::generate();
+        $binary = Ulid::toBinary($ulid);
+        $uuid = Ulid::toUuid($ulid);
+
+        // Convert binary to hex and compare with UUID
+        $binaryHex = \bin2hex($binary);
+        $uuidHex = \str_replace('-', '', $uuid);
+
+        $this->assertSame($binaryHex, $uuidHex);
+    }
+
+    // =========================================================================
+    // INTERFACE TESTS
+    // =========================================================================
+
+    /**
+     * Test that Ulid implements UlidInterface
+     *
+     * @covers Ulid
+     */
+    public function testUlidImplementsInterface(): void
+    {
+        $this->assertInstanceOf(\Xmf\UlidInterface::class, new Ulid());
+    }
+
+    /**
+     * Test that Ulid implements UlidGeneratorInterface
+     *
+     * @covers Ulid
+     */
+    public function testUlidImplementsGeneratorInterface(): void
+    {
+        $this->assertInstanceOf(\Xmf\UlidGeneratorInterface::class, new Ulid());
+    }
+
+    /**
+     * Test that Ulid implements UlidMonotonicGeneratorInterface
+     *
+     * @covers Ulid
+     */
+    public function testUlidImplementsMonotonicGeneratorInterface(): void
+    {
+        $this->assertInstanceOf(\Xmf\UlidMonotonicGeneratorInterface::class, new Ulid());
+    }
+
+    /**
+     * Test that Ulid implements UlidValidatorInterface
+     *
+     * @covers Ulid
+     */
+    public function testUlidImplementsValidatorInterface(): void
+    {
+        $this->assertInstanceOf(\Xmf\UlidValidatorInterface::class, new Ulid());
+    }
+
+    /**
+     * Test that Ulid implements UlidBinaryInterface
+     *
+     * @covers Ulid
+     */
+    public function testUlidImplementsBinaryInterface(): void
+    {
+        $this->assertInstanceOf(\Xmf\UlidBinaryInterface::class, new Ulid());
+    }
+
+    /**
+     * Test that Ulid implements UlidUuidInterface
+     *
+     * @covers Ulid
+     */
+    public function testUlidImplementsUuidInterface(): void
+    {
+        $this->assertInstanceOf(\Xmf\UlidUuidInterface::class, new Ulid());
+    }
+
+    /**
+     * Test using Ulid via interface for dependency injection
+     *
+     * @covers Ulid
+     */
+    public function testDependencyInjectionUsage(): void
+    {
+        $generator = new Ulid();
+
+        // Use via interface methods
+        $ulid = $generator->generate();
+        $this->assertTrue($generator->isValid($ulid));
+
+        $decoded = $generator->decode($ulid);
+        $this->assertArrayHasKey('time', $decoded);
+
+        $monotonic = $generator->generateMonotonic();
+        $this->assertTrue($generator->isValid($monotonic));
+    }
+
+    // =========================================================================
+    // CONSTANT TESTS
+    // =========================================================================
+
+    /**
+     * Test that BINARY_LENGTH constant is correct
+     */
+    public function testBinaryLengthConstant(): void
+    {
+        $this->assertSame(16, Ulid::BINARY_LENGTH);
+    }
+
+    /**
+     * Test that MAX_TIME constant is correct (2^48 - 1)
+     */
+    public function testMaxTimeConstant(): void
+    {
+        $expected = (2 ** 48) - 1;
+        $this->assertSame($expected, Ulid::MAX_TIME);
     }
 }
