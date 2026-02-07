@@ -7,9 +7,12 @@
     <!-- Use PSR-12 as the base standard -->
     <rule ref="PSR12"/>
 
-    <!-- Disable line length check (can be overly strict for documentation) -->
+    <!-- Relax line length: warn at 200 chars instead of the default 120 -->
     <rule ref="Generic.Files.LineLength">
-        <exclude-pattern>*</exclude-pattern>
+        <properties>
+            <property name="lineLimit" value="200"/>
+            <property name="absoluteLineLimit" value="0"/>
+        </properties>
     </rule>
 
     <!-- Exclude patterns -->

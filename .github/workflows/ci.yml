@@ -71,10 +71,20 @@ jobs:
       - name: Show PHPUnit version
         run: vendor/bin/phpunit --version
 
+      - name: Select PHPUnit config
+        id: phpunit-config
+        run: |
+          PHPUNIT_VERSION=$(vendor/bin/phpunit --version | grep -oP '\d+' | head -1)
+          if [ "$PHPUNIT_VERSION" -ge 10 ]; then
+            echo "config=phpunit10.xml.dist" >> $GITHUB_OUTPUT
+          else
+            echo "config=phpunit.xml.dist" >> $GITHUB_OUTPUT
+          fi
+
       - name: Run tests
         run: |
           mkdir -p build/logs
-          vendor/bin/phpunit --stderr ${{ matrix.coverage && '--coverage-clover=build/logs/clover.xml' || '--no-coverage' }}
+          vendor/bin/phpunit --configuration ${{ steps.phpunit-config.outputs.config }} --stderr ${{ matrix.coverage && '--coverage-clover=build/logs/clover.xml' || '--no-coverage' }}
 
       - name: Upload coverage to Codecov
         if: matrix.coverage
