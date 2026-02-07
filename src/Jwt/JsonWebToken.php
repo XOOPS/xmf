@@ -107,9 +107,9 @@ class JsonWebToken
      *
      * @return string encoded and signed jwt string
      *
-     * @throws \DomainException;
-     * @throws \InvalidArgumentException;
-     * @throws \UnexpectedValueException;
+     * @throws \DomainException
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
      */
     public function create($payload, $expirationOffset = 0)
     {

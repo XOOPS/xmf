@@ -979,24 +979,6 @@ parameters:
 			path: src/Jwt/JsonWebToken.php
 
 		-
-			message: '#^PHPDoc tag @throws has invalid value \(\\DomainException;\)\: Unexpected token ";", expected TOKEN_HORIZONTAL_WS at offset 466 on line 10$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Jwt/JsonWebToken.php
-
-		-
-			message: '#^PHPDoc tag @throws has invalid value \(\\InvalidArgumentException;\)\: Unexpected token ";", expected TOKEN_HORIZONTAL_WS at offset 509 on line 11$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Jwt/JsonWebToken.php
-
-		-
-			message: '#^PHPDoc tag @throws has invalid value \(\\UnexpectedValueException;\)\: Unexpected token ";", expected TOKEN_HORIZONTAL_WS at offset 552 on line 12$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Jwt/JsonWebToken.php
-
-		-
 			message: '#^Parameter \#1 \$payload of static method Firebase\\JWT\\JWT\:\:encode\(\) expects array\<mixed\>, array\|ArrayObject given\.$#'
 			identifier: argument.type
 			count: 1
