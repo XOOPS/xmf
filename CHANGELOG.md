@@ -9,6 +9,15 @@
 * Fix XSS in `Module\Admin` config methods (`addConfigError`, `addConfigAccept`, `addConfigWarning`) by escaping output
 * Fix `IPAddress::normalize()` passing `inet_pton()` false result to `inet_ntop()` for invalid IPs
 
+### Security
+* Harden `Key\FileStorage::save()` to use `var_export()` instead of string interpolation for PHP code generation
+* Add `allowed_classes => false` to `unserialize()` in `Module\Helper\Session::get()` to prevent PHP Object Injection
+* Harden `Language::loadFile()` with `realpath()` validation to prevent path traversal
+* Add 2MB file size limit to `Yaml::read()` and `Yaml::readWrapped()` to prevent memory exhaustion
+* Narrow `Yaml` exception handling from `\Exception` to `ParseException` to avoid hiding unrelated errors
+* Replace `trigger_error()` with `RuntimeException` in `Jwt\JsonWebToken::decode()` for structured error handling
+* Remove dead `get_magic_quotes_gpc()` calls from `Request` (function removed in PHP 8.0)
+
 ## [1.2.32] - 2025-02-06
 
 ### Ulid class overhaul (breaking changes)

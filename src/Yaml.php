@@ -11,6 +11,7 @@
 
 namespace Xmf;
 
+use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml as VendorYaml;
 
 /**
@@ -50,7 +51,7 @@ class Yaml
     {
         try {
             $ret = VendorYaml::dump($var, $inline, $indent);
-        } catch (\Exception $e) {
+        } catch (ParseException $e) {
             static::logError($e);
             $ret = false;
         }
@@ -68,7 +69,7 @@ class Yaml
     {
         try {
             $ret = VendorYaml::parse($yamlString);
-        } catch (\Exception $e) {
+        } catch (ParseException $e) {
             static::logError($e);
             $ret = false;
         }
@@ -87,10 +88,15 @@ class Yaml
         if (!file_exists($yamlFile)) {
             return false;
         }
+        $maxSize = 2 * 1024 * 1024; // 2 MB
+        if (filesize($yamlFile) > $maxSize) {
+            trigger_error("YAML file exceeds maximum size of 2MB", E_USER_WARNING);
+            return false;
+        }
         try {
             $yamlString = file_get_contents($yamlFile);
             $ret = VendorYaml::parse($yamlString);
-        } catch (\Exception $e) {
+        } catch (ParseException $e) {
             static::logError($e);
             $ret = false;
         }
@@ -112,7 +118,7 @@ class Yaml
         try {
             $yamlString = VendorYaml::dump($var, $inline, $indent);
             $ret = file_put_contents($yamlFile, $yamlString);
-        } catch (\Exception $e) {
+        } catch (ParseException $e) {
             static::logError($e);
             $ret = false;
         }
@@ -138,7 +144,7 @@ class Yaml
         try {
             $yamlString = VendorYaml::dump($var, $inline, $indent);
             $ret = empty($yamlString) ? false : "<?php\n/*\n---\n" . $yamlString . "\n...\n*/\n";
-        } catch (\Exception $e) {
+        } catch (ParseException $e) {
             static::logError($e);
             $ret = false;
         }
@@ -177,7 +183,7 @@ class Yaml
             }
             $unwrapped = implode("\n", $lines);
             $ret = VendorYaml::parse($unwrapped);
-        } catch (\Exception $e) {
+        } catch (ParseException $e) {
             static::logError($e);
             $ret = false;
         }
@@ -201,10 +207,15 @@ class Yaml
         if (!file_exists($yamlFile)) {
             return false;
         }
+        $maxSize = 2 * 1024 * 1024; // 2 MB
+        if (filesize($yamlFile) > $maxSize) {
+            trigger_error("YAML file exceeds maximum size of 2MB", E_USER_WARNING);
+            return false;
+        }
         try {
             $yamlString = file_get_contents($yamlFile);
             $ret = static::loadWrapped($yamlString);
-        } catch (\Exception $e) {
+        } catch (ParseException $e) {
             static::logError($e);
             $ret = false;
         }

@@ -84,8 +84,7 @@ class JsonWebToken
         try {
             $values = JWT::decode($jwtString, new Key($this->key->getVerifying(), $this->algorithm));
         } catch (\Exception $e) {
-            trigger_error($e->getMessage(), E_USER_NOTICE);
-            return false;
+            throw new \RuntimeException('JWT decode failed: ' . $e->getMessage(), 0, $e);
         }
         foreach ($assertClaims as $claim => $assert) {
             if (!property_exists($values, $claim)) {
