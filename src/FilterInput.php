@@ -554,7 +554,7 @@ class FilterInput
         $source = preg_replace_callback(
             '/&#x([a-f0-9]+);/mi',
             function ($matches) {
-                return chr('0x' . $matches[1]);
+                return chr(hexdec($matches[1]));
             },
             $source
         );
