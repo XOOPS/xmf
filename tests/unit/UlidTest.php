@@ -303,12 +303,12 @@ class UlidTest extends TestCase
      */
     public function testGetDateTimeWithSpecVector(): void
     {
-        // Timestamp: 1469918176385 (2016-07-30 23:29:36.385 UTC)
+        // Timestamp: 1469918176385 (2016-07-30 22:36:16.385 UTC)
         $ulid = '01ARYZ6S410000000000000000';
         $dateTime = Ulid::getDateTime($ulid);
 
         $this->assertSame('2016-07-30', $dateTime->format('Y-m-d'));
-        $this->assertSame('23:29:36', $dateTime->format('H:i:s'));
+        $this->assertSame('22:36:16', $dateTime->format('H:i:s'));
     }
 
     // =========================================================================
