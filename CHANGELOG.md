@@ -8,6 +8,8 @@
 * Fix `Metagen::html2text()` discarding `preg_replace_callback()` result for numeric HTML entities; use `html_entity_decode()` with `self::ENCODING` for codepoints > 255
 * Fix XSS in `Module\Admin` config methods (`addConfigError`, `addConfigAccept`, `addConfigWarning`) by escaping output with charset-aware `htmlspecialchars()`
 * Fix `IPAddress::normalize()` passing `inet_pton()` false result to `inet_ntop()` for invalid IPs
+* Fix `Language` using unqualified `XOOPS_ROOT_PATH` constant (resolved as `Xmf\XOOPS_ROOT_PATH` in namespaced context)
+* Fix `Request::getInt()`, `getFloat()`, `getBool()` return types to match PHPDoc via explicit casts
 
 ### Security
 * Harden `Key\FileStorage::save()` to use `var_export()` instead of string interpolation for PHP code generation
@@ -33,10 +35,11 @@
 * Simplify `.scrutinizer.yml` to analysis-only (remove failing PHP 8.3/8.4 build nodes); exclude `stubs/` from analysis
 * Add dedicated PHPStan, PHPCS, and code coverage jobs to GitHub Actions CI workflow
 * Add coverage upload to Scrutinizer via `ocular.phar` from GitHub Actions
-* Generate PHPStan baseline (`phpstan-baseline.neon`) with 597 existing errors for incremental cleanup
+* Generate PHPStan baseline (`phpstan-baseline.neon`) with 596 existing errors for incremental cleanup
 * Add `composer baseline` script for regenerating PHPStan baseline
 * Update `.gitignore` to exclude `build/` directory (coverage output)
 * Update `.gitattributes` with export-ignore for PHPStan, PHPUnit, and stub files
+* Add GitHub Copilot custom instructions (`.github/copilot-instructions.md`) and reusable XOOPS template
 
 ### Tests
 * Add unit tests for `Request::setVar()` ENV and SERVER branches
