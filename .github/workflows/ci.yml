@@ -189,12 +189,6 @@ jobs:
 
       - name: Run tests with coverage
         run: vendor/bin/phpunit --configuration ${{ steps.phpunit-config.outputs.config }} --stderr --coverage-clover build/logs/clover.xml
-
-      - name: Upload coverage to Scrutinizer
-        # Requires external_code_coverage enabled in .scrutinizer.yml to process uploads.
-        # Currently disabled; re-enable both when Scrutinizer coverage integration is set up.
-        if: false
-        continue-on-error: true
-        run: |
-          wget -q https://scrutinizer-ci.com/ocular.phar
-          php ocular.phar code-coverage:upload --format=php-clover build/logs/clover.xml
+        # TODO: Add Scrutinizer coverage upload when external_code_coverage is enabled in .scrutinizer.yml
+        # wget -q https://scrutinizer-ci.com/ocular.phar
+        # php ocular.phar code-coverage:upload --format=php-clover build/logs/clover.xml

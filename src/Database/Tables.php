@@ -612,7 +612,7 @@ class Tables
      * Create a DELETE statement and add it to the work queue
      *
      * @param string                 $table    table
-     * @param string|CriteriaElement $criteria string where clause or object criteria
+     * @param string|\CriteriaElement $criteria string where clause or object criteria
      *
      * @return bool true if no errors, false if errors encountered
      */
@@ -795,9 +795,9 @@ class Tables
     /**
      * fetch the next row of a result set
      *
-     * @param resource $result as returned by query
+     * @param \mysqli_result|bool $result as returned by query
      *
-     * @return mixed false on error
+     * @return array|null
      */
     protected function fetch($result)
     {

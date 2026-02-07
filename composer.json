@@ -49,10 +49,7 @@
     "fix": "vendor/bin/phpcbf",
     "baseline": [
       "Composer\\Config::disableProcessTimeout",
-      "@php -r \"copy('phpstan-baseline.neon', 'phpstan-baseline.neon.bak');\"",
-      "@php -r \"file_put_contents('phpstan-baseline.neon', \\\"parameters:\\n\\n\\\");\"",
-      "vendor/bin/phpstan analyse --generate-baseline",
-      "@php -r \"@unlink('phpstan-baseline.neon.bak');\""
+      "@php -r \"$f='phpstan-baseline.neon'; $b=$f.'.bak'; if(file_exists($f)){copy($f,$b);} file_put_contents($f,'parameters:'.chr(10).chr(10)); passthru('vendor'.DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'phpstan analyse --generate-baseline',$r); if($r!==0){if(file_exists($b)){copy($b,$f);@unlink($b);} exit($r);} @unlink($b);\""
     ],
     "ci": [
       "@lint",

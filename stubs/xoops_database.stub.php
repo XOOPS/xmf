@@ -28,13 +28,13 @@ class XoopsDatabase
      * @param \mysqli_result $result
      * @return array|null
      */
-    public function fetchArray($result) {}
+    public function fetchArray($result) { return []; }
 
     /**
      * @param \mysqli_result $result
      * @return array|null
      */
-    public function fetchRow($result) {}
+    public function fetchRow($result) { return []; }
 
     /**
      * @return int

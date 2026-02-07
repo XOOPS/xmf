@@ -331,73 +331,7 @@ parameters:
 			path: src/Database/Tables.php
 
 		-
-			message: '#^Cannot access offset ''CHARACTER_SET_NAME'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Cannot access offset ''COLUMN_DEFAULT'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Cannot access offset ''COLUMN_NAME'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 3
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Cannot access offset ''COLUMN_TYPE'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Cannot access offset ''ENGINE'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Cannot access offset ''EXTRA'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Cannot access offset ''INDEX_NAME'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Cannot access offset ''IS_NULLABLE'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Cannot access offset ''NON_UNIQUE'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Database/Tables.php
-
-		-
 			message: '#^Cannot access offset ''PRIMARY'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Cannot access offset ''SUB_PART'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Cannot access offset ''TABLE_NAME'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/Database/Tables.php
@@ -475,6 +409,12 @@ parameters:
 			path: src/Database/Tables.php
 
 		-
+			message: '#^Method Xmf\\Database\\Tables\:\:fetch\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Database/Tables.php
+
+		-
 			message: '#^Method Xmf\\Database\\Tables\:\:getColumnAttributes\(\) should return string\|false but returns mixed\.$#'
 			identifier: return.type
 			count: 1
@@ -529,13 +469,13 @@ parameters:
 			path: src/Database/Tables.php
 
 		-
-			message: '#^Parameter \#1 \$result of method Xmf\\Database\\Tables\:\:fetch\(\) expects resource, mixed given\.$#'
+			message: '#^Parameter \#1 \$result of method Xmf\\Database\\Tables\:\:fetch\(\) expects bool\|mysqli_result, mixed given\.$#'
 			identifier: argument.type
 			count: 3
 			path: src/Database/Tables.php
 
 		-
-			message: '#^Parameter \#1 \$result of method XoopsDatabase\:\:fetchArray\(\) expects mysqli_result, resource given\.$#'
+			message: '#^Parameter \#1 \$result of method XoopsDatabase\:\:fetchArray\(\) expects mysqli_result, bool\|mysqli_result given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Database/Tables.php
@@ -567,12 +507,6 @@ parameters:
 		-
 			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, mixed given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Parameter \$criteria of method Xmf\\Database\\Tables\:\:delete\(\) has invalid type Xmf\\Database\\CriteriaElement\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Database/Tables.php
 
