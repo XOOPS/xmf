@@ -37,3 +37,11 @@ define('XOOPS_UPLOAD_PATH', '');
 define('XOOPS_GROUP_ANONYMOUS', 3);
 define('XOOPS_GROUP_ADMIN', 1);
 define('XOOPS_GROUP_USERS', 2);
+
+// XMF Language Constants (loaded at runtime via Language::load('xmf'))
+define('_DB_XMF_TABLE_IS_NOT_DEFINED', 'Table is not defined');
+define('_AM_XMF_MODULE_INSTALLED', '%s is installed');
+define('_AM_XMF_MODULE_NOT_INSTALLED', '%s is NOT installed');
+define('_AM_XMF_MODULE_VERSION', '%s version %s (installed: %s)');
+define('_AM_XMF_MODULE_NOTFOUND', '%s (%s) not found');
+define('_XMF_STOPWORDS', '');

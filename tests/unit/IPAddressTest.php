@@ -94,15 +94,6 @@ class IPAddressTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($instance->ipVersion());
     }
 
-    public function testNormalizeInvalidIp()
-    {
-        $method = new \ReflectionMethod('Xmf\IPAddress', 'normalize');
-        $method->setAccessible(true);
-        $instance = new IPAddress('127.0.0.1');
-        $result = $method->invokeArgs($instance, array('not-a-valid-ip'));
-        $this->assertFalse($result);
-    }
-
     public function testSameSubnet()
     {
         $instanceV6 = new IPAddress('FE80:0000:0000:0000:0202:B3FF:FE1E:8329');

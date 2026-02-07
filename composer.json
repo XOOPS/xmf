@@ -47,6 +47,10 @@
     "lint": "vendor/bin/phpcs",
     "analyse": "vendor/bin/phpstan analyse",
     "fix": "vendor/bin/phpcbf",
+    "baseline": [
+      "Composer\\Config::disableProcessTimeout",
+      "@php -r \"$f='phpstan-baseline.neon'; $b=$f.'.bak'; if(file_exists($f)){copy($f,$b);} file_put_contents($f,'parameters:'.chr(10).chr(10)); passthru('vendor'.DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'phpstan analyse --generate-baseline',$r); if($r!==0){if(file_exists($b)){copy($b,$f);@unlink($b);} exit($r);} @unlink($b);\""
+    ],
     "ci": [
       "@lint",
       "@analyse",
@@ -59,6 +63,7 @@
     "lint": "Check code style (PSR-12)",
     "analyse": "Run static analysis (PHPStan)",
     "fix": "Auto-fix code style issues",
+    "baseline": "Regenerate PHPStan baseline",
     "ci": "Run all CI checks (lint, analyse, test)"
   },
   "config": {

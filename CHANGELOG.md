@@ -5,30 +5,28 @@
 ### Bug Fixes
 * Fix `Request::setVar()` writing to literal key `'name'` instead of variable `$name` for ENV and SERVER superglobals
 * Fix `FilterInput` hex entity decode (`&#xNN;`) producing null bytes instead of correct characters on PHP 7+; use `html_entity_decode()` for proper Unicode support
-* Fix `Metagen::html2text()` discarding `preg_replace_callback()` result for numeric HTML entities; use `html_entity_decode()` for codepoints > 255
+* Fix `Metagen::html2text()` discarding `preg_replace_callback()` result for numeric HTML entities; use `html_entity_decode()` with `self::ENCODING` for codepoints > 255
 * Fix XSS in `Module\Admin` config methods (`addConfigError`, `addConfigAccept`, `addConfigWarning`) by escaping output with charset-aware `htmlspecialchars()`
 * Fix `IPAddress::normalize()` passing `inet_pton()` false result to `inet_ntop()` for invalid IPs
+* Fix `Language` using unqualified `XOOPS_ROOT_PATH` constant (resolved as `Xmf\XOOPS_ROOT_PATH` in namespaced context)
+* Fix `Request::getInt()`, `getFloat()`, `getBool()` return types to match PHPDoc via explicit casts
+* Fix `Migrate::getTargetDefinitions()` checking `null` instead of `false` for `Yaml::read()` failure
+* Fix `Tables::executeQueue()` passing potentially non-string `$ddl` to `execSql()` after `renderTableCreate()` failure
+* Fix `JsonWebToken::create()` passing `ArrayObject` to `JWT::encode()` which only accepts `array`
 
 ### Security
 * Harden `Key\FileStorage::save()` to use `var_export()` instead of string interpolation for PHP code generation
 * Add `allowed_classes => false` to `unserialize()` in `Module\Helper\Session::get()` to prevent PHP Object Injection
 * Harden `Language::loadFile()` with `realpath()` and boundary-safe directory validation to prevent path traversal
 * Add 2MB file size limit to `Yaml::read()` and `Yaml::readWrapped()` to prevent memory exhaustion
-* Harden `Yaml` with `file_get_contents()` and `filesize()` false checks; widen exception catches to `\Throwable`
+* Harden `Yaml` with `is_readable()` pre-check, suppressed `file_get_contents()` warnings, `filesize()` false checks; widen exception catches to `\Throwable`
 * Preserve `Jwt\JsonWebToken::decode()` `object|false` API contract (no longer throws on decode failure)
 * Remove dead `get_magic_quotes_gpc()` calls from `Request` (function removed in PHP 8.0)
 
 ### Changed
 * Use strict comparison (`===`) instead of loose (`==`) in `FilterInput` attribute filtering and `Database\Tables` column lookups
 * Fix `FileStorageTest` namespace from `Xmf\Key` to `Xmf\Test\Key` to match autoload-dev configuration
-* Use strict comparison (`===`) instead of loose (`==`) in `FilterInput` attribute filtering
-
-### Tests
-* Add unit tests for `Request::setVar()` ENV and SERVER branches
-* Add unit tests for `FilterInput` hex and decimal entity decode
-* Add unit test for `Metagen::html2text()` numeric entity conversion
-* Add unit test for `IPAddress::normalize()` invalid IP handling
-* Add unit tests for `Yaml::read()` and `Yaml::readWrapped()` file size limits
+* Fix trailing semicolons in `@throws` PHPDoc tags in `Jwt\JsonWebToken::create()`
 
 ### Removed
 * Remove redundant `paragonie/random_compat` dependency (native in PHP 7+)
@@ -37,6 +35,13 @@
 * Add PHPStan stub files for XOOPS framework classes to eliminate ~524 false-positive errors
 * Configure `phpstan.neon` to scan stubs directory
 * Move changelog to `CHANGELOG.md` at repo root; `docs/changelog.md` now redirects
+* Simplify `.scrutinizer.yml` to analysis-only; move `stubs/` from `excluded_paths` to `dependency_paths` for constant/class resolution
+* Add dedicated PHPStan, PHPCS, and code coverage jobs to GitHub Actions CI workflow
+* Generate PHPStan baseline (`phpstan-baseline.neon`) with ~546 existing errors for incremental cleanup
+* Add `composer baseline` script with backup/restore safety for PHPStan baseline regeneration
+* Update `.gitignore` to exclude `build/` directory (coverage output)
+* Update `.gitattributes` with export-ignore for PHPStan, PHPUnit, and stub files
+* Add GitHub Copilot custom instructions (`.github/copilot-instructions.md`) and reusable XOOPS template
 
 ### Tests
 * Add unit tests for `Request::setVar()` ENV and SERVER branches

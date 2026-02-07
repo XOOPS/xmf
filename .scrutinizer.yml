@@ -5,68 +5,14 @@ build:
         override:
           - php-scrutinizer-run
 
-    php74:
-      environment:
-        php: 7.4
-      tests:
-        override:
-          - command: composer validate --strict --no-check-publish
-          - command: composer update --prefer-stable --no-interaction
-          - command: composer check-platform-reqs
-
-    php80:
-      environment:
-        php: 8.0
-      tests:
-        override:
-          - command: composer validate --strict --no-check-publish
-          - command: composer update --prefer-stable --no-interaction
-          - command: composer check-platform-reqs
-
-    php81:
-      environment:
-        php: 8.1
-      tests:
-        override:
-          - command: composer validate --strict --no-check-publish
-          - command: composer update --prefer-stable --no-interaction
-          - command: composer check-platform-reqs
-
-    php82:
-      environment:
-        php: 8.2
-      tests:
-        override:
-          - command: composer validate --strict --no-check-publish
-          - command: composer update --prefer-stable --no-interaction
-          - command: composer check-platform-reqs
-
-    php83:
-      environment:
-        php: 8.3
-      tests:
-        override:
-          - command: composer validate --strict --no-check-publish
-          - command: composer update --prefer-stable --no-interaction
-          - command: composer check-platform-reqs
-
-    php84:
-      environment:
-        php: 8.4
-      tests:
-        override:
-          - command: composer validate --strict --no-check-publish
-          - command: composer update --prefer-stable --no-interaction
-          - command: composer check-platform-reqs
-
 filter:
   excluded_paths:
     - '_archive/*'
     - 'tests/*'
     - 'vendor/*'
     - 'docs/*'
+  dependency_paths:
+    - 'stubs/'
 
 tools:
   php_analyzer: true
-  external_code_coverage:
-    timeout: 600
