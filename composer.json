@@ -47,7 +47,11 @@
     "lint": "vendor/bin/phpcs",
     "analyse": "vendor/bin/phpstan analyse",
     "fix": "vendor/bin/phpcbf",
-    "baseline": "vendor/bin/phpstan analyse --generate-baseline",
+    "baseline": [
+      "Composer\\Config::disableProcessTimeout",
+      "@php -r \"file_put_contents('phpstan-baseline.neon', 'parameters:\\n\\n');\"",
+      "vendor/bin/phpstan analyse --generate-baseline"
+    ],
     "ci": [
       "@lint",
       "@analyse",

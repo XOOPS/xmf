@@ -223,7 +223,7 @@ EOT;
         // path, since codepoints <= 255 are already handled by the earlier $search/$replace
         $input = 'Price: &#8364;50';
         $actual = $method->invokeArgs(null, array($input));
-        $expected = html_entity_decode('&#8364;', ENT_NOQUOTES, 'UTF-8'); // €
+        $expected = html_entity_decode('&#8364;', ENT_NOQUOTES, Metagen::ENCODING); // €
         $this->assertStringContainsString($expected, $actual);
         $this->assertStringNotContainsString('&#8364;', $actual);
     }
