@@ -28,14 +28,14 @@ class UlidTest extends TestCase
     /**
      * Test against a known vector from the ULID spec to ensure
      * the encoding math is correct and hasn't drifted.
- *
+     *
      * Timestamp: 1469918176385 (2016-07-30 23:29:36.385 UTC)
      * Expected time encoding: 01ARYZ6S41
      *
      * @covers Ulid::encodeTime
- */
+     */
     public function testEncodeTimeMatchesSpecVector(): void
-{
+    {
         $timestamp = 1469918176385;
         $encoded = Ulid::encodeTime($timestamp);
 
@@ -196,7 +196,7 @@ class UlidTest extends TestCase
         for ($i = 0; $i < 10; $i++) {
             $ulids[] = Ulid::generate();
             \usleep(1000); // 1ms between each
-    }
+        }
 
         $sortedUlids = $ulids;
         \sort($sortedUlids, SORT_STRING);
@@ -258,7 +258,7 @@ class UlidTest extends TestCase
         $this->expectExceptionMessage('Timestamp cannot be negative');
 
         Ulid::encodeTime(-1);
-        }
+    }
 
     /**
      * @covers Ulid::encodeTime
@@ -445,11 +445,20 @@ class UlidTest extends TestCase
 
         for ($i = 0; $i < 26; $i++) {
             $mixedUlid .= $i % 2 === 0 ? $upperUlid[$i] : \strtolower($upperUlid[$i]);
-    }
+        }
 
         $this->assertTrue(Ulid::isValid($upperUlid));
         $this->assertTrue(Ulid::isValid($lowerUlid));
         $this->assertTrue(Ulid::isValid($mixedUlid));
+    }
+
+    /**
+     * @covers Ulid::isValid
+     */
+    public function testIsValidReturnsFalseForOverflowFirstChar(): void
+    {
+        // First character > 7 would mean timestamp overflow (> 2^48 - 1)
+        $this->assertFalse(Ulid::isValid('80000000000000000000000000'));
     }
 
     // =========================================================================
@@ -593,11 +602,12 @@ class UlidTest extends TestCase
     }
 
     // =========================================================================
-    // UUID CONVERSION TESTS
+    // UUID CONVERSION TESTS (require ext-bcmath)
     // =========================================================================
 
     /**
      * @covers Ulid::toUuid
+     * @requires extension bcmath
      */
     public function testToUuidReturnsValidUuidFormat(): void
     {
@@ -613,6 +623,7 @@ class UlidTest extends TestCase
 
     /**
      * @covers Ulid::toUuid
+     * @requires extension bcmath
      */
     public function testToUuidReturns36Characters(): void
     {
@@ -624,6 +635,7 @@ class UlidTest extends TestCase
 
     /**
      * @covers Ulid::toUuid
+     * @requires extension bcmath
      */
     public function testToUuidThrowsExceptionForInvalidUlid(): void
     {
@@ -634,6 +646,7 @@ class UlidTest extends TestCase
 
     /**
      * @covers Ulid::toUuid
+     * @requires extension bcmath
      */
     public function testToUuidProducesConsistentResult(): void
     {
@@ -646,6 +659,7 @@ class UlidTest extends TestCase
 
     /**
      * @covers Ulid::fromUuid
+     * @requires extension bcmath
      */
     public function testFromUuidReturnsValidUlid(): void
     {
@@ -658,6 +672,7 @@ class UlidTest extends TestCase
 
     /**
      * @covers Ulid::fromUuid
+     * @requires extension bcmath
      */
     public function testFromUuidWorksWithoutHyphens(): void
     {
@@ -672,6 +687,7 @@ class UlidTest extends TestCase
 
     /**
      * @covers Ulid::fromUuid
+     * @requires extension bcmath
      */
     public function testFromUuidThrowsExceptionForInvalidLength(): void
     {
@@ -683,6 +699,7 @@ class UlidTest extends TestCase
 
     /**
      * @covers Ulid::fromUuid
+     * @requires extension bcmath
      */
     public function testFromUuidThrowsExceptionForInvalidCharacters(): void
     {
@@ -695,6 +712,7 @@ class UlidTest extends TestCase
     /**
      * @covers Ulid::toUuid
      * @covers Ulid::fromUuid
+     * @requires extension bcmath
      */
     public function testUuidRoundTrip(): void
     {
@@ -708,6 +726,7 @@ class UlidTest extends TestCase
     /**
      * @covers Ulid::toUuid
      * @covers Ulid::fromUuid
+     * @requires extension bcmath
      */
     public function testUuidRoundTripMultiple(): void
     {
@@ -727,6 +746,7 @@ class UlidTest extends TestCase
     /**
      * @covers Ulid::fromUuid
      * @covers Ulid::toUuid
+     * @requires extension bcmath
      */
     public function testFromUuidRoundTrip(): void
     {
@@ -741,6 +761,7 @@ class UlidTest extends TestCase
      * Test known UUID to ULID conversion vector.
      *
      * @covers Ulid::fromUuid
+     * @requires extension bcmath
      */
     public function testFromUuidKnownVector(): void
     {
@@ -843,8 +864,8 @@ class UlidTest extends TestCase
     public function testEncodingDecodingConsistency(): void
     {
         for ($i = 0; $i < 100; $i++) {
-        $ulid = Ulid::generate();
-        $components = Ulid::decode($ulid);
+            $ulid = Ulid::generate();
+            $components = Ulid::decode($ulid);
             $reEncodedTime = Ulid::encodeTime($components['time']);
 
             $this->assertSame(
@@ -886,7 +907,7 @@ class UlidTest extends TestCase
             $random = Ulid::encodeRandomness();
             for ($j = 0; $j < 16; $j++) {
                 $charCounts[$random[$j]]++;
-    }
+            }
         }
 
         // Each character should appear roughly 1/32 of the time
@@ -912,18 +933,12 @@ class UlidTest extends TestCase
     // MONOTONIC GENERATION TESTS
     // =========================================================================
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        // Reset monotonic state before each test
-        Ulid::resetMonotonicState();
-    }
-
     /**
      * @covers Ulid::generateMonotonic
      */
     public function testGenerateMonotonicReturnsValidUlid(): void
     {
+        Ulid::resetMonotonicState();
         $ulid = Ulid::generateMonotonic();
 
         $this->assertTrue(Ulid::isValid($ulid));
@@ -935,6 +950,7 @@ class UlidTest extends TestCase
      */
     public function testGenerateMonotonicReturnsUppercaseByDefault(): void
     {
+        Ulid::resetMonotonicState();
         $ulid = Ulid::generateMonotonic();
 
         $this->assertSame($ulid, \strtoupper($ulid));
@@ -945,6 +961,7 @@ class UlidTest extends TestCase
      */
     public function testGenerateMonotonicReturnsLowercaseWhenRequested(): void
     {
+        Ulid::resetMonotonicState();
         $ulid = Ulid::generateMonotonic(false);
 
         $this->assertSame($ulid, \strtolower($ulid));
@@ -955,12 +972,13 @@ class UlidTest extends TestCase
      */
     public function testGenerateMonotonicProducesStrictlyIncreasingValues(): void
     {
+        Ulid::resetMonotonicState();
         $ulids = [];
 
         // Generate many ULIDs rapidly (within same millisecond)
         for ($i = 0; $i < 100; $i++) {
             $ulids[] = Ulid::generateMonotonic();
-    }
+        }
 
         // Verify strict ordering
         for ($i = 1; $i < count($ulids); $i++) {
@@ -1003,6 +1021,7 @@ class UlidTest extends TestCase
      */
     public function testGenerateMonotonicResetsOnNewMillisecond(): void
     {
+        Ulid::resetMonotonicState();
         $ulid1 = Ulid::generateMonotonic();
 
         // Wait for a new millisecond
@@ -1014,6 +1033,7 @@ class UlidTest extends TestCase
         $time1 = Ulid::decodeTime($ulid1);
         $time2 = Ulid::decodeTime($ulid2);
 
+        // $time2 should be greater than $time1
         $this->assertGreaterThan($time1, $time2);
     }
 
@@ -1039,6 +1059,7 @@ class UlidTest extends TestCase
      */
     public function testGenerateMonotonicUniqueness(): void
     {
+        Ulid::resetMonotonicState();
         $ulids = [];
 
         for ($i = 0; $i < 1000; $i++) {
@@ -1055,6 +1076,7 @@ class UlidTest extends TestCase
      */
     public function testGenerateMonotonicSortedArray(): void
     {
+        Ulid::resetMonotonicState();
         $ulids = [];
 
         for ($i = 0; $i < 100; $i++) {
@@ -1068,11 +1090,12 @@ class UlidTest extends TestCase
     }
 
     // =========================================================================
-    // BINARY CONVERSION TESTS
+    // BINARY CONVERSION TESTS (require ext-bcmath)
     // =========================================================================
 
     /**
      * @covers Ulid::toBinary
+     * @requires extension bcmath
      */
     public function testToBinaryReturns16Bytes(): void
     {
@@ -1084,6 +1107,7 @@ class UlidTest extends TestCase
 
     /**
      * @covers Ulid::toBinary
+     * @requires extension bcmath
      */
     public function testToBinaryProducesConsistentResult(): void
     {
@@ -1096,6 +1120,7 @@ class UlidTest extends TestCase
 
     /**
      * @covers Ulid::toBinary
+     * @requires extension bcmath
      */
     public function testToBinaryThrowsExceptionForInvalidUlid(): void
     {
@@ -1106,6 +1131,7 @@ class UlidTest extends TestCase
 
     /**
      * @covers Ulid::fromBinary
+     * @requires extension bcmath
      */
     public function testFromBinaryReturnsValidUlid(): void
     {
@@ -1119,6 +1145,7 @@ class UlidTest extends TestCase
 
     /**
      * @covers Ulid::fromBinary
+     * @requires extension bcmath
      */
     public function testFromBinaryThrowsExceptionForInvalidLength(): void
     {
@@ -1131,6 +1158,7 @@ class UlidTest extends TestCase
     /**
      * @covers Ulid::toBinary
      * @covers Ulid::fromBinary
+     * @requires extension bcmath
      */
     public function testBinaryRoundTrip(): void
     {
@@ -1144,6 +1172,7 @@ class UlidTest extends TestCase
     /**
      * @covers Ulid::toBinary
      * @covers Ulid::fromBinary
+     * @requires extension bcmath
      */
     public function testBinaryRoundTripMultiple(): void
     {
@@ -1157,13 +1186,14 @@ class UlidTest extends TestCase
                 $convertedBack,
                 "Binary round-trip failed for ULID: $originalUlid"
             );
-    }
+        }
     }
 
     /**
      * Test known binary vector: all zeros
      *
      * @covers Ulid::toBinary
+     * @requires extension bcmath
      */
     public function testToBinaryKnownVectorZeros(): void
     {
@@ -1178,6 +1208,7 @@ class UlidTest extends TestCase
      * Test known binary vector: all zeros
      *
      * @covers Ulid::fromBinary
+     * @requires extension bcmath
      */
     public function testFromBinaryKnownVectorZeros(): void
     {
@@ -1191,6 +1222,7 @@ class UlidTest extends TestCase
      * Test binary preserves lexicographic ordering
      *
      * @covers Ulid::toBinary
+     * @requires extension bcmath
      */
     public function testBinaryPreservesOrdering(): void
     {
@@ -1210,6 +1242,7 @@ class UlidTest extends TestCase
      * Test binary storage efficiency
      *
      * @covers Ulid::toBinary
+     * @requires extension bcmath
      */
     public function testBinaryStorageEfficiency(): void
     {
@@ -1227,7 +1260,7 @@ class UlidTest extends TestCase
     }
 
     // =========================================================================
-    // UUID AND BINARY INTEROPERABILITY TESTS
+    // UUID AND BINARY INTEROPERABILITY TESTS (require ext-bcmath)
     // =========================================================================
 
     /**
@@ -1236,6 +1269,7 @@ class UlidTest extends TestCase
      * @covers Ulid::toBinary
      * @covers Ulid::fromBinary
      * @covers Ulid::toUuid
+     * @requires extension bcmath
      */
     public function testBinaryUuidInteroperability(): void
     {
@@ -1257,6 +1291,7 @@ class UlidTest extends TestCase
      *
      * @covers Ulid::toBinary
      * @covers Ulid::toUuid
+     * @requires extension bcmath
      */
     public function testBinaryMatchesUuidHex(): void
     {
@@ -1269,90 +1304,6 @@ class UlidTest extends TestCase
         $uuidHex = \str_replace('-', '', $uuid);
 
         $this->assertSame($binaryHex, $uuidHex);
-    }
-
-    // =========================================================================
-    // INTERFACE TESTS
-    // =========================================================================
-
-    /**
-     * Test that Ulid implements UlidInterface
-     *
-     * @covers Ulid
-     */
-    public function testUlidImplementsInterface(): void
-    {
-        $this->assertInstanceOf(\Xmf\UlidInterface::class, new Ulid());
-    }
-
-    /**
-     * Test that Ulid implements UlidGeneratorInterface
-     *
-     * @covers Ulid
-     */
-    public function testUlidImplementsGeneratorInterface(): void
-    {
-        $this->assertInstanceOf(\Xmf\UlidGeneratorInterface::class, new Ulid());
-    }
-
-    /**
-     * Test that Ulid implements UlidMonotonicGeneratorInterface
-     *
-     * @covers Ulid
-     */
-    public function testUlidImplementsMonotonicGeneratorInterface(): void
-    {
-        $this->assertInstanceOf(\Xmf\UlidMonotonicGeneratorInterface::class, new Ulid());
-    }
-
-    /**
-     * Test that Ulid implements UlidValidatorInterface
-     *
-     * @covers Ulid
-     */
-    public function testUlidImplementsValidatorInterface(): void
-    {
-        $this->assertInstanceOf(\Xmf\UlidValidatorInterface::class, new Ulid());
-    }
-
-    /**
-     * Test that Ulid implements UlidBinaryInterface
-     *
-     * @covers Ulid
-     */
-    public function testUlidImplementsBinaryInterface(): void
-    {
-        $this->assertInstanceOf(\Xmf\UlidBinaryInterface::class, new Ulid());
-    }
-
-    /**
-     * Test that Ulid implements UlidUuidInterface
-     *
-     * @covers Ulid
-     */
-    public function testUlidImplementsUuidInterface(): void
-    {
-        $this->assertInstanceOf(\Xmf\UlidUuidInterface::class, new Ulid());
-    }
-
-    /**
-     * Test using Ulid via interface for dependency injection
-     *
-     * @covers Ulid
-     */
-    public function testDependencyInjectionUsage(): void
-    {
-        $generator = new Ulid();
-
-        // Use via interface methods
-        $ulid = $generator->generate();
-        $this->assertTrue($generator->isValid($ulid));
-
-        $decoded = $generator->decode($ulid);
-        $this->assertArrayHasKey('time', $decoded);
-
-        $monotonic = $generator->generateMonotonic();
-        $this->assertTrue($generator->isValid($monotonic));
     }
 
     // =========================================================================

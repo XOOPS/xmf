@@ -29,7 +29,7 @@ namespace Xmf;
  * - 16 characters: Randomness (80 bits)
  *
  * Requirements:
- * - PHP 8.0+
+ * - PHP 7.4+ (per composer.json requirement)
  * - ext-bcmath (for UUID conversion methods)
  *
  * @category  Xmf\Ulid
@@ -69,6 +69,21 @@ class Ulid
      * Maximum valid timestamp (2^48 - 1 milliseconds, year 10889)
      */
     public const MAX_TIME = 281474976710655;
+
+    /**
+     * Length of binary ULID representation in bytes (128 bits)
+     */
+    public const BINARY_LENGTH = 16;
+
+    /**
+     * @var int|null Last timestamp used for monotonic generation
+     */
+    private static $lastTime = null;
+
+    /**
+     * @var string|null Last randomness used for monotonic generation
+     */
+    private static $lastRandom = null;
 
     /**
      * Generate a new ULID.
@@ -154,7 +169,8 @@ class Ulid
         $bytes = \array_map('ord', \str_split($randomBytes));
 
         // Extract 16 groups of 5 bits from 80 bits (10 bytes)
-        // Using a bit buffer approach for optimal extraction
+        // Process two bytes at a time to avoid any integer overflow concerns
+        // on 32-bit platforms. Maximum buffer size stays well within safe range.
         $bitBuffer = 0;
         $bitsInBuffer = 0;
         $byteIndex = 0;
@@ -170,6 +186,8 @@ class Ulid
             // Extract the top 5 bits
             $bitsInBuffer -= 5;
             $value = ($bitBuffer >> $bitsInBuffer) & 0x1F;
+            // Mask the buffer to prevent unbounded growth
+            $bitBuffer &= (1 << $bitsInBuffer) - 1;
             $randChars .= $chars[$value];
         }
         return $randChars;
@@ -282,7 +300,14 @@ class Ulid
         for ($i = 0; $i < self::ULID_LENGTH; $i++) {
             if (\strpos(self::ENCODING_CHARS, $ulid[$i]) === false) {
                 return false;
-}
+            }
+        }
+
+        // Per ULID spec, timestamp is 48 bits, so the first character
+        // (most significant 5 bits) must encode a value in the range 0-7.
+        $firstCharPos = \strpos(self::ENCODING_CHARS, $ulid[0]);
+        if ($firstCharPos === false || $firstCharPos > 7) {
+            return false;
         }
 
         return true;
@@ -440,5 +465,126 @@ class Ulid
     public static function compare(string $ulid1, string $ulid2): int
     {
         return \strcmp(\strtoupper($ulid1), \strtoupper($ulid2)) <=> 0;
+    }
+
+    /**
+     * Generate a monotonically increasing ULID.
+     *
+     * Within the same millisecond, the random portion is incremented
+     * to guarantee strict ordering. When the timestamp advances, a
+     * fresh random portion is generated.
+     *
+     * @param bool $upperCase Whether to return uppercase (default) or lowercase
+     *
+     * @return string The generated ULID (26 characters)
+     * @throws \Exception If random_bytes() fails
+     */
+    public static function generateMonotonic(bool $upperCase = true): string
+    {
+        $time = self::currentTimeMillis();
+
+        if (self::$lastTime !== null && $time === self::$lastTime && self::$lastRandom !== null) {
+            // Same millisecond — increment the random portion
+            self::$lastRandom = self::incrementBase32(self::$lastRandom);
+        } else {
+            // New millisecond — generate fresh randomness
+            self::$lastRandom = self::encodeRandomness();
+            self::$lastTime = $time;
+        }
+
+        $ulid = self::encodeTime($time) . self::$lastRandom;
+
+        return $upperCase ? $ulid : \strtolower($ulid);
+    }
+
+    /**
+     * Reset the monotonic generation state.
+     *
+     * Useful for testing or when you want to start a fresh sequence.
+     *
+     * @return void
+     */
+    public static function resetMonotonicState(): void
+    {
+        self::$lastTime = null;
+        self::$lastRandom = null;
+    }
+
+    /**
+     * Convert a ULID string to a 16-byte binary representation.
+     *
+     * @param string $ulid The ULID to convert
+     *
+     * @return string 16-byte binary string
+     * @throws \InvalidArgumentException If the ULID is invalid
+     * @throws \RuntimeException If BCMath extension is not available
+     */
+    public static function toBinary(string $ulid): string
+    {
+        if (!\extension_loaded('bcmath')) {
+            throw new \RuntimeException('BCMath extension is required for binary conversion');
+        }
+
+        if (!self::isValid($ulid)) {
+            throw new \InvalidArgumentException('Invalid ULID string: ' . $ulid);
+        }
+
+        $hex = self::toHex($ulid);
+
+        return \hex2bin($hex);
+    }
+
+    /**
+     * Create a ULID from a 16-byte binary representation.
+     *
+     * @param string $binary 16-byte binary string
+     *
+     * @return string The ULID representation
+     * @throws \InvalidArgumentException If the binary length is invalid
+     * @throws \RuntimeException If BCMath extension is not available
+     */
+    public static function fromBinary(string $binary): string
+    {
+        if (!\extension_loaded('bcmath')) {
+            throw new \RuntimeException('BCMath extension is required for binary conversion');
+        }
+
+        if (\strlen($binary) !== self::BINARY_LENGTH) {
+            throw new \InvalidArgumentException(
+                'Invalid binary length: expected 16, got ' . \strlen($binary)
+            );
+        }
+
+        $hex = \bin2hex($binary);
+
+        return self::fromUuid($hex);
+    }
+
+    /**
+     * Increment a base32 string by 1.
+     *
+     * @param string $base32 The base32 string to increment
+     *
+     * @return string The incremented base32 string
+     */
+    private static function incrementBase32(string $base32): string
+    {
+        $chars = self::ENCODING_CHARS;
+        $result = \str_split($base32);
+        $carry = true;
+
+        for ($i = \count($result) - 1; $i >= 0 && $carry; $i--) {
+            $pos = \strpos($chars, $result[$i]);
+            $pos++;
+            if ($pos >= self::ENCODING_LENGTH) {
+                $result[$i] = $chars[0];
+                // carry remains true
+            } else {
+                $result[$i] = $chars[$pos];
+                $carry = false;
+            }
+        }
+
+        return \implode('', $result);
     }
 }
