@@ -11,7 +11,8 @@ filter:
     - 'tests/*'
     - 'vendor/*'
     - 'docs/*'
-    - 'stubs/*'
+  dependency_paths:
+    - 'stubs/'
 
 tools:
   php_analyzer: true
