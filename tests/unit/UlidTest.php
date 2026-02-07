@@ -32,7 +32,7 @@ class UlidTest extends TestCase
      * Timestamp: 1469918176385 (2016-07-30 23:29:36.385 UTC)
      * Expected time encoding: 01ARYZ6S41
      *
-     * @covers Ulid::encodeTime
+     * @covers \Xmf\Ulid::encodeTime
      */
     public function testEncodeTimeMatchesSpecVector(): void
     {
@@ -45,7 +45,7 @@ class UlidTest extends TestCase
     /**
      * Test decoding the spec vector timestamp.
      *
-     * @covers Ulid::decodeTime
+     * @covers \Xmf\Ulid::decodeTime
      */
     public function testDecodeTimeMatchesSpecVector(): void
     {
@@ -59,8 +59,8 @@ class UlidTest extends TestCase
     /**
      * Test round-trip encoding/decoding with spec vector.
      *
-     * @covers Ulid::encodeTime
-     * @covers Ulid::decodeTime
+     * @covers \Xmf\Ulid::encodeTime
+     * @covers \Xmf\Ulid::decodeTime
      */
     public function testSpecVectorRoundTrip(): void
     {
@@ -75,7 +75,7 @@ class UlidTest extends TestCase
     /**
      * Test another known vector: Unix epoch (timestamp 0)
      *
-     * @covers Ulid::encodeTime
+     * @covers \Xmf\Ulid::encodeTime
      */
     public function testEncodeTimeAtEpoch(): void
     {
@@ -87,7 +87,7 @@ class UlidTest extends TestCase
     /**
      * Test known vector: maximum timestamp (year ~10889)
      *
-     * @covers Ulid::encodeTime
+     * @covers \Xmf\Ulid::encodeTime
      */
     public function testEncodeTimeAtMaximum(): void
     {
@@ -102,7 +102,7 @@ class UlidTest extends TestCase
     // =========================================================================
 
     /**
-     * @covers Ulid::generate
+     * @covers \Xmf\Ulid::generate
      */
     public function testGenerateReturns26Characters(): void
     {
@@ -112,7 +112,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::generate
+     * @covers \Xmf\Ulid::generate
      */
     public function testGenerateReturnsValidUlid(): void
     {
@@ -122,7 +122,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::generate
+     * @covers \Xmf\Ulid::generate
      */
     public function testGenerateReturnsUppercaseByDefault(): void
     {
@@ -132,7 +132,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::generate
+     * @covers \Xmf\Ulid::generate
      */
     public function testGenerateReturnsLowercaseWhenRequested(): void
     {
@@ -143,7 +143,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::generate
+     * @covers \Xmf\Ulid::generate
      */
     public function testGenerateUsesOnlyCrockfordBase32Characters(): void
     {
@@ -159,7 +159,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::generate
+     * @covers \Xmf\Ulid::generate
      */
     public function testGenerateProducesUniqueValues(): void
     {
@@ -175,7 +175,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::generate
+     * @covers \Xmf\Ulid::generate
      */
     public function testGenerateProducesLexicographicallySortableValues(): void
     {
@@ -187,7 +187,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::generate
+     * @covers \Xmf\Ulid::generate
      */
     public function testGenerateProducesCorrectlySortedArray(): void
     {
@@ -209,7 +209,7 @@ class UlidTest extends TestCase
     // =========================================================================
 
     /**
-     * @covers Ulid::currentTimeMillis
+     * @covers \Xmf\Ulid::currentTimeMillis
      */
     public function testCurrentTimeMillisReturnsReasonableValue(): void
     {
@@ -223,8 +223,8 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::encodeTime
-     * @covers Ulid::decodeTime
+     * @covers \Xmf\Ulid::encodeTime
+     * @covers \Xmf\Ulid::decodeTime
      */
     public function testTimeEncodingDecodingRoundTrip(): void
     {
@@ -239,7 +239,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::encodeTime
+     * @covers \Xmf\Ulid::encodeTime
      */
     public function testEncodeTimeReturns10Characters(): void
     {
@@ -250,7 +250,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::encodeTime
+     * @covers \Xmf\Ulid::encodeTime
      */
     public function testEncodeTimeThrowsExceptionForNegativeTime(): void
     {
@@ -261,7 +261,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::encodeTime
+     * @covers \Xmf\Ulid::encodeTime
      */
     public function testEncodeTimeThrowsExceptionForOverflow(): void
     {
@@ -272,7 +272,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::decodeTime
+     * @covers \Xmf\Ulid::decodeTime
      */
     public function testDecodeTimeExtractsCorrectTimestamp(): void
     {
@@ -285,7 +285,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::getDateTime
+     * @covers \Xmf\Ulid::getDateTime
      */
     public function testGetDateTimeReturnsCorrectDateTime(): void
     {
@@ -299,7 +299,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::getDateTime
+     * @covers \Xmf\Ulid::getDateTime
      */
     public function testGetDateTimeWithSpecVector(): void
     {
@@ -316,7 +316,7 @@ class UlidTest extends TestCase
     // =========================================================================
 
     /**
-     * @covers Ulid::encodeRandomness
+     * @covers \Xmf\Ulid::encodeRandomness
      */
     public function testEncodeRandomnessReturns16Characters(): void
     {
@@ -326,7 +326,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::encodeRandomness
+     * @covers \Xmf\Ulid::encodeRandomness
      */
     public function testEncodeRandomnessProducesDifferentValues(): void
     {
@@ -337,7 +337,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::encodeRandomness
+     * @covers \Xmf\Ulid::encodeRandomness
      */
     public function testEncodeRandomnessUsesOnlyValidCharacters(): void
     {
@@ -354,7 +354,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::decodeRandomness
+     * @covers \Xmf\Ulid::decodeRandomness
      */
     public function testDecodeRandomnessExtractsCorrectPortion(): void
     {
@@ -369,7 +369,7 @@ class UlidTest extends TestCase
     // =========================================================================
 
     /**
-     * @covers Ulid::isValid
+     * @covers \Xmf\Ulid::isValid
      */
     public function testIsValidReturnsTrueForValidUppercaseUlid(): void
     {
@@ -379,7 +379,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::isValid
+     * @covers \Xmf\Ulid::isValid
      */
     public function testIsValidReturnsTrueForValidLowercaseUlid(): void
     {
@@ -389,7 +389,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::isValid
+     * @covers \Xmf\Ulid::isValid
      */
     public function testIsValidReturnsFalseForTooShortString(): void
     {
@@ -397,7 +397,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::isValid
+     * @covers \Xmf\Ulid::isValid
      */
     public function testIsValidReturnsFalseForTooLongString(): void
     {
@@ -405,7 +405,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::isValid
+     * @covers \Xmf\Ulid::isValid
      */
     public function testIsValidReturnsFalseForEmptyString(): void
     {
@@ -413,7 +413,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::isValid
+     * @covers \Xmf\Ulid::isValid
      * @dataProvider invalidCharacterProvider
      */
     public function testIsValidReturnsFalseForInvalidCharacters(string $invalidUlid): void
@@ -435,7 +435,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::isValid
+     * @covers \Xmf\Ulid::isValid
      */
     public function testIsValidIsCaseInsensitive(): void
     {
@@ -453,7 +453,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::isValid
+     * @covers \Xmf\Ulid::isValid
      */
     public function testIsValidReturnsFalseForOverflowFirstChar(): void
     {
@@ -466,7 +466,7 @@ class UlidTest extends TestCase
     // =========================================================================
 
     /**
-     * @covers Ulid::decode
+     * @covers \Xmf\Ulid::decode
      */
     public function testDecodeReturnsArrayWithTimeAndRand(): void
     {
@@ -478,7 +478,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::decode
+     * @covers \Xmf\Ulid::decode
      */
     public function testDecodeTimeIsPositiveInteger(): void
     {
@@ -490,7 +490,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::decode
+     * @covers \Xmf\Ulid::decode
      */
     public function testDecodeRandIs16Characters(): void
     {
@@ -501,7 +501,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::decode
+     * @covers \Xmf\Ulid::decode
      */
     public function testDecodeThrowsExceptionForInvalidUlid(): void
     {
@@ -511,7 +511,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::decodeTime
+     * @covers \Xmf\Ulid::decodeTime
      */
     public function testDecodeTimeThrowsExceptionForWrongLength(): void
     {
@@ -522,7 +522,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::decodeTime
+     * @covers \Xmf\Ulid::decodeTime
      */
     public function testDecodeTimeThrowsExceptionForInvalidCharacter(): void
     {
@@ -533,7 +533,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::decodeRandomness
+     * @covers \Xmf\Ulid::decodeRandomness
      */
     public function testDecodeRandomnessThrowsExceptionForWrongLength(): void
     {
@@ -543,7 +543,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::decodeRandomness
+     * @covers \Xmf\Ulid::decodeRandomness
      */
     public function testDecodeRandomnessThrowsExceptionForInvalidCharacter(): void
     {
@@ -557,7 +557,7 @@ class UlidTest extends TestCase
     // =========================================================================
 
     /**
-     * @covers Ulid::compare
+     * @covers \Xmf\Ulid::compare
      */
     public function testCompareReturnNegativeForEarlierUlid(): void
     {
@@ -569,7 +569,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::compare
+     * @covers \Xmf\Ulid::compare
      */
     public function testCompareReturnPositiveForLaterUlid(): void
     {
@@ -581,7 +581,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::compare
+     * @covers \Xmf\Ulid::compare
      */
     public function testCompareReturnZeroForSameUlid(): void
     {
@@ -591,7 +591,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::compare
+     * @covers \Xmf\Ulid::compare
      */
     public function testCompareIsCaseInsensitive(): void
     {
@@ -606,7 +606,7 @@ class UlidTest extends TestCase
     // =========================================================================
 
     /**
-     * @covers Ulid::toUuid
+     * @covers \Xmf\Ulid::toUuid
      * @requires extension bcmath
      */
     public function testToUuidReturnsValidUuidFormat(): void
@@ -622,7 +622,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::toUuid
+     * @covers \Xmf\Ulid::toUuid
      * @requires extension bcmath
      */
     public function testToUuidReturns36Characters(): void
@@ -634,7 +634,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::toUuid
+     * @covers \Xmf\Ulid::toUuid
      * @requires extension bcmath
      */
     public function testToUuidThrowsExceptionForInvalidUlid(): void
@@ -645,7 +645,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::toUuid
+     * @covers \Xmf\Ulid::toUuid
      * @requires extension bcmath
      */
     public function testToUuidProducesConsistentResult(): void
@@ -658,7 +658,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::fromUuid
+     * @covers \Xmf\Ulid::fromUuid
      * @requires extension bcmath
      */
     public function testFromUuidReturnsValidUlid(): void
@@ -671,7 +671,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::fromUuid
+     * @covers \Xmf\Ulid::fromUuid
      * @requires extension bcmath
      */
     public function testFromUuidWorksWithoutHyphens(): void
@@ -686,7 +686,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::fromUuid
+     * @covers \Xmf\Ulid::fromUuid
      * @requires extension bcmath
      */
     public function testFromUuidThrowsExceptionForInvalidLength(): void
@@ -698,7 +698,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::fromUuid
+     * @covers \Xmf\Ulid::fromUuid
      * @requires extension bcmath
      */
     public function testFromUuidThrowsExceptionForInvalidCharacters(): void
@@ -710,8 +710,8 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::toUuid
-     * @covers Ulid::fromUuid
+     * @covers \Xmf\Ulid::toUuid
+     * @covers \Xmf\Ulid::fromUuid
      * @requires extension bcmath
      */
     public function testUuidRoundTrip(): void
@@ -724,8 +724,8 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::toUuid
-     * @covers Ulid::fromUuid
+     * @covers \Xmf\Ulid::toUuid
+     * @covers \Xmf\Ulid::fromUuid
      * @requires extension bcmath
      */
     public function testUuidRoundTripMultiple(): void
@@ -744,8 +744,8 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::fromUuid
-     * @covers Ulid::toUuid
+     * @covers \Xmf\Ulid::fromUuid
+     * @covers \Xmf\Ulid::toUuid
      * @requires extension bcmath
      */
     public function testFromUuidRoundTrip(): void
@@ -760,7 +760,7 @@ class UlidTest extends TestCase
     /**
      * Test known UUID to ULID conversion vector.
      *
-     * @covers Ulid::fromUuid
+     * @covers \Xmf\Ulid::fromUuid
      * @requires extension bcmath
      */
     public function testFromUuidKnownVector(): void
@@ -934,7 +934,7 @@ class UlidTest extends TestCase
     // =========================================================================
 
     /**
-     * @covers Ulid::generateMonotonic
+     * @covers \Xmf\Ulid::generateMonotonic
      */
     public function testGenerateMonotonicReturnsValidUlid(): void
     {
@@ -946,7 +946,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::generateMonotonic
+     * @covers \Xmf\Ulid::generateMonotonic
      */
     public function testGenerateMonotonicReturnsUppercaseByDefault(): void
     {
@@ -957,7 +957,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::generateMonotonic
+     * @covers \Xmf\Ulid::generateMonotonic
      */
     public function testGenerateMonotonicReturnsLowercaseWhenRequested(): void
     {
@@ -968,7 +968,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::generateMonotonic
+     * @covers \Xmf\Ulid::generateMonotonic
      */
     public function testGenerateMonotonicProducesStrictlyIncreasingValues(): void
     {
@@ -991,7 +991,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::generateMonotonic
+     * @covers \Xmf\Ulid::generateMonotonic
      */
     public function testGenerateMonotonicIncrementsRandomPortion(): void
     {
@@ -1021,7 +1021,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::generateMonotonic
+     * @covers \Xmf\Ulid::generateMonotonic
      */
     public function testGenerateMonotonicResetsOnNewMillisecond(): void
     {
@@ -1042,7 +1042,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::resetMonotonicState
+     * @covers \Xmf\Ulid::resetMonotonicState
      */
     public function testResetMonotonicState(): void
     {
@@ -1059,7 +1059,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::generateMonotonic
+     * @covers \Xmf\Ulid::generateMonotonic
      */
     public function testGenerateMonotonicUniqueness(): void
     {
@@ -1076,7 +1076,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::generateMonotonic
+     * @covers \Xmf\Ulid::generateMonotonic
      */
     public function testGenerateMonotonicSortedArray(): void
     {
@@ -1098,7 +1098,7 @@ class UlidTest extends TestCase
     // =========================================================================
 
     /**
-     * @covers Ulid::toBinary
+     * @covers \Xmf\Ulid::toBinary
      * @requires extension bcmath
      */
     public function testToBinaryReturns16Bytes(): void
@@ -1110,7 +1110,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::toBinary
+     * @covers \Xmf\Ulid::toBinary
      * @requires extension bcmath
      */
     public function testToBinaryProducesConsistentResult(): void
@@ -1123,7 +1123,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::toBinary
+     * @covers \Xmf\Ulid::toBinary
      * @requires extension bcmath
      */
     public function testToBinaryThrowsExceptionForInvalidUlid(): void
@@ -1134,7 +1134,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::fromBinary
+     * @covers \Xmf\Ulid::fromBinary
      * @requires extension bcmath
      */
     public function testFromBinaryReturnsValidUlid(): void
@@ -1148,7 +1148,7 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::fromBinary
+     * @covers \Xmf\Ulid::fromBinary
      * @requires extension bcmath
      */
     public function testFromBinaryThrowsExceptionForInvalidLength(): void
@@ -1160,8 +1160,8 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::toBinary
-     * @covers Ulid::fromBinary
+     * @covers \Xmf\Ulid::toBinary
+     * @covers \Xmf\Ulid::fromBinary
      * @requires extension bcmath
      */
     public function testBinaryRoundTrip(): void
@@ -1174,8 +1174,8 @@ class UlidTest extends TestCase
     }
 
     /**
-     * @covers Ulid::toBinary
-     * @covers Ulid::fromBinary
+     * @covers \Xmf\Ulid::toBinary
+     * @covers \Xmf\Ulid::fromBinary
      * @requires extension bcmath
      */
     public function testBinaryRoundTripMultiple(): void
@@ -1196,7 +1196,7 @@ class UlidTest extends TestCase
     /**
      * Test known binary vector: all zeros
      *
-     * @covers Ulid::toBinary
+     * @covers \Xmf\Ulid::toBinary
      * @requires extension bcmath
      */
     public function testToBinaryKnownVectorZeros(): void
@@ -1211,7 +1211,7 @@ class UlidTest extends TestCase
     /**
      * Test known binary vector: all zeros
      *
-     * @covers Ulid::fromBinary
+     * @covers \Xmf\Ulid::fromBinary
      * @requires extension bcmath
      */
     public function testFromBinaryKnownVectorZeros(): void
@@ -1225,7 +1225,7 @@ class UlidTest extends TestCase
     /**
      * Test binary preserves lexicographic ordering
      *
-     * @covers Ulid::toBinary
+     * @covers \Xmf\Ulid::toBinary
      * @requires extension bcmath
      */
     public function testBinaryPreservesOrdering(): void
@@ -1245,7 +1245,7 @@ class UlidTest extends TestCase
     /**
      * Test binary storage efficiency
      *
-     * @covers Ulid::toBinary
+     * @covers \Xmf\Ulid::toBinary
      * @requires extension bcmath
      */
     public function testBinaryStorageEfficiency(): void
@@ -1270,9 +1270,9 @@ class UlidTest extends TestCase
     /**
      * Test that ULID → Binary → ULID → UUID is consistent
      *
-     * @covers Ulid::toBinary
-     * @covers Ulid::fromBinary
-     * @covers Ulid::toUuid
+     * @covers \Xmf\Ulid::toBinary
+     * @covers \Xmf\Ulid::fromBinary
+     * @covers \Xmf\Ulid::toUuid
      * @requires extension bcmath
      */
     public function testBinaryUuidInteroperability(): void
@@ -1293,8 +1293,8 @@ class UlidTest extends TestCase
     /**
      * Test that Binary and UUID representations are equivalent
      *
-     * @covers Ulid::toBinary
-     * @covers Ulid::toUuid
+     * @covers \Xmf\Ulid::toBinary
+     * @covers \Xmf\Ulid::toUuid
      * @requires extension bcmath
      */
     public function testBinaryMatchesUuidHex(): void
