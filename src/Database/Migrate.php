@@ -34,7 +34,7 @@ use Xmf\Yaml;
 class Migrate
 {
 
-    /** @var false|\Xmf\Module\Helper|\Xoops\Module\Helper\HelperAbstract  */
+    /** @var false|\Xmf\Module\Helper|\Xoops\Module\Helper|\Xoops\Module\Helper\HelperAbstract */
     protected $helper;
 
     /** @var string[] table names used by module */

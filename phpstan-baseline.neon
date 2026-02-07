@@ -169,12 +169,6 @@ parameters:
 			path: src/Database/Migrate.php
 
 		-
-			message: '#^Property Xmf\\Database\\Migrate\:\:\$helper \(Xmf\\Module\\Helper\|Xoops\\Module\\Helper\\HelperAbstract\|false\) does not accept Xmf\\Module\\Helper\|Xoops\\Module\\Helper\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Database/Migrate.php
-
-		-
 			message: '#^Property Xmf\\Database\\Migrate\:\:\$moduleTables \(array\<string\>\) does not accept mixed\.$#'
 			identifier: assign.propertyType
 			count: 1

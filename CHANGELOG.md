@@ -37,7 +37,7 @@
 * Move changelog to `CHANGELOG.md` at repo root; `docs/changelog.md` now redirects
 * Simplify `.scrutinizer.yml` to analysis-only; move `stubs/` from `excluded_paths` to `dependency_paths` for constant/class resolution
 * Add dedicated PHPStan, PHPCS, and code coverage jobs to GitHub Actions CI workflow
-* Generate PHPStan baseline (`phpstan-baseline.neon`) with ~547 existing errors for incremental cleanup
+* Generate PHPStan baseline (`phpstan-baseline.neon`) with ~546 existing errors for incremental cleanup
 * Add `composer baseline` script with backup/restore safety for PHPStan baseline regeneration
 * Update `.gitignore` to exclude `build/` directory (coverage output)
 * Update `.gitattributes` with export-ignore for PHPStan, PHPUnit, and stub files

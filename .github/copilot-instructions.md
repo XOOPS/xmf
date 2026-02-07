@@ -75,7 +75,7 @@ Classes check `class_exists('Xoops', false)` to detect XOOPS 2.6+ and fall back 
 
 ## Static Analysis
 
-PHPStan runs at level `max`. The baseline (`phpstan-baseline.neon`) tracks ~547 existing errors for incremental cleanup. New code must not introduce new PHPStan errors. Run `composer baseline` to regenerate after intentionally resolving baseline items. The baseline script backs up the current file, clears it, regenerates, and restores from backup on failure.
+PHPStan runs at level `max`. The baseline (`phpstan-baseline.neon`) tracks ~546 existing errors for incremental cleanup. New code must not introduce new PHPStan errors. Run `composer baseline` to regenerate after intentionally resolving baseline items. The baseline script backs up the current file, clears it, regenerates, and restores from backup on failure.
 
 Stubs in `stubs/` define XOOPS framework classes (`Xoops`, `XoopsModule`, `XoopsCache`, criteria classes, database handlers, `ModuleAdmin`, XOOPS 2.6 namespaced classes, language constants, etc.) so PHPStan can type-check XMF code without requiring a full XOOPS installation.
 
