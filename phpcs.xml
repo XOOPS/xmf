@@ -9,7 +9,7 @@
 
     <!-- Disable line length check (can be overly strict for documentation) -->
     <rule ref="Generic.Files.LineLength">
-        <exclude-pattern>*</exclude-pattern>
+        <severity>0</severity>
     </rule>
 
     <!-- Exclude patterns -->
@@ -17,9 +17,4 @@
     <exclude-pattern>*/docs/*</exclude-pattern>
     <exclude-pattern>*/tests/*</exclude-pattern>
     <exclude-pattern>*/vendor/*</exclude-pattern>
-
-    <!-- Allow test files to have different class naming -->
-    <rule ref="Squiz.Classes.ClassFileName.NoMatch">
-        <exclude-pattern>*/tests/*</exclude-pattern>
-    </rule>
 </ruleset>
