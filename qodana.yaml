@@ -1,0 +1,18 @@
+version: "1.0"
+
+linter: jetbrains/qodana-php:latest
+
+profile:
+  name: qodana.recommended
+
+php:
+  version: "7.4"
+
+bootstrap: composer install --ignore-platform-reqs --no-interaction --prefer-dist
+
+exclude:
+  - name: All
+    paths:
+      - vendor
+      - stubs
+      - build
