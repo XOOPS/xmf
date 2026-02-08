@@ -84,7 +84,7 @@ jobs:
 
       - name: Run tests with coverage
         if: ${{ matrix.coverage }}
-        run: phpunit --colors=always --coverage-clover build/logs/clover.xml
+        run: ./vendor/bin/phpunit --colors=always --coverage-clover build/logs/clover.xml
 
       - name: Upload coverage to Codecov
         if: ${{ matrix.coverage }}
