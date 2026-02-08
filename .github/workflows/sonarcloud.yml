@@ -1,0 +1,38 @@
+name: SonarCloud
+on:
+  push:
+    branches: [master]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  sonarcloud:
+    name: SonarCloud Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: intl, mbstring
+          tools: composer
+          coverage: xdebug
+
+      - name: Install dependencies
+        run: composer update --prefer-stable --no-interaction --prefer-dist --no-progress
+
+      - name: Ensure build directory exists
+        run: mkdir -p build/logs
+
+      - name: Run tests with coverage
+        run: phpunit --colors=always --coverage-clover build/logs/clover.xml
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v7
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

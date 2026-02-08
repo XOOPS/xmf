@@ -78,7 +78,12 @@ jobs:
         run: composer analyse
 
       - name: Run tests
+        if: ${{ !matrix.coverage }}
         run: composer test
+
+      - name: Run tests with coverage
+        if: ${{ matrix.coverage }}
+        run: phpunit --colors=always --coverage-clover build/logs/clover.xml
 
       - name: Upload coverage to Codecov
         if: ${{ matrix.coverage }}
