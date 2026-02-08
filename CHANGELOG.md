@@ -1,8 +1,28 @@
 # XMF ChangeLog
 
-## [1.2.33] - 2026-02-08
+## [1.2.33-beta3] - 2026-02-08
 
+### Infrastructure
+* Pin all GitHub Actions to full commit SHA hashes to prevent supply-chain attacks
+* Add SonarCloud analysis workflow (`sonarcloud.yml`) with coverage reporting
+* Add Qodana static analysis workflow (`qodana.yml`) pinned to `jetbrains/qodana-php:2025.2`
+* Add Dependabot configuration for Composer and GitHub Actions updates
+* Add Renovate configuration with auto-merge for patch updates and stability windows
+* Add CodeRabbit AI code review configuration (`.coderabbit.yaml`)
+* Add Codecov coverage upload to CI workflow
+* Skip PHPStan on PHP 7.4/8.0 (baseline uses PHPStan 2.x format, incompatible with PHPStan 1.x)
+* Fix PHP version comparison in CI from lexicographic `>= '8.1'` to explicit `!= '7.4' && != '8.0'`
+* Fix SonarCloud token check from `env.SONAR_TOKEN` to `secrets.SONAR_TOKEN` for fork PR compatibility
+* Add repository guards (`if: github.repository`) to Qodana and SonarCloud workflows
+* Replace `phpcs.xml.dist` with `phpcs.xml`; use `severity=0` for line-length rule
+* Remove legacy `phpunit10.xml.dist` (consolidated into `phpunit.xml.dist`)
+* Add `sonar-project.properties`, `qodana.yaml`, `renovate.json` to `.gitattributes` export-ignore
+* Streamline CI workflow: split test step into coverage/non-coverage, simplify matrix
 
+### Changed
+* Fix CHANGELOG: move Ulid overhaul from v1.2.32 to v1.2.33-beta2 (correct release)
+* Fix CHANGELOG: correct 11 release dates to match GitHub release timestamps
+* Fix CHANGELOG: add missing PRs #118, #119, #122
 
 ## [1.2.33-beta2] - 2026-02-07
 
