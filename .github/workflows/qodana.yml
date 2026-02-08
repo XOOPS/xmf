@@ -9,17 +9,18 @@ on:
 jobs:
   qodana:
     runs-on: ubuntu-latest
+    if: github.repository == 'XOOPS/xmf'
     permissions:
       contents: write
       pull-requests: write
       checks: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
 
       - name: Qodana Scan
-        uses: JetBrains/qodana-action@v2025.2
+        uses: JetBrains/qodana-action@99ec27a55aaaf5ba2fd7e5816e66231caed7a72a # v2025.2.4
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}

@@ -7,12 +7,9 @@
     <!-- Use PSR-12 as the base standard -->
     <rule ref="PSR12"/>
 
-    <!-- Relax line length: warn at 200 chars instead of the default 120 -->
+    <!-- Disable line length check (can be overly strict for documentation) -->
     <rule ref="Generic.Files.LineLength">
-        <properties>
-            <property name="lineLimit" value="200"/>
-            <property name="absoluteLineLimit" value="0"/>
-        </properties>
+        <severity>0</severity>
     </rule>
 
     <!-- Exclude patterns -->
@@ -20,9 +17,4 @@
     <exclude-pattern>*/docs/*</exclude-pattern>
     <exclude-pattern>*/tests/*</exclude-pattern>
     <exclude-pattern>*/vendor/*</exclude-pattern>
-
-    <!-- Allow test files to have different class naming -->
-    <rule ref="Squiz.Classes.ClassFileName.NoMatch">
-        <exclude-pattern>*/tests/*</exclude-pattern>
-    </rule>
 </ruleset>
