@@ -3,9 +3,8 @@ on: [push, pull_request]
 
 jobs:
   tests:
-    name: PHP ${{ matrix.php }}${{ matrix.deps && format(' / {0}', matrix.deps) || '' }}
+    name: PHP ${{ matrix.php }}${{ matrix.deps && format(' / {0}', matrix.deps) || '' }}${{ matrix.coverage && ' / Coverage' || '' }}
     runs-on: ubuntu-latest
-    continue-on-error: ${{ matrix.experimental || false }}
 
     strategy:
       fail-fast: false
@@ -21,9 +20,10 @@ jobs:
           - php: "8.2"
           - php: "8.3"
           - php: "8.4"
-          # Experimental future PHP (optional, uncomment when PHP 8.5 RC available)
-          # - php: "8.5"
-          #   experimental: true
+          - php: "8.5"
+          # Coverage run
+          - php: "8.3"
+            coverage: true
 
     steps:
       - uses: actions/checkout@v5
@@ -34,7 +34,7 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: intl, mbstring
           tools: composer
-          coverage: none
+          coverage: ${{ matrix.coverage && 'xdebug' || 'none' }}
 
       - name: Show versions
         run: |
@@ -67,134 +67,22 @@ jobs:
       - name: Check platform requirements
         run: composer check-platform-reqs
 
-      - name: Show PHPUnit version
-        run: vendor/bin/phpunit --version
-
-      - name: Select PHPUnit config
-        id: phpunit-config
-        run: |
-          PHPUNIT_VERSION=$(vendor/bin/phpunit --version | grep -oP '\d+' | head -1)
-          if [ "$PHPUNIT_VERSION" -ge 10 ]; then
-            echo "config=phpunit10.xml.dist" >> $GITHUB_OUTPUT
-          else
-            echo "config=phpunit.xml.dist" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Run tests
-        run: vendor/bin/phpunit --configuration ${{ steps.phpunit-config.outputs.config }} --stderr --no-coverage
-
-  phpstan:
-    name: PHPStan
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: "8.2"
-          extensions: intl, mbstring
-          tools: composer
-          coverage: none
-
-      - name: Get Composer cache dir
-        id: composer-cache
-        run: echo "dir=$(composer config cache-dir)" >> $GITHUB_OUTPUT
-
-      - name: Cache Composer
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: composer-phpstan-${{ hashFiles('**/composer.json') }}
-          restore-keys: composer-phpstan-
-
-      - name: Install dependencies
-        run: composer update --prefer-stable --no-interaction --prefer-dist --no-progress
-
-      - name: Run PHPStan
-        run: composer analyse
-
-  phpcs:
-    name: Code Style
-    runs-on: ubuntu-latest
-    continue-on-error: true  # Pre-existing style issues; informational until codebase is cleaned up
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: "8.2"
-          extensions: intl, mbstring
-          tools: composer
-          coverage: none
-
-      - name: Get Composer cache dir
-        id: composer-cache
-        run: echo "dir=$(composer config cache-dir)" >> $GITHUB_OUTPUT
-
-      - name: Cache Composer
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: composer-phpcs-${{ hashFiles('**/composer.json') }}
-          restore-keys: composer-phpcs-
-
-      - name: Install dependencies
-        run: composer update --prefer-stable --no-interaction --prefer-dist --no-progress
-
-      - name: Run PHPCS
-        run: composer lint
-
-  coverage:
-    name: Coverage
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: "8.2"
-          extensions: intl, mbstring
-          tools: composer
-          coverage: xdebug
-
-      - name: Get Composer cache dir
-        id: composer-cache
-        run: echo "dir=$(composer config cache-dir)" >> $GITHUB_OUTPUT
-
-      - name: Cache Composer
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: composer-coverage-${{ hashFiles('**/composer.json') }}
-          restore-keys: composer-coverage-
-
-      - name: Install dependencies
-        run: composer update --prefer-stable --no-interaction --prefer-dist --no-progress
-
-      - name: Select PHPUnit config
-        id: phpunit-config
-        run: |
-          PHPUNIT_VERSION=$(vendor/bin/phpunit --version | grep -oP '\d+' | head -1)
-          if [ "$PHPUNIT_VERSION" -ge 10 ]; then
-            echo "config=phpunit10.xml.dist" >> $GITHUB_OUTPUT
-          else
-            echo "config=phpunit.xml.dist" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Prepare coverage directory
+      - name: Ensure build directory exists
         run: mkdir -p build/logs
 
-      - name: Run tests with coverage
-        run: vendor/bin/phpunit --configuration ${{ steps.phpunit-config.outputs.config }} --stderr --coverage-clover build/logs/clover.xml
+      - name: Check code style
+        continue-on-error: true
+        run: composer lint
+
+      - name: Run static analysis
+        run: composer analyse
+
+      - name: Run tests
+        run: composer test
 
       - name: Upload coverage to Codecov
+        if: ${{ matrix.coverage }}
         uses: codecov/codecov-action@v5
         with:
           files: build/logs/clover.xml
           fail_ci_if_error: false
-        # TODO: Add Scrutinizer coverage upload when external_code_coverage is enabled in .scrutinizer.yml
-        # wget -q https://scrutinizer-ci.com/ocular.phar
-        # php ocular.phar code-coverage:upload --format=php-clover build/logs/clover.xml

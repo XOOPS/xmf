@@ -36,17 +36,17 @@
       "Xmf\\": "src/"
     }
   },
- "autoload-dev": {
+  "autoload-dev": {
     "psr-4": {
       "Xmf\\Test\\": "tests/unit/"
     }
   },
   "scripts": {
-    "test": "vendor/bin/phpunit --colors=always",
-    "phpunit": "vendor/bin/phpunit --colors=always",
-    "lint": "vendor/bin/phpcs",
-    "analyse": "vendor/bin/phpstan analyse",
-    "fix": "vendor/bin/phpcbf",
+    "test": "phpunit --colors=always",
+    "phpunit": "phpunit --colors=always",
+    "lint": "phpcs",
+    "analyse": "phpstan analyse",
+    "fix": "phpcbf",
     "baseline": [
       "Composer\\Config::disableProcessTimeout",
       "@php -r \"$f='phpstan-baseline.neon'; $b=$f.'.bak'; if(file_exists($f)){copy($f,$b);} file_put_contents($f,'parameters:'.chr(10).chr(10)); passthru('vendor'.DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'phpstan analyse --generate-baseline',$r); if($r!==0){if(file_exists($b)){copy($b,$f);@unlink($b);} exit($r);} @unlink($b);\""
@@ -75,7 +75,8 @@
   "prefer-stable": true,
   "support": {
     "issues": "https://github.com/XOOPS/xmf/issues",
-    "source": "https://github.com/XOOPS/xmf"
+    "source": "https://github.com/XOOPS/xmf",
+    "docs": "https://github.com/XOOPS/xmf#readme"
   },
   "funding": [
     {

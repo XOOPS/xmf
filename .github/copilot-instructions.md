@@ -27,11 +27,11 @@ composer baseline         # Regenerate PHPStan baseline
 composer ci               # Run all checks (lint + analyse + test)
 ```
 
-PHPUnit has two config files: `phpunit.xml.dist` (PHPUnit 9) and `phpunit10.xml.dist` (PHPUnit 10+). CI selects automatically based on the installed version.
+PHPUnit uses a single `phpunit.xml.dist` with `<source>` element (compatible with PHPUnit 9.3.4+ through 11.x).
 
 ## PHP Compatibility
 
-Code must run on PHP 7.4 through 8.4. Do not use features exclusive to PHP 8.0+ (named arguments, match expressions, union type hints in signatures, enums, fibers, readonly properties). CI tests all versions in the matrix.
+Code must run on PHP 7.4 through 8.5. Do not use features exclusive to PHP 8.0+ (named arguments, match expressions, union type hints in signatures, enums, fibers, readonly properties, intersection types, `never` return type, first-class callable syntax). CI tests all versions in the matrix.
 
 ## Coding Conventions
 
@@ -81,22 +81,19 @@ Stubs in `stubs/` define XOOPS framework classes (`Xoops`, `XoopsModule`, `Xoops
 
 ## CI Pipeline
 
-GitHub Actions runs four jobs on every push and PR:
+GitHub Actions runs a single consolidated job on every push and PR:
 
-| Job | PHP | What it does |
-|---|---|---|
-| **Tests** | 7.4-8.4 matrix | `composer test` (includes lowest-deps run on 7.4) |
-| **PHPStan** | 8.2 | `composer analyse` at level max |
-| **Code Style** | 8.2 | `composer lint` (non-blocking — pre-existing issues) |
-| **Coverage** | 8.2 | PHPUnit + Xdebug, uploads clover.xml to Scrutinizer |
+- **PHP matrix:** 7.4–8.5, plus lowest-deps on 7.4
+- **Each run:** lint (non-blocking, pre-existing issues) + analyse + test
+- **Coverage:** PHP 8.3 with Xdebug, uploaded to Codecov
 
-Scrutinizer runs its own `php_analyzer` tool. It excludes `_archive/`, `tests/`, `vendor/`, `docs/`, and `stubs/`.
+Scrutinizer runs its own `php_analyzer` tool plus `composer ci` on PHP 7.4–8.5. It excludes `_archive/`, `tests/`, `vendor/`, `docs/`, and `stubs/`.
 
 ## Pull Request Checklist
 
 1. Code follows PSR-12 and passes `composer lint` (or `composer fix`).
 2. `composer analyse` passes with no new errors beyond the baseline.
-3. `composer test` passes on all PHP versions (7.4-8.4).
+3. `composer test` passes on all PHP versions (7.4-8.5).
 4. New public methods have PHPDoc with `@param`, `@return`, and `@throws` tags.
 5. New functionality has corresponding unit tests in `tests/unit/`.
 6. Changes are documented in `CHANGELOG.md` under `[Unreleased]`.
