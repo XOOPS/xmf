@@ -26,10 +26,10 @@ jobs:
             coverage: true
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # v2
         with:
           php-version: ${{ matrix.php }}
           extensions: intl, mbstring
@@ -46,7 +46,7 @@ jobs:
         run: echo "dir=$(composer config cache-dir)" >> $GITHUB_OUTPUT
 
       - name: Cache Composer
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: composer-${{ runner.os }}-${{ matrix.php }}-${{ matrix.deps || 'stable' }}-${{ hashFiles('**/composer.json') }}
@@ -75,7 +75,7 @@ jobs:
         run: composer lint
 
       - name: Run static analysis
-        if: ${{ matrix.php >= '8.1' }}
+        if: ${{ matrix.php != '7.4' && matrix.php != '8.0' }}
         run: composer analyse
 
       - name: Run tests
@@ -88,7 +88,7 @@ jobs:
 
       - name: Upload coverage to Codecov
         if: ${{ matrix.coverage }}
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5
         with:
           files: build/logs/clover.xml
           fail_ci_if_error: false
