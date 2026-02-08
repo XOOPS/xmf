@@ -29,4 +29,5 @@ qodana.yaml export-ignore
 renovate.json export-ignore
 .coderabbit.yaml export-ignore
 sonar-project.properties export-ignore
+CHANGELOG.md export-ignore
 CLAUDE.md export-ignore
