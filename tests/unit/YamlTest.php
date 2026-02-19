@@ -9,7 +9,7 @@ class YamlTest extends \PHPUnit\Framework\TestCase
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
      */
-    protected function setUp()
+    protected function setUp(): void
     {
     }
 
@@ -17,7 +17,7 @@ class YamlTest extends \PHPUnit\Framework\TestCase
      * Tears down the fixture, for example, closes a network connection.
      * This method is called after a test is executed.
      */
-    protected function tearDown()
+    protected function tearDown(): void
     {
     }
 
@@ -113,5 +113,49 @@ class YamlTest extends \PHPUnit\Framework\TestCase
     public function testReadWrappedNoFile()
     {
         $this->assertFalse(Yaml::readWrapped('./no-such-file'));
+    }
+
+    public function testReadOversizedFile()
+    {
+        $tmpfname = tempnam(sys_get_temp_dir(), 'YAMLTEST');
+        $this->assertNotFalse($tmpfname, 'Failed to create temp file');
+        try {
+            // Create a file just over 2MB
+            $fh = fopen($tmpfname, 'w');
+            $this->assertNotFalse($fh, 'Failed to open temp file for writing');
+            $line = str_repeat('x', 1024) . "\n";
+            for ($i = 0; $i < 2049; $i++) {
+                fwrite($fh, $line);
+            }
+            fclose($fh);
+            // Suppress the trigger_error warning
+            $result = @Yaml::read($tmpfname);
+            $this->assertFalse($result);
+        } finally {
+            if (file_exists($tmpfname)) {
+                unlink($tmpfname);
+            }
+        }
+    }
+
+    public function testReadWrappedOversizedFile()
+    {
+        $tmpfname = tempnam(sys_get_temp_dir(), 'YAMLTEST');
+        $this->assertNotFalse($tmpfname, 'Failed to create temp file');
+        try {
+            $fh = fopen($tmpfname, 'w');
+            $this->assertNotFalse($fh, 'Failed to open temp file for writing');
+            $line = str_repeat('x', 1024) . "\n";
+            for ($i = 0; $i < 2049; $i++) {
+                fwrite($fh, $line);
+            }
+            fclose($fh);
+            $result = @Yaml::readWrapped($tmpfname);
+            $this->assertFalse($result);
+        } finally {
+            if (file_exists($tmpfname)) {
+                unlink($tmpfname);
+            }
+        }
     }
 }

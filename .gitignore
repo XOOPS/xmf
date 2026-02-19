@@ -7,3 +7,19 @@ vendor/
 composer.lock
 coverage.clover
 git-phpcs.phar
+
+# Local config overrides (only .dist files are tracked)
+phpunit.xml
+.phpcs.xml
+
+# Build artifacts
+build/
+
+# PHPUnit result cache
+.phpunit.result.cache
+.phpunit.cache/
+
+# Claude local files
+CLAUDE.md
+.claude/
+docs/tasks.md

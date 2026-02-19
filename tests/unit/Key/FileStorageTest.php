@@ -1,5 +1,7 @@
 <?php
-namespace Xmf\Key;
+namespace Xmf\Test\Key;
+
+use Xmf\Key\FileStorage;
 
 class FileStorageTest extends \PHPUnit\Framework\TestCase
 {
@@ -17,7 +19,7 @@ class FileStorageTest extends \PHPUnit\Framework\TestCase
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         //$this->markTestIncomplete('FileStorage testing incomplete');
         $this->object = new FileStorage('/tmp', 'fubar');
@@ -27,7 +29,7 @@ class FileStorageTest extends \PHPUnit\Framework\TestCase
      * Tears down the fixture, for example, closes a network connection.
      * This method is called after a test is executed.
      */
-    protected function tearDown()
+    protected function tearDown(): void
     {
         @$this->object->delete($this->testKey);
     }

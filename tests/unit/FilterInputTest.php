@@ -14,7 +14,7 @@ class FilterInputTest extends \PHPUnit\Framework\TestCase
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->object = FilterInput::getInstance();
     }
@@ -23,7 +23,7 @@ class FilterInputTest extends \PHPUnit\Framework\TestCase
      * Tears down the fixture, for example, closes a network connection.
      * This method is called after a test is executed.
      */
-    protected function tearDown()
+    protected function tearDown(): void
     {
     }
 
@@ -87,7 +87,7 @@ class FilterInputTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($xssTestExpect, $filter->cleanVar($xssTest));
     }
 
-    public function getTestForCleanVarType()
+    public static function getTestForCleanVarType()
     {
         return array(
             array('100', 'int', 100),
@@ -110,5 +110,21 @@ class FilterInputTest extends \PHPUnit\Framework\TestCase
     public function testCleanVarTypes($value, $type, $expected)
     {
         $this->assertSame($expected, $this->object->cleanVar($value, $type));
+    }
+
+    public function testHexEntityDecode()
+    {
+        // &#x41; = 'A', &#x42; = 'B', &#x43; = 'C'
+        $input = '&#x41;&#x42;&#x43;';
+        $result = FilterInput::clean($input, 'string');
+        $this->assertStringContainsString('ABC', $result);
+    }
+
+    public function testDecimalEntityDecode()
+    {
+        // &#65; = 'A', &#66; = 'B'
+        $input = '&#65;&#66;';
+        $result = FilterInput::clean($input, 'string');
+        $this->assertStringContainsString('AB', $result);
     }
 }

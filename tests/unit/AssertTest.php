@@ -89,12 +89,15 @@ class AssertTest extends BaseTestCase
         return static::$resource;
     }
 
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass(): void
     {
-        @fclose(self::$resource);
+        if (is_resource(self::$resource)) {
+            fclose(self::$resource);
+        }
+        self::$resource = null;
     }
 
-    public function getTests()
+    public static function getTests()
     {
         $resource = self::getResource();
 
@@ -150,7 +153,7 @@ class AssertTest extends BaseTestCase
             array('resource', array($resource, 'other'), false),
             array('resource', array(1), false),
             array('isCallable', array('strlen'), true),
-            array('isCallable', array(array($this, 'getTests')), true),
+            array('isCallable', array(array(self::class, 'getTests')), true),
             array('isCallable', array(function () {}), true),
             array('isCallable', array(1234), false),
             array('isCallable', array('foobar'), false),
@@ -567,8 +570,8 @@ class AssertTest extends BaseTestCase
             array('throws', array(function() { throw new LogicException('test'); }, 'LogicException'), true),
             array('throws', array(function() { throw new LogicException('test'); }, 'IllogicException'), false),
             array('throws', array(function() { throw new Exception('test'); }), true),
-            array('throws', array(function() { trigger_error('test'); }, 'Throwable'), true, false, 70000),
-            array('throws', array(function() { trigger_error('test'); }, 'Unthrowable'), false, false, 70000),
+            array('throws', array(function() { throw new \ErrorException('test'); }, 'Throwable'), true, false, 70000),
+            array('throws', array(function() { throw new \ErrorException('test'); }, 'Unthrowable'), false, false, 70000),
             array('throws', array(function() { throw new Error(); }, 'Throwable'), true, true, 70000),
             array('ip', array('192.168.0.1'), true),
             array('ip', array(new ToStringClass('192.168.0.1')), true),
@@ -620,12 +623,17 @@ class AssertTest extends BaseTestCase
         );
     }
 
-    public function getMethods()
+    public static function getMethods()
     {
         $methods = array();
 
-        foreach ($this->getTests() as $params) {
-            $methods[$params[0]] = array($params[0]);
+        foreach (self::getTests() as $params) {
+            $methodName = $params[0];
+            $args = $params[1];
+            // Keep the extra args (beyond the first value) so nullOr tests
+            // can pass them along with null as the first argument
+            $extraArgs = array_slice($args, 1);
+            $methods[$methodName] = array($methodName, $extraArgs);
         }
 
         return array_values($methods);
@@ -678,9 +686,10 @@ class AssertTest extends BaseTestCase
     /**
      * @dataProvider getMethods
      */
-    public function testNullOrAcceptsNull($method)
+    public function testNullOrAcceptsNull($method, $extraArgs = array())
     {
-        call_user_func(array('Webmozart\Assert\Assert', 'nullOr'.ucfirst($method)), null);
+        $args = array_merge(array(null), $extraArgs);
+        call_user_func_array(array('Webmozart\Assert\Assert', 'nullOr'.ucfirst($method)), $args);
         $this->addToAssertionCount(1);
     }
 
@@ -734,7 +743,7 @@ class AssertTest extends BaseTestCase
         $this->addToAssertionCount(1);
     }
 
-    public function getStringConversions()
+    public static function getStringConversions()
     {
         return array(
             array('integer', array('foobar'), 'Expected an integer. Got: string'),

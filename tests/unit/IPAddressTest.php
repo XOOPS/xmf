@@ -25,7 +25,7 @@ class IPAddressTest extends \PHPUnit\Framework\TestCase
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->object = new IPAddress($this->testIPV4);
         $this->objectV6 = new IPAddress($this->testIPV6);
@@ -35,7 +35,7 @@ class IPAddressTest extends \PHPUnit\Framework\TestCase
      * Tears down the fixture, for example, closes a network connection.
      * This method is called after a test is executed.
      */
-    protected function tearDown()
+    protected function tearDown(): void
     {
     }
 
@@ -113,5 +113,15 @@ class IPAddressTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($instanceV4->sameSubnet($addressV4, 24, 96));
         $this->assertFalse($instanceV4->sameSubnet($addressV6, 25, 98));
         $this->assertTrue($instanceV4->sameSubnet($instanceV4->asReadable(), 32, 128));
+    }
+
+    public function testNormalizeInvalidIp()
+    {
+        $method = new \ReflectionMethod('Xmf\IPAddress', 'normalize');
+        $method->setAccessible(true);
+        $instance = new IPAddress('127.0.0.1');
+        // Invalid IP should return false without warnings
+        $result = @$method->invoke($instance, 'not-an-ip');
+        $this->assertFalse($result);
     }
 }

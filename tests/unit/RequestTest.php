@@ -14,7 +14,7 @@ class RequestTest extends \PHPUnit\Framework\TestCase
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->object = new Request;
     }
@@ -23,7 +23,7 @@ class RequestTest extends \PHPUnit\Framework\TestCase
      * Tears down the fixture, for example, closes a network connection.
      * This method is called after a test is executed.
      */
-    protected function tearDown()
+    protected function tearDown(): void
     {
     }
 
@@ -214,6 +214,26 @@ class RequestTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($_REQUEST[$varname], 'Porshca');
     }
 
+    public function testSetVarEnv()
+    {
+        $varname = 'XMF_TEST_ENV_VAR';
+        $value = 'env_test_value';
+        Request::setVar($varname, $value, 'env');
+        $this->assertArrayHasKey($varname, $_ENV);
+        $this->assertEquals($value, $_ENV[$varname]);
+        unset($_ENV[$varname]);
+    }
+
+    public function testSetVarServer()
+    {
+        $varname = 'XMF_TEST_SERVER_VAR';
+        $value = 'server_test_value';
+        Request::setVar($varname, $value, 'server');
+        $this->assertArrayHasKey($varname, $_SERVER);
+        $this->assertEquals($value, $_SERVER[$varname]);
+        unset($_SERVER[$varname]);
+    }
+
     public function testGet()
     {
         $varname = 'RequestTest';
@@ -236,4 +256,5 @@ class RequestTest extends \PHPUnit\Framework\TestCase
         Request::set(array($varname => 'Pourquoi'), 'get');
         $this->assertEquals($_REQUEST[$varname], 'Pourquoi');
     }
+
 }

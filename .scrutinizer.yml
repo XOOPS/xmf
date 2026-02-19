@@ -1,19 +1,18 @@
-# .scrutinizer.yml
 build:
-    nodes:
-        analysis:
-            environment:
-                php:
-                    version: 7.4
-            project_setup:
-                override: true
-            tests:
-                override:
-                - php-scrutinizer-run
+  nodes:
+    analysis:
+      tests:
+        override:
+          - php-scrutinizer-run
+
 filter:
-    excluded_paths:
-        - '_archive/*'
-        - 'tests/*'
+  excluded_paths:
+    - '_archive/*'
+    - 'tests/*'
+    - 'vendor/*'
+    - 'docs/*'
+  dependency_paths:
+    - 'stubs/'
+
 tools:
-    external_code_coverage:
-        timeout: 300    # Timeout in seconds.
+  php_analyzer: true

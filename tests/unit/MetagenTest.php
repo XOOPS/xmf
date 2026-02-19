@@ -41,7 +41,7 @@ EOT;
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->object = new Metagen;
     }
@@ -50,7 +50,7 @@ EOT;
      * Tears down the fixture, for example, closes a network connection.
      * This method is called after a test is executed.
      */
-    protected function tearDown()
+    protected function tearDown(): void
     {
     }
 
@@ -213,5 +213,18 @@ EOT;
         $expected = 'This is a test of cleaning up a string.';
         $actual = $method->invokeArgs($this->object, array($input));
         $this->assertEquals($expected, $actual, $actual);
+    }
+
+    public function testHtml2textNumericEntities()
+    {
+        $method = new \ReflectionMethod('Xmf\Metagen', 'html2text');
+        $method->setAccessible(true);
+        // Use codepoint > 255 (&#8364; = Euro sign €) to test the preg_replace_callback
+        // path, since codepoints <= 255 are already handled by the earlier $search/$replace
+        $input = 'Price: &#8364;50';
+        $actual = $method->invokeArgs(null, array($input));
+        $expected = html_entity_decode('&#8364;', ENT_NOQUOTES, Metagen::ENCODING); // €
+        $this->assertStringContainsString($expected, $actual);
+        $this->assertStringNotContainsString('&#8364;', $actual);
     }
 }
