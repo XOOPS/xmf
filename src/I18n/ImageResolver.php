@@ -62,7 +62,7 @@ final class ImageResolver
             return $basePath;
         }
 
-        $lang = $lang ?? (defined('_LANGCODE') && \is_string(_LANGCODE) ? _LANGCODE : 'en');
+        $lang = $lang ?? (defined('_LANGCODE') && \is_string(\_LANGCODE) ? \_LANGCODE : 'en');
         $dir  = $dir ?? Direction::dir($lang);
         if ($dir !== Direction::LTR && $dir !== Direction::RTL) {
             $dir = Direction::dir($lang);
@@ -95,7 +95,7 @@ final class ImageResolver
 
         $root = '';
         if (defined('XOOPS_ROOT_PATH')) {
-            $rootValue = XOOPS_ROOT_PATH;
+            $rootValue = \XOOPS_ROOT_PATH;
             if (\is_string($rootValue) && $rootValue !== '') {
                 $root = rtrim($rootValue, '/');
             }
