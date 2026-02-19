@@ -112,7 +112,7 @@ final class Direction
                 );
                 self::$rtlDeprecationWarned = true;
             }
-            $result = _RTL ? self::RTL : self::LTR;
+            $result = ((bool) _RTL) ? self::RTL : self::LTR;
         }
 
         // Priority 3: Auto-detect from locale
@@ -173,8 +173,8 @@ final class Direction
                     return self::RTL;
                 }
             } catch (\Throwable $e) {
-                $debug = (defined('XOOPS_DEBUG_MODE') && XOOPS_DEBUG_MODE)
-                         || (defined('XOOPS_DEBUG') && XOOPS_DEBUG);
+                $debug = (defined('XOOPS_DEBUG_MODE') && (bool) XOOPS_DEBUG_MODE)
+                         || (defined('XOOPS_DEBUG') && (bool) XOOPS_DEBUG);
                 if ($debug) {
                     \error_log(
                         'Direction: ICU script detection failed for locale "'

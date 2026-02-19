@@ -93,9 +93,13 @@ final class ImageResolver
         $candidates[] = $prefix . "{$filename}.{$otherDir}.{$extension}";
         $candidates[] = $basePath;
 
-        $root = (defined('XOOPS_ROOT_PATH') && \is_string(XOOPS_ROOT_PATH))
-            ? rtrim(XOOPS_ROOT_PATH, '/')
-            : '';
+        $root = '';
+        if (defined('XOOPS_ROOT_PATH')) {
+            $rootValue = XOOPS_ROOT_PATH;
+            if (\is_string($rootValue) && $rootValue !== '') {
+                $root = rtrim($rootValue, '/');
+            }
+        }
 
         $result = $basePath;
         if ($root !== '') {
