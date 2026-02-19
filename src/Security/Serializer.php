@@ -61,10 +61,19 @@ final class Serializer
      * @return string
      *
      * @throws JsonException On encoding failure
+     * @throws RuntimeException If encoded output exceeds MAX_SIZE
      */
     public static function toJson($data): string
     {
-        return json_encode($data, self::JSON_FLAGS);
+        $json = json_encode($data, self::JSON_FLAGS);
+
+        if (\strlen($json) > self::MAX_SIZE) {
+            throw new RuntimeException(
+                sprintf('Serialized JSON exceeds maximum allowed size of %d bytes', self::MAX_SIZE)
+            );
+        }
+
+        return $json;
     }
 
     /**
@@ -76,11 +85,18 @@ final class Serializer
      *
      * @throws JsonException On invalid JSON
      * @throws UnexpectedValueException On empty input
+     * @throws RuntimeException If payload exceeds MAX_SIZE
      */
     public static function fromJson(string $json)
     {
         if ($json === '') {
             throw new UnexpectedValueException('Cannot deserialize empty JSON');
+        }
+
+        if (\strlen($json) > self::MAX_SIZE) {
+            throw new RuntimeException(
+                sprintf('JSON payload exceeds maximum size of %d bytes', self::MAX_SIZE)
+            );
         }
 
         return json_decode($json, true, self::JSON_DEPTH, JSON_THROW_ON_ERROR);
@@ -124,6 +140,8 @@ final class Serializer
      * @param bool $enable
      *
      * @return void
+     *
+     * @throws void This method does not throw
      */
     public static function enableDebug(bool $enable = true): void
     {
@@ -138,6 +156,8 @@ final class Serializer
      * Get collected debug statistics
      *
      * @return array{total_operations: int, total_time: float, formats_detected: array<string, int>, slow_operations: array<int, array{operation: string, format: string, time: float, memory: int, error: string|null, trace: array<string, mixed>|null}>, errors: array<int, array{operation: string, format: string, time: float, memory: int, error: string|null, trace: array<string, mixed>|null}>}|array{}
+     *
+     * @throws void This method does not throw
      */
     public static function getDebugStats(): array
     {
@@ -234,6 +254,8 @@ final class Serializer
      * @param mixed $data
      *
      * @return string
+     *
+     * @throws \InvalidArgumentException On unsupported types (resource, closure)
      */
     public static function toLegacy($data): string
     {
@@ -254,12 +276,12 @@ final class Serializer
     public static function fromLegacy(string $payload, array $allowedClasses = [])
     {
         self::validateInput($payload);
+        self::validateSecurity($payload, empty($allowedClasses));
 
         // Try plain PHP serialize first
         $result = self::tryUnserialize($payload, $allowedClasses);
         if ($result !== null) {
             self::logLegacy($payload);
-            self::validateSecurity($payload, empty($allowedClasses));
             return $result;
         }
 
@@ -304,6 +326,10 @@ final class Serializer
      * @param array<int, class-string> $allowedClasses For PHP/legacy formats
      *
      * @return mixed
+     *
+     * @throws JsonException On JSON parse failure
+     * @throws RuntimeException On security or format violation
+     * @throws UnexpectedValueException On deserialization failure
      */
     public static function from(string $payload, array $allowedClasses = [])
     {
@@ -338,6 +364,8 @@ final class Serializer
      * @param string $payload
      *
      * @return string One of Format::* constants
+     *
+     * @throws void This method does not throw
      */
     public static function detect(string $payload): string
     {
@@ -362,7 +390,10 @@ final class Serializer
         // Check base64-encoded serialized
         if (self::isLikelyBase64($payload)) {
             $decoded = base64_decode($payload, true);
-            if ($decoded !== false && self::looksLikeSerialized($decoded)) {
+            if ($decoded !== false
+                && \strlen($decoded) <= self::MAX_SIZE
+                && self::looksLikeSerialized($decoded)
+            ) {
                 return Format::LEGACY;
             }
         }
@@ -448,6 +479,8 @@ final class Serializer
      * @param array<int, class-string> $allowedClasses
      *
      * @return mixed
+     *
+     * @throws void This method does not throw; returns $default on failure
      */
     public static function tryFrom(string $payload, $default = null, string $format = Format::AUTO, array $allowedClasses = [])
     {
@@ -473,7 +506,9 @@ final class Serializer
      *
      * @param string $payload
      *
-     * @return mixed|null
+     * @return mixed|null Returns null on any failure
+     *
+     * @throws void This method does not throw; returns null on failure
      */
     public static function jsonOnly(string $payload)
     {
@@ -485,7 +520,11 @@ final class Serializer
             return null;
         }
 
-        return json_decode($payload, true, self::JSON_DEPTH, JSON_THROW_ON_ERROR);
+        try {
+            return json_decode($payload, true, self::JSON_DEPTH, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            return null;
+        }
     }
 
     /**
@@ -497,6 +536,8 @@ final class Serializer
      * @return string|int|float|bool|null
      *
      * @throws UnexpectedValueException When result is not scalar or null
+     * @throws JsonException On JSON parse failure
+     * @throws RuntimeException On security or format violation
      */
     public static function scalarsOnly(string $payload, string $format = Format::AUTO)
     {
@@ -527,6 +568,8 @@ final class Serializer
      * @param callable|null $logger fn(string $file, int $line, string $preview): void
      *
      * @return void
+     *
+     * @throws void This method does not throw
      */
     public static function setLegacyLogger(?callable $logger): void
     {
@@ -613,8 +656,11 @@ final class Serializer
 
         set_error_handler(
             static function (int $severity, string $message): bool {
+                if ($severity !== E_WARNING && $severity !== E_NOTICE) {
+                    return false;
+                }
                 // Only suppress warnings/notices that originate from unserialize()
-                return stripos($message, 'unserialize():') === 0;
+                return strpos($message, 'unserialize():') === 0;
             },
             E_WARNING | E_NOTICE
         );

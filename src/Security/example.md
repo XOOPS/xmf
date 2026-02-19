@@ -40,7 +40,7 @@ class ForumForum extends XoopsObject
     public function getModerators(): array
     {
         $data = $this->getVar('forum_moderators');
-        return $this->unserializeProperty($data, []);
+        return $this->unserializeProperty($data, [], []); // no object deserialization allowed
     }
 
     public function setModerators(array $moderators): void

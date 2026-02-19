@@ -1,15 +1,16 @@
 includes:
-#	- ../../phpstan.neon
+    - phpstan-baseline.neon
+
 parameters:
-	level: max
-	paths:
-		- .
-	fileExtensions:
-		- php
-		- phtml
-	excludePaths:
-		- tests/*
-	ignoreErrors:
-		-
-			message: '#Trait .+ is used zero times and is not analysed\.#'
-			path: src/Security/SerializableTrait.php
+    level: max
+    paths:
+        - src
+    scanDirectories:
+        - stubs
+    excludePaths:
+        - tests/
+    treatPhpDocTypesAsCertain: false
+    ignoreErrors:
+        -
+            message: '#Trait .+ is used zero times and is not analysed\.#'
+            path: src/Security/SerializableTrait.php

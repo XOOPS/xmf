@@ -123,11 +123,15 @@ trait SerializableTrait
         $format = Serializer::detect($oldData);
 
         if ($format === Format::PHP || $format === Format::LEGACY) {
-            $value = $this->unserializeProperty($oldData);
-            $newData = $this->serializeProperty($value, Format::JSON);
-            $this->setVar($property, $newData);
+            try {
+                $value = $this->unserializeProperty($oldData);
+                $newData = $this->serializeProperty($value, Format::JSON);
+                $this->setVar($property, $newData);
 
-            return true;
+                return true;
+            } catch (\Throwable $e) {
+                return false;
+            }
         }
 
         return false;
