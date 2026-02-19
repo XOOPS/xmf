@@ -19,7 +19,7 @@ namespace Xmf\I18n;
  * @category  Xmf\I18n\Direction
  * @package   Xmf
  * @author    MAMBA <mambax7@gmail.com>
- * @copyright 2000-2025 XOOPS Project (https://xoops.org)
+ * @copyright 2000-2026 XOOPS Project (https://xoops.org)
  * @license   GNU GPL 2.0 or later (https://www.gnu.org/licenses/gpl-2.0.html)
  * @link      https://xoops.org
  */
@@ -27,7 +27,6 @@ final class Direction
 {
     public const LTR  = 'ltr';
     public const RTL  = 'rtl';
-    /** Sentinel for callers that want Direction::dir() to auto-detect */
     public const AUTO = 'auto';
 
     private static ?string $cachedDir = null;
@@ -67,19 +66,31 @@ final class Direction
     /**
      * Get text direction for a locale.
      *
-     * @param string|null $locale Locale code, or null for global locale
+     * @param string|null $locale Locale code, or null/AUTO for global locale
      *
      * @return string 'ltr' or 'rtl'
      */
     public static function dir(?string $locale = null): string
     {
+        if ($locale === self::AUTO) {
+            $locale = null;
+        }
+
         $isGlobal = ($locale === null);
 
         if ($isGlobal && self::$cachedDir !== null) {
             return self::$cachedDir;
         }
 
-        $resolved = $locale ?? (defined('_LANGCODE') && \is_string(\_LANGCODE) ? \_LANGCODE : 'en');
+        $isLegacy = !\class_exists('Xoops', false);
+
+        $resolved = $locale;
+        if ($resolved === null && $isLegacy && \defined('_LANGCODE') && \is_string(\_LANGCODE)) {
+            $resolved = \_LANGCODE;
+        }
+        if ($resolved === null) {
+            $resolved = 'en';
+        }
 
         if (!$isGlobal && isset(self::$cacheByLocale[$resolved])) {
             return self::$cacheByLocale[$resolved];
@@ -88,14 +99,14 @@ final class Direction
         $result = null;
 
         // Priority 1: Explicit _TEXT_DIRECTION (normalized for robustness)
-        if ($isGlobal && defined('_TEXT_DIRECTION')) {
+        if ($isGlobal && $isLegacy && \defined('_TEXT_DIRECTION')) {
             $raw = \_TEXT_DIRECTION;
             if (\is_string($raw)) {
-                $decl = strtolower(trim($raw));
+                $decl = \strtolower(\trim($raw));
                 if (\in_array($decl, [self::RTL, self::LTR], true)) {
                     $result = $decl;
                 } else {
-                    trigger_error(
+                    \trigger_error(
                         'Constant _TEXT_DIRECTION has invalid value "' . $raw
                         . '". Expected \'ltr\' or \'rtl\'.',
                         E_USER_WARNING
@@ -105,9 +116,9 @@ final class Direction
         }
 
         // Priority 2: Legacy _RTL constant
-        if ($result === null && $isGlobal && defined('_RTL')) {
+        if ($result === null && $isGlobal && $isLegacy && \defined('_RTL')) {
             if (!self::$rtlDeprecationWarned) {
-                trigger_error(
+                \trigger_error(
                     'Constant _RTL is deprecated. Define _TEXT_DIRECTION as \'ltr\' or \'rtl\' instead.',
                     E_USER_DEPRECATED
                 );
@@ -155,13 +166,13 @@ final class Direction
      */
     private static function detect(string $locale): string
     {
-        $locale = trim($locale);
+        $locale = \trim($locale);
         if ($locale === '') {
             return self::LTR;
         }
 
-        $norm    = str_replace('_', '-', strtolower($locale));
-        $primary = explode('-', $norm, 2)[0];
+        $norm    = \str_replace('_', '-', \strtolower($locale));
+        $primary = \explode('-', $norm, 2)[0];
 
         if (\in_array($primary, self::RTL_LANGS, true)) {
             return self::RTL;
@@ -174,8 +185,8 @@ final class Direction
                     return self::RTL;
                 }
             } catch (\IntlException $e) {
-                $debug = (defined('XOOPS_DEBUG_MODE') && (bool) \XOOPS_DEBUG_MODE)
-                         || (defined('XOOPS_DEBUG') && (bool) \XOOPS_DEBUG);
+                $debug = (\defined('XOOPS_DEBUG_MODE') && (bool) \XOOPS_DEBUG_MODE)
+                         || (\defined('XOOPS_DEBUG') && (bool) \XOOPS_DEBUG);
                 if ($debug) {
                     \error_log(
                         'Direction: ICU script detection failed for locale "'

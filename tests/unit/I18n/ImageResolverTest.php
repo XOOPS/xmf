@@ -26,13 +26,13 @@ class ImageResolverTest extends \PHPUnit\Framework\TestCase
         $this->assertSame('', ImageResolver::resolve(''));
     }
 
-    public function testAbsoluteHttpUrlReturnedAsIs(): void
+    public function testAbsoluteHttpsUrlReturnedAsIs(): void
     {
         $url = 'https://example.com/images/arrow.png';
         $this->assertSame($url, ImageResolver::resolve($url));
     }
 
-    public function testAbsoluteHttpsUrlReturnedAsIs(): void
+    public function testAbsoluteHttpUrlReturnedAsIs(): void
     {
         $url = 'http://example.com/images/arrow.png';
         $this->assertSame($url, ImageResolver::resolve($url));

@@ -70,9 +70,11 @@ class DirectionTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(Direction::LTR, Direction::dir(''));
     }
 
-    public function testAutoSentinelBehavesLikeNull(): void
+    public function testAutoSentinelIsNormalizedToNull(): void
     {
-        // AUTO should auto-detect, falling through to 'en' default => LTR
+        // AUTO is normalized to null inside dir(), triggering global
+        // auto-detection. Without legacy constants defined, it defaults
+        // to 'en' and resolves to LTR.
         $this->assertSame(Direction::LTR, Direction::dir(Direction::AUTO));
     }
 

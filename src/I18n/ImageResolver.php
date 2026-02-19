@@ -19,7 +19,7 @@ namespace Xmf\I18n;
  * @category  Xmf\I18n\ImageResolver
  * @package   Xmf
  * @author    MAMBA <mambax7@gmail.com>
- * @copyright 2000-2025 XOOPS Project (https://xoops.org)
+ * @copyright 2000-2026 XOOPS Project (https://xoops.org)
  * @license   GNU GPL 2.0 or later (https://www.gnu.org/licenses/gpl-2.0.html)
  * @link      https://xoops.org
  */
@@ -62,8 +62,21 @@ final class ImageResolver
             return $basePath;
         }
 
-        $lang = $lang ?? (defined('_LANGCODE') && \is_string(\_LANGCODE) ? \_LANGCODE : 'en');
-        $dir  = $dir ?? Direction::dir($lang);
+        $isLegacy = !\class_exists('Xoops', false);
+
+        if ($lang === null && $isLegacy && \defined('_LANGCODE') && \is_string(\_LANGCODE)) {
+            $lang = \_LANGCODE;
+        }
+        if ($lang === null) {
+            $lang = 'en';
+        }
+
+        // Reject lang values containing path traversal sequences
+        if (\strpos($lang, '..') !== false || \strpos($lang, '/') !== false) {
+            return $basePath;
+        }
+
+        $dir = $dir ?? Direction::dir($lang);
         if ($dir !== Direction::LTR && $dir !== Direction::RTL) {
             $dir = Direction::dir($lang);
         }
@@ -74,8 +87,8 @@ final class ImageResolver
         }
 
         $parts     = \pathinfo($basePath);
-        $dirname   = ($parts['dirname'] ?? '') === '.' ? '' : ($parts['dirname'] ?? '');
-        $filename  = $parts['filename'] ?? '';
+        $dirname   = $parts['dirname'] === '.' ? '' : $parts['dirname'];
+        $filename  = $parts['filename'];
         $extension = $parts['extension'] ?? '';
         if ($filename === '' || $extension === '') {
             return $basePath; // malformed path
@@ -95,18 +108,18 @@ final class ImageResolver
 
         // Resolve XOOPS_ROOT_PATH via constant() to avoid PHPStan stub narrowing
         $root = '';
-        if (defined('XOOPS_ROOT_PATH')) {
+        if (\defined('XOOPS_ROOT_PATH')) {
             /** @var mixed $rootValue */
             $rootValue = \constant('XOOPS_ROOT_PATH');
             if (\is_string($rootValue) && $rootValue !== '') {
-                $root = rtrim($rootValue, '/');
+                $root = \rtrim($rootValue, '/');
             }
         }
 
         $result = $basePath;
         if ($root !== '') {
             foreach ($candidates as $rel) {
-                $full = $root . '/' . ltrim($rel, '/');
+                $full = $root . '/' . \ltrim($rel, '/');
                 if (\is_file($full)) {
                     $result = $rel;
                     break;
@@ -146,10 +159,7 @@ final class ImageResolver
     private static function remember(string $key, string $value): void
     {
         if (\count(self::$cache) >= self::MAX_CACHE_SIZE) {
-            $oldestKey = \array_key_first(self::$cache);
-            if ($oldestKey !== null) {
-                unset(self::$cache[$oldestKey]);
-            }
+            \array_shift(self::$cache);
         }
         self::$cache[$key] = $value;
     }
