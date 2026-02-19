@@ -471,22 +471,28 @@ final class Serializer
      *
      * @return object
      *
+     * @throws \InvalidArgumentException When $className does not exist
      * @throws RuntimeException On unsupported format
      * @throws UnexpectedValueException On type mismatch
      */
     public static function toObject(string $payload, string $className, string $format = Format::PHP): object
     {
+        if (!class_exists($className)) {
+            throw new \InvalidArgumentException(
+                sprintf('Class "%s" does not exist', $className)
+            );
+        }
+
         /** @var array<int, class-string> $allowed */
         $allowed = [$className];
 
-        $data = null;
-        if ($format === Format::PHP) {
-            $data = self::fromPhp($payload, $allowed);
-        } elseif ($format === Format::LEGACY) {
-            $data = self::fromLegacy($payload, $allowed);
-        } else {
+        if ($format !== Format::PHP && $format !== Format::LEGACY) {
             throw new RuntimeException('Objects only supported in PHP/Legacy formats');
         }
+
+        $data = ($format === Format::PHP)
+            ? self::fromPhp($payload, $allowed)
+            : self::fromLegacy($payload, $allowed);
 
         if (!$data instanceof $className) {
             throw new UnexpectedValueException(
