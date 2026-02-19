@@ -128,7 +128,7 @@ final class Serializer
         }
 
         try {
-            return serialize($data);
+            $serialized = serialize($data);
         } catch (\Throwable $e) {
             throw new \InvalidArgumentException(
                 'Failed to serialize data: contains unsupported type (possibly nested)',
@@ -136,6 +136,14 @@ final class Serializer
                 $e
             );
         }
+
+        if (\strlen($serialized) > self::MAX_SIZE) {
+            throw new RuntimeException(
+                sprintf('Serialized PHP data exceeds maximum allowed size of %d bytes', self::MAX_SIZE)
+            );
+        }
+
+        return $serialized;
     }
 
     // ═══════════════════════════════════════════════════════════
@@ -156,6 +164,9 @@ final class Serializer
         self::$debugMode = $enable;
         if ($enable) {
             self::$startTime = microtime(true);
+            self::$debugLog = [];
+        } else {
+            self::$startTime = null;
             self::$debugLog = [];
         }
     }
@@ -723,15 +734,36 @@ final class Serializer
      */
     private static function looksLikeSerialized(string $str): bool
     {
-        if (\strlen($str) < 4) {
+        if (\strlen($str) < 2) {
             return false;
         }
 
-        $type = $str[0];
-        $validTypes = ['a', 'O', 's', 'i', 'b', 'd', 'N', 'r', 'R', 'C'];
+        switch ($str[0]) {
+            case 'N':
+                return \strpos($str, 'N;') === 0;
 
-        return in_array($type, $validTypes, true)
-               && (bool) preg_match('/^[aOsibdNRCr]:-?[\d.]+[:;{]/', $str);
+            case 'i':
+            case 'b':
+            case 'r':
+            case 'R':
+                return (bool) preg_match('/^[ibrR]:-?\d+;/', $str);
+
+            case 'd':
+                return (bool) preg_match('/^d:-?(?:\d+\.?\d*|\d*\.?\d+)(?:[eE][+-]?\d+)?;/', $str);
+
+            case 's':
+                return (bool) preg_match('/^s:\d+:"/', $str);
+
+            case 'a':
+                return (bool) preg_match('/^a:\d+:\{/', $str);
+
+            case 'O':
+            case 'C':
+                return (bool) preg_match('/^[OC]:\d+:"/', $str);
+
+            default:
+                return false;
+        }
     }
 
     /**
@@ -805,9 +837,14 @@ final class Serializer
         $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
         $caller = ['file' => 'unknown', 'line' => 0];
         foreach ($trace as $frame) {
-            if (isset($frame['file'], $frame['line'])) {
-                $caller = $frame;
+            if (!isset($frame['file'], $frame['line'])) {
+                continue;
             }
+            if (isset($frame['class']) && $frame['class'] === self::class) {
+                continue;
+            }
+            $caller = $frame;
+            break;
         }
 
         (self::$legacyLogger)(
