@@ -13,9 +13,9 @@ final class BlockPosition
      * Map a side integer to logical class based on convention.
      *
      * @param int $side Physical side (convention: 1=left, 0=right in LTR context)
-     * @param string $leftValue What integer represents "left" in your CMS (default: 1)
-     * @param string $rightValue What integer represents "right" in your CMS (default: 0)
-     * @return string 'start' or 'end'
+     * @param int $leftValue What integer represents "left" in your CMS (default: 1)
+     * @param int $rightValue What integer represents "right" in your CMS (default: 0)
+     * @return string 'start', 'end', or 'center'
      */
     public static function toLogical(
         int $side,
@@ -66,6 +66,11 @@ final class BlockPosition
 
     /**
      * Get appropriate side value for "end" position in given direction.
+     *
+     * @param string|null $direction 'ltr' or 'rtl'
+     * @param int $leftValue What represents "left" (default: 1)
+     * @param int $rightValue What represents "right" (default: 0)
+     * @return int Side value for end position
      */
     public static function getEndValue(
         ?string $direction = null,

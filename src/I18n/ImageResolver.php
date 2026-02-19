@@ -18,6 +18,11 @@ final class ImageResolver
      *   images/arrow.rtl.png
      *   images/arrow.ltr.png
      *   images/arrow.png
+     *
+     * @param string      $basePath Base image path (relative or absolute URL)
+     * @param string|null $lang     Locale code, or null for global locale
+     * @param string|null $dir      'ltr' or 'rtl', or null for auto-detection
+     * @return string Resolved image path
      */
     public static function resolve(string $basePath, ?string $lang = null, ?string $dir = null): string
     {
@@ -49,11 +54,17 @@ final class ImageResolver
             return $basePath; // malformed path
         }
 
+        // Normalize prefix to avoid double slashes for root paths
+        $prefix = ($dirname === '' || $dirname === '.') ? '' : ($dirname === '/' ? '/' : $dirname . '/');
+
+        $otherDir = ($dir === Direction::RTL) ? Direction::LTR : Direction::RTL;
+
         $candidates = [];
         foreach (self::expandLang($lang) as $l) {
-            $candidates[] = ($dirname !== '' ? "{$dirname}/" : '') . "{$filename}.{$l}.{$extension}";
+            $candidates[] = $prefix . "{$filename}.{$l}.{$extension}";
         }
-        $candidates[] = ($dirname !== '' ? "{$dirname}/" : '') . "{$filename}.{$dir}.{$extension}";
+        $candidates[] = $prefix . "{$filename}.{$dir}.{$extension}";
+        $candidates[] = $prefix . "{$filename}.{$otherDir}.{$extension}";
         $candidates[] = $basePath;
 
         $root = defined('XOOPS_ROOT_PATH') ? rtrim((string) XOOPS_ROOT_PATH, '/') : '';
@@ -71,11 +82,18 @@ final class ImageResolver
         return $result;
     }
 
-    /** @return string[] e.g., 'pt-BR' → ['pt-br','pt'] */
+    /**
+     * Expand a locale code into candidate suffixes.
+     *
+     * @param string $lang Locale code (e.g. 'pt-BR')
+     * @return string[] e.g. ['pt-br', 'pt']
+     */
     private static function expandLang(string $lang): array
     {
         $lang = \strtolower(\str_replace('_', '-', \trim($lang)));
-        if ($lang === '') return [];
+        if ($lang === '') {
+            return [];
+        }
         $parts = \explode('-', $lang, 2);
         return isset($parts[1]) ? [$lang, $parts[0]] : [$lang];
     }
@@ -88,7 +106,11 @@ final class ImageResolver
         self::$cache[$key] = $value;
     }
 
-    /** testing hook */
+    /**
+     * Clear the resolution cache (useful for testing).
+     *
+     * @return void
+     */
     public static function clearCache(): void
     {
         self::$cache = [];
