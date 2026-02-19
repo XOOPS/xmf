@@ -64,8 +64,12 @@ final class ImageResolver
 
         $isLegacy = !\class_exists('Xoops', false);
 
-        if ($lang === null && $isLegacy && \defined('_LANGCODE') && \is_string(\_LANGCODE)) {
-            $lang = \_LANGCODE;
+        if ($lang === null && $isLegacy && \defined('_LANGCODE')) {
+            /** @var mixed $langCode */
+            $langCode = \constant('_LANGCODE');
+            if (\is_string($langCode)) {
+                $lang = $langCode;
+            }
         }
         if ($lang === null) {
             $lang = 'en';

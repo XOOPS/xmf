@@ -85,8 +85,12 @@ final class Direction
         $isLegacy = !\class_exists('Xoops', false);
 
         $resolved = $locale;
-        if ($resolved === null && $isLegacy && \defined('_LANGCODE') && \is_string(\_LANGCODE)) {
-            $resolved = \_LANGCODE;
+        if ($resolved === null && $isLegacy && \defined('_LANGCODE')) {
+            /** @var mixed $langCode */
+            $langCode = \constant('_LANGCODE');
+            if (\is_string($langCode)) {
+                $resolved = $langCode;
+            }
         }
         if ($resolved === null) {
             $resolved = 'en';
@@ -100,7 +104,8 @@ final class Direction
 
         // Priority 1: Explicit _TEXT_DIRECTION (normalized for robustness)
         if ($isGlobal && $isLegacy && \defined('_TEXT_DIRECTION')) {
-            $raw = \_TEXT_DIRECTION;
+            /** @var mixed $raw */
+            $raw = \constant('_TEXT_DIRECTION');
             if (\is_string($raw)) {
                 $decl = \strtolower(\trim($raw));
                 if (\in_array($decl, [self::RTL, self::LTR], true)) {
@@ -124,7 +129,7 @@ final class Direction
                 );
                 self::$rtlDeprecationWarned = true;
             }
-            $result = ((bool) \_RTL) ? self::RTL : self::LTR;
+            $result = ((bool) \constant('_RTL')) ? self::RTL : self::LTR;
         }
 
         // Priority 3: Auto-detect from locale
@@ -185,8 +190,8 @@ final class Direction
                     return self::RTL;
                 }
             } catch (\IntlException $e) {
-                $debug = (\defined('XOOPS_DEBUG_MODE') && (bool) \XOOPS_DEBUG_MODE)
-                         || (\defined('XOOPS_DEBUG') && (bool) \XOOPS_DEBUG);
+                $debug = (\defined('XOOPS_DEBUG_MODE') && (bool) \constant('XOOPS_DEBUG_MODE'))
+                         || (\defined('XOOPS_DEBUG') && (bool) \constant('XOOPS_DEBUG'));
                 if ($debug) {
                     \error_log(
                         'Direction: ICU script detection failed for locale "'
