@@ -26,19 +26,25 @@ namespace Xmf\I18n;
  */
 final class BlockPosition
 {
+    /** XOOPS convention: integer representing the left/start side */
+    public const DEFAULT_LEFT  = 1;
+
+    /** XOOPS convention: integer representing the right/end side */
+    public const DEFAULT_RIGHT = 0;
+
     /**
      * Map a side integer to logical class based on convention.
      *
      * @param int $side       Physical side (convention: 1=left, 0=right in LTR context)
-     * @param int $leftValue  What integer represents "left" in your CMS (default: 1)
-     * @param int $rightValue What integer represents "right" in your CMS (default: 0)
+     * @param int $leftValue  What integer represents "left" in your CMS
+     * @param int $rightValue What integer represents "right" in your CMS
      *
      * @return string 'start', 'end', or 'center'
      */
     public static function toLogical(
         int $side,
-        int $leftValue = 1,
-        int $rightValue = 0
+        int $leftValue = self::DEFAULT_LEFT,
+        int $rightValue = self::DEFAULT_RIGHT
     ): string {
         if ($side === $leftValue) {
             return 'start';
@@ -53,15 +59,15 @@ final class BlockPosition
      * Get CSS class for a block position.
      *
      * @param int $side       Physical side value from database
-     * @param int $leftValue  What represents "left" (default: 1)
-     * @param int $rightValue What represents "right" (default: 0)
+     * @param int $leftValue  What represents "left"
+     * @param int $rightValue What represents "right"
      *
      * @return string CSS class: 'block-start', 'block-end', or 'block-center'
      */
     public static function toCssClass(
         int $side,
-        int $leftValue = 1,
-        int $rightValue = 0
+        int $leftValue = self::DEFAULT_LEFT,
+        int $rightValue = self::DEFAULT_RIGHT
     ): string {
         $logical = self::toLogical($side, $leftValue, $rightValue);
         return "block-{$logical}";
@@ -71,15 +77,15 @@ final class BlockPosition
      * Get appropriate side value for "start" position in given direction.
      *
      * @param string|null $direction 'ltr' or 'rtl'
-     * @param int         $leftValue  What represents "left" (default: 1)
-     * @param int         $rightValue What represents "right" (default: 0)
+     * @param int         $leftValue  What represents "left"
+     * @param int         $rightValue What represents "right"
      *
      * @return int Side value for start position
      */
     public static function getStartValue(
         ?string $direction = null,
-        int $leftValue = 1,
-        int $rightValue = 0
+        int $leftValue = self::DEFAULT_LEFT,
+        int $rightValue = self::DEFAULT_RIGHT
     ): int {
         $dir = $direction ?? Direction::dir();
         return ($dir === Direction::RTL) ? $rightValue : $leftValue;
@@ -89,15 +95,15 @@ final class BlockPosition
      * Get appropriate side value for "end" position in given direction.
      *
      * @param string|null $direction 'ltr' or 'rtl'
-     * @param int         $leftValue  What represents "left" (default: 1)
-     * @param int         $rightValue What represents "right" (default: 0)
+     * @param int         $leftValue  What represents "left"
+     * @param int         $rightValue What represents "right"
      *
      * @return int Side value for end position
      */
     public static function getEndValue(
         ?string $direction = null,
-        int $leftValue = 1,
-        int $rightValue = 0
+        int $leftValue = self::DEFAULT_LEFT,
+        int $rightValue = self::DEFAULT_RIGHT
     ): int {
         $dir = $direction ?? Direction::dir();
         return ($dir === Direction::RTL) ? $leftValue : $rightValue;

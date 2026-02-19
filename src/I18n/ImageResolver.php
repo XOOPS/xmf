@@ -93,9 +93,11 @@ final class ImageResolver
         $candidates[] = $prefix . "{$filename}.{$otherDir}.{$extension}";
         $candidates[] = $basePath;
 
+        // Resolve XOOPS_ROOT_PATH via constant() to avoid PHPStan stub narrowing
         $root = '';
         if (defined('XOOPS_ROOT_PATH')) {
-            $rootValue = \XOOPS_ROOT_PATH;
+            /** @var mixed $rootValue */
+            $rootValue = \constant('XOOPS_ROOT_PATH');
             if (\is_string($rootValue) && $rootValue !== '') {
                 $root = rtrim($rootValue, '/');
             }
@@ -144,7 +146,10 @@ final class ImageResolver
     private static function remember(string $key, string $value): void
     {
         if (\count(self::$cache) >= self::MAX_CACHE_SIZE) {
-            \array_shift(self::$cache);
+            $oldestKey = \array_key_first(self::$cache);
+            if ($oldestKey !== null) {
+                unset(self::$cache[$oldestKey]);
+            }
         }
         self::$cache[$key] = $value;
     }

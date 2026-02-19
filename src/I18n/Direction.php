@@ -27,6 +27,7 @@ final class Direction
 {
     public const LTR  = 'ltr';
     public const RTL  = 'rtl';
+    /** Sentinel for callers that want Direction::dir() to auto-detect */
     public const AUTO = 'auto';
 
     private static ?string $cachedDir = null;
@@ -172,7 +173,7 @@ final class Direction
                 if (\in_array($script, self::RTL_SCRIPTS, true)) {
                     return self::RTL;
                 }
-            } catch (\Throwable $e) {
+            } catch (\IntlException $e) {
                 $debug = (defined('XOOPS_DEBUG_MODE') && (bool) \XOOPS_DEBUG_MODE)
                          || (defined('XOOPS_DEBUG') && (bool) \XOOPS_DEBUG);
                 if ($debug) {
