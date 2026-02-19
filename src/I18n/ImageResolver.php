@@ -1,12 +1,33 @@
 <?php
+/*
+ You may not change or alter any portion of this comment or credits
+ of supporting developers from this source code or any supporting source code
+ which is considered copyrighted (c) material of the original comment or credit authors.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 declare(strict_types=1);
 
 namespace Xmf\I18n;
 
+/**
+ * Locale-aware image path resolver with direction fallbacks.
+ *
+ * @category  Xmf\I18n\ImageResolver
+ * @package   Xmf
+ * @author    MAMBA <mambax7@gmail.com>
+ * @copyright 2000-2025 XOOPS Project (https://xoops.org)
+ * @license   GNU GPL 2.0 or later (https://www.gnu.org/licenses/gpl-2.0.html)
+ * @link      https://xoops.org
+ */
 final class ImageResolver
 {
-    /** @var array<string,string> */
+    /** @var array<string, string> */
     private static array $cache = [];
+
     private const MAX_CACHE_SIZE = 200;
 
     /**
@@ -22,6 +43,7 @@ final class ImageResolver
      * @param string      $basePath Base image path (relative or absolute URL)
      * @param string|null $lang     Locale code, or null for global locale
      * @param string|null $dir      'ltr' or 'rtl', or null for auto-detection
+     *
      * @return string Resolved image path
      */
     public static function resolve(string $basePath, ?string $lang = null, ?string $dir = null): string
@@ -35,27 +57,31 @@ final class ImageResolver
             return $basePath;
         }
 
-        $lang = $lang ?? (defined('_LANGCODE') ? (string) _LANGCODE : 'en');
-        $dir  = $dir  ?? Direction::dir($lang);
+        // Reject path traversal attempts
+        if (\strpos($basePath, '..') !== false) {
+            return $basePath;
+        }
+
+        $lang = $lang ?? (defined('_LANGCODE') && \is_string(_LANGCODE) ? _LANGCODE : 'en');
+        $dir  = $dir ?? Direction::dir($lang);
         if ($dir !== Direction::LTR && $dir !== Direction::RTL) {
             $dir = Direction::dir($lang);
         }
 
-        $cacheKey = \md5($basePath . "\0" . \strtolower($lang) . "\0" . $dir);
+        $cacheKey = \strtolower($lang) . "\0" . $dir . "\0" . $basePath;
         if (isset(self::$cache[$cacheKey])) {
             return self::$cache[$cacheKey];
         }
 
         $parts     = \pathinfo($basePath);
         $dirname   = ($parts['dirname'] ?? '') === '.' ? '' : ($parts['dirname'] ?? '');
-        $filename  = $parts['filename']  ?? '';
+        $filename  = $parts['filename'] ?? '';
         $extension = $parts['extension'] ?? '';
         if ($filename === '' || $extension === '') {
             return $basePath; // malformed path
         }
 
-        // Normalize prefix to avoid double slashes for root paths
-        $prefix = ($dirname === '' || $dirname === '.') ? '' : ($dirname === '/' ? '/' : $dirname . '/');
+        $prefix = $dirname === '' ? '' : ($dirname === '/' ? '/' : $dirname . '/');
 
         $otherDir = ($dir === Direction::RTL) ? Direction::LTR : Direction::RTL;
 
@@ -67,14 +93,18 @@ final class ImageResolver
         $candidates[] = $prefix . "{$filename}.{$otherDir}.{$extension}";
         $candidates[] = $basePath;
 
-        $root = defined('XOOPS_ROOT_PATH') ? rtrim((string) XOOPS_ROOT_PATH, '/') : '';
+        $root = (defined('XOOPS_ROOT_PATH') && \is_string(XOOPS_ROOT_PATH))
+            ? rtrim(XOOPS_ROOT_PATH, '/')
+            : '';
 
         $result = $basePath;
-        foreach ($candidates as $rel) {
-            $full = ($root !== '' ? $root . '/' : '') . ltrim($rel, '/');
-            if (\is_file($full)) {
-                $result = $rel;
-                break;
+        if ($root !== '') {
+            foreach ($candidates as $rel) {
+                $full = $root . '/' . ltrim($rel, '/');
+                if (\is_file($full)) {
+                    $result = $rel;
+                    break;
+                }
             }
         }
 
@@ -86,6 +116,7 @@ final class ImageResolver
      * Expand a locale code into candidate suffixes.
      *
      * @param string $lang Locale code (e.g. 'pt-BR')
+     *
      * @return string[] e.g. ['pt-br', 'pt']
      */
     private static function expandLang(string $lang): array
@@ -98,6 +129,14 @@ final class ImageResolver
         return isset($parts[1]) ? [$lang, $parts[0]] : [$lang];
     }
 
+    /**
+     * Store a resolved path in the cache.
+     *
+     * @param string $key   Cache key
+     * @param string $value Resolved path
+     *
+     * @return void
+     */
     private static function remember(string $key, string $value): void
     {
         if (\count(self::$cache) >= self::MAX_CACHE_SIZE) {

@@ -1,18 +1,44 @@
 <?php
+/*
+ You may not change or alter any portion of this comment or credits
+ of supporting developers from this source code or any supporting source code
+ which is considered copyrighted (c) material of the original comment or credit authors.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 declare(strict_types=1);
 
 namespace Xmf\I18n;
 
+/**
+ * Text direction detection and caching for RTL/LTR layouts.
+ *
+ * @category  Xmf\I18n\Direction
+ * @package   Xmf
+ * @author    MAMBA <mambax7@gmail.com>
+ * @copyright 2000-2025 XOOPS Project (https://xoops.org)
+ * @license   GNU GPL 2.0 or later (https://www.gnu.org/licenses/gpl-2.0.html)
+ * @link      https://xoops.org
+ */
 final class Direction
 {
     public const LTR  = 'ltr';
     public const RTL  = 'rtl';
     public const AUTO = 'auto';
-    private static ?string $cachedDir            = null;
-    private static array   $cacheByLocale        = [];
-    private static bool    $rtlDeprecationWarned = false;
+
+    private static ?string $cachedDir = null;
+
+    /** @var array<string, string> */
+    private static array $cacheByLocale = [];
+
+    private static bool $rtlDeprecationWarned = false;
+
     private const MAX_LOCALE_CACHE = 50;
-    private const RTL_LANGS        = [
+
+    private const RTL_LANGS = [
         'ar',  // Arabic
         'arc', // Aramaic
         'bcc', // Southern Balochi
@@ -34,12 +60,14 @@ final class Direction
         'ur',  // Urdu
         'yi',  // Yiddish
     ];
-    private const RTL_SCRIPTS      = ['Arab', 'Hebr', 'Thaa', 'Syrc', 'Nkoo', 'Adlm', 'Mand', 'Samr'];
+
+    private const RTL_SCRIPTS = ['Arab', 'Hebr', 'Thaa', 'Syrc', 'Nkoo', 'Adlm', 'Mand', 'Samr'];
 
     /**
      * Get text direction for a locale.
      *
      * @param string|null $locale Locale code, or null for global locale
+     *
      * @return string 'ltr' or 'rtl'
      */
     public static function dir(?string $locale = null): string
@@ -50,7 +78,7 @@ final class Direction
             return self::$cachedDir;
         }
 
-        $resolved = $locale ?? (defined('_LANGCODE') ? (string)_LANGCODE : 'en');
+        $resolved = $locale ?? (defined('_LANGCODE') && \is_string(_LANGCODE) ? _LANGCODE : 'en');
 
         if (!$isGlobal && isset(self::$cacheByLocale[$resolved])) {
             return self::$cacheByLocale[$resolved];
@@ -60,15 +88,18 @@ final class Direction
 
         // Priority 1: Explicit _TEXT_DIRECTION (normalized for robustness)
         if ($isGlobal && defined('_TEXT_DIRECTION')) {
-            $decl = strtolower(trim((string)_TEXT_DIRECTION));
-            if (in_array($decl, [self::RTL, self::LTR], true)) {
-                $result = $decl;
-            } else {
-                trigger_error(
-                    'Constant _TEXT_DIRECTION has invalid value "' . _TEXT_DIRECTION . '". Expected \'ltr\' or \'rtl\'.',
-                    E_USER_WARNING
-                );
-                // Fall through to next priority
+            $raw = _TEXT_DIRECTION;
+            if (\is_string($raw)) {
+                $decl = strtolower(trim($raw));
+                if (\in_array($decl, [self::RTL, self::LTR], true)) {
+                    $result = $decl;
+                } else {
+                    trigger_error(
+                        'Constant _TEXT_DIRECTION has invalid value "' . $raw
+                        . '". Expected \'ltr\' or \'rtl\'.',
+                        E_USER_WARNING
+                    );
+                }
             }
         }
 
@@ -93,8 +124,8 @@ final class Direction
         if ($isGlobal) {
             self::$cachedDir = $result;
         } else {
-            if (count(self::$cacheByLocale) >= self::MAX_LOCALE_CACHE) {
-                array_shift(self::$cacheByLocale);
+            if (\count(self::$cacheByLocale) >= self::MAX_LOCALE_CACHE) {
+                \array_shift(self::$cacheByLocale);
             }
             self::$cacheByLocale[$resolved] = $result;
         }
@@ -106,6 +137,7 @@ final class Direction
      * Check if a locale uses right-to-left text direction.
      *
      * @param string|null $locale Locale code, or null for global locale
+     *
      * @return bool True if RTL, false if LTR
      */
     public static function isRtl(?string $locale = null): bool
@@ -117,6 +149,7 @@ final class Direction
      * Core detection logic.
      *
      * @param string $locale Resolved locale code (never null)
+     *
      * @return string 'ltr' or 'rtl'
      */
     private static function detect(string $locale): string
@@ -129,21 +162,24 @@ final class Direction
         $norm    = str_replace('_', '-', strtolower($locale));
         $primary = explode('-', $norm, 2)[0];
 
-        if (in_array($primary, self::RTL_LANGS, true)) {
+        if (\in_array($primary, self::RTL_LANGS, true)) {
             return self::RTL;
         }
 
-        if (extension_loaded('intl')) {
+        if (\extension_loaded('intl')) {
             try {
                 $script = \Locale::getScript($norm) ?: '';
-                if (in_array($script, self::RTL_SCRIPTS, true)) {
+                if (\in_array($script, self::RTL_SCRIPTS, true)) {
                     return self::RTL;
                 }
             } catch (\Throwable $e) {
                 $debug = (defined('XOOPS_DEBUG_MODE') && XOOPS_DEBUG_MODE)
                          || (defined('XOOPS_DEBUG') && XOOPS_DEBUG);
                 if ($debug) {
-                    error_log('Direction: ICU script detection failed for locale "' . $locale . '": ' . $e->getMessage());
+                    \error_log(
+                        'Direction: ICU script detection failed for locale "'
+                        . $locale . '": ' . $e->getMessage()
+                    );
                 }
             }
         }
@@ -158,8 +194,8 @@ final class Direction
      */
     public static function clearCache(): void
     {
-        self::$cachedDir            = null;
-        self::$cacheByLocale        = [];
-        self::$rtlDeprecationWarned = false;  // Reset for tests
+        self::$cachedDir = null;
+        self::$cacheByLocale = [];
+        self::$rtlDeprecationWarned = false;
     }
 }
