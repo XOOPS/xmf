@@ -20,7 +20,7 @@
   ],
   "require": {
     "php": "^7.4 || ^8.0",
-    "firebase/php-jwt": "^6.10 || ^7.0",
+    "firebase/php-jwt": "^6.4 || ^7.0",
     "kint-php/kint": "^6.0",
     "symfony/yaml": "^5.4 || ^6.0 || ^7.0",
     "webmozart/assert": "^1.11"

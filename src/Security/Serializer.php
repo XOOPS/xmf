@@ -35,7 +35,7 @@ use UnexpectedValueException;
  */
 final class Serializer
 {
-    private const MAX_SIZE = 5_000_000; // 5MB
+    private const MAX_SIZE = 5000000; // 5MB
     private const JSON_DEPTH = 512;
     private const JSON_FLAGS = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR;
 
@@ -44,7 +44,7 @@ final class Serializer
 
     private static bool $debugMode = false;
 
-    /** @var array<int, array{operation: string, format: string, time: float, memory: int, error: string|null, trace: array<string, mixed>|null}> */
+    /** @var array<int, array{operation: string, format: string, time: float, memory: int, error: string|null, trace: array<int|string, mixed>|null}> */
     private static array $debugLog = [];
 
     private static ?float $startTime = null;
@@ -454,9 +454,9 @@ final class Serializer
     /**
      * Deserialize expecting a specific class instance
      *
-     * @param string $payload
-     * @param string $className
-     * @param string $format
+     * @param string       $payload
+     * @param class-string $className
+     * @param string       $format
      *
      * @return object
      *
@@ -465,11 +465,14 @@ final class Serializer
      */
     public static function toObject(string $payload, string $className, string $format = Format::PHP): object
     {
+        /** @var array<int, class-string> $allowed */
+        $allowed = [$className];
+
         $data = null;
         if ($format === Format::PHP) {
-            $data = self::fromPhp($payload, [$className]);
+            $data = self::fromPhp($payload, $allowed);
         } elseif ($format === Format::LEGACY) {
-            $data = self::fromLegacy($payload, [$className]);
+            $data = self::fromLegacy($payload, $allowed);
         } else {
             throw new RuntimeException('Objects only supported in PHP/Legacy formats');
         }
@@ -808,8 +811,8 @@ final class Serializer
         }
 
         (self::$legacyLogger)(
-            $caller['file'] ?? 'unknown',
-            $caller['line'] ?? 0,
+            $caller['file'],
+            $caller['line'],
             $preview
         );
     }

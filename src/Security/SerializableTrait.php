@@ -61,7 +61,7 @@ trait SerializableTrait
      *
      * @param string                    $data           The serialized data
      * @param mixed                     $default        Default value if deserialization fails
-     * @param array<int, class-string>  $allowedClasses Whitelist of allowed classes
+     * @param array<int, string>  $allowedClasses Whitelist of allowed class names
      *
      * @return mixed The deserialized value or default
      */
