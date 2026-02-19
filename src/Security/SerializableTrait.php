@@ -86,7 +86,11 @@ trait SerializableTrait
 
         foreach ($this->getSerializableProperties() as $property => $format) {
             if (property_exists($this, $property)) {
-                $serialized[$property] = $this->serializeProperty($this->$property, $format);
+                try {
+                    $serialized[$property] = $this->serializeProperty($this->$property, $format);
+                } catch (\Error $e) {
+                    // Typed property may not be initialized — skip it
+                }
             }
         }
 
@@ -134,6 +138,12 @@ trait SerializableTrait
 
                 return true;
             } catch (\Throwable $e) {
+                \error_log(\sprintf(
+                    'Serializer migration failed for property "%s": %s',
+                    $property,
+                    $e->getMessage()
+                ));
+
                 return false;
             }
         }

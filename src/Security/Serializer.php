@@ -127,7 +127,15 @@ final class Serializer
             throw new \InvalidArgumentException('Cannot serialize closures');
         }
 
-        return serialize($data);
+        try {
+            return serialize($data);
+        } catch (\Throwable $e) {
+            throw new \InvalidArgumentException(
+                'Failed to serialize data: contains unsupported type (possibly nested)',
+                0,
+                $e
+            );
+        }
     }
 
     // ═══════════════════════════════════════════════════════════
@@ -161,7 +169,7 @@ final class Serializer
      */
     public static function getDebugStats(): array
     {
-        if (!self::$debugMode) {
+        if (!self::$debugMode || self::$startTime === null) {
             return [];
         }
 
@@ -196,7 +204,8 @@ final class Serializer
         // Only capture backtrace for errors to avoid performance overhead
         $trace = null;
         if ($error !== null) {
-            $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3)[2] ?? null;
+            // Capture a short backtrace instead of relying on a fixed stack depth
+            $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
         }
 
         self::$debugLog[] = [
@@ -347,8 +356,8 @@ final class Serializer
         // Format::AUTO - try sequence for migrations
         try {
             return self::fromJson($payload);
-        } catch (\Throwable $e) {
-            // Not JSON
+        } catch (JsonException $e) {
+            // Not JSON, try other formats
         }
 
         if (self::looksLikeSerialized(ltrim($payload))) {
@@ -375,9 +384,9 @@ final class Serializer
 
         $trimmed = ltrim($payload);
 
-        // Check JSON
+        // Check JSON (use trimmed for consistency with the leading-char check)
         if (isset($trimmed[0]) && ($trimmed[0] === '{' || $trimmed[0] === '[')) {
-            if (self::isValidJson($payload)) {
+            if (self::isValidJson($trimmed)) {
                 return Format::JSON;
             }
         }
@@ -520,10 +529,8 @@ final class Serializer
             return null;
         }
 
-        if (!self::isValidJson($payload)) {
-            return null;
-        }
-
+        // Single json_decode with try-catch avoids redundant double-parsing
+        // that would occur if isValidJson() were called first
         try {
             return json_decode($payload, true, self::JSON_DEPTH, JSON_THROW_ON_ERROR);
         } catch (\JsonException $e) {
@@ -603,7 +610,7 @@ final class Serializer
             throw new UnexpectedValueException('Cannot deserialize empty string');
         }
 
-        if (strlen($payload) > self::MAX_SIZE) {
+        if (\strlen($payload) > self::MAX_SIZE) {
             throw new RuntimeException(
                 sprintf('Payload exceeds maximum size of %d bytes', self::MAX_SIZE)
             );
@@ -619,7 +626,7 @@ final class Serializer
      */
     private static function validateSize(string $payload): void
     {
-        if (strlen($payload) > self::MAX_SIZE) {
+        if (\strlen($payload) > self::MAX_SIZE) {
             throw new RuntimeException(
                 sprintf('Decoded payload exceeds %d bytes', self::MAX_SIZE)
             );
@@ -713,7 +720,7 @@ final class Serializer
      */
     private static function looksLikeSerialized(string $str): bool
     {
-        if (strlen($str) < 4) {
+        if (\strlen($str) < 4) {
             return false;
         }
 
@@ -721,7 +728,7 @@ final class Serializer
         $validTypes = ['a', 'O', 's', 'i', 'b', 'd', 'N', 'r', 'R', 'C'];
 
         return in_array($type, $validTypes, true)
-               && (bool) preg_match('/^[aOsibdNRCr]:\d+[:;{]/', $str);
+               && (bool) preg_match('/^[aOsibdNRCr]:-?[\d.]+[:;{]/', $str);
     }
 
     /**
@@ -745,7 +752,7 @@ final class Serializer
      */
     private static function isLikelyBase64(string $s): bool
     {
-        $len = strlen($s);
+        $len = \strlen($s);
 
         // Require reasonable minimum length and proper block alignment
         if ($len < 16 || ($len % 4) !== 0) {
@@ -791,9 +798,14 @@ final class Serializer
             return;
         }
 
-        $preview = substr($payload, 0, 50) . (strlen($payload) > 50 ? '...' : '');
-        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
-        $caller = $trace[2] ?? ['file' => 'unknown', 'line' => 0];
+        $preview = \substr($payload, 0, 50) . (\strlen($payload) > 50 ? '...' : '');
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
+        $caller = ['file' => 'unknown', 'line' => 0];
+        foreach ($trace as $frame) {
+            if (isset($frame['file'], $frame['line'])) {
+                $caller = $frame;
+            }
+        }
 
         (self::$legacyLogger)(
             $caller['file'] ?? 'unknown',
