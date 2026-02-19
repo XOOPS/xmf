@@ -123,8 +123,6 @@ trait SerializableTrait
      * @param string $oldData  Current serialized data
      *
      * @return bool True if migration was performed
-     *
-     * @throws void This method does not throw; returns false on failure
      */
     public function migrateSerializedData(string $property, string $oldData): bool
     {

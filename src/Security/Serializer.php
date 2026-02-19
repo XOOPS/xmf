@@ -156,8 +156,6 @@ final class Serializer
      * @param bool $enable
      *
      * @return void
-     *
-     * @throws void This method does not throw
      */
     public static function enableDebug(bool $enable = true): void
     {
@@ -175,8 +173,6 @@ final class Serializer
      * Get collected debug statistics
      *
      * @return array{total_operations: int, total_time: float, formats_detected: array<string, int>, slow_operations: array<int, array{operation: string, format: string, time: float, memory: int, error: string|null, trace: array<string, mixed>|null}>, errors: array<int, array{operation: string, format: string, time: float, memory: int, error: string|null, trace: array<string, mixed>|null}>}|array{}
-     *
-     * @throws void This method does not throw
      */
     public static function getDebugStats(): array
     {
@@ -384,8 +380,6 @@ final class Serializer
      * @param string $payload
      *
      * @return string One of Format::* constants
-     *
-     * @throws void This method does not throw
      */
     public static function detect(string $payload): string
     {
@@ -512,8 +506,6 @@ final class Serializer
      * @param array<int, string> $allowedClasses
      *
      * @return mixed
-     *
-     * @throws void This method does not throw; returns $default on failure
      */
     public static function tryFrom(string $payload, $default = null, string $format = Format::AUTO, array $allowedClasses = [])
     {
@@ -540,8 +532,6 @@ final class Serializer
      * @param string $payload
      *
      * @return mixed|null Returns null on any failure
-     *
-     * @throws void This method does not throw; returns null on failure
      */
     public static function jsonOnly(string $payload)
     {
@@ -553,7 +543,7 @@ final class Serializer
         // that would occur if isValidJson() were called first
         try {
             return json_decode($payload, true, self::JSON_DEPTH, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             return null;
         }
     }
@@ -604,8 +594,6 @@ final class Serializer
      * @param callable|null $logger fn(string $file, int $line, string $preview): void
      *
      * @return void
-     *
-     * @throws void This method does not throw
      */
     public static function setLegacyLogger(?callable $logger): void
     {
@@ -821,7 +809,7 @@ final class Serializer
         try {
             json_decode($s, true, self::JSON_DEPTH, JSON_THROW_ON_ERROR);
             return true;
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             return false;
         }
     }
