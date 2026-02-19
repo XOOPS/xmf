@@ -77,6 +77,8 @@ trait SerializableTrait
      * to produce an associative array of serialized values.
      *
      * @return array<string, string> Map of property names to serialized values
+     *
+     * @throws \InvalidArgumentException On unsupported format in serializeProperty()
      */
     public function serializeProperties(): array
     {
@@ -117,6 +119,8 @@ trait SerializableTrait
      * @param string $oldData  Current serialized data
      *
      * @return bool True if migration was performed
+     *
+     * @throws void This method does not throw; returns false on failure
      */
     public function migrateSerializedData(string $property, string $oldData): bool
     {

@@ -415,10 +415,10 @@ final class Serializer
      *
      * @throws UnexpectedValueException When result is not an array
      * @throws JsonException On JSON parse failure
+     * @throws \InvalidArgumentException On unsupported format
      */
     public static function toArray(string $payload, string $format = Format::AUTO): array
     {
-        $data = null;
         if ($format === Format::JSON) {
             $data = self::fromJson($payload);
         } elseif ($format === Format::PHP) {
@@ -427,6 +427,10 @@ final class Serializer
             $data = self::fromLegacy($payload);
         } elseif ($format === Format::AUTO) {
             $data = self::from($payload);
+        } else {
+            throw new \InvalidArgumentException(
+                sprintf('Unsupported format "%s"', $format)
+            );
         }
 
         if (!is_array($data)) {
@@ -538,6 +542,7 @@ final class Serializer
      * @throws UnexpectedValueException When result is not scalar or null
      * @throws JsonException On JSON parse failure
      * @throws RuntimeException On security or format violation
+     * @throws \InvalidArgumentException On unsupported format
      */
     public static function scalarsOnly(string $payload, string $format = Format::AUTO)
     {
@@ -547,8 +552,12 @@ final class Serializer
             $v = self::fromPhp($payload);
         } elseif ($format === Format::LEGACY) {
             $v = self::fromLegacy($payload);
-        } else {
+        } elseif ($format === Format::AUTO) {
             $v = self::from($payload);
+        } else {
+            throw new \InvalidArgumentException(
+                sprintf('Unsupported format "%s"', $format)
+            );
         }
 
         if (!is_scalar($v) && $v !== null) {
