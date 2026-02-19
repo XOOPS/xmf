@@ -233,7 +233,7 @@ final class Serializer
      * Deserialize PHP serialized string (secure by default)
      *
      * @param string                   $payload        The serialized string
-     * @param array<int, class-string> $allowedClasses Whitelist of allowed classes (empty = no objects)
+     * @param array<int, string> $allowedClasses Whitelist of allowed classes (empty = no objects)
      *
      * @return mixed
      *
@@ -286,7 +286,7 @@ final class Serializer
      * Deserialize legacy format (handles plain, base64, and optional gzip)
      *
      * @param string                   $payload
-     * @param array<int, class-string> $allowedClasses Whitelist of allowed classes
+     * @param array<int, string> $allowedClasses Whitelist of allowed classes
      *
      * @return mixed
      *
@@ -343,7 +343,7 @@ final class Serializer
      * Deserialize with automatic format detection
      *
      * @param string                   $payload
-     * @param array<int, class-string> $allowedClasses For PHP/legacy formats
+     * @param array<int, string> $allowedClasses For PHP/legacy formats
      *
      * @return mixed
      *
@@ -466,7 +466,7 @@ final class Serializer
      * Deserialize expecting a specific class instance
      *
      * @param string       $payload
-     * @param class-string $className
+     * @param string       $className Fully-qualified class name
      * @param string       $format
      *
      * @return object
@@ -509,7 +509,7 @@ final class Serializer
      * @param string                   $payload
      * @param mixed                    $default
      * @param string                   $format
-     * @param array<int, class-string> $allowedClasses
+     * @param array<int, string> $allowedClasses
      *
      * @return mixed
      *
@@ -679,7 +679,7 @@ final class Serializer
      * Core unserialize with error handling
      *
      * @param string                   $payload
-     * @param array<int, class-string> $allowedClasses
+     * @param array<int, string> $allowedClasses
      *
      * @return mixed
      *
@@ -718,7 +718,7 @@ final class Serializer
      * Attempt unserialization, returning null on failure instead of throwing.
      *
      * @param string                   $payload
-     * @param array<int, class-string> $allowedClasses
+     * @param array<int, string> $allowedClasses
      *
      * @return mixed|null
      */
