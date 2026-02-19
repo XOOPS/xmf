@@ -14,6 +14,7 @@ $data2 = Serializer::from($payload2);
 **Get performance stats**
 ```php
 $stats = Serializer::getDebugStats();
+// For debugging only; disable debug mode in production to avoid performance impact.
 error_log('Serializer stats: ' . json_encode($stats));
 ```
 
@@ -27,7 +28,7 @@ use Xmf\Security\Format;
 class ForumForum extends XoopsObject
 {
     use SerializableTrait;
-    
+
     protected function getSerializableProperties(): array
     {
         return [
@@ -35,13 +36,13 @@ class ForumForum extends XoopsObject
             'forum_settings' => Format::JSON,
         ];
     }
-    
+
     public function getModerators(): array
     {
         $data = $this->getVar('forum_moderators');
         return $this->unserializeProperty($data, []);
     }
-    
+
     public function setModerators(array $moderators): void
     {
         $data = $this->serializeProperty($moderators);

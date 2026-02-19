@@ -1,4 +1,15 @@
-<?php declare(strict_types=1);
+<?php
+/*
+ You may not change or alter any portion of this comment or credits
+ of supporting developers from this source code or any supporting source code
+ which is considered copyrighted (c) material of the original comment or credit authors.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
+declare(strict_types=1);
 
 namespace Xmf\Security;
 
@@ -14,6 +25,13 @@ use UnexpectedValueException;
  * - Secure by default (no objects unless explicitly allowed)
  * - Simple, focused API
  * - Compatible with PHP 7.4+
+ *
+ * @category  Xmf\Security
+ * @package   Xmf
+ * @author    MAMBA <mambax7@gmail.com>
+ * @copyright 2000-2025 XOOPS Project (https://xoops.org)
+ * @license   GNU GPL 2.0 or later (https://www.gnu.org/licenses/gpl-2.0.html)
+ * @link      https://xoops.org
  */
 final class Serializer
 {
@@ -23,8 +41,12 @@ final class Serializer
 
     /** @var \Closure|null Optional logger for legacy format detection */
     private static $legacyLogger = null;
+
     private static bool $debugMode = false;
+
+    /** @var array<int, array{operation: string, format: string, time: float, memory: int, error: string|null, trace: array<string, mixed>|null}> */
     private static array $debugLog = [];
+
     private static ?float $startTime = null;
 
     // ═══════════════════════════════════════════════════════════
@@ -35,7 +57,9 @@ final class Serializer
      * Serialize data to JSON
      *
      * @param mixed $data
+     *
      * @return string
+     *
      * @throws JsonException On encoding failure
      */
     public static function toJson($data): string
@@ -47,7 +71,9 @@ final class Serializer
      * Deserialize JSON string
      *
      * @param string $json
+     *
      * @return mixed
+     *
      * @throws JsonException On invalid JSON
      * @throws UnexpectedValueException On empty input
      */
@@ -67,8 +93,13 @@ final class Serializer
     /**
      * Serialize data using PHP's native format
      *
+     * Note: only validates top-level types; nested resources or closures
+     * within arrays/objects are not checked.
+     *
      * @param mixed $data
+     *
      * @return string
+     *
      * @throws \InvalidArgumentException On unsupported types
      */
     public static function toPhp($data): string
@@ -91,6 +122,7 @@ final class Serializer
      * Enable or disable debug mode
      *
      * @param bool $enable
+     *
      * @return void
      */
     public static function enableDebug(bool $enable = true): void
@@ -105,7 +137,7 @@ final class Serializer
     /**
      * Get collected debug statistics
      *
-     * @return array
+     * @return array{total_operations: int, total_time: float, formats_detected: array<string, int>, slow_operations: array<int, array{operation: string, format: string, time: float, memory: int, error: string|null, trace: array<string, mixed>|null}>, errors: array<int, array{operation: string, format: string, time: float, memory: int, error: string|null, trace: array<string, mixed>|null}>}|array{}
      */
     public static function getDebugStats(): array
     {
@@ -120,8 +152,8 @@ final class Serializer
             'total_operations' => count(self::$debugLog),
             'total_time' => round($totalTime, 4),
             'formats_detected' => $formats,
-            'slow_operations' => array_filter(self::$debugLog, fn($log) => $log['time'] > 0.01),
-            'errors' => array_filter(self::$debugLog, fn($log) => isset($log['error']))
+            'slow_operations' => array_filter(self::$debugLog, static fn(array $log): bool => $log['time'] > 0.01),
+            'errors' => array_filter(self::$debugLog, static fn(array $log): bool => isset($log['error']))
         ];
     }
 
@@ -132,6 +164,7 @@ final class Serializer
      * @param string      $format
      * @param float       $time
      * @param string|null $error
+     *
      * @return void
      */
     private static function debug(string $operation, string $format, float $time, ?string $error = null): void
@@ -140,22 +173,30 @@ final class Serializer
             return;
         }
 
+        // Only capture backtrace for errors to avoid performance overhead
+        $trace = null;
+        if ($error !== null) {
+            $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3)[2] ?? null;
+        }
+
         self::$debugLog[] = [
             'operation' => $operation,
             'format' => $format,
             'time' => round($time, 6),
             'memory' => memory_get_usage(true),
             'error' => $error,
-            'trace' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3)[2] ?? null
+            'trace' => $trace
         ];
     }
 
     /**
      * Deserialize PHP serialized string (secure by default)
      *
-     * @param string $payload The serialized string
-     * @param array $allowedClasses Whitelist of allowed classes (empty = no objects)
+     * @param string                   $payload        The serialized string
+     * @param array<int, class-string> $allowedClasses Whitelist of allowed classes (empty = no objects)
+     *
      * @return mixed
+     *
      * @throws RuntimeException On security violation
      * @throws UnexpectedValueException On deserialization failure
      */
@@ -189,20 +230,26 @@ final class Serializer
      * Create legacy format (base64-encoded serialized data)
      *
      * @deprecated Use toJson() for new code
+     *
      * @param mixed $data
+     *
      * @return string
      */
     public static function toLegacy($data): string
     {
-        return base64_encode(serialize($data));
+        return base64_encode(self::toPhp($data));
     }
 
     /**
      * Deserialize legacy format (handles plain, base64, and optional gzip)
      *
-     * @param string $payload
-     * @param array $allowedClasses Whitelist of allowed classes
+     * @param string                   $payload
+     * @param array<int, class-string> $allowedClasses Whitelist of allowed classes
+     *
      * @return mixed
+     *
+     * @throws RuntimeException On security or format violation
+     * @throws UnexpectedValueException On deserialization failure
      */
     public static function fromLegacy(string $payload, array $allowedClasses = [])
     {
@@ -211,6 +258,8 @@ final class Serializer
         // Try plain PHP serialize first
         $result = self::tryUnserialize($payload, $allowedClasses);
         if ($result !== null) {
+            self::logLegacy($payload);
+            self::validateSecurity($payload, empty($allowedClasses));
             return $result;
         }
 
@@ -230,7 +279,7 @@ final class Serializer
 
         // Check for optional gzip compression
         if (self::isGzip($decoded)) {
-            $unzipped = @gzdecode($decoded);
+            $unzipped = gzdecode($decoded);
             if ($unzipped === false) {
                 throw new RuntimeException('Gzip decompression failed');
             }
@@ -251,8 +300,9 @@ final class Serializer
     /**
      * Deserialize with automatic format detection
      *
-     * @param string $payload
-     * @param array $allowedClasses For PHP/legacy formats
+     * @param string                   $payload
+     * @param array<int, class-string> $allowedClasses For PHP/legacy formats
+     *
      * @return mixed
      */
     public static function from(string $payload, array $allowedClasses = [])
@@ -286,6 +336,7 @@ final class Serializer
      * Detect the serialization format without deserializing
      *
      * @param string $payload
+     *
      * @return string One of Format::* constants
      */
     public static function detect(string $payload): string
@@ -328,7 +379,11 @@ final class Serializer
      *
      * @param string $payload
      * @param string $format
-     * @return array
+     *
+     * @return array<mixed>
+     *
+     * @throws UnexpectedValueException When result is not an array
+     * @throws JsonException On JSON parse failure
      */
     public static function toArray(string $payload, string $format = Format::AUTO): array
     {
@@ -358,7 +413,11 @@ final class Serializer
      * @param string $payload
      * @param string $className
      * @param string $format
+     *
      * @return object
+     *
+     * @throws RuntimeException On unsupported format
+     * @throws UnexpectedValueException On type mismatch
      */
     public static function toObject(string $payload, string $className, string $format = Format::PHP): object
     {
@@ -383,10 +442,11 @@ final class Serializer
     /**
      * Safe deserialization with fallback
      *
-     * @param string $payload
-     * @param mixed $default
-     * @param string $format
-     * @param array $allowedClasses
+     * @param string                   $payload
+     * @param mixed                    $default
+     * @param string                   $format
+     * @param array<int, class-string> $allowedClasses
+     *
      * @return mixed
      */
     public static function tryFrom(string $payload, $default = null, string $format = Format::AUTO, array $allowedClasses = [])
@@ -412,6 +472,7 @@ final class Serializer
      * Try JSON-only deserialization (for mixed-field migrations)
      *
      * @param string $payload
+     *
      * @return mixed|null
      */
     public static function jsonOnly(string $payload)
@@ -424,11 +485,7 @@ final class Serializer
             return null;
         }
 
-        try {
-            return json_decode($payload, true, self::JSON_DEPTH, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
-            return null;
-        }
+        return json_decode($payload, true, self::JSON_DEPTH, JSON_THROW_ON_ERROR);
     }
 
     /**
@@ -436,7 +493,10 @@ final class Serializer
      *
      * @param string $payload
      * @param string $format
+     *
      * @return string|int|float|bool|null
+     *
+     * @throws UnexpectedValueException When result is not scalar or null
      */
     public static function scalarsOnly(string $payload, string $format = Format::AUTO)
     {
@@ -465,6 +525,7 @@ final class Serializer
      * Set a logger to track legacy format usage (for migration tracking)
      *
      * @param callable|null $logger fn(string $file, int $line, string $preview): void
+     *
      * @return void
      */
     public static function setLegacyLogger(?callable $logger): void
@@ -478,7 +539,9 @@ final class Serializer
 
     /**
      * @param string $payload
+     *
      * @return void
+     *
      * @throws UnexpectedValueException
      * @throws RuntimeException
      */
@@ -497,7 +560,9 @@ final class Serializer
 
     /**
      * @param string $payload
+     *
      * @return void
+     *
      * @throws RuntimeException
      */
     private static function validateSize(string $payload): void
@@ -510,9 +575,18 @@ final class Serializer
     }
 
     /**
+     * Secondary defense against object injection in scalar/array payloads.
+     *
+     * PHP serialized objects use NUL bytes to mark private/protected
+     * property visibility boundaries. Legitimate scalar/array payloads
+     * should never contain them. This complements allowed_classes=false
+     * set in unserialize().
+     *
      * @param string $payload
-     * @param bool $noObjects
+     * @param bool   $noObjects
+     *
      * @return void
+     *
      * @throws RuntimeException
      */
     private static function validateSecurity(string $payload, bool $noObjects): void
@@ -523,24 +597,30 @@ final class Serializer
     }
 
     /**
-     * @param string $payload
-     * @param array $allowedClasses
+     * Core unserialize with error handling
+     *
+     * @param string                   $payload
+     * @param array<int, class-string> $allowedClasses
+     *
      * @return mixed
+     *
      * @throws UnexpectedValueException
      */
     private static function unserialize(string $payload, array $allowedClasses)
     {
-        $options = ['allowed_classes' => $allowedClasses ? array_values($allowedClasses) : false];
+        /** @var array{allowed_classes: array<int, class-string>|false} $options */
+        $options = ['allowed_classes' => $allowedClasses !== [] ? array_values($allowedClasses) : false];
 
         set_error_handler(
-            static function ($severity, $message) {
-                return is_string($message) && stripos($message, 'unserialize') !== false;
+            static function (int $severity, string $message): bool {
+                // Only suppress warnings/notices that originate from unserialize()
+                return stripos($message, 'unserialize():') === 0;
             },
             E_WARNING | E_NOTICE
         );
 
         try {
-            $result = unserialize($payload, $options);
+            $result = \unserialize($payload, $options);
         } finally {
             restore_error_handler();
         }
@@ -555,8 +635,9 @@ final class Serializer
     /**
      * Attempt unserialization, returning null on failure instead of throwing.
      *
-     * @param string $payload
-     * @param array $allowedClasses
+     * @param string                   $payload
+     * @param array<int, class-string> $allowedClasses
+     *
      * @return mixed|null
      */
     private static function tryUnserialize(string $payload, array $allowedClasses)
@@ -569,7 +650,10 @@ final class Serializer
     }
 
     /**
+     * Check if a string looks like PHP serialized data
+     *
      * @param string $str
+     *
      * @return bool
      */
     private static function looksLikeSerialized(string $str): bool
@@ -586,7 +670,10 @@ final class Serializer
     }
 
     /**
+     * Check if data starts with gzip magic bytes
+     *
      * @param string $bin
+     *
      * @return bool
      */
     private static function isGzip(string $bin): bool
@@ -595,17 +682,29 @@ final class Serializer
     }
 
     /**
+     * Heuristic check for base64-encoded data
+     *
      * @param string $s
+     *
      * @return bool
      */
     private static function isLikelyBase64(string $s): bool
     {
         $len = strlen($s);
-        return $len >= 8 && ($len % 4) === 0 && preg_match('/^[A-Za-z0-9+\/]+={0,2}$/', $s) === 1;
+
+        // Require reasonable minimum length and proper block alignment
+        if ($len < 16 || ($len % 4) !== 0) {
+            return false;
+        }
+
+        return preg_match('/^[A-Za-z0-9+\/]+={0,2}$/', $s) === 1;
     }
 
     /**
+     * Validate JSON string
+     *
      * @param string $s
+     *
      * @return bool
      */
     private static function isValidJson(string $s): bool
@@ -625,7 +724,10 @@ final class Serializer
     }
 
     /**
+     * Log legacy format detection
+     *
      * @param string $payload
+     *
      * @return void
      */
     private static function logLegacy(string $payload): void
@@ -649,6 +751,7 @@ final class Serializer
      * PHP 7.4 compatible version of get_debug_type()
      *
      * @param mixed $value
+     *
      * @return string
      */
     private static function getDebugType($value): string

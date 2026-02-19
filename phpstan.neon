@@ -9,3 +9,7 @@ parameters:
 		- phtml
 	excludePaths:
 		- tests/*
+	ignoreErrors:
+		-
+			message: '#Trait .+ is used zero times and is not analysed\.#'
+			path: src/Security/SerializableTrait.php
