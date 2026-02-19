@@ -2,7 +2,6 @@
 
 namespace Xmf\Security;
 
-
 /**
  * Format types for serialization (PHP 7.4+ compatible)
  */

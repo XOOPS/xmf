@@ -18,12 +18,15 @@ error_log('Serializer stats: ' . json_encode($stats));
 ```
 
 
-## XoopsSerializerTrait
+## SerializableTrait
 
 ```php
+use Xmf\Security\SerializableTrait;
+use Xmf\Security\Format;
+
 class ForumForum extends XoopsObject
 {
-    use XoopsSerializerTrait;
+    use SerializableTrait;
     
     protected function getSerializableProperties(): array
     {

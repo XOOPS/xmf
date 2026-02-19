@@ -53,59 +53,27 @@ trait SerializableTrait
 
     /**
      * Migrate serialized data from old to new format
+     *
+     * Requires the using class to implement setVar() (e.g. XoopsObject).
+     * Migration is automatically tracked via Serializer::setLegacyLogger()
+     * when the legacy logger is configured.
+     *
+     * @param string $property Property name to migrate
+     * @param string $oldData  Current serialized data
+     * @return bool True if migration was performed
      */
-    public function migrateSerializedData(string $property, string $oldData): void
+    public function migrateSerializedData(string $property, string $oldData): bool
     {
         $format = Serializer::detect($oldData);
 
         if ($format === Format::PHP || $format === Format::LEGACY) {
-            // Deserialize old format
             $value = $this->unserializeProperty($oldData);
-
-            // Re-serialize as JSON
             $newData = $this->serializeProperty($value, Format::JSON);
-
-            // Update property
             $this->setVar($property, $newData);
 
-            // Log migration
-            error_log(sprintf(
-                '[Migration] %s::%s converted from %s to JSON',
-                get_class($this),
-                $property,
-                $format
-            ));
+            return true;
         }
+
+        return false;
     }
 }
-
-// usage example
-
-/*
-use Xmf\Security\SerializableTrait;
-
-class ForumForum extends XoopsObject
-{
-    use SerializableTrait;
-
-    protected function getSerializableProperties(): array
-    {
-        return [
-            'forum_moderators' => Format::JSON,
-            'forum_settings' => Format::JSON,
-        ];
-    }
-
-    public function getModerators(): array
-    {
-        $data = $this->getVar('forum_moderators');
-        return $this->unserializeProperty($data, []);
-    }
-
-    public function setModerators(array $moderators): void
-    {
-        $data = $this->serializeProperty($moderators);
-        $this->setVar('forum_moderators', $data);
-    }
-}
-*/

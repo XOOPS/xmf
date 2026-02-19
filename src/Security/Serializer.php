@@ -553,6 +553,8 @@ final class Serializer
     }
 
     /**
+     * Attempt unserialization, returning null on failure instead of throwing.
+     *
      * @param string $payload
      * @param array $allowedClasses
      * @return mixed|null
@@ -560,22 +562,7 @@ final class Serializer
     private static function tryUnserialize(string $payload, array $allowedClasses)
     {
         try {
-            $options = ['allowed_classes' => $allowedClasses ? array_values($allowedClasses) : false];
-
-            set_error_handler(
-                static function ($severity, $message) {
-                    return is_string($message) && stripos($message, 'unserialize') !== false;
-                },
-                E_WARNING | E_NOTICE
-            );
-
-            try {
-                $result = unserialize($payload, $options);
-            } finally {
-                restore_error_handler();
-            }
-
-            return ($result === false && $payload !== 'b:0;') ? null : $result;
+            return self::unserialize($payload, $allowedClasses);
         } catch (\Throwable $e) {
             return null;
         }
