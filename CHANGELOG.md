@@ -1,5 +1,20 @@
 # XMF ChangeLog
 
+## [1.2.33-beta4] - 2026-02-22
+
+### Breaking Changes
+* **Raise minimum PHP version from 7.4 to 8.2** — drop support for PHP 7.4, 8.0, and 8.1
+* Require PHPUnit ^11.0 only (drop ^9.6 and ^10.0)
+* Require Symfony YAML ^6.0 || ^7.0 (drop ^5.4)
+* Require kint-php/kint ^6.0
+
+### Infrastructure
+* Update CI matrix to PHP 8.2–8.5; move lowest-deps test to PHP 8.2
+* Remove PHPStan skip condition for PHP 7.4/8.0 (now runs on all matrix entries)
+* Add `cacheDirectory` to `phpunit.xml.dist` (PHPUnit 11 feature)
+* Set PHP 8.2 in Scrutinizer config to fix OpenSSL build failure
+* Update README requirements to PHP 8.2+
+
 ## [1.2.33-beta3] - 2026-02-08
 
 ### Infrastructure
