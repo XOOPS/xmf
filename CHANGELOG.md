@@ -1,12 +1,23 @@
 # XMF ChangeLog
 
-## [1.2.33-beta4] - 2026-02-22
+## [1.3.0-beta1] - 2026-02-22
 
 ### Breaking Changes
 * **Raise minimum PHP version from 7.4 to 8.2** — drop support for PHP 7.4, 8.0, and 8.1
 * Require PHPUnit ^11.0 only (drop ^9.6 and ^10.0)
 * Require Symfony YAML ^6.0 || ^7.0 (drop ^5.4)
 * Require kint-php/kint ^6.0
+
+### New Features
+* **I18n namespace** (PR #120): Add `Xmf\I18n` with RTL/LTR-aware utilities
+  - `Direction` — automatic text-direction detection (LTR/RTL) with caching and legacy XOOPS constant support
+  - `BlockPosition` — map physical sidebar positions to logical start/end and CSS classes
+  - `ImageResolver` — resolve locale- and direction-specific image assets with fallback chains
+  - `Translator` — simple translation helper resolving XOOPS-style language constants
+* **Security\Serializer** (PR #121): Add secure serialization toolkit under `Xmf\Security`
+  - `Serializer` — secure serialize/deserialize with JSON, PHP native, and legacy format support, automatic format detection, and size/security validation
+  - `Format` — serialization format constants (JSON, PHP, LEGACY, AUTO)
+  - `SerializableTrait` — trait for XoopsObject integration with property-level serialize/deserialize and legacy-to-JSON migration
 
 ### Infrastructure
 * Update CI matrix to PHP 8.2–8.5; move lowest-deps test to PHP 8.2
