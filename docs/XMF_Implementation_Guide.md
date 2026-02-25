@@ -1,7 +1,7 @@
 # XMF Library — Implementation & Testing Guide
 
 **Claude Code Instructions for All Fixes**
-Based on Code Review Report Rev. 2 — February 2026
+Based on Code Review Report Rev. 3 — February 2026 (Updated to reflect current codebase state)
 
 ---
 
@@ -11,19 +11,21 @@ This document provides step-by-step Claude Code instructions for implementing an
 
 **Total: 18 implementation tasks organized into 6 phases.**
 
+> **Note:** Several tasks have already been completed in the current codebase. Completed tasks are marked with a checkmark below. Remaining open tasks still contain the original implementation instructions.
+
 ---
 
 ## Overview
 
-| Phase | Tasks | Focus |
-|-------|-------|-------|
-| 0 | 0.1–0.2 | Prerequisites & Environment |
-| 1 | 1.1–1.3 | Test Infrastructure |
-| 2 | 2.1–2.2 | Critical Correctness Bugs |
-| 3 | 3.1–3.4 | High Severity Bugs |
-| 4 | 4.1–4.6 | Security Hardening |
-| 5 | 5.1–5.2 | Architectural Improvements |
-| 6 | 6.1 | Final Validation |
+| Phase | Tasks | Focus | Status |
+|-------|-------|-------|--------|
+| 0 | 0.1–0.2 | Prerequisites & Environment | Done |
+| 1 | 1.1–1.3 | Test Infrastructure | All completed |
+| 2 | 2.1–2.2 | Critical Correctness Bugs | Open |
+| 3 | 3.1–3.4 | High Severity Bugs | 3.2 completed; 3.1, 3.3, 3.4 open |
+| 4 | 4.1–4.6 | Security Hardening | 4.2, 4.3, 4.4 (partial), 4.6 completed; 4.1, 4.5 open |
+| 5 | 5.1–5.2 | Architectural Improvements | All completed |
+| 6 | 6.1 | Final Validation | Open |
 
 ---
 
@@ -60,136 +62,21 @@ Record the baseline numbers — you will compare against these in Phase 6.
 
 ## Phase 1: Test Infrastructure
 
-### Task 1.1 — Add `:void` Return Types to PHPUnit Lifecycle Methods `[Low]`
+### Task 1.1 — Add `:void` Return Types to PHPUnit Lifecycle Methods `[Low]` — COMPLETED
 
-**File:** All 20 test files in `tests/unit/`
-
-**Problem:** PHPUnit 11.x requires `:void` return types on `setUp()`, `tearDown()`, `setUpBeforeClass()`, and `tearDownAfterClass()`. All 20 test files (except `UlidTest.php`) are missing these, causing every test to fail.
-
-**Before:**
-
-```php
-protected function setUp()
-{
-    // ...
-}
-```
-
-**After:**
-
-```php
-protected function setUp(): void
-{
-    // ...
-}
-```
-
-Apply this to **every** lifecycle method in all 20 test files. A quick way:
-
-```bash
-# Find all affected files
-grep -rn "function setUp()" tests/unit/
-grep -rn "function tearDown()" tests/unit/
-grep -rn "function setUpBeforeClass()" tests/unit/
-grep -rn "function tearDownAfterClass()" tests/unit/
-```
-
-**Verify:**
-
-```bash
-vendor/bin/phpunit tests/unit/FilterInputTest.php
-vendor/bin/phpunit tests/unit/MetagenTest.php
-vendor/bin/phpunit tests/unit/RequestTest.php
-# All three should no longer crash on return type errors
-```
+**Status:** All test lifecycle methods (`setUp()`, `tearDown()`, `setUpBeforeClass()`, `tearDownAfterClass()`) now have `:void` return types across all test files.
 
 ---
 
-### Task 1.2 — Fix FileStorageTest Namespace `[Low]`
+### Task 1.2 — Fix FileStorageTest Namespace `[Low]` — COMPLETED
 
-**File:** `tests/unit/Key/FileStorageTest.php`
-
-**Problem:** Uses namespace `Xmf\Key` instead of `Xmf\Test\Key` (per `autoload-dev` PSR-4 mapping in `composer.json`).
-
-**Before:**
-
-```php
-namespace Xmf\Key;
-```
-
-**After:**
-
-```php
-namespace Xmf\Test\Key;
-```
-
-**Verify:**
-
-```bash
-vendor/bin/phpunit tests/unit/Key/FileStorageTest.php
-```
+**Status:** Namespace corrected to `Xmf\Test\Key` (matching `autoload-dev` PSR-4 mapping in `composer.json`).
 
 ---
 
-### Task 1.3 — Implement Ulid Monotonic Methods `[Medium]`
+### Task 1.3 — Implement Ulid Monotonic Methods `[Medium]` — COMPLETED
 
-**File:** `src/Ulid.php`
-
-**Problem:** Tests call `generateMonotonic()` and `resetMonotonicState()` but these methods do not exist. The test file `UlidTest.php` has 101 tests that all fail because of this.
-
-**Fix:** Add two static properties and three methods to the `Ulid` class:
-
-```php
-private static ?int $lastTime = null;
-private static ?string $lastRandom = null;
-
-public static function generateMonotonic(): string
-{
-    $time = static::currentTimeMillis();
-
-    if ($time === static::$lastTime && static::$lastRandom !== null) {
-        static::$lastRandom = static::incrementBase32(static::$lastRandom);
-    } else {
-        static::$lastRandom = static::encodeRandomness();
-        static::$lastTime = $time;
-    }
-
-    return static::encodeTime($time) . static::$lastRandom;
-}
-
-public static function resetMonotonicState(): void
-{
-    static::$lastTime = null;
-    static::$lastRandom = null;
-}
-
-private static function incrementBase32(string $encoded): string
-{
-    $chars = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
-    $arr = str_split($encoded);
-
-    for ($i = count($arr) - 1; $i >= 0; $i--) {
-        $pos = strpos($chars, $arr[$i]);
-        if ($pos < 31) {
-            $arr[$i] = $chars[$pos + 1];
-            return implode('', $arr);
-        }
-        $arr[$i] = '0';
-    }
-
-    // All positions carried over — wrap around to all zeros.
-    // Overflow is astronomically unlikely (1 in 2^80 per millisecond),
-    // and a silent wrap is safer in production than crashing.
-    return implode('', $arr);
-}
-```
-
-**Verify:**
-
-```bash
-vendor/bin/phpunit tests/unit/UlidTest.php
-# Expected: 101 tests pass
-```
+**Status:** `generateMonotonic()` and `resetMonotonicState()` methods are implemented in `src/Ulid.php`. All 101 Ulid tests pass.
 
 ---
 
@@ -289,38 +176,9 @@ vendor/bin/phpunit tests/unit/MetagenTest.php
 
 ---
 
-### Task 3.2 — Fix Admin.php XSS in Config Methods `[High]`
+### Task 3.2 — Fix Admin.php XSS in Config Methods `[High]` — COMPLETED
 
-**File:** `src/Module/Admin.php` (lines ~290–342)
-
-**Problem:** `$value` is output unescaped in HTML context in the methods `addConfigError()`, `addConfigAccept()`, and `addConfigWarning()`. If a module config value contains user-influenced data, this is a stored XSS vector.
-
-**Exploit path:** Admin-to-admin only in standard XOOPS (requires module config injection), so practical risk is moderate — but the fix is trivial.
-
-**Before:**
-
-```php
-$line .= $value;
-```
-
-**After:**
-
-```php
-$line .= htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
-```
-
-Apply to **all three** methods: `addConfigError()`, `addConfigAccept()`, `addConfigWarning()`.
-
-**Verify:**
-
-```php
-// Test that HTML entities are escaped in output
-$admin = new Admin();
-$admin->addConfigError('<script>alert(1)</script>');
-$output = $admin->renderConfigErrors();
-assert(strpos($output, '<script>') === false, 'XSS content should be escaped');
-assert(strpos($output, '&lt;script&gt;') !== false, 'Content should be HTML-escaped');
-```
+**Status:** All three methods (`addConfigError()`, `addConfigAccept()`, `addConfigWarning()`) in `src/Module/Admin.php` now use `htmlspecialchars($value, ENT_QUOTES, ...)` for output escaping.
 
 ---
 
@@ -444,109 +302,21 @@ vendor/bin/phpunit tests/unit/Key/FileStorageTest.php
 
 ---
 
-### Task 4.2 — Add `allowed_classes` to Session Unserialize `[Medium]`
+### Task 4.2 — Add `allowed_classes` to Session Unserialize `[Medium]` — COMPLETED
 
-**File:** `src/Module/Helper/Session.php` (line ~85)
-
-**Problem:** `unserialize()` without `allowed_classes` restriction allows PHP Object Injection if session data is ever tampered with.
-
-**Before:**
-
-```php
-return unserialize($_SESSION[$prefixedName]);
-```
-
-**After:**
-
-```php
-return unserialize($_SESSION[$prefixedName], ['allowed_classes' => false]);
-```
-
-**Verify:**
-
-```php
-// Functional test: store and retrieve array data
-$session = new Session();
-$session->set('test_key', ['foo' => 'bar']);
-$result = $session->get('test_key');
-assert($result === ['foo' => 'bar'], 'Array data should round-trip correctly');
-```
+**Status:** `unserialize()` now uses `['allowed_classes' => false]` in `src/Module/Helper/Session.php`.
 
 ---
 
-### Task 4.3 — Harden Language.php File Inclusion `[Medium]`
+### Task 4.3 — Harden Language.php File Inclusion `[Medium]` — COMPLETED
 
-**File:** `src/Language.php` (lines ~79–83)
-
-**Problem:** Uses blacklist-based `strpos()` checks to prevent directory traversal. This is fragile — should use `realpath()` for canonical path validation.
-
-**Before:**
-
-```php
-// Blacklist checks with strpos for '..' etc.
-```
-
-**After:**
-
-```php
-$realPath = realpath($filePath);
-$allowedDir = realpath(XOOPS_ROOT_PATH);
-if ($realPath === false || strpos($realPath, $allowedDir) !== 0) {
-    return false;
-}
-include $realPath;
-```
-
-**Verify:**
-
-```php
-// Test with path traversal attempt
-$result = Language::load('../../etc/passwd');
-assert($result === false, 'Path traversal should be blocked');
-```
+**Status:** `src/Language.php` now uses `realpath()` for canonical path validation, ensuring resolved paths are within the allowed directory.
 
 ---
 
-### Task 4.4 — Add File Size Check to Yaml.php `[Medium]`
+### Task 4.4 — Add File Size Check to Yaml.php `[Medium]` — PARTIALLY COMPLETED
 
-**File:** `src/Yaml.php` (lines ~91, 205)
-
-**Problem:** `file_get_contents()` called without file size check — could cause memory exhaustion on large files. Also catches broad `\Exception` instead of specific `ParseException`.
-
-**Fix (file size check):**
-
-```php
-$maxSize = 2 * 1024 * 1024; // 2 MB
-if (filesize($yamlFile) > $maxSize) {
-    throw new \RuntimeException("YAML file exceeds maximum size of 2MB");
-}
-$content = file_get_contents($yamlFile);
-```
-
-**Fix (narrow exception):**
-
-```php
-// Before:
-} catch (\Exception $e) {
-
-// After:
-} catch (\Symfony\Component\Yaml\Exception\ParseException $e) {
-```
-
-**Verify:**
-
-```php
-// Create a test file > 2MB
-$tmpFile = tempnam(sys_get_temp_dir(), 'yaml');
-file_put_contents($tmpFile, str_repeat("key: value\n", 300000));
-try {
-    Yaml::load($tmpFile);
-    assert(false, 'Should have thrown RuntimeException');
-} catch (\RuntimeException $e) {
-    assert(strpos($e->getMessage(), 'maximum size') !== false);
-}
-unlink($tmpFile);
-```
+**Status:** File size check (2 MB limit) is implemented in both `read()` and `readWrapped()` methods. The broad `\Exception` catch (Finding 12) remains open for future improvement.
 
 ---
 
@@ -583,145 +353,23 @@ try {
 
 ---
 
-### Task 4.6 — Remove `get_magic_quotes_gpc()` Call `[Low]`
+### Task 4.6 — Remove `get_magic_quotes_gpc()` Call `[Low]` — COMPLETED
 
-**File:** `src/Request.php` (~line 119)
-
-**Problem:** `get_magic_quotes_gpc()` was removed in PHP 8.0. Calling it on PHP 8+ causes a fatal error.
-
-**Fix:** Remove the entire conditional block that calls `get_magic_quotes_gpc()`. The function was only relevant for PHP < 5.4 where magic quotes could be enabled.
-
-**Verify:**
-
-```bash
-php -l src/Request.php
-vendor/bin/phpunit tests/unit/RequestTest.php
-```
+**Status:** The `get_magic_quotes_gpc()` call and related conditional block have been removed from `src/Request.php`.
 
 ---
 
 ## Phase 5: Architectural Improvements
 
-### Task 5.1 — Create PHPStan Stubs for XOOPS Classes `[Low]`
+### Task 5.1 — Create PHPStan Stubs for XOOPS Classes `[Low]` — COMPLETED
 
-**Problem:** ~524 of 724 PHPStan errors are due to missing XOOPS class definitions (the framework classes that XMF depends on). These aren't real bugs — PHPStan just can't see the types.
-
-**Fix:**
-
-1. Create directory `stubs/`:
-
-```bash
-mkdir -p stubs
-```
-
-2. Create minimal stub files:
-
-**`stubs/XoopsObject.stub.php`:**
-
-```php
-<?php
-class XoopsObject {
-    public function getVar(string $key, string $format = 's') { return ''; }
-    public function setVar(string $key, $value): void {}
-    public function assignVar(string $key, $value): void {}
-    public function getVars(): array { return []; }
-    public function cleanVars(): bool { return true; }
-}
-```
-
-**`stubs/XoopsDatabase.stub.php`:**
-
-```php
-<?php
-abstract class XoopsDatabase {
-    abstract public function query(string $sql);
-    abstract public function queryF(string $sql);
-    abstract public function prefix(string $table = ''): string;
-    abstract public function fetchArray($result): ?array;
-    abstract public function fetchRow($result): ?array;
-    abstract public function getInsertId(): int;
-    abstract public function getAffectedRows(): int;
-    abstract public function freeRecordSet($result): void;
-}
-```
-
-**`stubs/XoopsModule.stub.php`:**
-
-```php
-<?php
-class XoopsModule extends XoopsObject {
-    public function getVar(string $key, string $format = 's') { return ''; }
-    public function getInfo(string $key = '') { return ''; }
-    public function loadAdminMenu(): void {}
-}
-```
-
-**`stubs/CriteriaElement.stub.php`:**
-
-```php
-<?php
-class CriteriaElement {
-    public function render(): string { return ''; }
-    public function renderWhere(): string { return ''; }
-}
-class CriteriaCompo extends CriteriaElement {
-    public function add(CriteriaElement $criteria, string $condition = 'AND'): void {}
-}
-class Criteria extends CriteriaElement {
-    public function __construct(string $column, $value = '', string $operator = '=', string $prefix = '', string $function = '') {}
-}
-```
-
-3. Update `phpstan.neon`:
-
-```yaml
-parameters:
-    level: max
-    paths:
-        - src
-    scanDirectories:
-        - stubs
-    excludePaths:
-        - tests/*
-```
-
-**Verify:**
-
-```bash
-vendor/bin/phpstan analyse src/ --level max --memory-limit=512M
-# Should see significantly fewer errors (target: ~200 actionable → near-zero)
-```
+**Status:** The `stubs/` directory exists with XOOPS class stub files. `phpstan.neon` is configured with `scanDirectories: - stubs` and scans `src/` only.
 
 ---
 
-### Task 5.2 — Remove Redundant `paragonie/random_compat` `[Low]`
+### Task 5.2 — Remove Redundant `paragonie/random_compat` `[Low]` — COMPLETED
 
-**File:** `composer.json`
-
-**Problem:** `"paragonie/random_compat": "^9.99.100"` is a polyfill for `random_bytes()` / `random_int()`, which are native in PHP 7+. Since XMF requires `PHP >= 8.2`, this dependency is unnecessary.
-
-**Fix:**
-
-1. Remove from `composer.json` `require`:
-
-```json
-// Remove this line:
-"paragonie/random_compat": "^9.99.100"
-```
-
-2. Run:
-
-```bash
-composer update
-```
-
-**Verify:**
-
-```bash
-grep -r "random_compat" src/
-vendor/bin/phpunit
-# Tests should still pass
-```
+**Status:** `paragonie/random_compat` is not present in `composer.json`. PHP ^8.2 includes `random_bytes()` and `random_int()` natively.
 
 ---
 
