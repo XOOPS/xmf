@@ -219,38 +219,7 @@ $addr = new IPAddress('not-an-ip');
 
 ---
 
-### Task 3.4 — Fix UlidOriginal Bit Extraction `[High]`
-
-**File:** `src/UlidOriginal.php` (lines ~62–82)
-
-**Problem:** Flawed bit operations in `encodeRandomness()` produce non-uniform randomness distribution. The nibble extraction doesn't correctly map random bytes to Crockford base32 characters.
-
-**Fix:** Replace the nibble extraction with proper random byte encoding:
-
-```php
-protected static function encodeRandomness(): string
-{
-    $bytes = random_bytes(10);
-    $encoded = '';
-    $chars = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
-
-    // Encode 10 bytes into 16 base32 characters (80 bits)
-    $bitBuffer = 0;
-    $bitsInBuffer = 0;
-
-    for ($i = 0; $i < 10; $i++) {
-        $bitBuffer = ($bitBuffer << 8) | ord($bytes[$i]);
-        $bitsInBuffer += 8;
-
-        while ($bitsInBuffer >= 5) {
-            $bitsInBuffer -= 5;
-            $index = ($bitBuffer >> $bitsInBuffer) & 0x1F;
-            $encoded .= $chars[$index];
-        }
-    }
-
-    return $encoded;
-}
+<!-- Task 3.4 (original ULID bit extraction fix) has been removed because it referred to a non-existent src/UlidOriginal.php file. The ULID implementation has since been updated in the codebase and is no longer tracked as a separate task here. -->
 ```
 
 **Verify:**
