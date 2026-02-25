@@ -12,7 +12,7 @@ namespace Xmf\Mail;
  *
  * @category  Xmf\Mail
  * @package   Xmf
- * @author    XOOPS Development Team <https://xoops.org>
+ * @author    XOOPS Development Team
  * @copyright 2000-2026 XOOPS Project (https://xoops.org)
  * @license   GNU GPL 2.0 or later (https://www.gnu.org/licenses/gpl-2.0.html)
  * @link      https://xoops.org
