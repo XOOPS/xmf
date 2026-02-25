@@ -18,7 +18,7 @@ namespace Xmf;
  * @package   Xmf
  * @author    Richard Griffith <richard@geekwright.com>
  * @author    trabis <lusopoemas@gmail.com>
- * @copyright 2000-2025 XOOPS Project (https://xoops.org)
+ * @copyright 2000-2026 XOOPS Project (https://xoops.org)
  * @license   GNU GPL 2.0 or later (https://www.gnu.org/licenses/gpl-2.0.html)
  * @link      https://xoops.org
  */
@@ -271,7 +271,7 @@ class Metagen
         $title = preg_replace("/[^\p{N}\p{L}]/u", "-", $title);
 
         $tableau = explode("-", $title);
-        $tableau = array_filter($tableau, static::nonEmptyString(...));
+        $tableau = array_filter($tableau, self::nonEmptyString(...));
         $tableau = array_filter($tableau, array(static::stopWordsObject(), 'check'));
         $title = implode("-", $tableau);
 
