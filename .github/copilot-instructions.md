@@ -31,7 +31,7 @@ PHPUnit uses a single `phpunit.xml.dist` with `<source>` element (compatible wit
 
 ## PHP Compatibility
 
-Code must run on PHP 7.4 through 8.5. Do not use features exclusive to PHP 8.0+ (named arguments, match expressions, union type hints in signatures, enums, fibers, readonly properties, intersection types, `never` return type, first-class callable syntax). CI tests all versions in the matrix.
+Code must run on PHP 8.2 through 8.5. PHP 8.0+ and 8.1+ features (named arguments, match expressions, union type hints, enums, fibers, readonly properties, intersection types, `never` return type, first-class callable syntax, constructor promotion, attributes `#[...]`, nullsafe operator `?->`, explicit `mixed` type) are allowed. CI tests all versions in the matrix.
 
 ## Coding Conventions
 
@@ -83,17 +83,17 @@ Stubs in `stubs/` define XOOPS framework classes (`Xoops`, `XoopsModule`, `Xoops
 
 GitHub Actions runs a single consolidated job on every push and PR:
 
-- **PHP matrix:** 7.4–8.5, plus lowest-deps on 7.4
+- **PHP matrix:** 8.2–8.5, plus lowest-deps on 8.2
 - **Each run:** lint (non-blocking, pre-existing issues) + analyse + test
 - **Coverage:** PHP 8.3 with Xdebug, uploaded to Codecov
 
-Scrutinizer runs its own `php_analyzer` tool plus `composer ci` on PHP 7.4–8.5. It excludes `_archive/`, `tests/`, `vendor/`, `docs/`, and `stubs/`.
+Scrutinizer runs its own `php_analyzer` tool plus `composer ci` on PHP 8.2. It excludes `_archive/`, `tests/`, `vendor/`, `docs/`, and `stubs/`.
 
 ## Pull Request Checklist
 
 1. Code follows PSR-12 and passes `composer lint` (or `composer fix`).
 2. `composer analyse` passes with no new errors beyond the baseline.
-3. `composer test` passes on all PHP versions (7.4-8.5).
+3. `composer test` passes on all PHP versions (8.2-8.5).
 4. New public methods have PHPDoc with `@param`, `@return`, and `@throws` tags.
 5. New functionality has corresponding unit tests in `tests/unit/`.
 6. Changes are documented in `CHANGELOG.md` under `[Unreleased]`.
