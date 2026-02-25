@@ -1093,12 +1093,6 @@ parameters:
 			path: src/Metagen.php
 
 		-
-			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(string\)\: bool\)\|null, ''static\:…'' given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Metagen.php
-
-		-
 			message: '#^Parameter \#2 \$encoding of function mb_strlen expects string\|null, mixed given\.$#'
 			identifier: argument.type
 			count: 2
