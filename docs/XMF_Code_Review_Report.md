@@ -69,7 +69,7 @@ The remaining open items are primarily medium/low severity architectural concern
 | 26 | Low | `composer.json` | Redundant `paragonie/random_compat` for PHP 7.4+ | **RESOLVED** |
 | 27 | Low | `src/FilterInput.php` | `html_entity_decode()` before hex entity fix | Open |
 | 28 | Low | Multiple files | No version pinning on dev dependencies | Open |
-| 29 | Low | `composer.json` | Missing CI matrix for PHP 8.0/8.1/8.2/8.3 | Open |
+| 29 | Low | `composer.json` | CI matrix updated to PHP 8.2–8.5 to match PHP requirement ^8.2 | **RESOLVED** |
 | 30 | Low | `src/Module/Admin.php` | Inline HTML construction without template engine | Open |
 
 ---
