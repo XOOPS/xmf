@@ -43,10 +43,10 @@ The remaining open items are primarily medium/low severity architectural concern
 |---|----------|------|-------|--------|
 | 1 | Critical | `src/Request.php` | `setVar()` writes `$_ENV['name']` instead of `$_ENV[$name]` | **RESOLVED** |
 | 2 | Critical | `src/FilterInput.php` | `chr('0x'...)` passes string to chr(); decodes to null byte | **RESOLVED** |
-| 3 | High | `src/Metagen.php` | `preg_replace_callback()` result not assigned | Open |
+| 3 | High | `src/Metagen.php` | `preg_replace_callback()` result not assigned | **RESOLVED** |
 | 4 | High | `src/Module/Admin.php` | XSS via unescaped `$value` in config methods | **RESOLVED** |
-| 5 | High | `src/IPAddress.php` | `inet_pton()` false not checked before `inet_ntop()` | Open |
-| 6 | High | `src/UlidOriginal.php` | Non-uniform randomness from flawed bit extraction | Open |
+| 5 | High | `src/IPAddress.php` | `inet_pton()` false not checked before `inet_ntop()` | **RESOLVED** |
+| 6 | High | N/A | Legacy ULID implementation (file removed from repository) | **N/A (file removed)** |
 | 7 | High | `src/Database/Tables.php` | MySQL-specific SQL (backticks, ENGINE=InnoDB, INFORMATION_SCHEMA) | Open |
 | 8 | Medium | `src/Key/FileStorage.php` | String interpolation in PHP code generation | Open |
 | 9 | Medium | `src/Module/Helper/Session.php` | `unserialize()` without `allowed_classes` | **RESOLVED** |
