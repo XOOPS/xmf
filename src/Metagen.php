@@ -271,7 +271,7 @@ class Metagen
         $title = preg_replace("/[^\p{N}\p{L}]/u", "-", $title);
 
         $tableau = explode("-", $title);
-        $tableau = array_filter($tableau, 'static::nonEmptyString');
+        $tableau = array_filter($tableau, static::nonEmptyString(...));
         $tableau = array_filter($tableau, array(static::stopWordsObject(), 'check'));
         $title = implode("-", $tableau);
 
