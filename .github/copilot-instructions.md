@@ -87,7 +87,7 @@ GitHub Actions runs a single consolidated job on every push and PR:
 - **Each run:** lint (non-blocking, pre-existing issues) + analyse + test
 - **Coverage:** PHP 8.3 with Xdebug, uploaded to Codecov
 
-Scrutinizer runs its own `php_analyzer` tool plus `composer ci` on PHP 8.2–8.5. It excludes `_archive/`, `tests/`, `vendor/`, `docs/`, and `stubs/`.
+Scrutinizer runs its own `php_analyzer` tool plus `composer ci` on PHP 8.2. It excludes `_archive/`, `tests/`, `vendor/`, `docs/`, and `stubs/`.
 
 ## Pull Request Checklist
 
