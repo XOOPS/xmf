@@ -23,7 +23,7 @@
     "firebase/php-jwt": "^7.0",
     "kint-php/kint": "^6.0",
     "symfony/yaml": "^6.0 || ^7.0",
-    "webmozart/assert": "^1.11"
+    "webmozart/assert": "^1.11 || ^2.0"
   },
   "require-dev": {
     "phpstan/phpstan": "^2.0",
