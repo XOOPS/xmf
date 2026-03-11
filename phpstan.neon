@@ -10,6 +10,7 @@ parameters:
     excludePaths:
         - tests/
     treatPhpDocTypesAsCertain: false
+    reportUnmatchedIgnoredErrors: false
     ignoreErrors:
         -
             message: '#Trait .+ is used zero times and is not analysed\.#'

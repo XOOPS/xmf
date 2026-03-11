@@ -179,6 +179,9 @@ class Yaml
     {
         try {
             $lines = preg_split('/\R/', $yamlString);
+            if ($lines === false) {
+                return false;
+            }
             $count = count($lines);
             for ($index = $count; --$index > 0;) {
                 if ('...' === $lines[$index]) {
