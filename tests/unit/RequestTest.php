@@ -11,6 +11,11 @@ class RequestTest extends \PHPUnit\Framework\TestCase
     protected $object;
 
     /**
+     * @var array<string, string> Original session INI values saved by startTestSession()
+     */
+    private array $savedSessionIni = [];
+
+    /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
      */
@@ -25,6 +30,15 @@ class RequestTest extends \PHPUnit\Framework\TestCase
      */
     protected function tearDown(): void
     {
+        // Ensure full cleanup even if a test fails mid-way
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            $_SESSION = [];
+            session_destroy();
+        }
+        foreach ($this->savedSessionIni as $key => $value) {
+            ini_set($key, $value);
+        }
+        $this->savedSessionIni = [];
     }
 
     public function testGetMethod()
@@ -267,15 +281,23 @@ class RequestTest extends \PHPUnit\Framework\TestCase
     private function startTestSession(): void
     {
         if (session_status() === PHP_SESSION_ACTIVE) {
+            $_SESSION = [];
             return;
+        }
+        $iniKeys = ['session.use_cookies', 'session.use_only_cookies', 'session.cache_limiter'];
+        foreach ($iniKeys as $key) {
+            if (!isset($this->savedSessionIni[$key])) {
+                $this->savedSessionIni[$key] = (string) ini_get($key);
+            }
         }
         ini_set('session.use_cookies', '0');
         ini_set('session.use_only_cookies', '0');
         ini_set('session.cache_limiter', '');
-        session_start();
-        if (session_status() !== PHP_SESSION_ACTIVE) {
+        $started = @session_start();
+        if ($started === false || session_status() !== PHP_SESSION_ACTIVE) {
             $this->markTestSkipped('Cannot start a session in this environment.');
         }
+        $_SESSION = [];
     }
 
     /**
@@ -284,7 +306,8 @@ class RequestTest extends \PHPUnit\Framework\TestCase
     private function closeTestSession(): void
     {
         if (session_status() === PHP_SESSION_ACTIVE) {
-            session_write_close();
+            $_SESSION = [];
+            session_destroy();
         }
         $this->assertNotSame(
             PHP_SESSION_ACTIVE,
@@ -392,7 +415,7 @@ class RequestTest extends \PHPUnit\Framework\TestCase
         $varname = 'XMF_TEST_SESSION_NO_WRITE';
         Request::setVar($varname, 'should_not_persist', 'session');
 
-        // Start a fresh session and verify nothing leaked
+        // Re-open session and verify the write was skipped
         $this->startTestSession();
         try {
             $this->assertArrayNotHasKey($varname, $_SESSION);

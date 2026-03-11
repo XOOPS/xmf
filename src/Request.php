@@ -122,13 +122,11 @@ class Request
         if (isset($input[$name]) && null !== $input[$name]) {
             // Get the variable from the input hash and clean it
             $var = static::cleanVar($input[$name], $mask, $type);
-
         } elseif (null !== $default) {
             // Clean the default value
             $var = static::cleanVar($default, $mask, $type);
         } else {
             $var = $default;
-
         }
 
         return $var;
@@ -143,7 +141,7 @@ class Request
      *
      * @param string $name    Variable name
      * @param int    $default Default value if the variable does not exist
-     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, ENV, SERVER, SESSION, METHOD)
      *
      * @return int Requested variable
      */
@@ -161,7 +159,7 @@ class Request
      *
      * @param string $name    Variable name
      * @param float  $default Default value if the variable does not exist
-     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, ENV, SERVER, SESSION, METHOD)
      *
      * @return float Requested variable
      */
@@ -179,7 +177,7 @@ class Request
      *
      * @param string $name    Variable name
      * @param bool   $default Default value if the variable does not exist
-     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, ENV, SERVER, SESSION, METHOD)
      *
      * @return bool Requested variable
      */
@@ -197,7 +195,7 @@ class Request
      *
      * @param string $name    Variable name
      * @param string $default Default value if the variable does not exist
-     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, ENV, SERVER, SESSION, METHOD)
      *
      * @return string Requested variable
      */
@@ -214,7 +212,7 @@ class Request
      *
      * @param string $name    Variable name
      * @param string $default Default value if the variable does not exist
-     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, ENV, SERVER, SESSION, METHOD)
      *
      * @return string Requested variable
      */
@@ -232,7 +230,7 @@ class Request
      *
      * @param string $name    Variable name
      * @param string $default Default value if the variable does not exist
-     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, ENV, SERVER, SESSION, METHOD)
      * @param int    $mask    Filter mask for the variable
      *
      * @return string Requested variable
@@ -248,7 +246,7 @@ class Request
      *
      * @param string $name    Variable name
      * @param mixed  $default Default value if the variable does not exist
-     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, ENV, SERVER, SESSION, METHOD)
      *
      * @return array
      */
@@ -262,7 +260,7 @@ class Request
      *
      * @param string $name    Variable name
      * @param string $default Default value if the variable does not exist
-     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, ENV, SERVER, SESSION, METHOD)
      *
      * @return string Requested variable
      */
@@ -276,7 +274,7 @@ class Request
      *
      * @param string $name    Variable name
      * @param string $default Default value if the variable does not exist
-     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, ENV, SERVER, SESSION, METHOD)
      *
      * @return string Requested variable
      */
@@ -290,7 +288,7 @@ class Request
      *
      * @param string $name    Variable name
      * @param string $default Default value if the variable does not exist
-     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, ENV, SERVER, SESSION, METHOD)
      *
      * @return string Requested variable
      */
@@ -304,7 +302,7 @@ class Request
      *
      * @param string $name    Variable name
      * @param string $default Default value if the variable does not exist
-     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, ENV, SERVER, SESSION, METHOD)
      *
      * @return string email address or default if invalid
      */
@@ -319,7 +317,7 @@ class Request
      *
      * @param string $name    Variable name
      * @param string $default Default value if the variable does not exist
-     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, ENV, SERVER, SESSION, METHOD)
      *
      * @return string IP address or default if invalid
      */
