@@ -70,7 +70,7 @@ class Request
      *
      * @param string $name    Variable name
      * @param mixed  $default Default value if the variable does not exist
-     * @param string $hash    Source of variable value (POST, GET, FILES, COOKIE, SESSION, METHOD)
+     * @param string $hash    Source of variable value (GET, POST, FILES, COOKIE, ENV, SERVER, SESSION, METHOD, DEFAULT/REQUEST)
      * @param string $type    Return type for the variable (INT, FLOAT, BOOLEAN, WORD,
      *                         ALPHANUM, CMD, BASE64, STRING, ARRAY, PATH, NONE) For more
      *                         information see FilterInput::clean().
@@ -393,9 +393,11 @@ class Request
     /**
      * Set a variable in one of the request variables
      *
+     * For SESSION, the write is silently skipped if no session is active.
+     *
      * @param string $name      Name
      * @param string $value     Value
-     * @param string $hash      Hash
+     * @param string $hash      Hash (GET, POST, REQUEST, COOKIE, FILES, ENV, SERVER, SESSION, METHOD)
      * @param bool   $overwrite Boolean
      *
      * @return string Previous value
@@ -474,7 +476,7 @@ class Request
      *  - method      via current $_SERVER['REQUEST_METHOD']
      *  - default     $_REQUEST
      *
-     * @param string $hash to get (POST, GET, FILES, SESSION, METHOD)
+     * @param string $hash to get (GET, POST, FILES, COOKIE, ENV, SERVER, SESSION, METHOD, DEFAULT/REQUEST)
      * @param int    $mask Filter mask for the variable
      *
      * @return mixed Request hash
@@ -527,7 +529,7 @@ class Request
      * Sets a request variable
      *
      * @param array  $array       An associative array of key-value pairs
-     * @param string $hash        The request variable to set (POST, GET, FILES, METHOD)
+     * @param string $hash        The request variable to set (GET, POST, REQUEST, COOKIE, FILES, ENV, SERVER, SESSION, METHOD)
      * @param bool   $overwrite   If true and an existing key is found, the value is overwritten,
      *                            otherwise it is ignored
      *
