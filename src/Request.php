@@ -64,12 +64,13 @@ class Request
      *  - cookie     $_COOKIE
      *  - env        $_ENV
      *  - server     $_SERVER
+     *  - session    $_SESSION (returns default if no active session)
      *  - method     via current $_SERVER['REQUEST_METHOD']
      *  - default    $_REQUEST
      *
      * @param string $name    Variable name
      * @param mixed  $default Default value if the variable does not exist
-     * @param string $hash    Source of variable value (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $hash    Source of variable value (POST, GET, FILES, COOKIE, SESSION, METHOD)
      * @param string $type    Return type for the variable (INT, FLOAT, BOOLEAN, WORD,
      *                         ALPHANUM, CMD, BASE64, STRING, ARRAY, PATH, NONE) For more
      *                         information see FilterInput::clean().
@@ -105,6 +106,13 @@ class Request
                 break;
             case 'SERVER':
                 $input = &$_SERVER;
+                break;
+            case 'SESSION':
+                if (session_status() !== PHP_SESSION_ACTIVE) {
+                    $input = [];
+                    break;
+                }
+                $input = &$_SESSION;
                 break;
             default:
                 $input = &$_REQUEST;
@@ -437,6 +445,11 @@ class Request
             case 'SERVER':
                 $_SERVER[$name] = $value;
                 break;
+            case 'SESSION':
+                if (session_status() === PHP_SESSION_ACTIVE) {
+                    $_SESSION[$name] = $value;
+                }
+                break;
         }
 
         return $previous;
@@ -457,10 +470,11 @@ class Request
      *  - cookie      $_COOKIE
      *  - env         $_ENV
      *  - server      $_SERVER
+     *  - session     $_SESSION (returns empty if no active session)
      *  - method      via current $_SERVER['REQUEST_METHOD']
      *  - default     $_REQUEST
      *
-     * @param string $hash to get (POST, GET, FILES, METHOD)
+     * @param string $hash to get (POST, GET, FILES, SESSION, METHOD)
      * @param int    $mask Filter mask for the variable
      *
      * @return mixed Request hash
@@ -491,6 +505,13 @@ class Request
                 break;
             case 'SERVER':
                 $input = &$_SERVER;
+                break;
+            case 'SESSION':
+                if (session_status() !== PHP_SESSION_ACTIVE) {
+                    $input = [];
+                    break;
+                }
+                $input = &$_SESSION;
                 break;
             default:
                 $input = $_REQUEST;
