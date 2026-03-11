@@ -17,10 +17,6 @@ class RequestTest extends \PHPUnit\Framework\TestCase
     protected function setUp(): void
     {
         $this->object = new Request;
-        // Ensure a consistent session state for tests that need it
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
     }
 
     /**
@@ -29,10 +25,6 @@ class RequestTest extends \PHPUnit\Framework\TestCase
      */
     protected function tearDown(): void
     {
-        // Restore active session state after each test
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
     }
 
     public function testGetMethod()
@@ -266,111 +258,162 @@ class RequestTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Helper to ensure an active session, skipping the test if unavailable.
+     * Attempt to start a session for testing.
+     *
+     * Disables cookie-based session IDs (not available in CLI), starts the
+     * session, and verifies it became active. Skips the calling test if
+     * sessions cannot be started in this environment.
      */
-    private function requireActiveSession(): void
+    private function startTestSession(): void
     {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            return;
+        }
+        ini_set('session.use_cookies', '0');
+        ini_set('session.use_only_cookies', '0');
+        ini_set('session.cache_limiter', '');
+        session_start();
         if (session_status() !== PHP_SESSION_ACTIVE) {
             $this->markTestSkipped('Cannot start a session in this environment.');
         }
     }
 
+    /**
+     * Close any active session and verify it is no longer active.
+     */
+    private function closeTestSession(): void
+    {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+        $this->assertNotSame(
+            PHP_SESSION_ACTIVE,
+            session_status(),
+            'Session should not be active after close.'
+        );
+    }
+
     public function testGetVarSessionWithActiveSession()
     {
-        $this->requireActiveSession();
+        $this->startTestSession();
         $varname = 'RequestTestSession';
         $_SESSION[$varname] = 'session_value';
 
-        $this->assertEquals('session_value', Request::getVar($varname, null, 'session'));
-
-        unset($_SESSION[$varname]);
+        try {
+            $this->assertEquals('session_value', Request::getVar($varname, null, 'session'));
+        } finally {
+            unset($_SESSION[$varname]);
+            $this->closeTestSession();
+        }
     }
 
     public function testGetVarSessionReturnsDefaultWhenKeyMissing()
     {
-        $this->requireActiveSession();
+        $this->startTestSession();
 
-        $this->assertNull(Request::getVar('no_such_session_key', null, 'session'));
-        $this->assertEquals('fallback', Request::getVar('no_such_session_key', 'fallback', 'session'));
+        try {
+            $this->assertNull(Request::getVar('no_such_session_key', null, 'session'));
+            $this->assertEquals('fallback', Request::getVar('no_such_session_key', 'fallback', 'session'));
+        } finally {
+            $this->closeTestSession();
+        }
     }
 
     public function testGetVarSessionReturnsDefaultWhenNoSession()
     {
-        $this->requireActiveSession();
-        session_write_close();
+        $this->startTestSession();
+        $this->closeTestSession();
 
         $this->assertNull(Request::getVar('any_key', null, 'session'));
         $this->assertEquals('default_val', Request::getVar('any_key', 'default_val', 'session'));
-        // tearDown() restores the session
     }
 
     public function testGetIntFromSession()
     {
-        $this->requireActiveSession();
+        $this->startTestSession();
         $varname = 'RequestTestSessionInt';
         $_SESSION[$varname] = '42';
 
-        $this->assertEquals(42, Request::getInt($varname, 0, 'session'));
-
-        unset($_SESSION[$varname]);
+        try {
+            $this->assertEquals(42, Request::getInt($varname, 0, 'session'));
+        } finally {
+            unset($_SESSION[$varname]);
+            $this->closeTestSession();
+        }
     }
 
     public function testGetSessionHash()
     {
-        $this->requireActiveSession();
+        $this->startTestSession();
         $varname = 'RequestTestSessionGet';
         $_SESSION[$varname] = 'get_session_value';
 
-        $get = Request::get('session');
-        $this->assertTrue(is_array($get));
-        $this->assertEquals('get_session_value', $get[$varname]);
-
-        unset($_SESSION[$varname]);
+        try {
+            $get = Request::get('session');
+            $this->assertTrue(is_array($get));
+            $this->assertEquals('get_session_value', $get[$varname]);
+        } finally {
+            unset($_SESSION[$varname]);
+            $this->closeTestSession();
+        }
     }
 
     public function testGetSessionHashReturnsEmptyWhenNoSession()
     {
-        $this->requireActiveSession();
-        session_write_close();
+        $this->startTestSession();
+        $this->closeTestSession();
 
         $get = Request::get('session');
         $this->assertTrue(is_array($get));
         $this->assertEmpty($get);
-        // tearDown() restores the session
     }
 
     public function testSetVarSession()
     {
-        $this->requireActiveSession();
+        $this->startTestSession();
         $varname = 'XMF_TEST_SESSION_VAR';
         $value = 'session_set_value';
-        Request::setVar($varname, $value, 'session');
-        $this->assertArrayHasKey($varname, $_SESSION);
-        $this->assertEquals($value, $_SESSION[$varname]);
-        unset($_SESSION[$varname]);
+
+        try {
+            Request::setVar($varname, $value, 'session');
+            $this->assertArrayHasKey($varname, $_SESSION);
+            $this->assertEquals($value, $_SESSION[$varname]);
+        } finally {
+            unset($_SESSION[$varname]);
+            $this->closeTestSession();
+        }
     }
 
     public function testSetVarSessionIgnoredWhenNoSession()
     {
-        $this->requireActiveSession();
-        session_write_close();
+        $this->startTestSession();
+        $this->closeTestSession();
 
         $varname = 'XMF_TEST_SESSION_NO_WRITE';
         Request::setVar($varname, 'should_not_persist', 'session');
 
-        // tearDown() restarts the session; verify nothing was set
-        session_start();
-        $this->assertArrayNotHasKey($varname, $_SESSION);
+        // Start a fresh session and verify nothing leaked
+        $this->startTestSession();
+        try {
+            $this->assertArrayNotHasKey($varname, $_SESSION);
+        } finally {
+            $this->closeTestSession();
+        }
     }
 
     public function testHasVarSession()
     {
-        $this->requireActiveSession();
+        $this->startTestSession();
         $varname = 'RequestTestHasVarSession';
-        $this->assertFalse(Request::hasVar($varname, 'session'));
-        $_SESSION[$varname] = 'exists';
-        $this->assertTrue(Request::hasVar($varname, 'session'));
-        unset($_SESSION[$varname]);
+
+        try {
+            $this->assertFalse(Request::hasVar($varname, 'session'));
+            $_SESSION[$varname] = 'exists';
+            $this->assertTrue(Request::hasVar($varname, 'session'));
+        } finally {
+            unset($_SESSION[$varname]);
+            $this->closeTestSession();
+        }
     }
 
 }
