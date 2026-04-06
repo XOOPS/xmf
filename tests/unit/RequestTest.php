@@ -328,9 +328,8 @@ class RequestTest extends \PHPUnit\Framework\TestCase
         if (session_status() === PHP_SESSION_ACTIVE) {
             session_unset();
             $_SESSION = [];
-            session_destroy();
+            session_write_close();
         }
-        session_id('');
         $this->sessionHandler = null;
 
         $this->assertNotSame(

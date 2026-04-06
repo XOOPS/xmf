@@ -113,7 +113,7 @@ class Request
                     $input = [];
                     break;
                 }
-                $input = &$_SESSION;
+                $input = $_SESSION;
                 break;
             default:
                 $input = &$_REQUEST;
@@ -395,11 +395,11 @@ class Request
      * For SESSION, the write is silently skipped if no session is active.
      *
      * @param string $name      Name
-     * @param mixed  $value     Value
+     * @param string $value     Value
      * @param string $hash      Hash (GET, POST, REQUEST, COOKIE, FILES, ENV, SERVER, SESSION, METHOD)
      * @param bool   $overwrite Boolean
      *
-     * @return mixed Previous value
+     * @return string Previous value
      */
     public static function setVar($name, $value = null, $hash = 'method', $overwrite = true)
     {
