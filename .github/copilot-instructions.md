@@ -31,7 +31,7 @@ PHPUnit uses a single `phpunit.xml.dist` with `<source>` element (compatible wit
 
 ## PHP Compatibility
 
-Code must run on PHP 8.2 through 8.5. PHP 8.0+ and 8.1+ features (named arguments, match expressions, union type hints, enums, fibers, readonly properties, intersection types, `never` return type, first-class callable syntax, constructor promotion, attributes `#[...]`, nullsafe operator `?->`, explicit `mixed` type) are allowed. CI tests all versions in the matrix.
+Code must run on PHP 8.2 through 8.5. PHP 8.0+, 8.1+, and 8.2+ features (named arguments, match expressions, union type hints, enums, fibers, readonly properties, readonly classes, intersection types, DNF types, `never` return type, first-class callable syntax, constructor promotion, attributes `#[...]`, nullsafe operator `?->`, explicit `mixed` type, `true` type, trait constants, and the deprecation of dynamic properties) are allowed. CI tests all versions in the matrix.
 
 ## Coding Conventions
 
