@@ -313,7 +313,6 @@ class RequestTest extends \PHPUnit\Framework\TestCase
         };
 
         session_set_save_handler($this->sessionHandler, true);
-        session_id('xmf_request_test');
         $started = @session_start();
         if ($started === false || session_status() !== PHP_SESSION_ACTIVE) {
             $this->markTestSkipped('Cannot start a session in this environment.');
