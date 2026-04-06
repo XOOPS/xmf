@@ -1,4 +1,5 @@
 <?php
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -33,7 +34,6 @@ use Xmf\Yaml;
  */
 class Migrate
 {
-
     /** @var false|\Xmf\Module\Helper|\Xoops\Module\Helper|\Xoops\Module\Helper\HelperAbstract */
     protected $helper;
 
@@ -72,13 +72,14 @@ class Migrate
         $version = preg_replace_callback(
             '/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/',
             function ($match) {
-                $semver = $match[1] . '_' . $match[2] . '_' .$match[3];
+                $semver = $match[1] . '_' . $match[2] . '_' . $match[3];
                 if (!empty($match[4])) {
                     $semver .= '_' . substr($match[4], 0, 8);
                 }
                 return $semver;
             },
-            $module->getInfo('version'));
+            $module->getInfo('version')
+        );
 
         $this->tableDefinitionFile = $this->helper->path("sql/{$dirname}_{$version}_migrate.yml");
         $this->tableHandler = new Tables();
@@ -206,7 +207,8 @@ class Migrate
     protected function addMissingTable($tableName)
     {
         $targetTable = $this->targetDefinitions[$tableName] ?? null;
-        if (!is_array($targetTable)
+        if (
+            !is_array($targetTable)
             || !isset($targetTable['options'], $targetTable['columns'])
             || !is_string($targetTable['options'])
             || !is_array($targetTable['columns'])
@@ -281,7 +283,8 @@ class Migrate
                 } else {
                     if (!isset($existingIndexes[$key])) {
                         $this->tableHandler->addIndex($key, $tableName, $keyData['columns'], $keyData['unique']);
-                    } elseif ($existingIndexes[$key]['unique'] !== $keyData['unique']
+                    } elseif (
+                        $existingIndexes[$key]['unique'] !== $keyData['unique']
                         || $existingIndexes[$key]['columns'] !== $keyData['columns']
                     ) {
                         $this->tableHandler->dropIndex($key, $tableName);

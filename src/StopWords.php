@@ -1,4 +1,5 @@
 <?php
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -25,11 +26,10 @@ namespace Xmf;
  */
 class StopWords
 {
-
     /**
      * mbstring encoding
      */
-    const ENCODING = 'UTF-8';
+    public const ENCODING = 'UTF-8';
 
     /** @var string[] */
     protected $stopwordList = array();

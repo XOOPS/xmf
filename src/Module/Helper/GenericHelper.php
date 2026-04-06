@@ -1,4 +1,5 @@
 <?php
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -136,7 +137,8 @@ abstract class GenericHelper extends AbstractHelper
     protected function initObject()
     {
         global $xoopsModule;
-        if (isset($xoopsModule) && is_object($xoopsModule)
+        if (
+            isset($xoopsModule) && is_object($xoopsModule)
             && $xoopsModule->getVar('dirname') === $this->dirname
         ) {
             $this->module = $xoopsModule;
@@ -157,7 +159,8 @@ abstract class GenericHelper extends AbstractHelper
     {
         $this->addLog('INIT CONFIG');
         global $xoopsModule;
-        if (isset($xoopsModule) && is_object($xoopsModule)
+        if (
+            isset($xoopsModule) && is_object($xoopsModule)
             && $xoopsModule->getVar('dirname') === $this->dirname
         ) {
             global $xoopsModuleConfig;

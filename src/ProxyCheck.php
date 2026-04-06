@@ -1,4 +1,5 @@
 <?php
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -22,9 +23,9 @@ namespace Xmf;
  */
 class ProxyCheck
 {
-    const PROXY_ENVIRONMENT_VARIABLE = 'proxy_env';
+    public const PROXY_ENVIRONMENT_VARIABLE = 'proxy_env';
 
-    const FORWARDED = 'HTTP_FORWARDED';
+    public const FORWARDED = 'HTTP_FORWARDED';
 
     /** @var string|false header name determines how to process */
     protected $proxyHeaderName = false;
@@ -52,7 +53,7 @@ class ProxyCheck
      */
     public function get()
     {
-        if (false===$this->proxyHeaderName || false===$this->proxyHeader) {
+        if (false === $this->proxyHeaderName || false === $this->proxyHeader) {
             return false;
         }
         $proxyVars = $this->splitOnComma($this->proxyHeader);
@@ -94,8 +95,10 @@ class ProxyCheck
         global $xoopsConfig;
 
         /* must declare expected proxy in $xoopsConfig['proxy_env'] */
-        if (!isset($xoopsConfig[static::PROXY_ENVIRONMENT_VARIABLE])
-            || empty($xoopsConfig[static::PROXY_ENVIRONMENT_VARIABLE])) {
+        if (
+            !isset($xoopsConfig[static::PROXY_ENVIRONMENT_VARIABLE])
+            || empty($xoopsConfig[static::PROXY_ENVIRONMENT_VARIABLE])
+        ) {
             return false;
         }
         return trim($xoopsConfig[static::PROXY_ENVIRONMENT_VARIABLE]);
@@ -129,7 +132,7 @@ class ProxyCheck
         if ($start === false) {
             return false;
         }
-        $ip = substr($header, $start+4);
+        $ip = substr($header, $start + 4);
         $end = strpos($ip, ';');
         if ($end !== false) {
             $ip = substr($ip, 0, $end);

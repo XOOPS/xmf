@@ -1,4 +1,5 @@
 <?php
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -29,7 +30,6 @@ use Xmf\Language;
  */
 class Admin
 {
-
     /**
      * The real ModuleAdmin object
      *
@@ -62,11 +62,11 @@ class Admin
 
         if ($instance === null) {
             if (class_exists('\Xoops\Module\Admin', true)) {
-                $instance = new \Xoops\Module\Admin;
+                $instance = new \Xoops\Module\Admin();
                 static::$ModuleAdmin = $instance;
             } else {
                 include_once $GLOBALS['xoops']->path('Frameworks/moduleclasses/moduleadmin/moduleadmin.php');
-                static::$ModuleAdmin = new \ModuleAdmin;
+                static::$ModuleAdmin = new \ModuleAdmin();
                 Language::load('xmf');
                 $instance = new static();
             }

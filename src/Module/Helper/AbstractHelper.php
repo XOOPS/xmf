@@ -1,4 +1,5 @@
 <?php
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -121,7 +122,7 @@ abstract class AbstractHelper
         if ($this->debug) {
             $message = $this->serializeForHelperLog($log);
             if (class_exists('Xoops', false)) {
-                \Xoops::getInstance()->logger()->debug($message, array('channel'=>'Extra'));
+                \Xoops::getInstance()->logger()->debug($message, array('channel' => 'Extra'));
             } elseif (is_object($GLOBALS['xoopsLogger'])) {
                 $GLOBALS['xoopsLogger']->addExtra(get_called_class(), $message);
             }

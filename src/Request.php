@@ -1,4 +1,5 @@
 <?php
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -32,9 +33,9 @@ class Request
     /**
      * Available masks for cleaning variables
      */
-    const MASK_NO_TRIM    = 1;
-    const MASK_ALLOW_RAW  = 2;
-    const MASK_ALLOW_HTML = 4;
+    public const MASK_NO_TRIM    = 1;
+    public const MASK_ALLOW_RAW  = 2;
+    public const MASK_ALLOW_HTML = 4;
 
     /**
      * Gets the request method
@@ -114,13 +115,11 @@ class Request
         if (isset($input[$name]) && null !== $input[$name]) {
             // Get the variable from the input hash and clean it
             $var = static::cleanVar($input[$name], $mask, $type);
-
         } elseif (null !== $default) {
             // Clean the default value
             $var = static::cleanVar($default, $mask, $type);
         } else {
             $var = $default;
-
         }
 
         return $var;

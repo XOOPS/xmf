@@ -1,4 +1,5 @@
 <?php
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -415,7 +416,8 @@ final class Serializer
         // Check base64-encoded serialized
         if (self::isLikelyBase64($payload)) {
             $decoded = base64_decode($payload, true);
-            if ($decoded !== false
+            if (
+                $decoded !== false
                 && \strlen($decoded) <= self::MAX_SIZE
                 && self::looksLikeSerialized($decoded)
             ) {

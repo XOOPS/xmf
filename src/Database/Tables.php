@@ -1,4 +1,5 @@
 <?php
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -840,7 +841,7 @@ class Tables
     {
         // . (($column['COLUMN_DEFAULT'] === null) ? '' : " DEFAULT '" . $column['COLUMN_DEFAULT'] . "' ")
         // no default specified
-        if (null===$default) {
+        if (null === $default) {
             return '';
         }
 
