@@ -180,6 +180,7 @@ class Yaml
         try {
             $lines = preg_split('/\R/', $yamlString);
             if ($lines === false) {
+                trigger_error('Failed to split wrapped YAML content', E_USER_WARNING);
                 return false;
             }
             $count = count($lines);

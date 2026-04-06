@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -24,11 +26,25 @@ namespace Xmf\Database;
  */
 class SchemaDefinitionException extends \RuntimeException
 {
+    /**
+     * Build an exception for a missing schema definition file.
+     *
+     * @param string $file schema definition file path
+     *
+     * @return self
+     */
     public static function forFile(string $file): self
     {
-        return new self("No schema definition {$file}");
+        return new self('No schema definition ' . basename($file));
     }
 
+    /**
+     * Build an exception for a missing table definition.
+     *
+     * @param string $tableName table name
+     *
+     * @return self
+     */
     public static function forTable(string $tableName): self
     {
         return new self("No schema definition for table {$tableName}");

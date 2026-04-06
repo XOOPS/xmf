@@ -183,7 +183,7 @@ final class SendmailRunner
         $argv[] = '-i';
 
         $spec = [
-            0 => ['pipe', 'w'], // stdin
+            0 => ['pipe', 'r'], // stdin
             1 => ['pipe', 'w'], // stdout
             2 => ['pipe', 'w'], // stderr
         ];
@@ -248,7 +248,7 @@ final class SendmailRunner
 
         // Warn if stderr contains content despite success.
         if ($code === 0 && $stderr !== '') {
-            error_log('sendmail warning (success): ' . $this->clipForLog($stderr));
+            trigger_error('sendmail warning (success): ' . $this->clipForLog($stderr), E_USER_WARNING);
         }
 
         if ($code !== 0) {
@@ -256,7 +256,11 @@ final class SendmailRunner
             $sOut  = $this->clipForLog($stdout);
             $sErr  = $this->clipForLog($stderr);
             $first = $this->firstLine($stderr);
-            error_log("sendmail failure: path={$literal} code={$code} stderr=\"{$sErr}\" stdout=\"{$sOut}\"");
+            $displayPath = basename($literal);
+            trigger_error(
+                "sendmail failure: path={$displayPath} code={$code} stderr=\"{$sErr}\" stdout=\"{$sOut}\"",
+                E_USER_WARNING
+            );
             throw SendmailException::exitedWithCode($code, $first);
         }
     }

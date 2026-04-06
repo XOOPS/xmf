@@ -128,7 +128,7 @@ class Migrate
      *
      * @return array table structure
      *
-     * @throws \RuntimeException
+     * @throws SchemaDefinitionException
      */
     public function getTargetDefinitions()
     {
@@ -203,6 +203,8 @@ class Migrate
      * @param string $tableName table to add
      *
      * @return void
+     *
+     * @throws SchemaDefinitionException
      */
     protected function addMissingTable($tableName)
     {
@@ -241,6 +243,8 @@ class Migrate
      * @param string $tableName table to synchronize
      *
      * @return void
+     *
+     * @throws SchemaDefinitionException
      */
     protected function synchronizeTable($tableName)
     {

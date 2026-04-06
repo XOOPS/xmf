@@ -665,6 +665,10 @@ class Tables
             $valSql = '';
             foreach ($tableDef['columns'] as $col) {
                 if (!isset($col['name']) || !is_string($col['name'])) {
+                    trigger_error(
+                        'Skipping malformed column definition in ' . __METHOD__ . ': ' . var_export($col, true),
+                        E_USER_WARNING
+                    );
                     continue;
                 }
 
@@ -709,6 +713,10 @@ class Tables
             $colSql = '';
             foreach ($tableDef['columns'] as $col) {
                 if (!isset($col['name']) || !is_string($col['name'])) {
+                    trigger_error(
+                        'Skipping malformed column definition in ' . __METHOD__ . ': ' . var_export($col, true),
+                        E_USER_WARNING
+                    );
                     continue;
                 }
 

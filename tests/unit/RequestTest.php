@@ -1,6 +1,7 @@
 <?php
 namespace Xmf\Test;
 
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use Xmf\Request;
 
 class RequestTest extends \PHPUnit\Framework\TestCase
@@ -248,6 +249,22 @@ class RequestTest extends \PHPUnit\Framework\TestCase
         $_REQUEST[$varname] = '<i>Lorem ipsum </i><script>alert();</script>';
         $get = Request::get('request');
         $this->assertEquals('Lorem ipsum alert();', $get[$varname]);
+    }
+
+    #[RunInSeparateProcess]
+    public function testGetHeaderReturnsStringHeader()
+    {
+        $_SERVER['HTTP_X_TEST_HEADER'] = 'header-value';
+
+        $this->assertSame('header-value', Request::getHeader('X-Test-Header', 'default'));
+    }
+
+    #[RunInSeparateProcess]
+    public function testGetHeaderReturnsDefaultForNonStringHeader()
+    {
+        $_SERVER['HTTP_X_TEST_HEADER'] = array('not-a-string');
+
+        $this->assertSame('default', Request::getHeader('X-Test-Header', 'default'));
     }
 
     public function testSet()
