@@ -15,21 +15,6 @@ declare(strict_types=1);
 namespace Xmf\Mail;
 
 /**
- * SendmailRunner safely executes sendmail commands for email delivery.
- *
- * This final class validates sendmail binary paths against a strict allowlist
- * and ensures the binary is executable. It supports optional envelope sender
- * validation and normalizes message line endings to comply with RFC 5322.
- *
- * @category  Xmf\Mail
- * @package   Xmf
- * @author    XOOPS Development Team <contact@xoops.org>
- * @copyright 2000-2026 XOOPS Project (https://xoops.org)
- * @license   GNU GPL 2.0 or later (https://www.gnu.org/licenses/gpl-2.0.html)
- * @link      https://xoops.org
- */
-
-/**
  * Safe sendmail runner for XOOPS.
  *
  * - No shell: argv-only via proc_open([...], ..., ['bypass_shell' => true])
@@ -47,6 +32,13 @@ namespace Xmf\Mail;
  * - Toggle $allowSymlinks (default true) to allow symlinks that resolve
  *   to a canonical allowlisted target.
  * - Inject filesystem check callables (is_executable/is_link/is_file) for testing.
+ *
+ * @category  Xmf\Mail
+ * @package   Xmf
+ * @author    XOOPS Development Team <contact@xoops.org>
+ * @copyright 2000-2026 XOOPS Project (https://xoops.org)
+ * @license   GNU GPL 2.0 or later (https://www.gnu.org/licenses/gpl-2.0.html)
+ * @link      https://xoops.org
  */
 final class SendmailRunner
 {
@@ -199,7 +191,7 @@ final class SendmailRunner
         ];
 
         $pipes = [];
-        $proc = proc_open($argv, $spec, $pipes, null, null, ['bypass_shell' => true]);
+        $proc = @proc_open($argv, $spec, $pipes, null, null, ['bypass_shell' => true]);
         if (!is_resource($proc)) {
             throw SendmailException::failedToStartProcess();
         }
@@ -215,32 +207,82 @@ final class SendmailRunner
         $stdout = '';
         $stderr = '';
         $code   = null;
+        stream_set_blocking($stdin, false);
+        stream_set_blocking($stdoutPipe, false);
+        stream_set_blocking($stderrPipe, false);
 
         try {
-            // Robust write loop (handle partial writes / broken pipe)
             $len = strlen($rfc822);
             $off = 0;
-            while ($off < $len) {
-                $chunk = substr($rfc822, $off);
-                $n     = fwrite($stdin, $chunk);
-                if ($n === false) {
-                    throw SendmailException::writeFailure();
+            $stdinOpen = true;
+
+            while ($stdinOpen || !feof($stdoutPipe) || !feof($stderrPipe)) {
+                $read = [];
+                $write = [];
+                $except = null;
+
+                if (!feof($stdoutPipe)) {
+                    $read[] = $stdoutPipe;
                 }
-                if ($n === 0) {
-                    if (!is_resource($stdin) || feof($stdin)) {
+                if (!feof($stderrPipe)) {
+                    $read[] = $stderrPipe;
+                }
+                if ($stdinOpen && $off < $len) {
+                    $write[] = $stdin;
+                }
+                if ($read === [] && $write === []) {
+                    break;
+                }
+
+                $ready = @stream_select($read, $write, $except, 1);
+                if ($ready === false) {
+                    throw SendmailException::failedToOpenPipes();
+                }
+                if ($ready === 0) {
+                    if ($stdinOpen && $off < $len && feof($stdin)) {
                         throw SendmailException::prematurePipeClosure();
                     }
-                    usleep(10000);
                     continue;
                 }
-                $off += $n;
-            }
-            fclose($stdin);
 
-            $stdout = stream_get_contents($stdoutPipe) ?: '';
-            $stderr = stream_get_contents($stderrPipe) ?: '';
-            fclose($stdoutPipe);
-            fclose($stderrPipe);
+                foreach ($write as $stream) {
+                    if ($stream !== $stdin) {
+                        continue;
+                    }
+                    $chunk = substr($rfc822, $off);
+                    $n = @fwrite($stdin, $chunk);
+                    if ($n === false) {
+                        throw SendmailException::writeFailure();
+                    }
+                    if ($n === 0) {
+                        if (feof($stdin)) {
+                            throw SendmailException::prematurePipeClosure();
+                        }
+                        continue;
+                    }
+                    $off += $n;
+                    if ($off >= $len) {
+                        fclose($stdin);
+                        $stdinOpen = false;
+                    }
+                }
+
+                foreach ($read as $stream) {
+                    $chunk = stream_get_contents($stream);
+                    if ($chunk === false || $chunk === '') {
+                        continue;
+                    }
+                    if ($stream === $stdoutPipe) {
+                        $stdout .= $chunk;
+                    } elseif ($stream === $stderrPipe) {
+                        $stderr .= $chunk;
+                    }
+                }
+            }
+
+            if ($stdinOpen && $off < $len) {
+                throw SendmailException::prematurePipeClosure();
+            }
         } finally {
             if (is_resource($stdin)) {
                 fclose($stdin);

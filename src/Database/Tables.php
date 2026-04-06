@@ -680,6 +680,11 @@ class Tables
                         . ($quoteValue ? $this->db->quote($columns[$columnName]) : $columns[$columnName]);
                 }
             }
+            if ($colSql === '' || $valSql === '') {
+                $this->lastError = 'No valid columns supplied for insert';
+                $this->lastErrNo = -1;
+                return false;
+            }
             $sql = "INSERT INTO `{$tableDef['name']}` ({$colSql}) VALUES({$valSql})";
             $this->queue[] = $sql;
 
@@ -726,6 +731,11 @@ class Tables
                     $colSql .= "{$comma}`{$columnName}` = "
                         . ($quoteValue ? $this->db->quote($columns[$columnName]) : $columns[$columnName]);
                 }
+            }
+            if ($colSql === '') {
+                $this->lastError = 'No valid columns supplied for update';
+                $this->lastErrNo = -1;
+                return false;
             }
             $sql = "UPDATE `{$tableDef['name']}` SET {$colSql} {$where}";
             $this->queue[] = $sql;

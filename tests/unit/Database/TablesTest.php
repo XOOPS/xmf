@@ -97,6 +97,48 @@ class TablesTest extends \PHPUnit\Framework\TestCase
         $this->assertSame("UPDATE `xoops_demo` SET `title` = 'Updated' WHERE id = 1", $tables->dumpQueue()[0]);
     }
 
+    public function testInsertReturnsFalseWhenNoValidColumnsMatch()
+    {
+        $tables = new TestableTables();
+        $tables->setDb(new FakeTablesDatabase());
+        $tables->setTables(
+            array(
+                'demo' => array(
+                    'name' => 'xoops_demo',
+                    'columns' => array(
+                        array('name' => 'id', 'attributes' => 'int NOT NULL'),
+                    ),
+                ),
+            )
+        );
+
+        $this->assertFalse($tables->insert('demo', array('title' => 'Ignored')));
+        $this->assertSame('No valid columns supplied for insert', $tables->getLastError());
+        $this->assertSame(-1, $tables->getLastErrNo());
+        $this->assertSame(array(), $tables->dumpQueue());
+    }
+
+    public function testUpdateReturnsFalseWhenNoValidColumnsMatch()
+    {
+        $tables = new TestableTables();
+        $tables->setDb(new FakeTablesDatabase());
+        $tables->setTables(
+            array(
+                'demo' => array(
+                    'name' => 'xoops_demo',
+                    'columns' => array(
+                        array('name' => 'id', 'attributes' => 'int NOT NULL'),
+                    ),
+                ),
+            )
+        );
+
+        $this->assertFalse($tables->update('demo', array('title' => 'Ignored'), 'WHERE id = 1'));
+        $this->assertSame('No valid columns supplied for update', $tables->getLastError());
+        $this->assertSame(-1, $tables->getLastErrNo());
+        $this->assertSame(array(), $tables->dumpQueue());
+    }
+
     private function captureWarning(callable $callback): string
     {
         $warning = '';

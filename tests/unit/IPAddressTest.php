@@ -56,11 +56,22 @@ class IPAddressTest extends \PHPUnit\Framework\TestCase
 
     public function testFromRequestFallsBackWhenRemoteAddrIsNotString()
     {
-        $_SERVER['REMOTE_ADDR'] = array('invalid');
+        $hadRemoteAddr = array_key_exists('REMOTE_ADDR', $_SERVER);
+        $originalRemoteAddr = $_SERVER['REMOTE_ADDR'] ?? null;
 
-        $instance = IPAddress::fromRequest();
+        try {
+            $_SERVER['REMOTE_ADDR'] = array('invalid');
 
-        $this->assertSame('0.0.0.0', $instance->asReadable());
+            $instance = IPAddress::fromRequest();
+
+            $this->assertSame('0.0.0.0', $instance->asReadable());
+        } finally {
+            if ($hadRemoteAddr) {
+                $_SERVER['REMOTE_ADDR'] = $originalRemoteAddr;
+            } else {
+                unset($_SERVER['REMOTE_ADDR']);
+            }
+        }
     }
 
     public function testFromRequestProxy()
