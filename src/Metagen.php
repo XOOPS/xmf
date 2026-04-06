@@ -1,4 +1,5 @@
 <?php
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -24,17 +25,16 @@ namespace Xmf;
  */
 class Metagen
 {
-
     /**
      * mbstring encoding
      */
-    const ENCODING = 'UTF-8';
+    public const ENCODING = 'UTF-8';
 
     /**
      * horizontal ellipsis
      * This will be used to replace omitted text.
      */
-    const ELLIPSIS = "...";
+    public const ELLIPSIS = "...";
 
     /**
      * assignTitle set the page title
@@ -151,7 +151,8 @@ class Metagen
             if (static::stopWordsObject()->check($originalKeyword)) {
                 $secondRoundKeywords = explode("'", $originalKeyword);
                 foreach ($secondRoundKeywords as $secondRoundKeyword) {
-                    if (static::stopWordsObject()->check($secondRoundKeyword)
+                    if (
+                        static::stopWordsObject()->check($secondRoundKeyword)
                         && strlen($secondRoundKeyword) >= $minLength
                     ) {
                         $keyCount[$secondRoundKeyword] =

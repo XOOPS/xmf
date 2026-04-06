@@ -1,4 +1,5 @@
 <?php
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -36,7 +37,6 @@ use Symfony\Component\Yaml\Yaml as VendorYaml;
  */
 class Yaml
 {
-
     /**
      * Dump an PHP array as a YAML string
      *
