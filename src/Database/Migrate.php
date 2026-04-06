@@ -135,7 +135,7 @@ class Migrate
         if ($this->targetDefinitions === null) {
             $definitions = Yaml::read($this->tableDefinitionFile);
             if (!is_array($definitions) || $definitions === []) {
-                throw new \RuntimeException("No schema definition " . $this->tableDefinitionFile);
+                throw SchemaDefinitionException::forFile($this->tableDefinitionFile);
             }
             $this->targetDefinitions = $definitions;
         }
@@ -213,7 +213,7 @@ class Migrate
             || !is_string($targetTable['options'])
             || !is_array($targetTable['columns'])
         ) {
-            throw new \RuntimeException("No schema definition for table {$tableName}");
+            throw SchemaDefinitionException::forTable($tableName);
         }
 
         $this->tableHandler->addTable($tableName);
@@ -246,7 +246,7 @@ class Migrate
     {
         $targetTable = $this->targetDefinitions[$tableName] ?? null;
         if (!is_array($targetTable) || !isset($targetTable['columns']) || !is_array($targetTable['columns'])) {
-            throw new \RuntimeException("No schema definition for table {$tableName}");
+            throw SchemaDefinitionException::forTable($tableName);
         }
 
         foreach ($targetTable['columns'] as $column) {

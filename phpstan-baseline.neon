@@ -213,7 +213,7 @@ parameters:
 		-
 			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
-			count: 10
+			count: 8
 			path: src/Database/Tables.php
 
 		-
@@ -273,7 +273,7 @@ parameters:
 		-
 			message: '#^Cannot access offset ''columns'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 14
+			count: 8
 			path: src/Database/Tables.php
 
 		-
@@ -291,29 +291,17 @@ parameters:
 		-
 			message: '#^Cannot access offset ''name'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 26
+			count: 25
 			path: src/Database/Tables.php
 
 		-
 			message: '#^Cannot access offset ''options'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 3
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Cannot access offset ''unique'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 4
+			count: 2
 			path: src/Database/Tables.php
 
 		-
 			message: '#^Cannot access offset mixed on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 3
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Cannot access offset string on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/Database/Tables.php
@@ -435,13 +423,7 @@ parameters:
 		-
 			message: '#^Part \$keyName \(mixed\) of encapsed string cannot be cast to string\.$#'
 			identifier: encapsedStringPart.nonString
-			count: 2
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Part \$key\[''columns''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 2
+			count: 1
 			path: src/Database/Tables.php
 
 		-
@@ -451,21 +433,9 @@ parameters:
 			path: src/Database/Tables.php
 
 		-
-			message: '#^Part \$tableDef\[''options''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 1
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Part \$tableName \(mixed\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 1
-			path: src/Database/Tables.php
-
-		-
 			message: '#^Part \$this\-\>tables\[\$table\]\[''name''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
 			identifier: encapsedStringPart.nonString
-			count: 2
+			count: 1
 			path: src/Database/Tables.php
 
 		-
@@ -1925,5 +1895,4 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Yaml.php
-
 

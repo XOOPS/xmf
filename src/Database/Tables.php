@@ -180,12 +180,19 @@ class Tables
             $firstComma = ', ';
         }
         if (isset($this->tables[$table])) {
-            if (isset($this->tables[$table]['create']) && $this->tables[$table]['create']) {
-                $this->tables[$table]['keys'][$name]['columns'] = $columnList;
-                $this->tables[$table]['keys'][$name]['unique'] = (bool) $unique;
+            $tableDef = &$this->tables[$table];
+            if (isset($tableDef['create']) && $tableDef['create']) {
+                if (!isset($tableDef['keys']) || !is_array($tableDef['keys'])) {
+                    $tableDef['keys'] = [];
+                }
+                $tableDef['keys'][$name] = [
+                    'columns' => $columnList,
+                    'unique' => (bool) $unique,
+                ];
             } else {
                 $add = ($unique ? 'ADD UNIQUE INDEX' : 'ADD INDEX');
-                $this->queue[] = "ALTER TABLE `{$this->tables[$table]['name']}` {$add} `{$name}` ({$columnList})";
+                $tableName = isset($tableDef['name']) && is_string($tableDef['name']) ? $tableDef['name'] : $table;
+                $this->queue[] = "ALTER TABLE `{$tableName}` {$add} `{$name}` ({$columnList})";
             }
         } else {
             return $this->tableNotEstablished();
@@ -756,7 +763,19 @@ class Tables
     {
         if (isset($this->tables[$table])) {
             $tableDef = $this->tables[$table];
-            $tableName = ($prefixed ? $tableDef['name'] : $table);
+            if (
+                !is_array($tableDef)
+                || !isset($tableDef['columns'], $tableDef['options'])
+                || !is_array($tableDef['columns'])
+                || !is_string($tableDef['options'])
+            ) {
+                return false;
+            }
+
+            $tableName = $table;
+            if ($prefixed && isset($tableDef['name']) && is_string($tableDef['name'])) {
+                $tableName = $tableDef['name'];
+            }
             $sql = "CREATE TABLE `{$tableName}` (";
             $firstComma = '';
             foreach ($tableDef['columns'] as $col) {
@@ -764,11 +783,15 @@ class Tables
                 $firstComma = ',';
             }
             $keySql = '';
-            foreach ($tableDef['keys'] as $keyName => $key) {
+            $keys = isset($tableDef['keys']) && is_array($tableDef['keys']) ? $tableDef['keys'] : [];
+            foreach ($keys as $keyName => $key) {
+                if (!is_string($keyName) || !is_array($key) || !isset($key['columns']) || !is_string($key['columns'])) {
+                    continue;
+                }
                 if ($keyName === 'PRIMARY') {
                     $keySql .= ",\n  PRIMARY KEY ({$key['columns']})";
                 } else {
-                    $unique = $key['unique'] ? 'UNIQUE ' : '';
+                    $unique = !empty($key['unique']) ? 'UNIQUE ' : '';
                     $keySql .= ",\n  {$unique}KEY {$keyName} ({$key['columns']})";
                 }
             }
@@ -928,11 +951,14 @@ class Tables
         $lastKey = '';
         $keyCols = '';
         $keyUnique = false;
+        $tableDef['keys'] = [];
         while ($key = $this->fetch($result)) {
             if ($lastKey != $key['INDEX_NAME']) {
                 if (!empty($lastKey)) {
-                    $tableDef['keys'][$lastKey]['columns'] = $keyCols;
-                    $tableDef['keys'][$lastKey]['unique'] = $keyUnique;
+                    $tableDef['keys'][$lastKey] = [
+                        'columns' => $keyCols,
+                        'unique' => $keyUnique,
+                    ];
                 }
                 $lastKey = $key['INDEX_NAME'];
                 $keyCols = $key['COLUMN_NAME'];
@@ -948,8 +974,10 @@ class Tables
             }
         };
         if (!empty($lastKey)) {
-            $tableDef['keys'][$lastKey]['columns'] = $keyCols;
-            $tableDef['keys'][$lastKey]['unique'] = $keyUnique;
+            $tableDef['keys'][$lastKey] = [
+                'columns' => $keyCols,
+                'unique' => $keyUnique,
+            ];
         }
 
         return $tableDef;

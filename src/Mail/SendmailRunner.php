@@ -149,13 +149,13 @@ final class SendmailRunner
      * @param string      $rfc822       headers + CRLF CRLF + body
      * @param string|null $envelopeFrom optional envelope sender (validated)
      *
-     * @throws \RuntimeException on failures to start, write, or non-zero exit
+     * @throws SendmailException on failures to start, write, or non-zero exit
      */
     public function deliver(string $sendmailPath, string $rfc822, ?string $envelopeFrom = null): void
     {
         $validatedPath = $this->validatePath($sendmailPath);
         if ($validatedPath === null) {
-            throw new \RuntimeException('Invalid sendmail path.');
+            throw SendmailException::invalidPath();
         }
 
         // Normalize line endings to CRLF for RFC 5322 compliance (two-step, no double expansion).
@@ -188,23 +188,19 @@ final class SendmailRunner
             2 => ['pipe', 'w'], // stderr
         ];
 
+        $pipes = [];
         $proc = proc_open($argv, $spec, $pipes, null, null, ['bypass_shell' => true]);
         if (!is_resource($proc)) {
-            throw new \RuntimeException('Failed to start sendmail process.');
+            throw SendmailException::failedToStartProcess();
         }
-        if (
-            !isset($pipes[0], $pipes[1], $pipes[2])
-            || !is_resource($pipes[0])
-            || !is_resource($pipes[1])
-            || !is_resource($pipes[2])
-        ) {
+        /** @var array{0?: resource, 1?: resource, 2?: resource} $pipes */
+        $stdin = $pipes[0] ?? null;
+        $stdoutPipe = $pipes[1] ?? null;
+        $stderrPipe = $pipes[2] ?? null;
+        if (!is_resource($stdin) || !is_resource($stdoutPipe) || !is_resource($stderrPipe)) {
             proc_close($proc);
-            throw new \RuntimeException('Failed to open sendmail pipes.');
+            throw SendmailException::failedToOpenPipes();
         }
-
-        $stdin = $pipes[0];
-        $stdoutPipe = $pipes[1];
-        $stderrPipe = $pipes[2];
 
         $stdout = '';
         $stderr = '';
@@ -218,11 +214,11 @@ final class SendmailRunner
                 $chunk = substr($rfc822, $off);
                 $n     = fwrite($stdin, $chunk);
                 if ($n === false) {
-                    throw new \RuntimeException('Failed to write message to sendmail (broken pipe).');
+                    throw SendmailException::writeFailure();
                 }
                 if ($n === 0) {
                     if (!is_resource($stdin) || feof($stdin)) {
-                        throw new \RuntimeException('sendmail closed the input pipe prematurely.');
+                        throw SendmailException::prematurePipeClosure();
                     }
                     usleep(10000);
                     continue;
@@ -256,11 +252,12 @@ final class SendmailRunner
         }
 
         if ($code !== 0) {
+            $code = is_int($code) ? $code : -1;
             $sOut  = $this->clipForLog($stdout);
             $sErr  = $this->clipForLog($stderr);
             $first = $this->firstLine($stderr);
             error_log("sendmail failure: path={$literal} code={$code} stderr=\"{$sErr}\" stdout=\"{$sOut}\"");
-            throw new \RuntimeException('Sendmail exited with code ' . $code . ($first !== '' ? ': ' . $first : ''));
+            throw SendmailException::exitedWithCode($code, $first);
         }
     }
 
