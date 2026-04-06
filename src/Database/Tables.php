@@ -1,4 +1,5 @@
 <?php
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -27,8 +28,8 @@ use Xmf\Language;
  * @category  Xmf\Database\Tables
  * @package   Xmf
  * @author    Richard Griffith <richard@geekwright.com>
- * @copyright 2000-2025 XOOPS Project (https://xoops.org)
- * @license   GNU GPL 2 or later (https://www.gnu.org/licenses/gpl-2.0.html)
+ * @copyright 2000-2026 XOOPS Project (https://xoops.org)
+ * @license   GNU GPL 2.0 or later (https://www.gnu.org/licenses/gpl-2.0.html)
  * @link      https://xoops.org
  */
 class Tables
@@ -179,12 +180,19 @@ class Tables
             $firstComma = ', ';
         }
         if (isset($this->tables[$table])) {
-            if (isset($this->tables[$table]['create']) && $this->tables[$table]['create']) {
-                $this->tables[$table]['keys'][$name]['columns'] = $columnList;
-                $this->tables[$table]['keys'][$name]['unique'] = (bool) $unique;
+            $tableDef = &$this->tables[$table];
+            if (isset($tableDef['create']) && $tableDef['create']) {
+                if (!isset($tableDef['keys']) || !is_array($tableDef['keys'])) {
+                    $tableDef['keys'] = [];
+                }
+                $tableDef['keys'][$name] = [
+                    'columns' => $columnList,
+                    'unique' => (bool) $unique,
+                ];
             } else {
                 $add = ($unique ? 'ADD UNIQUE INDEX' : 'ADD INDEX');
-                $this->queue[] = "ALTER TABLE `{$this->tables[$table]['name']}` {$add} `{$name}` ({$columnList})";
+                $tableName = isset($tableDef['name']) && is_string($tableDef['name']) ? $tableDef['name'] : $table;
+                $this->queue[] = "ALTER TABLE `{$tableName}` {$add} `{$name}` ({$columnList})";
             }
         } else {
             return $this->tableNotEstablished();
@@ -656,12 +664,26 @@ class Tables
             $colSql = '';
             $valSql = '';
             foreach ($tableDef['columns'] as $col) {
-                $comma = empty($colSql) ? '' : ', ';
-                if (isset($columns[$col['name']])) {
-                    $colSql .= "{$comma}`{$col['name']}`";
-                    $valSql .= $comma
-                        . ($quoteValue ? $this->db->quote($columns[$col['name']]) : $columns[$col['name']]);
+                if (!isset($col['name']) || !is_string($col['name'])) {
+                    trigger_error(
+                        'Skipping malformed column definition in ' . __METHOD__ . ': ' . var_export($col, true),
+                        E_USER_WARNING
+                    );
+                    continue;
                 }
+
+                $columnName = $col['name'];
+                $comma = empty($colSql) ? '' : ', ';
+                if (isset($columns[$columnName])) {
+                    $colSql .= "{$comma}`{$columnName}`";
+                    $valSql .= $comma
+                        . ($quoteValue ? $this->db->quote($columns[$columnName]) : $columns[$columnName]);
+                }
+            }
+            if ($colSql === '' || $valSql === '') {
+                $this->lastError = 'No valid columns supplied for insert';
+                $this->lastErrNo = -1;
+                return false;
             }
             $sql = "INSERT INTO `{$tableDef['name']}` ({$colSql}) VALUES({$valSql})";
             $this->queue[] = $sql;
@@ -695,11 +717,25 @@ class Tables
             }
             $colSql = '';
             foreach ($tableDef['columns'] as $col) {
-                $comma = empty($colSql) ? '' : ', ';
-                if (isset($columns[$col['name']])) {
-                    $colSql .= "{$comma}`{$col['name']}` = "
-                        . ($quoteValue ? $this->db->quote($columns[$col['name']]) : $columns[$col['name']]);
+                if (!isset($col['name']) || !is_string($col['name'])) {
+                    trigger_error(
+                        'Skipping malformed column definition in ' . __METHOD__ . ': ' . var_export($col, true),
+                        E_USER_WARNING
+                    );
+                    continue;
                 }
+
+                $columnName = $col['name'];
+                $comma = empty($colSql) ? '' : ', ';
+                if (isset($columns[$columnName])) {
+                    $colSql .= "{$comma}`{$columnName}` = "
+                        . ($quoteValue ? $this->db->quote($columns[$columnName]) : $columns[$columnName]);
+                }
+            }
+            if ($colSql === '') {
+                $this->lastError = 'No valid columns supplied for update';
+                $this->lastErrNo = -1;
+                return false;
             }
             $sql = "UPDATE `{$tableDef['name']}` SET {$colSql} {$where}";
             $this->queue[] = $sql;
@@ -745,19 +781,46 @@ class Tables
     {
         if (isset($this->tables[$table])) {
             $tableDef = $this->tables[$table];
-            $tableName = ($prefixed ? $tableDef['name'] : $table);
+            if (
+                !is_array($tableDef)
+                || !isset($tableDef['columns'], $tableDef['options'])
+                || !is_array($tableDef['columns'])
+                || !is_string($tableDef['options'])
+            ) {
+                return false;
+            }
+
+            $tableName = $table;
+            if ($prefixed && isset($tableDef['name']) && is_string($tableDef['name'])) {
+                $tableName = $tableDef['name'];
+            }
             $sql = "CREATE TABLE `{$tableName}` (";
             $firstComma = '';
             foreach ($tableDef['columns'] as $col) {
+                if (
+                    !is_array($col)
+                    || !isset($col['name'], $col['attributes'])
+                    || !is_string($col['name'])
+                    || $col['name'] === ''
+                    || !is_string($col['attributes'])
+                    || $col['attributes'] === ''
+                ) {
+                    return false;
+                }
+
                 $sql .= "{$firstComma}\n    `{$col['name']}`  {$col['attributes']}";
                 $firstComma = ',';
             }
             $keySql = '';
-            foreach ($tableDef['keys'] as $keyName => $key) {
+            $keys = isset($tableDef['keys']) && is_array($tableDef['keys']) ? $tableDef['keys'] : [];
+            foreach ($keys as $keyName => $key) {
+                if (!is_string($keyName) || !is_array($key) || !isset($key['columns']) || !is_string($key['columns'])) {
+                    continue;
+                }
                 if ($keyName === 'PRIMARY') {
                     $keySql .= ",\n  PRIMARY KEY ({$key['columns']})";
                 } else {
-                    $unique = $key['unique'] ? 'UNIQUE ' : '';
+                    $unique = !empty($key['unique']) ? 'UNIQUE ' : '';
                     $keySql .= ",\n  {$unique}KEY {$keyName} ({$key['columns']})";
                 }
             }
@@ -830,7 +893,7 @@ class Tables
     {
         // . (($column['COLUMN_DEFAULT'] === null) ? '' : " DEFAULT '" . $column['COLUMN_DEFAULT'] . "' ")
         // no default specified
-        if (null===$default) {
+        if (null === $default) {
             return '';
         }
 
@@ -917,13 +980,21 @@ class Tables
         $lastKey = '';
         $keyCols = '';
         $keyUnique = false;
+        $tableDef['keys'] = [];
         while ($key = $this->fetch($result)) {
-            if ($lastKey != $key['INDEX_NAME']) {
+            $currentKey = $key['INDEX_NAME'];
+            if (!is_string($currentKey) || !is_string($key['COLUMN_NAME'])) {
+                continue;
+            }
+
+            if ($lastKey != $currentKey) {
                 if (!empty($lastKey)) {
-                    $tableDef['keys'][$lastKey]['columns'] = $keyCols;
-                    $tableDef['keys'][$lastKey]['unique'] = $keyUnique;
+                    $tableDef['keys'][$lastKey] = [
+                        'columns' => $keyCols,
+                        'unique' => $keyUnique,
+                    ];
                 }
-                $lastKey = $key['INDEX_NAME'];
+                $lastKey = $currentKey;
                 $keyCols = $key['COLUMN_NAME'];
                 if (!empty($key['SUB_PART'])) {
                     $keyCols .= ' (' . $key['SUB_PART'] . ')';
@@ -937,8 +1008,10 @@ class Tables
             }
         };
         if (!empty($lastKey)) {
-            $tableDef['keys'][$lastKey]['columns'] = $keyCols;
-            $tableDef['keys'][$lastKey]['unique'] = $keyUnique;
+            $tableDef['keys'][$lastKey] = [
+                'columns' => $keyCols,
+                'unique' => $keyUnique,
+            ];
         }
 
         return $tableDef;

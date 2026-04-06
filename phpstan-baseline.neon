@@ -3,43 +3,25 @@ parameters:
 		-
 			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
-			count: 6
-			path: src/Database/Migrate.php
-
-		-
-			message: '#^Cannot access offset ''attributes'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 4
+			count: 2
 			path: src/Database/Migrate.php
 
 		-
 			message: '#^Cannot access offset ''columns'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 14
-			path: src/Database/Migrate.php
-
-		-
-			message: '#^Cannot access offset ''keys'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 3
+			count: 4
 			path: src/Database/Migrate.php
 
 		-
 			message: '#^Cannot access offset ''name'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 8
-			path: src/Database/Migrate.php
-
-		-
-			message: '#^Cannot access offset ''options'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
+			count: 4
 			path: src/Database/Migrate.php
 
 		-
 			message: '#^Cannot access offset ''unique'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 5
+			count: 1
 			path: src/Database/Migrate.php
 
 		-
@@ -73,37 +55,7 @@ parameters:
 			path: src/Database/Migrate.php
 
 		-
-			message: '#^Parameter \#1 \$name of method Xmf\\Database\\Tables\:\:addIndex\(\) expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/Database/Migrate.php
-
-		-
-			message: '#^Parameter \#1 \$name of method Xmf\\Database\\Tables\:\:dropIndex\(\) expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Database/Migrate.php
-
-		-
 			message: '#^Parameter \#1 \$string1 of function strcasecmp expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Database/Migrate.php
-
-		-
-			message: '#^Parameter \#2 \$column of method Xmf\\Database\\Tables\:\:addColumn\(\) expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Database/Migrate.php
-
-		-
-			message: '#^Parameter \#2 \$column of method Xmf\\Database\\Tables\:\:addPrimaryKey\(\) expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/Database/Migrate.php
-
-		-
-			message: '#^Parameter \#2 \$column of method Xmf\\Database\\Tables\:\:alterColumn\(\) expects string, mixed given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Database/Migrate.php
@@ -115,39 +67,9 @@ parameters:
 			path: src/Database/Migrate.php
 
 		-
-			message: '#^Parameter \#2 \$column of method Xmf\\Database\\Tables\:\:getColumnAttributes\(\) expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Database/Migrate.php
-
-		-
 			message: '#^Parameter \#2 \$columnName of method Xmf\\Database\\Migrate\:\:targetHasColumn\(\) expects string, mixed given\.$#'
 			identifier: argument.type
 			count: 1
-			path: src/Database/Migrate.php
-
-		-
-			message: '#^Parameter \#2 \$options of method Xmf\\Database\\Tables\:\:setTableOptions\(\) expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Database/Migrate.php
-
-		-
-			message: '#^Parameter \#3 \$attributes of method Xmf\\Database\\Tables\:\:addColumn\(\) expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Database/Migrate.php
-
-		-
-			message: '#^Parameter \#3 \$attributes of method Xmf\\Database\\Tables\:\:alterColumn\(\) expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Database/Migrate.php
-
-		-
-			message: '#^Parameter \#3 \$column of method Xmf\\Database\\Tables\:\:addIndex\(\) expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 3
 			path: src/Database/Migrate.php
 
 		-
@@ -157,32 +79,8 @@ parameters:
 			path: src/Database/Migrate.php
 
 		-
-			message: '#^Parameter \#4 \$unique of method Xmf\\Database\\Tables\:\:addIndex\(\) expects bool, mixed given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/Database/Migrate.php
-
-		-
-			message: '#^Possibly invalid array key type mixed\.$#'
-			identifier: offsetAccess.invalidOffset
-			count: 3
-			path: src/Database/Migrate.php
-
-		-
 			message: '#^Property Xmf\\Database\\Migrate\:\:\$moduleTables \(array\<string\>\) does not accept mixed\.$#'
 			identifier: assign.propertyType
-			count: 1
-			path: src/Database/Migrate.php
-
-		-
-			message: '#^Property Xmf\\Database\\Migrate\:\:\$targetDefinitions \(array\) does not accept array\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Database/Migrate.php
-
-		-
-			message: '#^Property Xmf\\Database\\Migrate\:\:\$targetDefinitions \(array\) in isset\(\) is not nullable\.$#'
-			identifier: isset.property
 			count: 1
 			path: src/Database/Migrate.php
 
@@ -261,7 +159,7 @@ parameters:
 		-
 			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
-			count: 10
+			count: 8
 			path: src/Database/Tables.php
 
 		-
@@ -283,12 +181,6 @@ parameters:
 			path: src/Database/Tables.php
 
 		-
-			message: '#^Binary operation "\." between '', '' and mixed results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: src/Database/Tables.php
-
-		-
 			message: '#^Binary operation "\." between ''ENGINE\='' and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
@@ -301,12 +193,6 @@ parameters:
 			path: src/Database/Tables.php
 
 		-
-			message: '#^Binary operation "\.\=" between mixed and non\-falsy\-string results in an error\.$#'
-			identifier: assignOp.invalid
-			count: 2
-			path: src/Database/Tables.php
-
-		-
 			message: '#^Cannot access offset ''PRIMARY'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -315,13 +201,13 @@ parameters:
 		-
 			message: '#^Cannot access offset ''attributes'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 4
+			count: 3
 			path: src/Database/Tables.php
 
 		-
 			message: '#^Cannot access offset ''columns'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 14
+			count: 8
 			path: src/Database/Tables.php
 
 		-
@@ -339,29 +225,17 @@ parameters:
 		-
 			message: '#^Cannot access offset ''name'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 26
+			count: 24
 			path: src/Database/Tables.php
 
 		-
 			message: '#^Cannot access offset ''options'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 3
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Cannot access offset ''unique'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 4
+			count: 2
 			path: src/Database/Tables.php
 
 		-
 			message: '#^Cannot access offset mixed on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 3
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Cannot access offset string on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/Database/Tables.php
@@ -469,27 +343,9 @@ parameters:
 			path: src/Database/Tables.php
 
 		-
-			message: '#^Part \$col\[''attributes''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 1
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Part \$col\[''name''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 3
-			path: src/Database/Tables.php
-
-		-
 			message: '#^Part \$keyName \(mixed\) of encapsed string cannot be cast to string\.$#'
 			identifier: encapsedStringPart.nonString
-			count: 2
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Part \$key\[''columns''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 2
+			count: 1
 			path: src/Database/Tables.php
 
 		-
@@ -499,27 +355,9 @@ parameters:
 			path: src/Database/Tables.php
 
 		-
-			message: '#^Part \$tableDef\[''options''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 1
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Part \$tableName \(mixed\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 1
-			path: src/Database/Tables.php
-
-		-
 			message: '#^Part \$this\-\>tables\[\$table\]\[''name''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
 			identifier: encapsedStringPart.nonString
-			count: 2
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Possibly invalid array key type mixed\.$#'
-			identifier: offsetAccess.invalidOffset
-			count: 6
+			count: 1
 			path: src/Database/Tables.php
 
 		-
@@ -783,12 +621,6 @@ parameters:
 		-
 			message: '#^Cannot access offset int\<0, 15\> on string\|false\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/IPAddress.php
-
-		-
-			message: '#^Parameter \#1 \$ip of class Xmf\\IPAddress constructor expects string, mixed given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/IPAddress.php
 
@@ -1088,12 +920,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$string of function trim expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Metagen.php
-
-		-
-			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(string\)\: bool\)\|null, ''static\:…'' given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Metagen.php
@@ -1789,18 +1615,6 @@ parameters:
 			path: src/Request.php
 
 		-
-			message: '#^Method Xmf\\Request\:\:cleanVar\(\) should return string but returns mixed\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Request.php
-
-		-
-			message: '#^Method Xmf\\Request\:\:cleanVars\(\) should return string but returns array\<string\>\|string\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Request.php
-
-		-
 			message: '#^Method Xmf\\Request\:\:getArray\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -1939,18 +1753,6 @@ parameters:
 			path: src/Yaml.php
 
 		-
-			message: '#^Cannot access offset \(float\|int\<1, max\>\) on list\<string\>\|false\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Yaml.php
-
-		-
-			message: '#^Cannot access offset int\<2, max\> on list\<string\>\|false\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Yaml.php
-
-		-
 			message: '#^Method Xmf\\Yaml\:\:load\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -2013,18 +1815,6 @@ parameters:
 		-
 			message: '#^Method Xmf\\Yaml\:\:saveWrapped\(\) has parameter \$var with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: src/Yaml.php
-
-		-
-			message: '#^Parameter \#1 \$value of function count expects array\|Countable, list\<string\>\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Yaml.php
-
-		-
-			message: '#^Parameter \#2 \$array of function implode expects array, list\<string\>\|false given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Yaml.php
 

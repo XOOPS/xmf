@@ -1,22 +1,18 @@
 <?php
+
+/*
+ You may not change or alter any portion of this comment or credits
+ of supporting developers from this source code or any supporting source code
+ which is considered copyrighted (c) material of the original comment or credit authors.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
 declare(strict_types=1);
 
 namespace Xmf\Mail;
-
-/**
- * SendmailRunner safely executes sendmail commands for email delivery.
- *
- * This final class validates sendmail binary paths against a strict allowlist
- * and ensures the binary is executable. It supports optional envelope sender
- * validation and normalizes message line endings to comply with RFC 5322.
- *
- * @category  Xmf\Mail
- * @package   Xmf
- * @author    XOOPS Development Team <
- * @copyright 2000-2025 XOOPS Project (https://xoops.org)
- * @license   GNU GPL 2.0 or later (https://www.gnu.org/licenses/gpl-2.0.html)
- * @link      https://xoops.org
- */
 
 /**
  * Safe sendmail runner for XOOPS.
@@ -36,6 +32,13 @@ namespace Xmf\Mail;
  * - Toggle $allowSymlinks (default true) to allow symlinks that resolve
  *   to a canonical allowlisted target.
  * - Inject filesystem check callables (is_executable/is_link/is_file) for testing.
+ *
+ * @category  Xmf\Mail
+ * @package   Xmf
+ * @author    XOOPS Development Team <contact@xoops.org>
+ * @copyright 2000-2026 XOOPS Project (https://xoops.org)
+ * @license   GNU GPL 2.0 or later (https://www.gnu.org/licenses/gpl-2.0.html)
+ * @link      https://xoops.org
  */
 final class SendmailRunner
 {
@@ -148,13 +151,16 @@ final class SendmailRunner
      * @param string      $rfc822       headers + CRLF CRLF + body
      * @param string|null $envelopeFrom optional envelope sender (validated)
      *
-     * @throws \RuntimeException on failures to start, write, or non-zero exit
+     * @return void
+     *
+     * @throws SendmailException on invalid path, process startup or pipe-open failures,
+     *                           write failures, premature pipe closure, or non-zero exit
      */
     public function deliver(string $sendmailPath, string $rfc822, ?string $envelopeFrom = null): void
     {
         $validatedPath = $this->validatePath($sendmailPath);
         if ($validatedPath === null) {
-            throw new \RuntimeException('Invalid sendmail path.');
+            throw SendmailException::invalidPath();
         }
 
         // Normalize line endings to CRLF for RFC 5322 compliance (two-step, no double expansion).
@@ -182,46 +188,115 @@ final class SendmailRunner
         $argv[] = '-i';
 
         $spec = [
-            0 => ['pipe', 'w'], // stdin
+            0 => ['pipe', 'r'], // stdin
             1 => ['pipe', 'w'], // stdout
             2 => ['pipe', 'w'], // stderr
         ];
 
-        $proc = proc_open($argv, $spec, $pipes, null, null, ['bypass_shell' => true]);
+        $pipes = [];
+        $proc = @proc_open($argv, $spec, $pipes, null, null, ['bypass_shell' => true]);
         if (!is_resource($proc)) {
-            throw new \RuntimeException('Failed to start sendmail process.');
+            throw SendmailException::failedToStartProcess();
+        }
+        /** @var array{0?: resource, 1?: resource, 2?: resource} $pipes */
+        $stdin = $pipes[0] ?? null;
+        $stdoutPipe = $pipes[1] ?? null;
+        $stderrPipe = $pipes[2] ?? null;
+        if (!is_resource($stdin) || !is_resource($stdoutPipe) || !is_resource($stderrPipe)) {
+            proc_close($proc);
+            throw SendmailException::failedToOpenPipes();
         }
 
         $stdout = '';
         $stderr = '';
         $code   = null;
+        stream_set_blocking($stdin, false);
+        stream_set_blocking($stdoutPipe, false);
+        stream_set_blocking($stderrPipe, false);
 
         try {
-            // Robust write loop (handle partial writes / broken pipe)
             $len = strlen($rfc822);
             $off = 0;
-            while ($off < $len) {
-                $chunk = substr($rfc822, $off);
-                $n     = fwrite($pipes[0], $chunk);
-                if ($n === false) {
-                    throw new \RuntimeException('Failed to write message to sendmail (broken pipe).');
+            $stdinOpen = true;
+            $chunkSize = 8192;
+
+            while ($stdinOpen || !feof($stdoutPipe) || !feof($stderrPipe)) {
+                $read = [];
+                $write = [];
+                $except = null;
+
+                if (!feof($stdoutPipe)) {
+                    $read[] = $stdoutPipe;
                 }
-                if ($n === 0) {
-                    if (!is_resource($pipes[0]) || feof($pipes[0])) {
-                        throw new \RuntimeException('sendmail closed the input pipe prematurely.');
+                if (!feof($stderrPipe)) {
+                    $read[] = $stderrPipe;
+                }
+                if ($stdinOpen && $off < $len) {
+                    $write[] = $stdin;
+                }
+                if ($read === [] && $write === []) {
+                    break;
+                }
+
+                $ready = @stream_select($read, $write, $except, 1);
+                if ($ready === false) {
+                    throw SendmailException::failedToOpenPipes();
+                }
+                if ($ready === 0) {
+                    if ($stdinOpen && $off < $len && feof($stdin)) {
+                        throw SendmailException::prematurePipeClosure();
                     }
-                    usleep(10000);
                     continue;
                 }
-                $off += $n;
-            }
-            fclose($pipes[0]);
 
-            $stdout = stream_get_contents($pipes[1]) ?: '';
-            $stderr = stream_get_contents($pipes[2]) ?: '';
-            fclose($pipes[1]);
-            fclose($pipes[2]);
+                foreach ($write as $stream) {
+                    if ($stream !== $stdin) {
+                        continue;
+                    }
+                    $chunk = substr($rfc822, $off, $chunkSize);
+                    $n = @fwrite($stdin, $chunk);
+                    if ($n === false) {
+                        throw SendmailException::writeFailure();
+                    }
+                    if ($n === 0) {
+                        if (feof($stdin)) {
+                            throw SendmailException::prematurePipeClosure();
+                        }
+                        continue;
+                    }
+                    $off += $n;
+                    if ($off >= $len) {
+                        fclose($stdin);
+                        $stdinOpen = false;
+                    }
+                }
+
+                foreach ($read as $stream) {
+                    $chunk = stream_get_contents($stream);
+                    if ($chunk === false || $chunk === '') {
+                        continue;
+                    }
+                    if ($stream === $stdoutPipe) {
+                        $stdout .= $chunk;
+                    } elseif ($stream === $stderrPipe) {
+                        $stderr .= $chunk;
+                    }
+                }
+            }
+
+            if ($stdinOpen && $off < $len) {
+                throw SendmailException::prematurePipeClosure();
+            }
         } finally {
+            if (is_resource($stdin)) {
+                fclose($stdin);
+            }
+            if (is_resource($stdoutPipe)) {
+                fclose($stdoutPipe);
+            }
+            if (is_resource($stderrPipe)) {
+                fclose($stderrPipe);
+            }
             if (is_resource($proc)) {
                 $code = proc_close($proc);
             }
@@ -229,15 +304,20 @@ final class SendmailRunner
 
         // Warn if stderr contains content despite success.
         if ($code === 0 && $stderr !== '') {
-            error_log('sendmail warning (success): ' . $this->clipForLog($stderr));
+            trigger_error('sendmail warning (success): ' . $this->clipForLog($stderr), E_USER_WARNING);
         }
 
         if ($code !== 0) {
+            $code = is_int($code) ? $code : -1;
             $sOut  = $this->clipForLog($stdout);
             $sErr  = $this->clipForLog($stderr);
             $first = $this->firstLine($stderr);
-            error_log("sendmail failure: path={$literal} code={$code} stderr=\"{$sErr}\" stdout=\"{$sOut}\"");
-            throw new \RuntimeException('Sendmail exited with code ' . $code . ($first !== '' ? ': ' . $first : ''));
+            $displayPath = basename($literal);
+            trigger_error(
+                "sendmail failure: path={$displayPath} code={$code} stderr=\"{$sErr}\" stdout=\"{$sOut}\"",
+                E_USER_WARNING
+            );
+            throw SendmailException::exitedWithCode($code, $first);
         }
     }
 

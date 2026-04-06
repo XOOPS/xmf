@@ -1,4 +1,5 @@
 <?php
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -29,14 +30,13 @@ use Symfony\Component\Yaml\Yaml as VendorYaml;
  * @category  Xmf\Yaml
  * @package   Xmf
  * @author    Richard Griffith <richard@geekwright.com>
- * @copyright 2000-2025 XOOPS Project (https://xoops.org)
+ * @copyright 2000-2026 XOOPS Project (https://xoops.org)
  * @license   GNU GPL 2.0 or later (https://www.gnu.org/licenses/gpl-2.0.html)
  * @link      https://xoops.org
  * @see       http://www.yaml.org/
  */
 class Yaml
 {
-
     /**
      * Dump an PHP array as a YAML string
      *
@@ -179,6 +179,10 @@ class Yaml
     {
         try {
             $lines = preg_split('/\R/', $yamlString);
+            if ($lines === false) {
+                trigger_error('Failed to split wrapped YAML content', E_USER_WARNING);
+                return false;
+            }
             $count = count($lines);
             for ($index = $count; --$index > 0;) {
                 if ('...' === $lines[$index]) {

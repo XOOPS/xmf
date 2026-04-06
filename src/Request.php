@@ -1,4 +1,5 @@
 <?php
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -23,7 +24,7 @@ namespace Xmf;
  * @author    Richard Griffith <richard@geekwright.com>
  * @author    trabis <lusopoemas@gmail.com>
  * @author    Joomla!
- * @copyright 2000-2025 XOOPS Project (https://xoops.org)
+ * @copyright 2000-2026 XOOPS Project (https://xoops.org)
  * @license   GNU GPL 2.0 or later (https://www.gnu.org/licenses/gpl-2.0.html)
  * @link      https://xoops.org
  */
@@ -32,9 +33,9 @@ class Request
     /**
      * Available masks for cleaning variables
      */
-    const MASK_NO_TRIM    = 1;
-    const MASK_ALLOW_RAW  = 2;
-    const MASK_ALLOW_HTML = 4;
+    public const MASK_NO_TRIM    = 1;
+    public const MASK_ALLOW_RAW  = 2;
+    public const MASK_ALLOW_HTML = 4;
 
     /**
      * Gets the request method
@@ -114,13 +115,11 @@ class Request
         if (isset($input[$name]) && null !== $input[$name]) {
             // Get the variable from the input hash and clean it
             $var = static::cleanVar($input[$name], $mask, $type);
-
         } elseif (null !== $default) {
             // Clean the default value
             $var = static::cleanVar($default, $mask, $type);
         } else {
             $var = $default;
-
         }
 
         return $var;
@@ -354,7 +353,13 @@ class Request
 
         $name = strtolower($headerName);
         if (isset($headers[$name])) {
-            return static::cleanVar($headers[$name]);
+            $headerValue = $headers[$name];
+            if (is_string($headerValue)) {
+                $cleanedHeader = static::cleanVar($headerValue);
+                if (is_string($cleanedHeader)) {
+                    return $cleanedHeader;
+                }
+            }
         }
         return $default;
     }
@@ -532,7 +537,7 @@ class Request
      *                      - If no bits other than the 1 bit is set, a strict filter is applied.
      * @param string $type The variable type. See {@link FilterInput::clean()}.
      *
-     * @return string
+     * @return mixed
      */
     protected static function cleanVar($var, $mask = 0, $type = null)
     {
@@ -578,7 +583,7 @@ class Request
      * @param int    $mask Filter bit mask. See {@link Request::cleanVar()}
      * @param string $type The variable type. See {@link FilterInput::clean()}.
      *
-     * @return string
+     * @return mixed
      */
     protected static function cleanVars($var, $mask = 0, $type = null)
     {

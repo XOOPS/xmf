@@ -1,4 +1,5 @@
 <?php
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -19,7 +20,7 @@ namespace Xmf\Module\Helper;
  * @package   Xmf
  * @author    trabis <lusopoemas@gmail.com>
  * @author    Richard Griffith <richard@geekwright.com>
- * @copyright 2000-2025 XOOPS Project (https://xoops.org)
+ * @copyright 2000-2026 XOOPS Project (https://xoops.org)
  * @license   GNU GPL 2.0 or later (https://www.gnu.org/licenses/gpl-2.0.html)
  * @link      https://xoops.org
  */
@@ -121,7 +122,7 @@ abstract class AbstractHelper
         if ($this->debug) {
             $message = $this->serializeForHelperLog($log);
             if (class_exists('Xoops', false)) {
-                \Xoops::getInstance()->logger()->debug($message, array('channel'=>'Extra'));
+                \Xoops::getInstance()->logger()->debug($message, array('channel' => 'Extra'));
             } elseif (is_object($GLOBALS['xoopsLogger'])) {
                 $GLOBALS['xoopsLogger']->addExtra(get_called_class(), $message);
             }
