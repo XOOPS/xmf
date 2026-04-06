@@ -54,6 +54,15 @@ class IPAddressTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($testAddress, $actual);
     }
 
+    public function testFromRequestFallsBackWhenRemoteAddrIsNotString()
+    {
+        $_SERVER['REMOTE_ADDR'] = array('invalid');
+
+        $instance = IPAddress::fromRequest();
+
+        $this->assertSame('0.0.0.0', $instance->asReadable());
+    }
+
     public function testFromRequestProxy()
     {
         global $xoopsConfig;

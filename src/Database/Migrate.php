@@ -221,17 +221,24 @@ class Migrate
         $this->tableHandler->addTable($tableName);
         $this->tableHandler->setTableOptions($tableName, $targetTable['options']);
         foreach ($targetTable['columns'] as $column) {
-            $this->tableHandler->addColumn($tableName, $column['name'], $column['attributes']);
+            $validatedColumn = $this->validatedTargetColumn($tableName, $column);
+            $this->tableHandler->addColumn($tableName, $validatedColumn['name'], $validatedColumn['attributes']);
         }
         if (isset($targetTable['keys']) && is_array($targetTable['keys'])) {
             foreach ($targetTable['keys'] as $key => $keyData) {
                 if (!is_string($key)) {
                     continue;
                 }
+                $validatedKey = $this->validatedTargetKey($tableName, $key, $keyData);
                 if ($key === 'PRIMARY') {
-                    $this->tableHandler->addPrimaryKey($tableName, $keyData['columns']);
+                    $this->tableHandler->addPrimaryKey($tableName, $validatedKey['columns']);
                 } else {
-                    $this->tableHandler->addIndex($key, $tableName, $keyData['columns'], $keyData['unique']);
+                    $this->tableHandler->addIndex(
+                        $key,
+                        $tableName,
+                        $validatedKey['columns'],
+                        $validatedKey['unique']
+                    );
                 }
             }
         }
@@ -254,11 +261,12 @@ class Migrate
         }
 
         foreach ($targetTable['columns'] as $column) {
-            $attributes = $this->tableHandler->getColumnAttributes($tableName, $column['name']);
+            $validatedColumn = $this->validatedTargetColumn($tableName, $column);
+            $attributes = $this->tableHandler->getColumnAttributes($tableName, $validatedColumn['name']);
             if ($attributes === false) {
-                $this->tableHandler->addColumn($tableName, $column['name'], $column['attributes']);
-            } elseif ($column['attributes'] !== $attributes) {
-                $this->tableHandler->alterColumn($tableName, $column['name'], $column['attributes']);
+                $this->tableHandler->addColumn($tableName, $validatedColumn['name'], $validatedColumn['attributes']);
+            } elseif ($validatedColumn['attributes'] !== $attributes) {
+                $this->tableHandler->alterColumn($tableName, $validatedColumn['name'], $validatedColumn['attributes']);
             }
         }
 
@@ -277,22 +285,33 @@ class Migrate
                 if (!is_string($key)) {
                     continue;
                 }
+                $validatedKey = $this->validatedTargetKey($tableName, $key, $keyData);
                 if ($key === 'PRIMARY') {
                     if (!isset($existingIndexes[$key])) {
-                        $this->tableHandler->addPrimaryKey($tableName, $keyData['columns']);
-                    } elseif ($existingIndexes[$key]['columns'] !== $keyData['columns']) {
+                        $this->tableHandler->addPrimaryKey($tableName, $validatedKey['columns']);
+                    } elseif ($existingIndexes[$key]['columns'] !== $validatedKey['columns']) {
                         $this->tableHandler->dropPrimaryKey($tableName);
-                        $this->tableHandler->addPrimaryKey($tableName, $keyData['columns']);
+                        $this->tableHandler->addPrimaryKey($tableName, $validatedKey['columns']);
                     }
                 } else {
                     if (!isset($existingIndexes[$key])) {
-                        $this->tableHandler->addIndex($key, $tableName, $keyData['columns'], $keyData['unique']);
+                        $this->tableHandler->addIndex(
+                            $key,
+                            $tableName,
+                            $validatedKey['columns'],
+                            $validatedKey['unique']
+                        );
                     } elseif (
-                        $existingIndexes[$key]['unique'] !== $keyData['unique']
-                        || $existingIndexes[$key]['columns'] !== $keyData['columns']
+                        $existingIndexes[$key]['unique'] !== $validatedKey['unique']
+                        || $existingIndexes[$key]['columns'] !== $validatedKey['columns']
                     ) {
                         $this->tableHandler->dropIndex($key, $tableName);
-                        $this->tableHandler->addIndex($key, $tableName, $keyData['columns'], $keyData['unique']);
+                        $this->tableHandler->addIndex(
+                            $key,
+                            $tableName,
+                            $validatedKey['columns'],
+                            $validatedKey['unique']
+                        );
                     }
                 }
             }
@@ -300,10 +319,75 @@ class Migrate
         if (false !== $existingIndexes) {
             foreach ($existingIndexes as $key => $keyData) {
                 if (!isset($targetTable['keys'][$key])) {
-                    $this->tableHandler->dropIndex($key, $tableName);
+                    if ($key === 'PRIMARY') {
+                        $this->tableHandler->dropPrimaryKey($tableName);
+                    } else {
+                        $this->tableHandler->dropIndex($key, $tableName);
+                    }
                 }
             }
         }
+    }
+
+    /**
+     * @param mixed $column
+     *
+     * @return array{name: string, attributes: string}
+     *
+     * @throws SchemaDefinitionException
+     */
+    private function validatedTargetColumn(string $tableName, mixed $column): array
+    {
+        if (
+            !is_array($column)
+            || !isset($column['name'], $column['attributes'])
+            || !is_string($column['name'])
+            || $column['name'] === ''
+            || !is_string($column['attributes'])
+            || $column['attributes'] === ''
+        ) {
+            throw SchemaDefinitionException::forTable($tableName);
+        }
+
+        return [
+            'name' => $column['name'],
+            'attributes' => $column['attributes'],
+        ];
+    }
+
+    /**
+     * @param mixed $keyData
+     *
+     * @return array{columns: string, unique: bool}
+     *
+     * @throws SchemaDefinitionException
+     */
+    private function validatedTargetKey(string $tableName, string $keyName, mixed $keyData): array
+    {
+        if (
+            !is_array($keyData)
+            || !isset($keyData['columns'])
+            || !is_string($keyData['columns'])
+            || $keyData['columns'] === ''
+        ) {
+            throw SchemaDefinitionException::forTable($tableName);
+        }
+
+        if ($keyName === 'PRIMARY') {
+            return [
+                'columns' => $keyData['columns'],
+                'unique' => true,
+            ];
+        }
+
+        if (!array_key_exists('unique', $keyData) || !is_bool($keyData['unique'])) {
+            throw SchemaDefinitionException::forTable($tableName);
+        }
+
+        return [
+            'columns' => $keyData['columns'],
+            'unique' => $keyData['unique'],
+        ];
     }
 
     /**

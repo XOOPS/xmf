@@ -7,27 +7,21 @@ parameters:
 			path: src/Database/Migrate.php
 
 		-
-			message: '#^Cannot access offset ''attributes'' on mixed\.$#'
+			message: '#^Cannot access offset ''columns'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 4
 			path: src/Database/Migrate.php
 
 		-
-			message: '#^Cannot access offset ''columns'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 12
-			path: src/Database/Migrate.php
-
-		-
 			message: '#^Cannot access offset ''name'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 8
+			count: 4
 			path: src/Database/Migrate.php
 
 		-
 			message: '#^Cannot access offset ''unique'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 5
+			count: 1
 			path: src/Database/Migrate.php
 
 		-
@@ -67,31 +61,7 @@ parameters:
 			path: src/Database/Migrate.php
 
 		-
-			message: '#^Parameter \#2 \$column of method Xmf\\Database\\Tables\:\:addColumn\(\) expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Database/Migrate.php
-
-		-
-			message: '#^Parameter \#2 \$column of method Xmf\\Database\\Tables\:\:addPrimaryKey\(\) expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/Database/Migrate.php
-
-		-
-			message: '#^Parameter \#2 \$column of method Xmf\\Database\\Tables\:\:alterColumn\(\) expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Database/Migrate.php
-
-		-
 			message: '#^Parameter \#2 \$column of method Xmf\\Database\\Tables\:\:dropColumn\(\) expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Database/Migrate.php
-
-		-
-			message: '#^Parameter \#2 \$column of method Xmf\\Database\\Tables\:\:getColumnAttributes\(\) expects string, mixed given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Database/Migrate.php
@@ -103,33 +73,9 @@ parameters:
 			path: src/Database/Migrate.php
 
 		-
-			message: '#^Parameter \#3 \$attributes of method Xmf\\Database\\Tables\:\:addColumn\(\) expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Database/Migrate.php
-
-		-
-			message: '#^Parameter \#3 \$attributes of method Xmf\\Database\\Tables\:\:alterColumn\(\) expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Database/Migrate.php
-
-		-
-			message: '#^Parameter \#3 \$column of method Xmf\\Database\\Tables\:\:addIndex\(\) expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/Database/Migrate.php
-
-		-
 			message: '#^Parameter \#3 \$subject of function preg_replace_callback expects array\<float\|int\|string\>\|string, mixed given\.$#'
 			identifier: argument.type
 			count: 1
-			path: src/Database/Migrate.php
-
-		-
-			message: '#^Parameter \#4 \$unique of method Xmf\\Database\\Tables\:\:addIndex\(\) expects bool, mixed given\.$#'
-			identifier: argument.type
-			count: 3
 			path: src/Database/Migrate.php
 
 		-
@@ -255,7 +201,7 @@ parameters:
 		-
 			message: '#^Cannot access offset ''attributes'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 4
+			count: 3
 			path: src/Database/Tables.php
 
 		-
@@ -279,7 +225,7 @@ parameters:
 		-
 			message: '#^Cannot access offset ''name'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 25
+			count: 24
 			path: src/Database/Tables.php
 
 		-
@@ -393,18 +339,6 @@ parameters:
 		-
 			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, mixed given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Part \$col\[''attributes''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 1
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Part \$col\[''name''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
 			count: 1
 			path: src/Database/Tables.php
 

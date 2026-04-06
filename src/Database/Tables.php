@@ -787,6 +787,17 @@ class Tables
             $sql = "CREATE TABLE `{$tableName}` (";
             $firstComma = '';
             foreach ($tableDef['columns'] as $col) {
+                if (
+                    !is_array($col)
+                    || !isset($col['name'], $col['attributes'])
+                    || !is_string($col['name'])
+                    || $col['name'] === ''
+                    || !is_string($col['attributes'])
+                    || $col['attributes'] === ''
+                ) {
+                    return false;
+                }
+
                 $sql .= "{$firstComma}\n    `{$col['name']}`  {$col['attributes']}";
                 $firstComma = ',';
             }
