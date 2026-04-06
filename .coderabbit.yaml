@@ -16,6 +16,20 @@ reviews:
   auto_review:
     enabled: true
     drafts: false
+  tools:
+    phpcs:
+      enabled: true
+    phpstan:
+      enabled: true
+    gitleaks:
+      enabled: true
+    markdownlint:
+      enabled: true
+    yamllint:
+      enabled: true
+    github-checks:
+      enabled: true
+      timeout_ms: 90000
   path_instructions:
     - path: "src/**/*.php"
       instructions: >-
@@ -32,18 +46,3 @@ reviews:
 
 chat:
   auto_reply: true
-
-tools:
-  phpcs:
-    enabled: true
-  phpstan:
-    enabled: true
-  gitleaks:
-    enabled: true
-  markdownlint:
-    enabled: true
-  yamllint:
-    enabled: true
-  github-checks:
-    enabled: true
-    timeout_ms: 90000
