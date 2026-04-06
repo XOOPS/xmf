@@ -151,7 +151,10 @@ final class SendmailRunner
      * @param string      $rfc822       headers + CRLF CRLF + body
      * @param string|null $envelopeFrom optional envelope sender (validated)
      *
-     * @throws SendmailException on failures to start, write, or non-zero exit
+     * @return void
+     *
+     * @throws SendmailException on invalid path, process startup or pipe-open failures,
+     *                           write failures, premature pipe closure, or non-zero exit
      */
     public function deliver(string $sendmailPath, string $rfc822, ?string $envelopeFrom = null): void
     {
@@ -215,6 +218,7 @@ final class SendmailRunner
             $len = strlen($rfc822);
             $off = 0;
             $stdinOpen = true;
+            $chunkSize = 8192;
 
             while ($stdinOpen || !feof($stdoutPipe) || !feof($stderrPipe)) {
                 $read = [];
@@ -249,7 +253,7 @@ final class SendmailRunner
                     if ($stream !== $stdin) {
                         continue;
                     }
-                    $chunk = substr($rfc822, $off);
+                    $chunk = substr($rfc822, $off, $chunkSize);
                     $n = @fwrite($stdin, $chunk);
                     if ($n === false) {
                         throw SendmailException::writeFailure();
