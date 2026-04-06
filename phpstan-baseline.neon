@@ -235,12 +235,6 @@ parameters:
 			path: src/Database/Tables.php
 
 		-
-			message: '#^Binary operation "\." between '', '' and mixed results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: src/Database/Tables.php
-
-		-
 			message: '#^Binary operation "\." between ''ENGINE\='' and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
@@ -249,12 +243,6 @@ parameters:
 		-
 			message: '#^Binary operation "\." between non\-falsy\-string and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
-			count: 2
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Binary operation "\.\=" between mixed and non\-falsy\-string results in an error\.$#'
-			identifier: assignOp.invalid
 			count: 2
 			path: src/Database/Tables.php
 

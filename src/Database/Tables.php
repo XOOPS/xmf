@@ -953,14 +953,19 @@ class Tables
         $keyUnique = false;
         $tableDef['keys'] = [];
         while ($key = $this->fetch($result)) {
-            if ($lastKey != $key['INDEX_NAME']) {
+            $currentKey = $key['INDEX_NAME'];
+            if (!is_string($currentKey) || !is_string($key['COLUMN_NAME'])) {
+                continue;
+            }
+
+            if ($lastKey != $currentKey) {
                 if (!empty($lastKey)) {
                     $tableDef['keys'][$lastKey] = [
                         'columns' => $keyCols,
                         'unique' => $keyUnique,
                     ];
                 }
-                $lastKey = $key['INDEX_NAME'];
+                $lastKey = $currentKey;
                 $keyCols = $key['COLUMN_NAME'];
                 if (!empty($key['SUB_PART'])) {
                     $keyCols .= ' (' . $key['SUB_PART'] . ')';
