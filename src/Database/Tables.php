@@ -656,11 +656,16 @@ class Tables
             $colSql = '';
             $valSql = '';
             foreach ($tableDef['columns'] as $col) {
+                if (!isset($col['name']) || !is_string($col['name'])) {
+                    continue;
+                }
+
+                $columnName = $col['name'];
                 $comma = empty($colSql) ? '' : ', ';
-                if (isset($columns[$col['name']])) {
-                    $colSql .= "{$comma}`{$col['name']}`";
+                if (isset($columns[$columnName])) {
+                    $colSql .= "{$comma}`{$columnName}`";
                     $valSql .= $comma
-                        . ($quoteValue ? $this->db->quote($columns[$col['name']]) : $columns[$col['name']]);
+                        . ($quoteValue ? $this->db->quote($columns[$columnName]) : $columns[$columnName]);
                 }
             }
             $sql = "INSERT INTO `{$tableDef['name']}` ({$colSql}) VALUES({$valSql})";
@@ -695,10 +700,15 @@ class Tables
             }
             $colSql = '';
             foreach ($tableDef['columns'] as $col) {
+                if (!isset($col['name']) || !is_string($col['name'])) {
+                    continue;
+                }
+
+                $columnName = $col['name'];
                 $comma = empty($colSql) ? '' : ', ';
-                if (isset($columns[$col['name']])) {
-                    $colSql .= "{$comma}`{$col['name']}` = "
-                        . ($quoteValue ? $this->db->quote($columns[$col['name']]) : $columns[$col['name']]);
+                if (isset($columns[$columnName])) {
+                    $colSql .= "{$comma}`{$columnName}` = "
+                        . ($quoteValue ? $this->db->quote($columns[$columnName]) : $columns[$columnName]);
                 }
             }
             $sql = "UPDATE `{$tableDef['name']}` SET {$colSql} {$where}";

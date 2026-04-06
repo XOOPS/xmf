@@ -354,7 +354,13 @@ class Request
 
         $name = strtolower($headerName);
         if (isset($headers[$name])) {
-            return static::cleanVar($headers[$name]);
+            $headerValue = $headers[$name];
+            if (is_string($headerValue)) {
+                $cleanedHeader = static::cleanVar($headerValue);
+                if (is_string($cleanedHeader)) {
+                    return $cleanedHeader;
+                }
+            }
         }
         return $default;
     }
@@ -532,7 +538,7 @@ class Request
      *                      - If no bits other than the 1 bit is set, a strict filter is applied.
      * @param string $type The variable type. See {@link FilterInput::clean()}.
      *
-     * @return string
+     * @return mixed
      */
     protected static function cleanVar($var, $mask = 0, $type = null)
     {
@@ -578,7 +584,7 @@ class Request
      * @param int    $mask Filter bit mask. See {@link Request::cleanVar()}
      * @param string $type The variable type. See {@link FilterInput::clean()}.
      *
-     * @return string
+     * @return mixed
      */
     protected static function cleanVars($var, $mask = 0, $type = null)
     {

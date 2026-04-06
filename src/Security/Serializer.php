@@ -172,7 +172,7 @@ final class Serializer
     /**
      * Get collected debug statistics
      *
-     * @return array{total_operations: int, total_time: float, formats_detected: array<string, int>, slow_operations: array<int, array{operation: string, format: string, time: float, memory: int, error: string|null, trace: array<int|string, mixed>|null}>, errors: array<int, array{operation: string, format: string, time: float, memory: int, error: string|null, trace: array<int|string, mixed>|null}>}|array{}
+     * @return array{total_operations: int, total_time: float, formats_detected: array<string, int>, slow_operations: array<int, array{operation: string, format: string, time: float, memory: int, error: string|null, trace: array<int|string, mixed>|null}>, errors: array<int, array{operation: string, format: string, time: float, memory: int, error: string, trace: array<int|string, mixed>|null}>}|array{}
      */
     public static function getDebugStats(): array
     {
@@ -181,14 +181,25 @@ final class Serializer
         }
 
         $totalTime = microtime(true) - self::$startTime;
-        $formats = array_count_values(array_column(self::$debugLog, 'format'));
+        $formats = [];
+        foreach (array_count_values(array_column(self::$debugLog, 'format')) as $format => $count) {
+            $formats[(string) $format] = $count;
+        }
+
+        $slowOperations = array_values(
+            array_filter(self::$debugLog, static fn(array $log): bool => $log['time'] > 0.01)
+        );
+        /** @var array<int, array{operation: string, format: string, time: float, memory: int, error: string, trace: array<int|string, mixed>|null}> $errors */
+        $errors = array_values(
+            array_filter(self::$debugLog, static fn(array $log): bool => $log['error'] !== null)
+        );
 
         return [
             'total_operations' => count(self::$debugLog),
             'total_time' => round($totalTime, 4),
             'formats_detected' => $formats,
-            'slow_operations' => array_filter(self::$debugLog, static fn(array $log): bool => $log['time'] > 0.01),
-            'errors' => array_filter(self::$debugLog, static fn(array $log): bool => isset($log['error']))
+            'slow_operations' => $slowOperations,
+            'errors' => $errors
         ];
     }
 
@@ -802,7 +813,7 @@ final class Serializer
     {
         // Use json_validate if available (PHP 8.3+)
         if (function_exists('json_validate')) {
-            return json_validate($s, self::JSON_DEPTH);
+            return json_validate($s, self::JSON_DEPTH) === true;
         }
 
         // Fallback for older PHP versions

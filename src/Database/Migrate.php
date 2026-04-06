@@ -46,8 +46,8 @@ class Migrate
     /** @var string yaml definition file */
     protected $tableDefinitionFile;
 
-    /** @var array target table definitions in Xmf\Database\Tables::dumpTables() format */
-    protected $targetDefinitions;
+    /** @var array|null target table definitions in Xmf\Database\Tables::dumpTables() format */
+    protected $targetDefinitions = null;
 
     /**
      * Migrate constructor
@@ -125,18 +125,20 @@ class Migrate
     /**
      * Return the target database condition
      *
-     * @return array|bool table structure or false on error
+     * @return array table structure
      *
      * @throws \RuntimeException
      */
     public function getTargetDefinitions()
     {
-        if (!isset($this->targetDefinitions)) {
-            $this->targetDefinitions = Yaml::read($this->tableDefinitionFile);
-            if (empty($this->targetDefinitions)) {
+        if ($this->targetDefinitions === null) {
+            $definitions = Yaml::read($this->tableDefinitionFile);
+            if (!is_array($definitions) || $definitions === []) {
                 throw new \RuntimeException("No schema definition " . $this->tableDefinitionFile);
             }
+            $this->targetDefinitions = $definitions;
         }
+
         return $this->targetDefinitions;
     }
 
@@ -203,16 +205,30 @@ class Migrate
      */
     protected function addMissingTable($tableName)
     {
+        $targetTable = $this->targetDefinitions[$tableName] ?? null;
+        if (!is_array($targetTable)
+            || !isset($targetTable['options'], $targetTable['columns'])
+            || !is_string($targetTable['options'])
+            || !is_array($targetTable['columns'])
+        ) {
+            throw new \RuntimeException("No schema definition for table {$tableName}");
+        }
+
         $this->tableHandler->addTable($tableName);
-        $this->tableHandler->setTableOptions($tableName, $this->targetDefinitions[$tableName]['options']);
-        foreach ($this->targetDefinitions[$tableName]['columns'] as $column) {
+        $this->tableHandler->setTableOptions($tableName, $targetTable['options']);
+        foreach ($targetTable['columns'] as $column) {
             $this->tableHandler->addColumn($tableName, $column['name'], $column['attributes']);
         }
-        foreach ($this->targetDefinitions[$tableName]['keys'] as $key => $keyData) {
-            if ($key === 'PRIMARY') {
-                $this->tableHandler->addPrimaryKey($tableName, $keyData['columns']);
-            } else {
-                $this->tableHandler->addIndex($key, $tableName, $keyData['columns'], $keyData['unique']);
+        if (isset($targetTable['keys']) && is_array($targetTable['keys'])) {
+            foreach ($targetTable['keys'] as $key => $keyData) {
+                if (!is_string($key)) {
+                    continue;
+                }
+                if ($key === 'PRIMARY') {
+                    $this->tableHandler->addPrimaryKey($tableName, $keyData['columns']);
+                } else {
+                    $this->tableHandler->addIndex($key, $tableName, $keyData['columns'], $keyData['unique']);
+                }
             }
         }
     }
@@ -226,7 +242,12 @@ class Migrate
      */
     protected function synchronizeTable($tableName)
     {
-        foreach ($this->targetDefinitions[$tableName]['columns'] as $column) {
+        $targetTable = $this->targetDefinitions[$tableName] ?? null;
+        if (!is_array($targetTable) || !isset($targetTable['columns']) || !is_array($targetTable['columns'])) {
+            throw new \RuntimeException("No schema definition for table {$tableName}");
+        }
+
+        foreach ($targetTable['columns'] as $column) {
             $attributes = $this->tableHandler->getColumnAttributes($tableName, $column['name']);
             if ($attributes === false) {
                 $this->tableHandler->addColumn($tableName, $column['name'], $column['attributes']);
@@ -245,8 +266,11 @@ class Migrate
         }
 
         $existingIndexes = $this->tableHandler->getTableIndexes($tableName);
-        if (isset($this->targetDefinitions[$tableName]['keys'])) {
-            foreach ($this->targetDefinitions[$tableName]['keys'] as $key => $keyData) {
+        if (isset($targetTable['keys']) && is_array($targetTable['keys'])) {
+            foreach ($targetTable['keys'] as $key => $keyData) {
+                if (!is_string($key)) {
+                    continue;
+                }
                 if ($key === 'PRIMARY') {
                     if (!isset($existingIndexes[$key])) {
                         $this->tableHandler->addPrimaryKey($tableName, $keyData['columns']);
@@ -268,7 +292,7 @@ class Migrate
         }
         if (false !== $existingIndexes) {
             foreach ($existingIndexes as $key => $keyData) {
-                if (!isset($this->targetDefinitions[$tableName]['keys'][$key])) {
+                if (!isset($targetTable['keys'][$key])) {
                     $this->tableHandler->dropIndex($key, $tableName);
                 }
             }

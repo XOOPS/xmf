@@ -3,7 +3,7 @@ parameters:
 		-
 			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
-			count: 6
+			count: 2
 			path: src/Database/Migrate.php
 
 		-
@@ -15,25 +15,13 @@ parameters:
 		-
 			message: '#^Cannot access offset ''columns'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 14
-			path: src/Database/Migrate.php
-
-		-
-			message: '#^Cannot access offset ''keys'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 3
+			count: 12
 			path: src/Database/Migrate.php
 
 		-
 			message: '#^Cannot access offset ''name'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 8
-			path: src/Database/Migrate.php
-
-		-
-			message: '#^Cannot access offset ''options'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
 			path: src/Database/Migrate.php
 
 		-
@@ -69,18 +57,6 @@ parameters:
 		-
 			message: '#^Method Xmf\\Database\\Migrate\:\:saveCurrentSchema\(\) should return int\|false but returns bool\|int\.$#'
 			identifier: return.type
-			count: 1
-			path: src/Database/Migrate.php
-
-		-
-			message: '#^Parameter \#1 \$name of method Xmf\\Database\\Tables\:\:addIndex\(\) expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/Database/Migrate.php
-
-		-
-			message: '#^Parameter \#1 \$name of method Xmf\\Database\\Tables\:\:dropIndex\(\) expects string, mixed given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Database/Migrate.php
 
@@ -127,12 +103,6 @@ parameters:
 			path: src/Database/Migrate.php
 
 		-
-			message: '#^Parameter \#2 \$options of method Xmf\\Database\\Tables\:\:setTableOptions\(\) expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Database/Migrate.php
-
-		-
 			message: '#^Parameter \#3 \$attributes of method Xmf\\Database\\Tables\:\:addColumn\(\) expects string, mixed given\.$#'
 			identifier: argument.type
 			count: 2
@@ -163,26 +133,8 @@ parameters:
 			path: src/Database/Migrate.php
 
 		-
-			message: '#^Possibly invalid array key type mixed\.$#'
-			identifier: offsetAccess.invalidOffset
-			count: 3
-			path: src/Database/Migrate.php
-
-		-
 			message: '#^Property Xmf\\Database\\Migrate\:\:\$moduleTables \(array\<string\>\) does not accept mixed\.$#'
 			identifier: assign.propertyType
-			count: 1
-			path: src/Database/Migrate.php
-
-		-
-			message: '#^Property Xmf\\Database\\Migrate\:\:\$targetDefinitions \(array\) does not accept array\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Database/Migrate.php
-
-		-
-			message: '#^Property Xmf\\Database\\Migrate\:\:\$targetDefinitions \(array\) in isset\(\) is not nullable\.$#'
-			identifier: isset.property
 			count: 1
 			path: src/Database/Migrate.php
 
@@ -477,7 +429,7 @@ parameters:
 		-
 			message: '#^Part \$col\[''name''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
 			identifier: encapsedStringPart.nonString
-			count: 3
+			count: 1
 			path: src/Database/Tables.php
 
 		-
@@ -514,12 +466,6 @@ parameters:
 			message: '#^Part \$this\-\>tables\[\$table\]\[''name''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
 			identifier: encapsedStringPart.nonString
 			count: 2
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Possibly invalid array key type mixed\.$#'
-			identifier: offsetAccess.invalidOffset
-			count: 6
 			path: src/Database/Tables.php
 
 		-
@@ -783,12 +729,6 @@ parameters:
 		-
 			message: '#^Cannot access offset int\<0, 15\> on string\|false\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/IPAddress.php
-
-		-
-			message: '#^Parameter \#1 \$ip of class Xmf\\IPAddress constructor expects string, mixed given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/IPAddress.php
 
@@ -1780,18 +1720,6 @@ parameters:
 			message: '#^Cannot cast mixed to string\.$#'
 			identifier: cast.string
 			count: 6
-			path: src/Request.php
-
-		-
-			message: '#^Method Xmf\\Request\:\:cleanVar\(\) should return string but returns mixed\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Request.php
-
-		-
-			message: '#^Method Xmf\\Request\:\:cleanVars\(\) should return string but returns array\<string\>\|string\.$#'
-			identifier: return.type
-			count: 1
 			path: src/Request.php
 
 		-

@@ -191,6 +191,19 @@ final class SendmailRunner
         if (!is_resource($proc)) {
             throw new \RuntimeException('Failed to start sendmail process.');
         }
+        if (
+            !isset($pipes[0], $pipes[1], $pipes[2])
+            || !is_resource($pipes[0])
+            || !is_resource($pipes[1])
+            || !is_resource($pipes[2])
+        ) {
+            proc_close($proc);
+            throw new \RuntimeException('Failed to open sendmail pipes.');
+        }
+
+        $stdin = $pipes[0];
+        $stdoutPipe = $pipes[1];
+        $stderrPipe = $pipes[2];
 
         $stdout = '';
         $stderr = '';
@@ -202,12 +215,12 @@ final class SendmailRunner
             $off = 0;
             while ($off < $len) {
                 $chunk = substr($rfc822, $off);
-                $n     = fwrite($pipes[0], $chunk);
+                $n     = fwrite($stdin, $chunk);
                 if ($n === false) {
                     throw new \RuntimeException('Failed to write message to sendmail (broken pipe).');
                 }
                 if ($n === 0) {
-                    if (!is_resource($pipes[0]) || feof($pipes[0])) {
+                    if (!is_resource($stdin) || feof($stdin)) {
                         throw new \RuntimeException('sendmail closed the input pipe prematurely.');
                     }
                     usleep(10000);
@@ -215,13 +228,22 @@ final class SendmailRunner
                 }
                 $off += $n;
             }
-            fclose($pipes[0]);
+            fclose($stdin);
 
-            $stdout = stream_get_contents($pipes[1]) ?: '';
-            $stderr = stream_get_contents($pipes[2]) ?: '';
-            fclose($pipes[1]);
-            fclose($pipes[2]);
+            $stdout = stream_get_contents($stdoutPipe) ?: '';
+            $stderr = stream_get_contents($stderrPipe) ?: '';
+            fclose($stdoutPipe);
+            fclose($stderrPipe);
         } finally {
+            if (is_resource($stdin)) {
+                fclose($stdin);
+            }
+            if (is_resource($stdoutPipe)) {
+                fclose($stdoutPipe);
+            }
+            if (is_resource($stderrPipe)) {
+                fclose($stderrPipe);
+            }
             if (is_resource($proc)) {
                 $code = proc_close($proc);
             }

@@ -47,7 +47,9 @@ class IPAddress
      */
     public static function fromRequest()
     {
-        $ip = (array_key_exists('REMOTE_ADDR', $_SERVER)) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
+        $ip = (array_key_exists('REMOTE_ADDR', $_SERVER) && is_string($_SERVER['REMOTE_ADDR']))
+            ? $_SERVER['REMOTE_ADDR']
+            : '0.0.0.0';
         $class = get_called_class();
         $proxyCheck = new ProxyCheck();
         $proxyIP = $proxyCheck->get();
