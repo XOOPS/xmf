@@ -10,10 +10,7 @@ class RequestTest extends \PHPUnit\Framework\TestCase
      */
     protected $object;
 
-    /**
-     * @var array<string, string> Original session INI values saved by startTestSession()
-     */
-    private array $savedSessionIni = [];
+    private ?\SessionHandlerInterface $sessionHandler = null;
 
     /**
      * Sets up the fixture, for example, opens a network connection.
@@ -22,6 +19,7 @@ class RequestTest extends \PHPUnit\Framework\TestCase
     protected function setUp(): void
     {
         $this->object = new Request;
+        $_SESSION = [];
     }
 
     /**
@@ -30,15 +28,9 @@ class RequestTest extends \PHPUnit\Framework\TestCase
      */
     protected function tearDown(): void
     {
-        // Ensure full cleanup even if a test fails mid-way
         if (session_status() === PHP_SESSION_ACTIVE) {
-            $_SESSION = [];
-            session_destroy();
+            $this->closeTestSession();
         }
-        foreach ($this->savedSessionIni as $key => $value) {
-            ini_set($key, $value);
-        }
-        $this->savedSessionIni = [];
     }
 
     public function testGetMethod()
@@ -274,9 +266,8 @@ class RequestTest extends \PHPUnit\Framework\TestCase
     /**
      * Attempt to start a session for testing.
      *
-     * Disables cookie-based session IDs (not available in CLI), starts the
-     * session, and verifies it became active. Skips the calling test if
-     * sessions cannot be started in this environment.
+     * Uses an in-memory save handler so the tests do not depend on the CLI
+     * session file handler working on the local machine.
      */
     private function startTestSession(): void
     {
@@ -284,15 +275,45 @@ class RequestTest extends \PHPUnit\Framework\TestCase
             $_SESSION = [];
             return;
         }
-        $iniKeys = ['session.use_cookies', 'session.use_only_cookies', 'session.cache_limiter'];
-        foreach ($iniKeys as $key) {
-            if (!isset($this->savedSessionIni[$key])) {
-                $this->savedSessionIni[$key] = (string) ini_get($key);
+
+        $this->sessionHandler = new class implements \SessionHandlerInterface {
+            private array $sessions = [];
+
+            public function open(string $path, string $name): bool
+            {
+                return true;
             }
-        }
-        ini_set('session.use_cookies', '0');
-        ini_set('session.use_only_cookies', '0');
-        ini_set('session.cache_limiter', '');
+
+            public function close(): bool
+            {
+                return true;
+            }
+
+            public function read(string $id): string|false
+            {
+                return $this->sessions[$id] ?? '';
+            }
+
+            public function write(string $id, string $data): bool
+            {
+                $this->sessions[$id] = $data;
+                return true;
+            }
+
+            public function destroy(string $id): bool
+            {
+                unset($this->sessions[$id]);
+                return true;
+            }
+
+            public function gc(int $max_lifetime): int|false
+            {
+                return 0;
+            }
+        };
+
+        session_set_save_handler($this->sessionHandler, true);
+        session_id('xmf_request_test');
         $started = @session_start();
         if ($started === false || session_status() !== PHP_SESSION_ACTIVE) {
             $this->markTestSkipped('Cannot start a session in this environment.');
@@ -306,9 +327,13 @@ class RequestTest extends \PHPUnit\Framework\TestCase
     private function closeTestSession(): void
     {
         if (session_status() === PHP_SESSION_ACTIVE) {
+            session_unset();
             $_SESSION = [];
             session_destroy();
         }
+        session_id('');
+        $this->sessionHandler = null;
+
         $this->assertNotSame(
             PHP_SESSION_ACTIVE,
             session_status(),
@@ -437,6 +462,8 @@ class RequestTest extends \PHPUnit\Framework\TestCase
             unset($_SESSION[$varname]);
             $this->closeTestSession();
         }
+
+        $this->assertFalse(Request::hasVar($varname, 'session'));
     }
 
 }
