@@ -275,12 +275,15 @@ class FilterInput
                 if (str_starts_with($result, '//')) {
                     $result = '';
                 }
-                $urlparts = parse_url($result);
-                if (
-                    !empty($urlparts['scheme'])
-                    && !($urlparts['scheme'] === 'http' || $urlparts['scheme'] === 'https')
-                ) {
-                    $result = '';
+                if ($result !== '') {
+                    $urlparts = parse_url($result);
+                    if (
+                        is_array($urlparts)
+                        && !empty($urlparts['scheme'])
+                        && !($urlparts['scheme'] === 'http' || $urlparts['scheme'] === 'https')
+                    ) {
+                        $result = '';
+                    }
                 }
                 // do not allow quotes, tag brackets or controls
                 if (!preg_match('#^[^"<>\x00-\x1F]+$#', $result)) {
