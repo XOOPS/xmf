@@ -31,10 +31,10 @@ class TableLoad
     /**
      * loadTableFromArray
      *
-     * @param string $table name of table to load without prefix
-     * @param array  $data  array of rows to insert
-     *                      Each element of the outer array represents a single table row.
-     *                      Each row is an associative array in 'column' => 'value' format.
+     * @param string                       $table name of table to load without prefix
+     * @param array<int, array<string, mixed>> $data  array of rows to insert
+     *                                         Each element of the outer array represents a single table row.
+     *                                         Each row is an associative array in 'column' => 'value' format.
      *
      * @return int number of rows inserted
      */
@@ -58,7 +58,7 @@ class TableLoad
                     $valueClause .= ', ';
                 }
 
-                $insertInto .= '`' . str_replace('`', '``', (string) $column) . '`';
+                $insertInto .= '`' . str_replace('`', '``', $column) . '`';
                 $valueClause .= $db->quote($value);
             }
 
