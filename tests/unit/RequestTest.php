@@ -289,7 +289,7 @@ class RequestTest extends \PHPUnit\Framework\TestCase
                     return true;
                 }
 
-                public function read(string $id): string|false
+                public function read(string $id): string
                 {
                     return $this->sessions[$id] ?? '';
                 }

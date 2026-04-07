@@ -10,8 +10,6 @@ jobs:
   qodana:
     runs-on: ubuntu-latest
     if: github.repository == 'XOOPS/xmf'
-    env:
-      QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
     permissions:
       contents: write
       pull-requests: write
@@ -23,7 +21,7 @@ jobs:
           fetch-depth: 0
 
       - name: Qodana Scan
-        if: env.QODANA_TOKEN != ''
+        if: secrets.QODANA_TOKEN != ''
         uses: JetBrains/qodana-action@42dad391966aca8ca344ca2340a7f43a5507e9b2 # v2025.3.1
         env:
-          QODANA_TOKEN: ${{ env.QODANA_TOKEN }}
+          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
