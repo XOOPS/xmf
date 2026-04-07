@@ -1,4 +1,5 @@
 <?php
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -29,7 +30,7 @@ use UnexpectedValueException;
  * @category  Xmf\Security
  * @package   Xmf
  * @author    MAMBA <mambax7@gmail.com>
- * @copyright 2000-2025 XOOPS Project (https://xoops.org)
+ * @copyright 2000-2026 XOOPS Project (https://xoops.org)
  * @license   GNU GPL 2.0 or later (https://www.gnu.org/licenses/gpl-2.0.html)
  * @link      https://xoops.org
  */
@@ -172,7 +173,7 @@ final class Serializer
     /**
      * Get collected debug statistics
      *
-     * @return array{total_operations: int, total_time: float, formats_detected: array<string, int>, slow_operations: array<int, array{operation: string, format: string, time: float, memory: int, error: string|null, trace: array<int|string, mixed>|null}>, errors: array<int, array{operation: string, format: string, time: float, memory: int, error: string|null, trace: array<int|string, mixed>|null}>}|array{}
+     * @return array{total_operations: int, total_time: float, formats_detected: array<string, int>, slow_operations: array<int, array{operation: string, format: string, time: float, memory: int, error: string|null, trace: array<int|string, mixed>|null}>, errors: array<int, array{operation: string, format: string, time: float, memory: int, error: string, trace: array<int|string, mixed>|null}>}|array{}
      */
     public static function getDebugStats(): array
     {
@@ -181,14 +182,25 @@ final class Serializer
         }
 
         $totalTime = microtime(true) - self::$startTime;
-        $formats = array_count_values(array_column(self::$debugLog, 'format'));
+        $formats = [];
+        foreach (array_count_values(array_column(self::$debugLog, 'format')) as $format => $count) {
+            $formats[(string) $format] = $count;
+        }
+
+        $slowOperations = array_values(
+            array_filter(self::$debugLog, static fn(array $log): bool => $log['time'] > 0.01)
+        );
+        /** @var array<int, array{operation: string, format: string, time: float, memory: int, error: string, trace: array<int|string, mixed>|null}> $errors */
+        $errors = array_values(
+            array_filter(self::$debugLog, static fn(array $log): bool => $log['error'] !== null)
+        );
 
         return [
             'total_operations' => count(self::$debugLog),
             'total_time' => round($totalTime, 4),
             'formats_detected' => $formats,
-            'slow_operations' => array_filter(self::$debugLog, static fn(array $log): bool => $log['time'] > 0.01),
-            'errors' => array_filter(self::$debugLog, static fn(array $log): bool => isset($log['error']))
+            'slow_operations' => $slowOperations,
+            'errors' => $errors
         ];
     }
 
@@ -404,7 +416,8 @@ final class Serializer
         // Check base64-encoded serialized
         if (self::isLikelyBase64($payload)) {
             $decoded = base64_decode($payload, true);
-            if ($decoded !== false
+            if (
+                $decoded !== false
                 && \strlen($decoded) <= self::MAX_SIZE
                 && self::looksLikeSerialized($decoded)
             ) {
@@ -802,7 +815,7 @@ final class Serializer
     {
         // Use json_validate if available (PHP 8.3+)
         if (function_exists('json_validate')) {
-            return json_validate($s, self::JSON_DEPTH);
+            return json_validate($s, self::JSON_DEPTH) === true;
         }
 
         // Fallback for older PHP versions

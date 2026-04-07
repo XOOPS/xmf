@@ -1,4 +1,5 @@
 <?php
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -24,7 +25,7 @@ use Xmf\Language;
  * @package   Xmf
  * @author    trabis <lusopoemas@gmail.com>
  * @author    Richard Griffith <richard@geekwright.com>
- * @copyright 2000-2025 XOOPS Project (https://xoops.org)
+ * @copyright 2000-2026 XOOPS Project (https://xoops.org)
  * @license   GNU GPL 2.0 or later (https://www.gnu.org/licenses/gpl-2.0.html)
  * @link      https://xoops.org
  */
@@ -136,7 +137,8 @@ abstract class GenericHelper extends AbstractHelper
     protected function initObject()
     {
         global $xoopsModule;
-        if (isset($xoopsModule) && is_object($xoopsModule)
+        if (
+            isset($xoopsModule) && is_object($xoopsModule)
             && $xoopsModule->getVar('dirname') === $this->dirname
         ) {
             $this->module = $xoopsModule;
@@ -157,7 +159,8 @@ abstract class GenericHelper extends AbstractHelper
     {
         $this->addLog('INIT CONFIG');
         global $xoopsModule;
-        if (isset($xoopsModule) && is_object($xoopsModule)
+        if (
+            isset($xoopsModule) && is_object($xoopsModule)
             && $xoopsModule->getVar('dirname') === $this->dirname
         ) {
             global $xoopsModuleConfig;
