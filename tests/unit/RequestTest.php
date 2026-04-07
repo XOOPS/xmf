@@ -11,6 +11,7 @@ class RequestTest extends \PHPUnit\Framework\TestCase
     protected $object;
 
     private ?\SessionHandlerInterface $sessionHandler = null;
+    private ?\SessionHandlerInterface $defaultSessionHandler = null;
 
     /**
      * Sets up the fixture, for example, opens a network connection.
@@ -273,51 +274,54 @@ class RequestTest extends \PHPUnit\Framework\TestCase
     {
         if (session_status() === PHP_SESSION_ACTIVE) {
             $_SESSION = [];
-            return;
+        } else {
+            $this->defaultSessionHandler ??= new \SessionHandler();
+            $this->sessionHandler = new class implements \SessionHandlerInterface {
+                private array $sessions = [];
+
+                public function open(string $path, string $name): bool
+                {
+                    return true;
+                }
+
+                public function close(): bool
+                {
+                    return true;
+                }
+
+                public function read(string $id): string|false
+                {
+                    return $this->sessions[$id] ?? '';
+                }
+
+                public function write(string $id, string $data): bool
+                {
+                    $this->sessions[$id] = $data;
+                    return true;
+                }
+
+                public function destroy(string $id): bool
+                {
+                    unset($this->sessions[$id]);
+                    return true;
+                }
+
+                public function gc(int $max_lifetime): int|false
+                {
+                    return 0;
+                }
+            };
+
+            session_set_save_handler($this->sessionHandler, true);
+            $started = @session_start();
+            if ($started === false || session_status() !== PHP_SESSION_ACTIVE) {
+                $this->restoreDefaultSessionHandler();
+                $this->sessionHandler = null;
+                $this->markTestSkipped('Cannot start a session in this environment.');
+            }
+
+            $_SESSION = [];
         }
-
-        $this->sessionHandler = new class implements \SessionHandlerInterface {
-            private array $sessions = [];
-
-            public function open(string $path, string $name): bool
-            {
-                return true;
-            }
-
-            public function close(): bool
-            {
-                return true;
-            }
-
-            public function read(string $id): string|false
-            {
-                return $this->sessions[$id] ?? '';
-            }
-
-            public function write(string $id, string $data): bool
-            {
-                $this->sessions[$id] = $data;
-                return true;
-            }
-
-            public function destroy(string $id): bool
-            {
-                unset($this->sessions[$id]);
-                return true;
-            }
-
-            public function gc(int $max_lifetime): int|false
-            {
-                return 0;
-            }
-        };
-
-        session_set_save_handler($this->sessionHandler, true);
-        $started = @session_start();
-        if ($started === false || session_status() !== PHP_SESSION_ACTIVE) {
-            $this->markTestSkipped('Cannot start a session in this environment.');
-        }
-        $_SESSION = [];
     }
 
     /**
@@ -330,6 +334,8 @@ class RequestTest extends \PHPUnit\Framework\TestCase
             $_SESSION = [];
             session_write_close();
         }
+
+        $this->restoreDefaultSessionHandler();
         $this->sessionHandler = null;
 
         $this->assertNotSame(
@@ -337,6 +343,13 @@ class RequestTest extends \PHPUnit\Framework\TestCase
             session_status(),
             'Session should not be active after close.'
         );
+    }
+
+    private function restoreDefaultSessionHandler(): void
+    {
+        if ($this->defaultSessionHandler instanceof \SessionHandlerInterface) {
+            session_set_save_handler($this->defaultSessionHandler, true);
+        }
     }
 
     public function testGetVarSessionWithActiveSession()
