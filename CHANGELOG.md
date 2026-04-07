@@ -9,6 +9,7 @@
 * Fix `TableLoad::loadTableFromArray()` to escape backticks in column names, preventing identifier injection
 * Fix `FilterInput::WEBURL` to reject protocol-relative URLs (`//evil.example`) that bypassed scheme validation
 * Fix `Tables::quoteDefaultClause()` to escape single quotes in DDL default values, preventing broken migrations
+* Harden `Serializer::fromLegacy()` gzip decompression with streaming inflate and size-enforced chunking to prevent zip-bomb memory exhaustion
 
 ### Bug Fixes
 * Fix `Metagen::purifyText()` calling `html_entity_decode()` without explicit encoding (now uses `self::ENCODING`)

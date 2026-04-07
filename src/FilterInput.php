@@ -270,7 +270,7 @@ class FilterInput
 
             case 'WEBURL':
                 /** @var string $result */
-                $result = (string) $this->process($source);
+                $result = trim((string) $this->process($source));
                 // reject protocol-relative URLs (//evil.example) and non-http(s) schemes
                 if (str_starts_with($result, '//')) {
                     $result = '';
