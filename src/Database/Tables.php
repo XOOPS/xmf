@@ -904,8 +904,8 @@ class Tables
             return ' DEFAULT CURRENT_TIMESTAMP ';
         }
 
-        // surround default with quotes
-        return " DEFAULT '{$default}' ";
+        // surround default with quotes — escape embedded single quotes for valid DDL
+        return " DEFAULT '" . str_replace("'", "''", $default) . "' ";
     }
 
     /**

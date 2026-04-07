@@ -104,11 +104,15 @@ class TokenReader
             return false;
         }
         $header = trim($header);
-        $space = strpos($header, ' '); // expecting "Bearer base64-token-string"
-        if (false !== $space) {
-            $header = substr($header, $space);
+        if (strcasecmp($headerName, 'Authorization') === 0) {
+            $parts = explode(' ', $header, 2);
+            if (count($parts) !== 2 || strcasecmp($parts[0], 'Bearer') !== 0) {
+                return false;
+            }
+            $token = trim($parts[1]);
+        } else {
+            $token = $header;
         }
-        $token = trim($header);
         return static::fromString($key, $token, $assertClaims);
     }
 }

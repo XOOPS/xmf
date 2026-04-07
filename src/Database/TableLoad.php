@@ -58,7 +58,7 @@ class TableLoad
                     $valueClause .= ', ';
                 }
 
-                $insertInto .= '`' . $column . '`';
+                $insertInto .= '`' . str_replace('`', '``', (string) $column) . '`';
                 $valueClause .= $db->quote($value);
             }
 

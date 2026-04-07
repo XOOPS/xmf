@@ -140,10 +140,9 @@ class Yaml
     /**
      * Dump an PHP array as a YAML string with a php wrapper
      *
-     * The wrap is a php header that surrounds the yaml with section markers,
-     * '---' and '...' along with php comment markers. The php wrapper keeps the
-     * yaml file contents from being revealed by serving the file directly from
-     * a poorly configured server.
+     * The wrap is a php exit guard followed by YAML section markers '---' and
+     * '...'. The php wrapper prevents the file contents from being revealed
+     * by serving the file directly from a poorly configured server.
      *
      * @param mixed   $var    Variable which will be dumped
      * @param integer $inline Nesting level where you switch to inline YAML
@@ -155,7 +154,7 @@ class Yaml
     {
         try {
             $yamlString = VendorYaml::dump($var, $inline, $indent);
-            $ret = empty($yamlString) ? false : "<?php\n/*\n---\n" . $yamlString . "\n...\n*/\n";
+            $ret = empty($yamlString) ? false : "<?php exit; ?>\n---\n" . $yamlString . "\n...\n";
         } catch (\Throwable $e) {
             static::logError($e);
             $ret = false;
