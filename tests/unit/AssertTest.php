@@ -31,9 +31,11 @@ namespace Xmf\Test;
 
 use ArrayIterator;
 use ArrayObject;
+use Composer\InstalledVersions;
 use Exception;
 use Error;
 use LogicException;
+use Webmozart\Assert\Assert as BaseAssert;
 use RuntimeException;
 use stdClass;
 use Xmf\Assert;
@@ -79,6 +81,7 @@ class BaseTestCase extends TestCase
 class AssertTest extends BaseTestCase
 {
     private static $resource;
+    private static ?bool $usesWebmozartAssertV2 = null;
 
     public static function getResource()
     {
@@ -101,7 +104,7 @@ class AssertTest extends BaseTestCase
     {
         $resource = self::getResource();
 
-        return array(
+        $tests = array(
             array('string', array('value'), true),
             array('string', array(''), true),
             array('string', array(1234), false),
@@ -621,6 +624,45 @@ class AssertTest extends BaseTestCase
             array('uniqueValues', array(array('asdfg', 'qwerty')), true),
             array('uniqueValues', array(array(123, '123')), false),
         );
+
+        if (!self::usesWebmozartAssertV2()) {
+            return $tests;
+        }
+
+        foreach ($tests as $index => $test) {
+            [$method, $args] = $test;
+
+            if ('isTraversable' === $method) {
+                unset($tests[$index]);
+                continue;
+            }
+
+            if ('notInstanceOf' === $method && !is_object($args[0])) {
+                $tests[$index][2] = false;
+                continue;
+            }
+
+            if ('isNotA' === $method && ('Iterator' === $args[0] || 'Iterator' === $args[1])) {
+                $tests[$index][2] = false;
+                continue;
+            }
+
+            if ('methodNotExists' === $method && !is_object($args[0]) && !is_string($args[0])) {
+                $tests[$index][2] = false;
+                continue;
+            }
+
+            if (in_array($method, array('isMap', 'isNonEmptyMap'), true) && self::isSparseNumericArray($args[0])) {
+                $tests[$index][2] = true;
+                continue;
+            }
+
+            if (in_array($method, array('ip', 'ipv4', 'ipv6', 'email'), true) && $args[0] instanceof ToStringClass) {
+                $tests[$index][2] = false;
+            }
+        }
+
+        return array_values($tests);
     }
 
     public static function getMethods()
@@ -629,6 +671,9 @@ class AssertTest extends BaseTestCase
 
         foreach (self::getTests() as $params) {
             $methodName = $params[0];
+            if (!self::supportsNullOrAssertion($methodName)) {
+                continue;
+            }
             $args = $params[1];
             // Keep the extra args (beyond the first value) so nullOr tests
             // can pass them along with null as the first argument
@@ -657,7 +702,7 @@ class AssertTest extends BaseTestCase
             $this->setExpectedException('\InvalidArgumentException');
         }
 
-        call_user_func_array(array('Webmozart\Assert\Assert', $method), $args);
+        call_user_func_array(array(BaseAssert::class, $method), $args);
         $this->addToAssertionCount(1);
     }
 
@@ -679,7 +724,7 @@ class AssertTest extends BaseTestCase
             $this->setExpectedException('\InvalidArgumentException');
         }
 
-        call_user_func_array(array('Webmozart\Assert\Assert', 'nullOr'.ucfirst($method)), $args);
+        $this->invokeNullOrAssertion($method, $args);
         $this->addToAssertionCount(1);
     }
 
@@ -689,7 +734,7 @@ class AssertTest extends BaseTestCase
     public function testNullOrAcceptsNull($method, $extraArgs = array())
     {
         $args = array_merge(array(null), $extraArgs);
-        call_user_func_array(array('Webmozart\Assert\Assert', 'nullOr'.ucfirst($method)), $args);
+        $this->invokeNullOrAssertion($method, $args);
         $this->addToAssertionCount(1);
     }
 
@@ -714,7 +759,7 @@ class AssertTest extends BaseTestCase
         $arg = array_shift($args);
         array_unshift($args, array($arg));
 
-        call_user_func_array(array('Webmozart\Assert\Assert', 'all'.ucfirst($method)), $args);
+        $this->invokeAllAssertion($method, $args);
         $this->addToAssertionCount(1);
     }
 
@@ -739,7 +784,7 @@ class AssertTest extends BaseTestCase
         $arg = array_shift($args);
         array_unshift($args, new ArrayIterator(array($arg)));
 
-        call_user_func_array(array('Webmozart\Assert\Assert', 'all'.ucfirst($method)), $args);
+        $this->invokeAllAssertion($method, $args);
         $this->addToAssertionCount(1);
     }
 
@@ -775,14 +820,78 @@ class AssertTest extends BaseTestCase
     {
         $this->setExpectedException('\InvalidArgumentException', $exceptionMessage);
 
-        call_user_func_array(array('Webmozart\Assert\Assert', $method), $args);
+        call_user_func_array(array(BaseAssert::class, $method), $args);
     }
 
     public function testAnUnknownMethodThrowsABadMethodCall()
     {
-        $this->setExpectedException('\BadMethodCallException');
+        $this->setExpectedException(self::usesWebmozartAssertV2() ? '\Error' : '\BadMethodCallException');
 
         Assert::nonExistentMethod();
+    }
+
+    private static function usesWebmozartAssertV2(): bool
+    {
+        if (null === self::$usesWebmozartAssertV2) {
+            $version = class_exists(InstalledVersions::class)
+                ? InstalledVersions::getPrettyVersion('webmozart/assert')
+                : null;
+            self::$usesWebmozartAssertV2 = is_string($version)
+                && version_compare(ltrim($version, 'v'), '2.0.0', '>=');
+        }
+
+        return self::$usesWebmozartAssertV2;
+    }
+
+    private static function supportsNullOrAssertion(string $method): bool
+    {
+        if ('null' === $method) {
+            return true;
+        }
+
+        return is_callable(array(BaseAssert::class, 'nullOr' . ucfirst($method)));
+    }
+
+    private static function isSparseNumericArray($value): bool
+    {
+        if (!is_array($value) || array() === $value || array_is_list($value)) {
+            return false;
+        }
+
+        foreach (array_keys($value) as $key) {
+            if (!is_int($key)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private function invokeNullOrAssertion(string $method, array $args): void
+    {
+        if ('null' === $method && !is_callable(array(BaseAssert::class, 'nullOrNull'))) {
+            if (null !== reset($args)) {
+                call_user_func_array(array(BaseAssert::class, 'null'), $args);
+            }
+
+            return;
+        }
+
+        if ('notNull' === $method && !is_callable(array(BaseAssert::class, 'nullOrNotNull'))) {
+            return;
+        }
+
+        call_user_func_array(array(BaseAssert::class, 'nullOr' . ucfirst($method)), $args);
+    }
+
+    private function invokeAllAssertion(string $method, array $args): void
+    {
+        $allMethod = 'all' . ucfirst($method);
+        if (!is_callable(array(BaseAssert::class, $allMethod))) {
+            $this->markTestSkipped(sprintf('Assertion %s is not available.', $allMethod));
+        }
+
+        call_user_func_array(array(BaseAssert::class, $allMethod), $args);
     }
 }
 
