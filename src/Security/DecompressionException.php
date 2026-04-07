@@ -17,7 +17,7 @@ namespace Xmf\Security;
 /**
  * Thrown when gzip decompression fails or produces unsafe output.
  *
- * @category  Xmf\Security\DecompressionException
+ * @category  Xmf\Security
  * @package   Xmf
  * @author    Richard Griffith <richard@geekwright.com>
  * @copyright 2000-2026 XOOPS Project (https://xoops.org)
