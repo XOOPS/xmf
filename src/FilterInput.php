@@ -270,7 +270,10 @@ class FilterInput
 
             case 'WEBURL':
                 $result = (string) $this->process($source);
-                // allow only relative, http or https
+                // reject protocol-relative URLs (//evil.example) and non-http(s) schemes
+                if (str_starts_with((string) $result, '//')) {
+                    $result = '';
+                }
                 $urlparts = parse_url($result);
                 if (
                     !empty($urlparts['scheme'])

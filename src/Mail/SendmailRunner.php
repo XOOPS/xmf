@@ -220,6 +220,11 @@ final class SendmailRunner
             $stdinOpen = true;
             $chunkSize = 8192;
 
+            if ($len === 0) {
+                fclose($stdin);
+                $stdinOpen = false;
+            }
+
             while ($stdinOpen || !feof($stdoutPipe) || !feof($stderrPipe)) {
                 $read = [];
                 $write = [];

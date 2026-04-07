@@ -404,7 +404,7 @@ class Metagen
         $text = str_replace('<br/>', ' ', $text);
         $text = str_replace('<br', ' ', $text);
         $text = strip_tags($text);
-        $text = html_entity_decode($text);
+        $text = html_entity_decode($text, ENT_QUOTES, self::ENCODING);
         $text = htmlspecialchars_decode($text, ENT_QUOTES);
         $text = str_replace(')', ' ', $text);
         $text = str_replace('(', ' ', $text);
@@ -416,7 +416,7 @@ class Metagen
         $text = str_replace('?', ' ', $text);
         $text = str_replace('"', ' ', $text);
         $text = str_replace('-', ' ', $text);
-        $text = str_replace('\n', ' ', $text);
+        $text = str_replace(["\r", "\n"], ' ', $text);
         $text = str_replace('&#8213;', ' ', $text);
 
         if ($keyword) {

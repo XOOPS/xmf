@@ -92,7 +92,7 @@ class JsonWebToken
                 return false;
             }
 
-            if ($values->$claim != $assert) {
+            if ($values->$claim !== $assert) {
                 return false;
             }
         }
