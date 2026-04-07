@@ -1,4 +1,5 @@
 <?php
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -23,12 +24,12 @@ use Xmf\Language;
  * @category  Xmf\Module\Admin
  * @package   Xmf
  * @author    Richard Griffith <richard@geekwright.com>
- * @copyright 2000-2025 XOOPS Project (https://xoops.org)
- * @license   GNU GPL 2 or later (https://www.gnu.org/licenses/gpl-2.0.html)
+ * @copyright 2000-2026 XOOPS Project (https://xoops.org)
+ * @license   GNU GPL 2.0 or later (https://www.gnu.org/licenses/gpl-2.0.html)
+ * @link      https://xoops.org
  */
 class Admin
 {
-
     /**
      * The real ModuleAdmin object
      *
@@ -61,11 +62,11 @@ class Admin
 
         if ($instance === null) {
             if (class_exists('\Xoops\Module\Admin', true)) {
-                $instance = new \Xoops\Module\Admin;
+                $instance = new \Xoops\Module\Admin();
                 static::$ModuleAdmin = $instance;
             } else {
                 include_once $GLOBALS['xoops']->path('Frameworks/moduleclasses/moduleadmin/moduleadmin.php');
-                static::$ModuleAdmin = new \ModuleAdmin;
+                static::$ModuleAdmin = new \ModuleAdmin();
                 Language::load('xmf');
                 $instance = new static();
             }

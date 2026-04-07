@@ -1,6 +1,7 @@
 <?php
 namespace Xmf\Test;
 
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use Xmf\Request;
 
 class RequestTest extends \PHPUnit\Framework\TestCase
@@ -10,6 +11,9 @@ class RequestTest extends \PHPUnit\Framework\TestCase
      */
     protected $object;
 
+    private ?\SessionHandlerInterface $sessionHandler = null;
+    private ?\SessionHandlerInterface $defaultSessionHandler = null;
+
     /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
@@ -17,6 +21,7 @@ class RequestTest extends \PHPUnit\Framework\TestCase
     protected function setUp(): void
     {
         $this->object = new Request;
+        $_SESSION = [];
     }
 
     /**
@@ -25,6 +30,9 @@ class RequestTest extends \PHPUnit\Framework\TestCase
      */
     protected function tearDown(): void
     {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            $this->closeTestSession();
+        }
     }
 
     public function testGetMethod()
@@ -250,11 +258,240 @@ class RequestTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('Lorem ipsum alert();', $get[$varname]);
     }
 
+    #[RunInSeparateProcess]
+    public function testGetHeaderReturnsStringHeader()
+    {
+        $_SERVER['HTTP_X_TEST_HEADER'] = 'header-value';
+
+        $this->assertSame('header-value', Request::getHeader('X-Test-Header', 'default'));
+    }
+
+    #[RunInSeparateProcess]
+    public function testGetHeaderReturnsDefaultForNonStringHeader()
+    {
+        $_SERVER['HTTP_X_TEST_HEADER'] = array('not-a-string');
+
+        $this->assertSame('default', Request::getHeader('X-Test-Header', 'default'));
+    }
+
     public function testSet()
     {
         $varname = 'RequestTest';
         Request::set(array($varname => 'Pourquoi'), 'get');
         $this->assertEquals($_REQUEST[$varname], 'Pourquoi');
+    }
+
+    /**
+     * Attempt to start a session for testing.
+     *
+     * Uses an in-memory save handler so the tests do not depend on the CLI
+     * session file handler working on the local machine.
+     */
+    private function startTestSession(): void
+    {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            $_SESSION = [];
+        } else {
+            $this->defaultSessionHandler ??= new \SessionHandler();
+            $this->sessionHandler = new class implements \SessionHandlerInterface {
+                private array $sessions = [];
+
+                public function open(string $path, string $name): bool
+                {
+                    return true;
+                }
+
+                public function close(): bool
+                {
+                    return true;
+                }
+
+                public function read(string $id): string
+                {
+                    return $this->sessions[$id] ?? '';
+                }
+
+                public function write(string $id, string $data): bool
+                {
+                    $this->sessions[$id] = $data;
+                    return true;
+                }
+
+                public function destroy(string $id): bool
+                {
+                    unset($this->sessions[$id]);
+                    return true;
+                }
+
+                public function gc(int $max_lifetime): int|false
+                {
+                    return 0;
+                }
+            };
+
+            session_set_save_handler($this->sessionHandler, true);
+            $started = @session_start();
+            if ($started === false || session_status() !== PHP_SESSION_ACTIVE) {
+                $this->restoreDefaultSessionHandler();
+                $this->sessionHandler = null;
+                $this->markTestSkipped('Cannot start a session in this environment.');
+            }
+
+            $_SESSION = [];
+        }
+    }
+
+    /**
+     * Close any active session and verify it is no longer active.
+     */
+    private function closeTestSession(): void
+    {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_unset();
+            $_SESSION = [];
+            session_write_close();
+        }
+
+        $this->restoreDefaultSessionHandler();
+        $this->sessionHandler = null;
+
+        $this->assertNotSame(
+            PHP_SESSION_ACTIVE,
+            session_status(),
+            'Session should not be active after close.'
+        );
+    }
+
+    private function restoreDefaultSessionHandler(): void
+    {
+        if ($this->defaultSessionHandler instanceof \SessionHandlerInterface) {
+            session_set_save_handler($this->defaultSessionHandler, true);
+        }
+    }
+
+    public function testGetVarSessionWithActiveSession()
+    {
+        $this->startTestSession();
+        $varname = 'RequestTestSession';
+        $_SESSION[$varname] = 'session_value';
+
+        try {
+            $this->assertEquals('session_value', Request::getVar($varname, null, 'session'));
+        } finally {
+            unset($_SESSION[$varname]);
+            $this->closeTestSession();
+        }
+    }
+
+    public function testGetVarSessionReturnsDefaultWhenKeyMissing()
+    {
+        $this->startTestSession();
+
+        try {
+            $this->assertNull(Request::getVar('no_such_session_key', null, 'session'));
+            $this->assertEquals('fallback', Request::getVar('no_such_session_key', 'fallback', 'session'));
+        } finally {
+            $this->closeTestSession();
+        }
+    }
+
+    public function testGetVarSessionReturnsDefaultWhenNoSession()
+    {
+        $this->startTestSession();
+        $this->closeTestSession();
+
+        $this->assertNull(Request::getVar('any_key', null, 'session'));
+        $this->assertEquals('default_val', Request::getVar('any_key', 'default_val', 'session'));
+    }
+
+    public function testGetIntFromSession()
+    {
+        $this->startTestSession();
+        $varname = 'RequestTestSessionInt';
+        $_SESSION[$varname] = '42';
+
+        try {
+            $this->assertEquals(42, Request::getInt($varname, 0, 'session'));
+        } finally {
+            unset($_SESSION[$varname]);
+            $this->closeTestSession();
+        }
+    }
+
+    public function testGetSessionHash()
+    {
+        $this->startTestSession();
+        $varname = 'RequestTestSessionGet';
+        $_SESSION[$varname] = 'get_session_value';
+
+        try {
+            $get = Request::get('session');
+            $this->assertTrue(is_array($get));
+            $this->assertEquals('get_session_value', $get[$varname]);
+        } finally {
+            unset($_SESSION[$varname]);
+            $this->closeTestSession();
+        }
+    }
+
+    public function testGetSessionHashReturnsEmptyWhenNoSession()
+    {
+        $this->startTestSession();
+        $this->closeTestSession();
+
+        $get = Request::get('session');
+        $this->assertTrue(is_array($get));
+        $this->assertEmpty($get);
+    }
+
+    public function testSetVarSession()
+    {
+        $this->startTestSession();
+        $varname = 'XMF_TEST_SESSION_VAR';
+        $value = 'session_set_value';
+
+        try {
+            Request::setVar($varname, $value, 'session');
+            $this->assertArrayHasKey($varname, $_SESSION);
+            $this->assertEquals($value, $_SESSION[$varname]);
+        } finally {
+            unset($_SESSION[$varname]);
+            $this->closeTestSession();
+        }
+    }
+
+    public function testSetVarSessionIgnoredWhenNoSession()
+    {
+        $this->startTestSession();
+        $this->closeTestSession();
+
+        $varname = 'XMF_TEST_SESSION_NO_WRITE';
+        Request::setVar($varname, 'should_not_persist', 'session');
+
+        // Re-open session and verify the write was skipped
+        $this->startTestSession();
+        try {
+            $this->assertArrayNotHasKey($varname, $_SESSION);
+        } finally {
+            $this->closeTestSession();
+        }
+    }
+
+    public function testHasVarSession()
+    {
+        $this->startTestSession();
+        $varname = 'RequestTestHasVarSession';
+
+        try {
+            $this->assertFalse(Request::hasVar($varname, 'session'));
+            $_SESSION[$varname] = 'exists';
+            $this->assertTrue(Request::hasVar($varname, 'session'));
+        } finally {
+            unset($_SESSION[$varname]);
+            $this->closeTestSession();
+        }
+
+        $this->assertFalse(Request::hasVar($varname, 'session'));
     }
 
 }
