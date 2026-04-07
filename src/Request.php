@@ -65,12 +65,13 @@ class Request
      *  - cookie     $_COOKIE
      *  - env        $_ENV
      *  - server     $_SERVER
+     *  - session    $_SESSION (returns default if no active session)
      *  - method     via current $_SERVER['REQUEST_METHOD']
      *  - default    $_REQUEST
      *
      * @param string $name    Variable name
      * @param mixed  $default Default value if the variable does not exist
-     * @param string $hash    Source of variable value (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $hash    Source of variable value (GET, POST, FILES, COOKIE, ENV, SERVER, SESSION, METHOD, DEFAULT/REQUEST)
      * @param string $type    Return type for the variable (INT, FLOAT, BOOLEAN, WORD,
      *                         ALPHANUM, CMD, BASE64, STRING, ARRAY, PATH, NONE) For more
      *                         information see FilterInput::clean().
@@ -107,6 +108,13 @@ class Request
             case 'SERVER':
                 $input = &$_SERVER;
                 break;
+            case 'SESSION':
+                if (session_status() !== PHP_SESSION_ACTIVE) {
+                    $input = [];
+                    break;
+                }
+                $input = $_SESSION;
+                break;
             default:
                 $input = &$_REQUEST;
                 break;
@@ -134,7 +142,7 @@ class Request
      *
      * @param string $name    Variable name
      * @param int    $default Default value if the variable does not exist
-     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $hash    Where the var should come from (GET, POST, FILES, COOKIE, ENV, SERVER, SESSION, METHOD, DEFAULT/REQUEST)
      *
      * @return int Requested variable
      */
@@ -152,7 +160,7 @@ class Request
      *
      * @param string $name    Variable name
      * @param float  $default Default value if the variable does not exist
-     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $hash    Where the var should come from (GET, POST, FILES, COOKIE, ENV, SERVER, SESSION, METHOD, DEFAULT/REQUEST)
      *
      * @return float Requested variable
      */
@@ -170,7 +178,7 @@ class Request
      *
      * @param string $name    Variable name
      * @param bool   $default Default value if the variable does not exist
-     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $hash    Where the var should come from (GET, POST, FILES, COOKIE, ENV, SERVER, SESSION, METHOD, DEFAULT/REQUEST)
      *
      * @return bool Requested variable
      */
@@ -188,7 +196,7 @@ class Request
      *
      * @param string $name    Variable name
      * @param string $default Default value if the variable does not exist
-     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $hash    Where the var should come from (GET, POST, FILES, COOKIE, ENV, SERVER, SESSION, METHOD, DEFAULT/REQUEST)
      *
      * @return string Requested variable
      */
@@ -205,7 +213,7 @@ class Request
      *
      * @param string $name    Variable name
      * @param string $default Default value if the variable does not exist
-     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $hash    Where the var should come from (GET, POST, FILES, COOKIE, ENV, SERVER, SESSION, METHOD, DEFAULT/REQUEST)
      *
      * @return string Requested variable
      */
@@ -223,7 +231,7 @@ class Request
      *
      * @param string $name    Variable name
      * @param string $default Default value if the variable does not exist
-     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $hash    Where the var should come from (GET, POST, FILES, COOKIE, ENV, SERVER, SESSION, METHOD, DEFAULT/REQUEST)
      * @param int    $mask    Filter mask for the variable
      *
      * @return string Requested variable
@@ -239,7 +247,7 @@ class Request
      *
      * @param string $name    Variable name
      * @param mixed  $default Default value if the variable does not exist
-     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $hash    Where the var should come from (GET, POST, FILES, COOKIE, ENV, SERVER, SESSION, METHOD, DEFAULT/REQUEST)
      *
      * @return array
      */
@@ -253,7 +261,7 @@ class Request
      *
      * @param string $name    Variable name
      * @param string $default Default value if the variable does not exist
-     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $hash    Where the var should come from (GET, POST, FILES, COOKIE, ENV, SERVER, SESSION, METHOD, DEFAULT/REQUEST)
      *
      * @return string Requested variable
      */
@@ -267,7 +275,7 @@ class Request
      *
      * @param string $name    Variable name
      * @param string $default Default value if the variable does not exist
-     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $hash    Where the var should come from (GET, POST, FILES, COOKIE, ENV, SERVER, SESSION, METHOD, DEFAULT/REQUEST)
      *
      * @return string Requested variable
      */
@@ -281,7 +289,7 @@ class Request
      *
      * @param string $name    Variable name
      * @param string $default Default value if the variable does not exist
-     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $hash    Where the var should come from (GET, POST, FILES, COOKIE, ENV, SERVER, SESSION, METHOD, DEFAULT/REQUEST)
      *
      * @return string Requested variable
      */
@@ -295,7 +303,7 @@ class Request
      *
      * @param string $name    Variable name
      * @param string $default Default value if the variable does not exist
-     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $hash    Where the var should come from (GET, POST, FILES, COOKIE, ENV, SERVER, SESSION, METHOD, DEFAULT/REQUEST)
      *
      * @return string email address or default if invalid
      */
@@ -310,7 +318,7 @@ class Request
      *
      * @param string $name    Variable name
      * @param string $default Default value if the variable does not exist
-     * @param string $hash    Where the var should come from (POST, GET, FILES, COOKIE, METHOD)
+     * @param string $hash    Where the var should come from (GET, POST, FILES, COOKIE, ENV, SERVER, SESSION, METHOD, DEFAULT/REQUEST)
      *
      * @return string IP address or default if invalid
      */
@@ -390,12 +398,14 @@ class Request
     /**
      * Set a variable in one of the request variables
      *
+     * For SESSION, the write is silently skipped if no session is active.
+     *
      * @param string $name      Name
-     * @param string $value     Value
-     * @param string $hash      Hash
+     * @param mixed  $value     Value
+     * @param string $hash      Hash (GET, POST, REQUEST, COOKIE, FILES, ENV, SERVER, SESSION, METHOD)
      * @param bool   $overwrite Boolean
      *
-     * @return string Previous value
+     * @return mixed Previous value
      */
     public static function setVar($name, $value = null, $hash = 'method', $overwrite = true)
     {
@@ -442,6 +452,11 @@ class Request
             case 'SERVER':
                 $_SERVER[$name] = $value;
                 break;
+            case 'SESSION':
+                if (session_status() === PHP_SESSION_ACTIVE) {
+                    $_SESSION[$name] = $value;
+                }
+                break;
         }
 
         return $previous;
@@ -462,10 +477,11 @@ class Request
      *  - cookie      $_COOKIE
      *  - env         $_ENV
      *  - server      $_SERVER
+     *  - session     $_SESSION (returns empty if no active session)
      *  - method      via current $_SERVER['REQUEST_METHOD']
      *  - default     $_REQUEST
      *
-     * @param string $hash to get (POST, GET, FILES, METHOD)
+     * @param string $hash to get (GET, POST, FILES, COOKIE, ENV, SERVER, SESSION, METHOD, DEFAULT/REQUEST)
      * @param int    $mask Filter mask for the variable
      *
      * @return mixed Request hash
@@ -497,6 +513,13 @@ class Request
             case 'SERVER':
                 $input = &$_SERVER;
                 break;
+            case 'SESSION':
+                if (session_status() !== PHP_SESSION_ACTIVE) {
+                    $input = [];
+                    break;
+                }
+                $input = &$_SESSION;
+                break;
             default:
                 $input = $_REQUEST;
                 break;
@@ -511,7 +534,7 @@ class Request
      * Sets a request variable
      *
      * @param array  $array       An associative array of key-value pairs
-     * @param string $hash        The request variable to set (POST, GET, FILES, METHOD)
+     * @param string $hash        The request variable to set (GET, POST, REQUEST, COOKIE, FILES, ENV, SERVER, SESSION, METHOD)
      * @param bool   $overwrite   If true and an existing key is found, the value is overwritten,
      *                            otherwise it is ignored
      *

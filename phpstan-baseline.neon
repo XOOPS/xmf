@@ -1651,12 +1651,6 @@ parameters:
 			path: src/Request.php
 
 		-
-			message: '#^Method Xmf\\Request\:\:setVar\(\) should return string but returns mixed\.$#'
-			identifier: return.type
-			count: 2
-			path: src/Request.php
-
-		-
 			message: '#^Method Xmf\\Request\:\:stripSlashesRecursive\(\) has parameter \$value with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -1690,12 +1684,6 @@ parameters:
 			message: '#^Parameter \#2 \$mask of static method Xmf\\Request\:\:get\(\) expects int, mixed given\.$#'
 			identifier: argument.type
 			count: 2
-			path: src/Request.php
-
-		-
-			message: '#^Parameter \#2 \$value of static method Xmf\\Request\:\:setVar\(\) expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
 			path: src/Request.php
 
 		-

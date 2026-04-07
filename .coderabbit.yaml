@@ -3,8 +3,9 @@ language: "en-US"
 early_access: false
 tone_instructions: >-
   Expert PHP code reviewer. Focus on type safety, PSR-12 compliance,
-  PHP 7.4 compatibility, and security. This is a utility library
-  supporting PHP 7.4 through 8.5 — no PHP 8.0+ language features allowed.
+  PHP 8.2+ compatibility, and security. This is a utility library
+  requiring PHP 8.2 or newer, so modern language features are acceptable
+  when they improve clarity and remain compatible with the supported range.
 
 reviews:
   profile: "assertive"
@@ -33,16 +34,29 @@ reviews:
   path_instructions:
     - path: "src/**/*.php"
       instructions: >-
-        Review for PHP 7.4 compatibility (no union types, named arguments,
-        match expressions, enums, readonly, constructor promotion, fibers,
-        intersection types, never return type, or first-class callable syntax).
-        Check for proper use of declare(strict_types=1), self:: for class
-        constants, and PSR-12 code style. Flag any hardcoded 'UTF-8' strings
+        Review for PHP 8.2+ compatibility, type safety, and PSR-12 code style.
+        Modern PHP features are allowed when they improve clarity and remain
+        within the supported version range. Flag any hardcoded 'UTF-8' strings
         that should use the ENCODING class constant.
     - path: "tests/**/*.php"
       instructions: >-
         Review test code for proper assertions, test isolation, and edge
-        case coverage. Tests must work across PHPUnit 9.6, 10, and 11.
+        case coverage. Tests must remain compatible with this repository's
+        supported PHPUnit setup.
+  tools:
+    phpcs:
+      enabled: true
+    phpstan:
+      enabled: true
+    gitleaks:
+      enabled: true
+    markdownlint:
+      enabled: true
+    yamllint:
+      enabled: true
+    github-checks:
+      enabled: true
+      timeout_ms: 90000
 
 chat:
   auto_reply: true
