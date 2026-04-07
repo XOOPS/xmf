@@ -74,11 +74,55 @@ class TokenReaderTest extends \PHPUnit\Framework\TestCase
         );
     }
 
-    public function testFromHeader()
+    /**
+     * Test fromHeader by running in a separate process to avoid static cache issues.
+     *
+     * @runInSeparateProcess
+     */
+    public function testFromHeaderWithBearerScheme()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-            'This test has not been implemented yet.'
-        );
+        $claims = array('rat' => 'cute');
+        $jwt = new JsonWebToken($this->testKey);
+        $token = $jwt->create($claims, 60);
+
+        $_SERVER['HTTP_AUTHORIZATION'] = 'Bearer ' . $token;
+        $actual = TokenReader::fromHeader($this->testKey, $claims);
+        $this->assertIsObject($actual);
+        $this->assertSame('cute', $actual->rat);
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testFromHeaderRejectsNonBearerScheme()
+    {
+        $_SERVER['HTTP_AUTHORIZATION'] = 'Basic dXNlcjpwYXNz';
+        $actual = TokenReader::fromHeader($this->testKey);
+        $this->assertFalse($actual);
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testFromHeaderAcceptsBareTokenOnCustomHeader()
+    {
+        $claims = array('rat' => 'cute');
+        $jwt = new JsonWebToken($this->testKey);
+        $token = $jwt->create($claims, 60);
+
+        $_SERVER['HTTP_X_AUTH_TOKEN'] = $token;
+        $actual = TokenReader::fromHeader($this->testKey, $claims, 'X-Auth-Token');
+        $this->assertIsObject($actual);
+        $this->assertSame('cute', $actual->rat);
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testFromHeaderRejectsEmptyHeader()
+    {
+        unset($_SERVER['HTTP_AUTHORIZATION']);
+        $actual = TokenReader::fromHeader($this->testKey);
+        $this->assertFalse($actual);
     }
 }

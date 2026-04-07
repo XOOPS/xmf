@@ -104,6 +104,30 @@ class FilterInputTest extends \PHPUnit\Framework\TestCase
         );
     }
 
+    public function testWeburlRejectsProtocolRelativeUrl()
+    {
+        $result = FilterInput::clean('//evil.example/path', 'WEBURL');
+        $this->assertSame('', $result);
+    }
+
+    public function testWeburlAllowsHttpUrl()
+    {
+        $result = FilterInput::clean('http://example.com/page', 'WEBURL');
+        $this->assertSame('http://example.com/page', $result);
+    }
+
+    public function testWeburlAllowsRelativeUrl()
+    {
+        $result = FilterInput::clean('/local/path', 'WEBURL');
+        $this->assertSame('/local/path', $result);
+    }
+
+    public function testWeburlRejectsJavascriptScheme()
+    {
+        $result = FilterInput::clean('javascript:alert(1)', 'WEBURL');
+        $this->assertSame('', $result);
+    }
+
     /**
      * @dataProvider getTestForCleanVarType
      */

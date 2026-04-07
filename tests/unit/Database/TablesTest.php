@@ -139,6 +139,27 @@ class TablesTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(array(), $tables->dumpQueue());
     }
 
+    public function testQuoteDefaultClauseEscapesSingleQuotes()
+    {
+        $tables = new TestableTables();
+        $result = $tables->callQuoteDefaultClause("O'Reilly");
+        $this->assertSame(" DEFAULT 'O''Reilly' ", $result);
+    }
+
+    public function testQuoteDefaultClauseNullReturnsEmpty()
+    {
+        $tables = new TestableTables();
+        $result = $tables->callQuoteDefaultClause(null);
+        $this->assertSame('', $result);
+    }
+
+    public function testQuoteDefaultClauseCurrentTimestamp()
+    {
+        $tables = new TestableTables();
+        $result = $tables->callQuoteDefaultClause('CURRENT_TIMESTAMP');
+        $this->assertSame(' DEFAULT CURRENT_TIMESTAMP ', $result);
+    }
+
     private function captureWarning(callable $callback): string
     {
         $warning = '';
@@ -178,6 +199,11 @@ class TestableTables extends Tables
     public function callRenderTableCreate(string $table, bool $prefixed = false): string|false
     {
         return $this->renderTableCreate($table, $prefixed);
+    }
+
+    public function callQuoteDefaultClause(?string $default): string
+    {
+        return $this->quoteDefaultClause($default);
     }
 }
 

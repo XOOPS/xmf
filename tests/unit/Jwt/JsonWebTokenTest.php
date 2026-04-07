@@ -80,4 +80,22 @@ class JsonWebTokenTest extends \PHPUnit\Framework\TestCase
         $actual = @$decoder->decode($token);
         $this->assertFalse($actual);
     }
+
+    public function testDecodeStrictClaimComparison()
+    {
+        $token = $this->object->create(['uid' => 1], 60);
+        $this->assertIsString($token);
+
+        // strict match succeeds
+        $result = $this->object->decode($token, ['uid' => 1]);
+        $this->assertIsObject($result);
+        $this->assertSame(1, $result->uid);
+
+        // loose match that would pass with == but fails with ===
+        $result = $this->object->decode($token, ['uid' => '1']);
+        $this->assertFalse($result);
+
+        $result = $this->object->decode($token, ['uid' => true]);
+        $this->assertFalse($result);
+    }
 }

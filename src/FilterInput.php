@@ -269,9 +269,10 @@ class FilterInput
                 break;
 
             case 'WEBURL':
+                /** @var string $result */
                 $result = (string) $this->process($source);
                 // reject protocol-relative URLs (//evil.example) and non-http(s) schemes
-                if (str_starts_with((string) $result, '//')) {
+                if (str_starts_with($result, '//')) {
                     $result = '';
                 }
                 $urlparts = parse_url($result);
