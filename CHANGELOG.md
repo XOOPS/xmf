@@ -3,7 +3,7 @@
 ## [1.3.0-RC1] - 2026-04-06
 
 ### Security
-* Fix wrapped YAML (`dumpWrapped`) using `<?php exit; ?>` guard instead of PHP block comment to prevent code execution when YAML content contains `*/`
+* Fix wrapped YAML (`dumpWrapped`) using `__halt_compiler()` guard instead of PHP block comment to prevent code execution when YAML content contains `*/` or `<?php`
 * Fix JWT claim validation using strict comparison (`!==`) to prevent type-juggling bypass in `JsonWebToken::decode()`
 * Fix JWT `TokenReader::fromHeader()` to require `Bearer` scheme for Authorization headers; custom headers still accept bare tokens
 * Fix `TableLoad::loadTableFromArray()` to escape backticks in column names, preventing identifier injection
@@ -16,8 +16,9 @@
 * Fix `SendmailRunner` hanging indefinitely when `$rfc822` is empty by closing stdin immediately
 
 ### Changed
-* Wrapped YAML files now use `<?php exit; ?>` instead of `<?php /* */ ?>` format; `loadWrapped()` reads both old and new formats transparently
+* Wrapped YAML files now use `<?php __halt_compiler(); ?>` instead of `<?php /* */ ?>` format; `loadWrapped()` reads both old and new formats transparently
 * Replace `header('HTTP/1.0 404 Not Found')` with `http_response_code(404); exit;` in all directory index guards
+* Fix duplicate `tools:` key in `.coderabbit.yaml` causing parse failure
 
 ## [1.3.0-beta1] - 2026-02-22
 

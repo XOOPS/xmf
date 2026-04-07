@@ -327,14 +327,9 @@ final class Serializer
         // Validate size after decoding
         self::validateSize($decoded);
 
-        // Check for optional gzip compression
+        // Check for optional gzip compression — stream-decompress to enforce size cap
         if (self::isGzip($decoded)) {
-            $unzipped = gzdecode($decoded);
-            if ($unzipped === false) {
-                throw new RuntimeException('Gzip decompression failed');
-            }
-            $decoded = $unzipped;
-            self::validateSize($decoded);
+            $decoded = self::safeGzipDecode($decoded);
         }
 
         self::logLegacy($payload);
@@ -652,6 +647,62 @@ final class Serializer
                 sprintf('Decoded payload exceeds %d bytes', self::MAX_SIZE)
             );
         }
+    }
+
+    /**
+     * Decompress gzip data with streaming size enforcement.
+     *
+     * Uses inflate_init()/inflate_add() to decompress in chunks, aborting
+     * as soon as output exceeds MAX_SIZE. This prevents a small compressed
+     * payload from consuming unbounded memory during decompression.
+     *
+     * @param string $data gzip-compressed data
+     *
+     * @return string decompressed data
+     *
+     * @throws RuntimeException on decompression failure or size exceeded
+     */
+    private static function safeGzipDecode(string $data): string
+    {
+        $context = inflate_init(ZLIB_ENCODING_GZIP);
+        if ($context === false) {
+            throw new RuntimeException('Failed to initialize gzip decompression');
+        }
+
+        $output = '';
+        $offset = 0;
+        $chunkSize = 8192;
+        $maxSize = self::MAX_SIZE;
+
+        while ($offset < \strlen($data)) {
+            $chunk = substr($data, $offset, $chunkSize);
+            $offset += \strlen($chunk);
+
+            $inflated = inflate_add($context, $chunk);
+            if ($inflated === false) {
+                throw new RuntimeException('Gzip decompression failed');
+            }
+            $output .= $inflated;
+
+            if (\strlen($output) > $maxSize) {
+                throw new RuntimeException(
+                    sprintf('Decompressed payload exceeds %d bytes', $maxSize)
+                );
+            }
+        }
+
+        // Flush remaining
+        $inflated = inflate_add($context, '', ZLIB_FINISH);
+        if ($inflated !== false && $inflated !== '') {
+            $output .= $inflated;
+            if (\strlen($output) > $maxSize) {
+                throw new RuntimeException(
+                    sprintf('Decompressed payload exceeds %d bytes', $maxSize)
+                );
+            }
+        }
+
+        return $output;
     }
 
     /**

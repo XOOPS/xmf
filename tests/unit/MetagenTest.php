@@ -227,4 +227,24 @@ EOT;
         $this->assertStringContainsString($expected, $actual);
         $this->assertStringNotContainsString('&#8364;', $actual);
     }
+
+    public function testPurifyTextReplacesNewlines()
+    {
+        $method = new \ReflectionMethod('Xmf\Metagen', 'purifyText');
+        $actual = $method->invokeArgs(null, array("line one\nline two\rline three"));
+        $this->assertStringNotContainsString("\n", $actual);
+        $this->assertStringNotContainsString("\r", $actual);
+        $this->assertStringContainsString('line one', $actual);
+        $this->assertStringContainsString('line two', $actual);
+        $this->assertStringContainsString('line three', $actual);
+    }
+
+    public function testPurifyTextDecodesEntitiesWithEncoding()
+    {
+        $method = new \ReflectionMethod('Xmf\Metagen', 'purifyText');
+        $input = 'caf&eacute; cr&egrave;me';
+        $actual = $method->invokeArgs(null, array($input));
+        $this->assertStringContainsString('café', $actual);
+        $this->assertStringContainsString('crème', $actual);
+    }
 }

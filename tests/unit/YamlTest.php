@@ -105,6 +105,50 @@ class YamlTest extends \PHPUnit\Framework\TestCase
         unlink($tmpfname);
     }
 
+    public function testDumpAndLoadWrappedWithClosingCommentSequence()
+    {
+        $inputArray = array('value' => 'contains */ closing comment', 'nested' => array('a' => '*/'));
+
+        $string = Yaml::dumpWrapped($inputArray);
+        $this->assertNotFalse($string);
+        $this->assertIsString($string);
+
+        $outputArray = Yaml::loadWrapped((string) $string);
+        $this->assertIsArray($outputArray);
+        $this->assertSame($inputArray, $outputArray);
+    }
+
+    public function testDumpWrappedUsesHaltCompilerGuard()
+    {
+        $inputArray = array('key' => 'value');
+        $string = Yaml::dumpWrapped($inputArray);
+        $this->assertIsString($string);
+        $this->assertStringStartsWith('<?php __halt_compiler(); ?>', (string) $string);
+    }
+
+    public function testDumpAndLoadWrappedWithPhpTag()
+    {
+        $inputArray = array('code' => '<?php echo "hello"; ?>');
+
+        $string = Yaml::dumpWrapped($inputArray);
+        $this->assertNotFalse($string);
+        $this->assertIsString($string);
+
+        $outputArray = Yaml::loadWrapped((string) $string);
+        $this->assertIsArray($outputArray);
+        $this->assertSame($inputArray, $outputArray);
+    }
+
+    public function testLoadWrappedReadsOldCommentFormat()
+    {
+        $inputArray = array('one' => 1, 'two' => 'hello');
+        $oldFormat = "<?php\n/*\n---\none: 1\ntwo: hello\n...\n*/\n";
+
+        $outputArray = Yaml::loadWrapped($oldFormat);
+        $this->assertIsArray($outputArray);
+        $this->assertSame($inputArray, $outputArray);
+    }
+
     public function testReadNoFile()
     {
         $this->assertFalse(Yaml::read('./no-such-file'));

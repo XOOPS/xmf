@@ -140,9 +140,10 @@ class Yaml
     /**
      * Dump an PHP array as a YAML string with a php wrapper
      *
-     * The wrap is a php exit guard followed by YAML section markers '---' and
-     * '...'. The php wrapper prevents the file contents from being revealed
-     * by serving the file directly from a poorly configured server.
+     * The wrap is a php __halt_compiler() guard followed by YAML section markers
+     * '---' and '...'. The guard stops the PHP lexer entirely, preventing the
+     * file contents from being parsed or revealed by serving the file directly
+     * from a poorly configured server.
      *
      * @param mixed   $var    Variable which will be dumped
      * @param integer $inline Nesting level where you switch to inline YAML
@@ -154,7 +155,7 @@ class Yaml
     {
         try {
             $yamlString = VendorYaml::dump($var, $inline, $indent);
-            $ret = empty($yamlString) ? false : "<?php exit; ?>\n---\n" . $yamlString . "\n...\n";
+            $ret = empty($yamlString) ? false : "<?php __halt_compiler(); ?>\n---\n" . $yamlString . "\n...\n";
         } catch (\Throwable $e) {
             static::logError($e);
             $ret = false;
@@ -165,10 +166,9 @@ class Yaml
     /**
      * Load a YAML string with a php wrapper into a PHP array
      *
-     * The wrap is a php header that surrounds the yaml with section markers,
-     * '---' and '...' along with php comment markers. The php wrapper keeps the
-     * yaml file contents from being revealed by serving the file directly from
-     * a poorly configured server.
+     * Supports both the current __halt_compiler() guard format and the legacy
+     * PHP block comment format. Content between '---' and '...' markers is
+     * extracted regardless of wrapper style.
      *
      * @param string $yamlString YAML dump string
      *
@@ -208,10 +208,9 @@ class Yaml
     /**
      * Read a file containing YAML with a php wrapper into a PHP array
      *
-     * The wrap is a php header that surrounds the yaml with section markers,
-     * '---' and '...' along with php comment markers. The php wrapper keeps the
-     * yaml file contents from being revealed by serving the file directly from
-     * a poorly configured server.
+     * Supports both the current __halt_compiler() guard format and the legacy
+     * PHP block comment format. Content between '---' and '...' markers is
+     * extracted regardless of wrapper style.
      *
      * @param string $yamlFile filename of YAML file
      *

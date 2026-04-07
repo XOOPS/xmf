@@ -98,6 +98,23 @@ class SendmailRunnerTest extends \PHPUnit\Framework\TestCase
         $this->assertSame('sendmail warning (success): minor warning\n', $warning);
     }
 
+    public function testDeliverEmptyPayloadDoesNotHang()
+    {
+        if (DIRECTORY_SEPARATOR === '\\') {
+            $this->markTestSkipped('Sendmail runner process test requires a POSIX shell.');
+        }
+
+        $outputFile = $this->createTempFile('sendmail-output-', '');
+        $script = $this->createExecutableScript(
+            "#!/usr/bin/env bash\ncat > " . escapeshellarg($outputFile) . "\nexit 0\n"
+        );
+        $runner = new SendmailRunner(array($script));
+
+        $runner->deliver($script, '');
+
+        $this->assertSame('', file_get_contents($outputFile));
+    }
+
     private function createTempFile(string $prefix, string $contents): string
     {
         $path = tempnam(sys_get_temp_dir(), $prefix);
