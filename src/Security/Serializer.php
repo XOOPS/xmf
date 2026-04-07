@@ -660,13 +660,13 @@ final class Serializer
      *
      * @return string decompressed data
      *
-     * @throws RuntimeException on decompression failure or size exceeded
+     * @throws DecompressionException on decompression failure or size exceeded
      */
     private static function safeGzipDecode(string $data): string
     {
         $context = inflate_init(ZLIB_ENCODING_GZIP);
         if ($context === false) {
-            throw new RuntimeException('Failed to initialize gzip decompression');
+            throw new DecompressionException('Failed to initialize gzip decompression');
         }
 
         $output = '';
@@ -680,23 +680,29 @@ final class Serializer
 
             $inflated = inflate_add($context, $chunk);
             if ($inflated === false) {
-                throw new RuntimeException('Gzip decompression failed');
+                throw new DecompressionException('Gzip decompression failed');
             }
             $output .= $inflated;
 
             if (\strlen($output) > $maxSize) {
-                throw new RuntimeException(
+                throw new DecompressionException(
                     sprintf('Decompressed payload exceeds %d bytes', $maxSize)
                 );
             }
         }
 
-        // Flush remaining
+        // Flush remaining and verify stream completed
         $inflated = inflate_add($context, '', ZLIB_FINISH);
-        if ($inflated !== false && $inflated !== '') {
+        if ($inflated === false) {
+            throw new DecompressionException('Gzip decompression failed during final flush');
+        }
+        if (inflate_get_status($context) !== ZLIB_STREAM_END) {
+            throw new DecompressionException('Gzip stream is incomplete or truncated');
+        }
+        if ($inflated !== '') {
             $output .= $inflated;
             if (\strlen($output) > $maxSize) {
-                throw new RuntimeException(
+                throw new DecompressionException(
                     sprintf('Decompressed payload exceeds %d bytes', $maxSize)
                 );
             }

@@ -122,6 +122,12 @@ class FilterInputTest extends \PHPUnit\Framework\TestCase
         $this->assertSame('/local/path', $result);
     }
 
+    public function testWeburlRejectsProtocolRelativeUrlWithLeadingWhitespace()
+    {
+        $result = FilterInput::clean('  //evil.example/path', 'WEBURL');
+        $this->assertSame('', $result);
+    }
+
     public function testWeburlRejectsJavascriptScheme()
     {
         $result = FilterInput::clean('javascript:alert(1)', 'WEBURL');

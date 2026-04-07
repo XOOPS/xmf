@@ -231,6 +231,7 @@ EOT;
     public function testPurifyTextReplacesNewlines()
     {
         $method = new \ReflectionMethod('Xmf\Metagen', 'purifyText');
+        $method->setAccessible(true);
         $actual = $method->invokeArgs(null, array("line one\nline two\rline three"));
         $this->assertStringNotContainsString("\n", $actual);
         $this->assertStringNotContainsString("\r", $actual);
@@ -242,6 +243,7 @@ EOT;
     public function testPurifyTextDecodesEntitiesWithEncoding()
     {
         $method = new \ReflectionMethod('Xmf\Metagen', 'purifyText');
+        $method->setAccessible(true);
         $input = 'caf&eacute; cr&egrave;me';
         $actual = $method->invokeArgs(null, array($input));
         $this->assertStringContainsString('café', $actual);
