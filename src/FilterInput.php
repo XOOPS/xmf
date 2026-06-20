@@ -386,10 +386,11 @@ class FilterInput
                 $isCloseTag = false;
                 list($tagName) = explode(' ', $currentTag);
             }
-            // excludes all "non-regular" tagnames OR no tagname OR remove if xssauto is on and tag is blacklisted
+            // excludes all "non-regular" tagnames OR remove if xssauto is on and tag is blacklisted.
+            // An empty (or "0") tag name is already rejected by the regex below, so a
+            // separate "!$tagName" test would be dead code.
             if (
                 (!preg_match("/^[a-z][a-z0-9]*$/i", $tagName))
-                || (!$tagName)
                 || ((in_array(strtolower($tagName), $this->tagBlacklist))
                     && ($this->xssAuto))
             ) {
