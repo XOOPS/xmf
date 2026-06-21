@@ -31,6 +31,9 @@ use Xmf\Language;
  */
 abstract class GenericHelper extends AbstractHelper
 {
+    /** Path segment for the modules directory, relative to the site root. */
+    private const MODULE_PATH = '/modules/';
+
     /**
      * @var \XoopsModule
      * @deprecated - use $module -- will be removed
@@ -252,7 +255,34 @@ abstract class GenericHelper extends AbstractHelper
      */
     public function url($url = '')
     {
-        return XOOPS_URL . '/modules/' . $this->dirname . '/' . $url;
+        return XOOPS_URL . self::MODULE_PATH . $this->dirname . '/' . $url;
+    }
+
+    /**
+     * Return a root relative URL for a module relative URL.
+     *
+     * Unlike url(), this omits the XOOPS_URL scheme and host and returns a path
+     * rooted at the web server root - the form expected by APIs such as
+     * $xoTheme->addScript(). The site's base path is taken from XOOPS_URL, so it
+     * is correct for a sub-directory install too:
+     *   root install    -> /modules/mymodule/assets/app.js
+     *   /xoops subfolder -> /xoops/modules/mymodule/assets/app.js
+     *
+     * @param string $url module relative URL
+     *
+     * @return string
+     */
+    public function relativeUrl($url = '')
+    {
+        $basePath = '';
+        if (defined('XOOPS_URL')) {
+            $urlPath = parse_url((string) XOOPS_URL, PHP_URL_PATH);
+            if (is_string($urlPath)) {
+                $basePath = rtrim($urlPath, '/');
+            }
+        }
+
+        return $basePath . self::MODULE_PATH . $this->dirname . '/' . ltrim($url, '/');
     }
 
     /**
@@ -264,7 +294,7 @@ abstract class GenericHelper extends AbstractHelper
      */
     public function path($path = '')
     {
-        return XOOPS_ROOT_PATH . '/modules/' . $this->dirname . '/' . $path;
+        return XOOPS_ROOT_PATH . self::MODULE_PATH . $this->dirname . '/' . $path;
     }
 
     /**
