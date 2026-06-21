@@ -256,6 +256,22 @@ abstract class GenericHelper extends AbstractHelper
     }
 
     /**
+     * Return a root relative URL for a module relative URL.
+     *
+     * Unlike url(), this omits the XOOPS_URL scheme/host prefix and returns a
+     * path rooted at the site root, e.g. /modules/mymodule/assets/app.js. This
+     * is the form expected by APIs such as $xoTheme->addScript().
+     *
+     * @param string $url module relative URL
+     *
+     * @return string
+     */
+    public function relativeUrl($url = '')
+    {
+        return '/modules/' . $this->dirname . '/' . $url;
+    }
+
+    /**
      * Return absolute filesystem path for a module relative path
      *
      * @param string $path module relative file system path
