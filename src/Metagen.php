@@ -352,7 +352,7 @@ class Metagen
      */
     protected static function asPlainText($rawText)
     {
-        $text = $rawText;
+        $text = static::normalizeMultilingual($rawText);
         $text = static::html2text($text);
         $text = static::purifyText($text);
 
@@ -360,6 +360,51 @@ class Metagen
         $text = preg_replace('/[ ]* [ ]*/', ' ', $text);
 
         return trim($text);
+    }
+
+    /** @var callable|null normalizer applied to reduce multilingual markup */
+    protected static $multilingualNormalizer;
+
+    /**
+     * Register a callback that reduces multilingual markup to a single language
+     * before description/keyword extraction — for example selecting the active
+     * language from markup such as [en]...[/en].
+     *
+     * A module such as xlanguage can register its processor (e.g.
+     * Xlanguage\Utility::cleanMultiLang) from a preload, so XMF needs no hard
+     * dependency on it. Pass null to clear.
+     *
+     * @param callable|null $normalizer signature: function (string $text): string
+     *
+     * @return void
+     */
+    public static function setMultilingualNormalizer(?callable $normalizer)
+    {
+        static::$multilingualNormalizer = $normalizer;
+    }
+
+    /**
+     * Apply the registered multilingual normalizer, if any, before plain-text
+     * extraction. No-op when none is registered — which avoids both the crash
+     * reported when xlanguage markup reached Metagen (issue #86) and the data
+     * loss of a blanket bracket strip (which would mash every language together
+     * and remove legitimate bracketed content). Override in a subclass for a
+     * different strategy.
+     *
+     * @param string $text raw text possibly containing multilingual markup
+     *
+     * @return string text reduced to the active language, or unchanged
+     */
+    protected static function normalizeMultilingual($text)
+    {
+        if (is_string($text) && null !== static::$multilingualNormalizer) {
+            $result = call_user_func(static::$multilingualNormalizer, $text);
+            if (is_string($result)) {
+                $text = $result;
+            }
+        }
+
+        return $text;
     }
 
     /**
