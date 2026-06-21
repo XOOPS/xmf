@@ -404,19 +404,47 @@ class Admin
      *
      * not part of next generation Xoops\Module\Admin
      *
-     * @param string $image icon name to prepend with path
+     * Returns a module-relative path (e.g. '../../Frameworks/moduleclasses/icons/32/').
+     * It is intentionally relative, not an absolute URL: both 2.5 ModuleAdmin
+     * renderers (renderMenuIndex() and addNavigation()) prepend the module URL to a
+     * non-URL icon value, so a leading '../../' resolves back to the webroot in either
+     * context, whereas an absolute URL would be mangled by addNavigation().
      *
-     * @return string the icon path
+     * @param string $image icon name to append to the path, or '' for the base path
+     *
+     * @return string module-relative icon path
      */
     public static function menuIconPath($image)
     {
-        if (static::isXng()) {
-            return($image);
-        } else {
-            $path = '../../Frameworks/moduleclasses/icons/32/';
+        $image     = ltrim((string) $image, '/');
+        $legacyRel = '../../Frameworks/moduleclasses/icons/32/';
+        $mediaRel  = '../../media/xoops/images/icons/32/';
 
-            return($path . $image);
+        if (!static::isXng()) {
+            return $legacyRel . $image;
         }
+
+        // Under XNG this helper is still reached on installs that ship the legacy
+        // "Frameworks" icons (returning the bare $image left the renderer to build a
+        // broken path such as modules/<dirname>//home.png). Prefer whichever stock
+        // icon set this install actually provides: for a named icon check the file,
+        // for the base-path ('' . '/name.png') call style check the directory.
+        $root = defined('XOOPS_ROOT_PATH') ? rtrim(XOOPS_ROOT_PATH, '/\\') : '';
+        if ('' !== $root) {
+            $present = static function (string $absDir) use ($root, $image): bool {
+                return '' === $image ? is_dir($root . $absDir) : is_file($root . $absDir . $image);
+            };
+            if ($present('/Frameworks/moduleclasses/icons/32/')) {
+                return $legacyRel . $image;
+            }
+            if ($present('/media/xoops/images/icons/32/')) {
+                return $mediaRel . $image;
+            }
+        }
+
+        // Unknown layout (or constants not bootstrapped): fall back to the
+        // next-generation media location, kept relative to stay renderer-safe.
+        return $mediaRel . $image;
     }
 
     /**
