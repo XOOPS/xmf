@@ -259,7 +259,15 @@ class Ulid
         $time = 0;
 
         for ($i = 0; $i < self::TIME_LENGTH; $i++) {
-            $time = $time * self::ENCODING_LENGTH + \strpos(self::ENCODING_CHARS, $ulid[$i]);
+            $pos = \strpos(self::ENCODING_CHARS, $ulid[$i]);
+            if ($pos === false) {
+                // Callers validate via isValid() first, so this is an invariant guard;
+                // it also keeps a stray false from being silently coerced to 0.
+                throw new \InvalidArgumentException(
+                    \sprintf('Invalid ULID character at position %d (0x%02X)', $i, \ord($ulid[$i]))
+                );
+            }
+            $time = $time * self::ENCODING_LENGTH + $pos;
         }
 
         return $time;
@@ -410,6 +418,8 @@ class Ulid
      * @param string $ulid The ULID to convert
      *
      * @return string 32-character hexadecimal string
+     *
+     * @throws \InvalidArgumentException if $ulid contains a non-base32 character
      */
     private static function toHex(string $ulid): string
     {
@@ -421,8 +431,15 @@ class Ulid
 
         for ($i = 0; $i < self::ULID_LENGTH; $i++) {
             $value = \strpos(self::ENCODING_CHARS, $ulid[$i]);
-            $decimal = (string) \bcmul($decimal, '32');
-            $decimal = (string) \bcadd($decimal, (string) $value);
+            if ($value === false) {
+                // Callers validate first (isValid()), so this is an invariant guard;
+                // it also gives bcadd() a guaranteed numeric-string second argument.
+                throw new \InvalidArgumentException(
+                    \sprintf('Invalid ULID character at position %d (0x%02X)', $i, \ord($ulid[$i]))
+                );
+            }
+            $decimal = \bcmul($decimal, '32');
+            $decimal = \bcadd($decimal, (string) $value);
         }
 
         // Convert decimal to hex

@@ -10,6 +10,10 @@ parameters:
     excludePaths:
         - tests/
     treatPhpDocTypesAsCertain: false
+    # The CI matrix spans PHPStan 2.1 (prefer-lowest) and 2.2+ (prefer-stable).
+    # Some findings only exist in the newer line, so their baseline entries are
+    # unmatched under the older one; tolerate that rather than fail the lowest job.
+    reportUnmatchedIgnoredErrors: false
     ignoreErrors:
         -
             message: '#Trait .+ is used zero times and is not analysed\.#'

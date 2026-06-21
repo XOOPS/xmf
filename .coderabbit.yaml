@@ -2,10 +2,9 @@
 language: "en-US"
 early_access: false
 tone_instructions: >-
-  Expert PHP code reviewer. Focus on type safety, PSR-12 compliance,
-  PHP 8.2+ compatibility, and security. This is a utility library
-  requiring PHP 8.2 or newer, so modern language features are acceptable
-  when they improve clarity and remain compatible with the supported range.
+  Expert PHP code reviewer. Focus on type safety, PSR-12, PHP 8.2+
+  compatibility, and security. This is a utility library requiring PHP 8.2+,
+  so modern language features are fine when they aid clarity within range.
 
 reviews:
   profile: "assertive"
