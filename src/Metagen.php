@@ -363,7 +363,7 @@ class Metagen
     }
 
     /** @var callable|null normalizer applied to reduce multilingual markup */
-    private static $multilingualNormalizer;
+    protected static $multilingualNormalizer;
 
     /**
      * Register a callback that reduces multilingual markup to a single language
@@ -380,7 +380,7 @@ class Metagen
      */
     public static function setMultilingualNormalizer(?callable $normalizer)
     {
-        self::$multilingualNormalizer = $normalizer;
+        static::$multilingualNormalizer = $normalizer;
     }
 
     /**
@@ -397,8 +397,8 @@ class Metagen
      */
     protected static function normalizeMultilingual($text)
     {
-        if (null !== self::$multilingualNormalizer) {
-            $result = call_user_func(self::$multilingualNormalizer, $text);
+        if (is_string($text) && null !== static::$multilingualNormalizer) {
+            $result = call_user_func(static::$multilingualNormalizer, $text);
             if (is_string($result)) {
                 $text = $result;
             }
