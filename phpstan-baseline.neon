@@ -1,5 +1,27 @@
 parameters:
 	ignoreErrors:
+		# Xmf\I18n\Direction::dir() — false positives, not bugs. PHPStan folds the
+		# runtime-variable legacy/global detection (class_exists('Xoops', false) against
+		# the bundled stub) and so treats the locale-specific cache branch as dead. The
+		# logic is correct at runtime: e.g. dir('ar') returns 'rtl' via that branch.
+		-
+			message: '#^Comparison operation "\>\=" between \*NEVER\* and 50 results in an error\.$#'
+			identifier: greaterOrEqual.invalid
+			count: 1
+			path: src/I18n/Direction.php
+
+		-
+			message: '#^If condition is always true\.$#'
+			identifier: if.alwaysTrue
+			count: 1
+			path: src/I18n/Direction.php
+
+		-
+			message: '#^Right side of && is always true\.$#'
+			identifier: booleanAnd.rightAlwaysTrue
+			count: 1
+			path: src/I18n/Direction.php
+
 		-
 			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
@@ -1691,12 +1713,6 @@ parameters:
 		-
 			message: '#^Method Xmf\\Ulid\:\:toBinary\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
-			count: 1
-			path: src/Ulid.php
-
-		-
-			message: '#^Parameter \#2 \$num2 of function bcadd expects numeric\-string, ''''\|numeric\-string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Ulid.php
 

@@ -63,6 +63,23 @@ class FilterInputTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($expected, FilterInput::clean($input, 'string'));
     }
 
+    /**
+     * Tag names that are empty or do not start with a letter are rejected by the
+     * tag-name regex, so they are stripped. Locks in the removal of the redundant
+     * "!$tagName" test in filterTags().
+     */
+    public function testCleanStripsMalformedTagNames()
+    {
+        // "<>" is not recognised as a tag at all, so it is left untouched.
+        $this->assertEquals('<>', FilterInput::clean('<>', 'string'));
+        // A digit-led tag name fails the regex and is stripped.
+        $this->assertEquals('', FilterInput::clean('<0>', 'string'));
+        $this->assertEquals('hello', FilterInput::clean('<0>hello', 'string'));
+        $this->assertEquals('text', FilterInput::clean('<0img src=x>text', 'string'));
+        // A well-formed tag is still stripped, content preserved.
+        $this->assertEquals('keep', FilterInput::clean('<img src=x>keep', 'string'));
+    }
+
     public function testCleanVarDefault()
     {
         $filter = FilterInput::getInstance();
