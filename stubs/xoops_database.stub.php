@@ -19,6 +19,12 @@ class XoopsDatabase
     public function queryF($sql) {}
 
     /**
+     * @param string $sql
+     * @return \mysqli_result|bool
+     */
+    public function exec($sql) {}
+
+    /**
      * @param string $table
      * @return string
      */

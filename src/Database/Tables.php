@@ -847,7 +847,10 @@ class Tables
     protected function execSql($sql, $force = false)
     {
         if ($force) {
-            $result = $this->db->queryF($sql);
+            // Forced statements are always DDL/writes here; exec() is the 2.7.x
+            // replacement for the deprecated queryF() and (under Protector) is
+            // inspected by dblayertrap like query()/exec().
+            $result = $this->db->exec($sql);
         } else {
             $result = $this->db->query($sql);
         }

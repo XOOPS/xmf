@@ -64,7 +64,8 @@ class TableLoad
 
             $sql = $insertInto . ') ' . $valueClause . ')';
 
-            $result = $db->queryF($sql);
+            // INSERT — use exec() (queryF() is deprecated in the 2.7.x line).
+            $result = $db->exec($sql);
             if (false !== $result) {
                 ++$count;
             }
@@ -107,7 +108,8 @@ class TableLoad
 
         $prefixedTable = $db->prefix($table);
         $sql = 'TRUNCATE TABLE ' . $prefixedTable;
-        $result = $db->queryF($sql);
+        // TRUNCATE is DDL — use exec() (queryF() is deprecated in the 2.7.x line).
+        $result = $db->exec($sql);
         if (false !== $result) {
             $result = $db->getAffectedRows();
         }
