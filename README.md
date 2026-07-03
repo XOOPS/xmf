@@ -109,7 +109,7 @@ xmf/src/
 | Requirement | Version |
 |---|---|
 | PHP | 8.2+ |
-| XOOPS | 2.5.x or 2.6.x |
+| XOOPS | 2.5.x, 2.6.x, or 2.7.x |
 | Composer | Required |
 
 ### Key Dependencies
