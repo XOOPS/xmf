@@ -302,9 +302,9 @@ final class SendmailRunner
             if (is_resource($stderrPipe)) {
                 fclose($stderrPipe);
             }
-            if (is_resource($proc)) {
-                $code = proc_close($proc);
-            }
+            // $proc is guaranteed a resource here (checked right after proc_open),
+            // so close it unconditionally; this also makes $code an int below.
+            $code = proc_close($proc);
         }
 
         // Warn if stderr contains content despite success.
@@ -313,7 +313,6 @@ final class SendmailRunner
         }
 
         if ($code !== 0) {
-            $code = is_int($code) ? $code : -1;
             $sOut  = $this->clipForLog($stdout);
             $sErr  = $this->clipForLog($stderr);
             $first = $this->firstLine($stderr);
