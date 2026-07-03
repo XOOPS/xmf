@@ -28,23 +28,7 @@ use Xmf\Yaml;
  */
 class TableLoad
 {
-    /**
-     * Execute a write/DDL statement in a way that works across XOOPS cores.
-     *
-     * exec() is the current API for writes/DDL (and, where Protector wraps the
-     * connection, it is inspected by dblayertrap); older cores predate exec()
-     * and only offer queryF(). Prefer exec() when the connection provides it and
-     * fall back to queryF() otherwise, so the same code is correct on every core.
-     *
-     * @param \XoopsDatabase $db  database connection
-     * @param string         $sql statement to execute
-     *
-     * @return \mysqli_result|bool
-     */
-    protected static function writeStatement($db, $sql)
-    {
-        return method_exists($db, 'exec') ? $db->exec($sql) : $db->queryF($sql);
-    }
+    use WriteStatementTrait;
 
     /**
      * loadTableFromArray
@@ -84,7 +68,7 @@ class TableLoad
 
             // INSERT is a write — prefer exec() where the connection provides it,
             // falling back to queryF() on cores that predate exec().
-            $result = static::writeStatement($db, $sql);
+            $result = static::executeWrite($db, $sql);
             if (false !== $result) {
                 ++$count;
             }
@@ -129,7 +113,7 @@ class TableLoad
         $sql = 'TRUNCATE TABLE ' . $prefixedTable;
         // TRUNCATE is DDL — prefer exec() where the connection provides it,
         // falling back to queryF() on cores that predate exec().
-        $result = static::writeStatement($db, $sql);
+        $result = static::executeWrite($db, $sql);
         if (false !== $result) {
             $result = $db->getAffectedRows();
         }
