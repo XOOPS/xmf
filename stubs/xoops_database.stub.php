@@ -19,6 +19,12 @@ class XoopsDatabase
     public function queryF($sql) {}
 
     /**
+     * @param string $sql
+     * @return bool
+     */
+    public function exec($sql) {} // NOSONAR type stub: $sql documents the signature PHPStan resolves; the body is intentionally empty
+
+    /**
      * @param string $table
      * @return string
      */

@@ -28,6 +28,8 @@ use Xmf\Yaml;
  */
 class TableLoad
 {
+    use WriteStatementTrait;
+
     /**
      * loadTableFromArray
      *
@@ -64,7 +66,9 @@ class TableLoad
 
             $sql = $insertInto . ') ' . $valueClause . ')';
 
-            $result = $db->queryF($sql);
+            // INSERT is a write — prefer exec() where the connection provides it,
+            // falling back to queryF() on cores that predate exec().
+            $result = static::executeWrite($db, $sql);
             if (false !== $result) {
                 ++$count;
             }
@@ -107,7 +111,9 @@ class TableLoad
 
         $prefixedTable = $db->prefix($table);
         $sql = 'TRUNCATE TABLE ' . $prefixedTable;
-        $result = $db->queryF($sql);
+        // TRUNCATE is DDL — prefer exec() where the connection provides it,
+        // falling back to queryF() on cores that predate exec().
+        $result = static::executeWrite($db, $sql);
         if (false !== $result) {
             $result = $db->getAffectedRows();
         }

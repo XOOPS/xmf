@@ -34,6 +34,8 @@ use Xmf\Language;
  */
 class Tables
 {
+    use WriteStatementTrait;
+
     /**
      * @var \XoopsDatabase
      */
@@ -846,13 +848,23 @@ class Tables
      */
     protected function execSql($sql, $force = false)
     {
-        if ($force) {
-            $result = $this->db->queryF($sql);
+        // execSql is internal to this class. Its only reads are the
+        // INFORMATION_SCHEMA lookups in getTable*/getIndexes (plain SELECTs);
+        // its only writes are the DDL rendered by executeQueue(). Route reads
+        // through query() and writes/DDL through the cross-version write path
+        // (exec() where available, else queryF()). $force keeps its "run even in
+        // safe requests" meaning by always taking the write path.
+        $isSelect = 0 === stripos(ltrim($sql), 'select');
+        if ($force || !$isSelect) {
+            $result = self::executeWrite($this->db, $sql);
         } else {
             $result = $this->db->query($sql);
         }
 
-        if (!$result) {
+        // Only a literal false signals failure here (query()/exec()/queryF()
+        // return a result set or true on success); a truthiness check would
+        // misread an int 0 result as an error.
+        if (false === $result) {
             $this->lastError = $this->db->error();
             $this->lastErrNo = $this->db->errno();
         }

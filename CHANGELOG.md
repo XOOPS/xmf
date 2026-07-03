@@ -1,5 +1,21 @@
 # XMF ChangeLog
 
+## [1.3.1] - 2026-07-02
+
+### Security
+* Migrate `TableLoad` and `Tables` write/DDL execution off the deprecated `queryF()` to `exec()` where the connection provides it, so these statements pass through Protector's `dblayertrap` SQL inspection. A `queryF()` fallback keeps XOOPS 2.5.x/2.6.x cores (which predate `exec()`) working, and `Tables::execSql()` now routes reads through `query()` and writes/DDL through the write path (#172)
+
+### New Features
+* **Metagen**: add a multilingual normalization hook so title/keyword generation can be localized (closes #86) (#169)
+* **Helper**: add `GenericHelper::relativeUrl()` for root-relative module URLs (closes #39) (#168)
+
+### Bug Fixes
+* **Module\Admin**: `menuIconPath()` now returns a usable icon path under XNG (#166)
+* Resolve PHPStan level-max findings in `FilterInput` and `Ulid`; baseline `Direction` false positives (#167)
+
+### Infrastructure
+* CI dependency bumps: `actions/checkout` 6→7 (#165), `codecov/codecov-action` 6.0.0→7.0.0 (#160, #164), `SonarSource/sonarqube-scan-action` 8.0→8.2 (#159, #163), `shivammathur/setup-php` 2.37.0→2.37.2 (#162)
+
 ## [1.3.0-RC1] - 2026-04-06
 
 ### Security
