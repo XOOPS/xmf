@@ -160,6 +160,50 @@ class TablesTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(' DEFAULT CURRENT_TIMESTAMP ', $result);
     }
 
+    public function testExecSqlRoutesSelectToQuery()
+    {
+        $db = new RoutingFakeDatabase();
+        $tables = new TestableTables();
+        $tables->setDb($db);
+
+        $tables->callExecSql('SELECT * FROM `demo`');
+
+        $this->assertSame(array('query'), $db->calls);
+    }
+
+    public function testExecSqlRoutesWriteToExecWhenAvailable()
+    {
+        $db = new RoutingFakeDatabase();
+        $tables = new TestableTables();
+        $tables->setDb($db);
+
+        $tables->callExecSql('CREATE TABLE `demo` (`id` INT)');
+
+        $this->assertSame(array('exec'), $db->calls);
+    }
+
+    public function testExecSqlForcedSelectTakesWritePath()
+    {
+        $db = new RoutingFakeDatabase();
+        $tables = new TestableTables();
+        $tables->setDb($db);
+
+        $tables->callExecSql('SELECT 1', true);
+
+        $this->assertSame(array('exec'), $db->calls);
+    }
+
+    public function testExecSqlFallsBackToQueryFWhenExecMissing()
+    {
+        $db = new LegacyFakeDatabase();
+        $tables = new TestableTables();
+        $tables->setDb($db);
+
+        $tables->callExecSql('TRUNCATE TABLE `demo`');
+
+        $this->assertSame(array('queryF'), $db->calls);
+    }
+
     private function captureWarning(callable $callback): string
     {
         $warning = '';
@@ -205,6 +249,14 @@ class TestableTables extends Tables
     {
         return $this->quoteDefaultClause($default);
     }
+
+    /**
+     * @return \mysqli_result|bool
+     */
+    public function callExecSql(string $sql, bool $force = false)
+    {
+        return $this->execSql($sql, $force);
+    }
 }
 
 class FakeTablesDatabase
@@ -212,5 +264,74 @@ class FakeTablesDatabase
     public function quote(mixed $value): string
     {
         return "'" . addslashes((string) $value) . "'";
+    }
+}
+
+/**
+ * Fake connection that records which execution method was used and, like a
+ * modern core, provides exec(). Used to assert execSql()'s read/write routing.
+ */
+class RoutingFakeDatabase
+{
+    /** @var string[] */
+    public array $calls = array();
+
+    public function query(string $sql): bool
+    {
+        $this->calls[] = 'query';
+        return true;
+    }
+
+    public function exec(string $sql): bool
+    {
+        $this->calls[] = 'exec';
+        return true;
+    }
+
+    public function queryF(string $sql): bool
+    {
+        $this->calls[] = 'queryF';
+        return true;
+    }
+
+    public function error(): string
+    {
+        return '';
+    }
+
+    public function errno(): int
+    {
+        return 0;
+    }
+}
+
+/**
+ * Fake connection modelling an older core that predates exec() (only queryF()).
+ */
+class LegacyFakeDatabase
+{
+    /** @var string[] */
+    public array $calls = array();
+
+    public function query(string $sql): bool
+    {
+        $this->calls[] = 'query';
+        return true;
+    }
+
+    public function queryF(string $sql): bool
+    {
+        $this->calls[] = 'queryF';
+        return true;
+    }
+
+    public function error(): string
+    {
+        return '';
+    }
+
+    public function errno(): int
+    {
+        return 0;
     }
 }

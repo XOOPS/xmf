@@ -861,7 +861,10 @@ class Tables
             $result = $this->db->query($sql);
         }
 
-        if (!$result) {
+        // Only a literal false signals failure here (query()/exec()/queryF()
+        // return a result set or true on success); a truthiness check would
+        // misread an int 0 result as an error.
+        if (false === $result) {
             $this->lastError = $this->db->error();
             $this->lastErrNo = $this->db->errno();
         }
