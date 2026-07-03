@@ -22,7 +22,7 @@ class XoopsDatabase
      * @param string $sql
      * @return \mysqli_result|bool
      */
-    public function exec($sql) {}
+    public function exec($sql) {} // NOSONAR type stub: $sql documents the signature PHPStan resolves; the body is intentionally empty
 
     /**
      * @param string $table

@@ -846,11 +846,14 @@ class Tables
      */
     protected function execSql($sql, $force = false)
     {
-        if ($force) {
-            // Forced statements are always DDL/writes here; exec() is the 2.7.x
-            // replacement for the deprecated queryF() and (under Protector) is
-            // inspected by dblayertrap like query()/exec().
-            $result = $this->db->exec($sql);
+        // Route by operation, not just the $force flag: reads (SELECT) go through
+        // query(), while writes/DDL go through the write path — which prefers
+        // exec() where the connection provides it and falls back to queryF() on
+        // cores that predate exec(). $force keeps its "run even in safe requests"
+        // meaning by always taking the write path.
+        $isSelect = 0 === stripos(ltrim($sql), 'select');
+        if ($force || !$isSelect) {
+            $result = method_exists($this->db, 'exec') ? $this->db->exec($sql) : $this->db->queryF($sql);
         } else {
             $result = $this->db->query($sql);
         }
