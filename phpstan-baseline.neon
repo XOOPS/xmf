@@ -1705,12 +1705,6 @@ parameters:
 			path: src/StopWords.php
 
 		-
-			message: '#^Property Xmf\\StopWords\:\:\$stopwordList \(array\<string\>\) does not accept array\<string, bool\>\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/StopWords.php
-
-		-
 			message: '#^Method Xmf\\Ulid\:\:toBinary\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
 			count: 1
