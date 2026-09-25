@@ -31,7 +31,7 @@ class StopWords
      */
     public const ENCODING = 'UTF-8';
 
-    /** @var string[] */
+    /** @var array<string, true> */
     protected $stopwordList = array();
 
     /**
