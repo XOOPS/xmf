@@ -8,6 +8,9 @@ on:
 jobs:
   sonarcloud:
     name: SonarCloud Analysis
+    permissions:
+      contents: read
+      pull-requests: read
     runs-on: ubuntu-latest
     if: github.repository == 'XOOPS/xmf'
 
