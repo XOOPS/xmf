@@ -1,5 +1,16 @@
 # XMF ChangeLog
 
+## [1.3.2] - 2026-10-06
+
+### Security
+* `FilterInput`: filtering always terminates (`<>` followed by text exhausted memory; passes are now capped at 10), name checks are anchored with `\z`, attribute names must start with a letter, `on*` handlers are matched case-insensitively, URL schemes are checked entity-decoded, and stripped text keeps no tag opener (GHSA-8j4x-8r8r-5jgw, GHSA-pf53-59r5-mhjv)
+
+### Bug Fixes
+* `StopWords`: correct the `$stopwordList` type (#182)
+
+### Infrastructure
+* Least-privilege workflow permissions (#183); CI action bumps and pinned-version comment fixes (#175–#178, #180, #181, #184–#186); allow `squizlabs/php_codesniffer` ^4.0 (#177)
+ 
 ## [1.3.1] - 2026-07-02
 
 ### Security
