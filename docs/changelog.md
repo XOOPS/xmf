@@ -1,5 +1,13 @@
 xmf ChangeLog
 =============
+Oct 6, 2026 v1.2.32.1
+------------------
+* security: FilterInput filtering always terminates; a value containing "<>" followed by more text exhausted the memory limit; passes are now capped at 10 (GHSA-8j4x-8r8r-5jgw)
+* security: FilterInput name checks are anchored with \z, attribute names must start with a letter, on* handlers are matched case-insensitively, URL schemes are checked entity-decoded, and stripped text keeps no tag opener (GHSA-pf53-59r5-mhjv)
+
+Mar 10, 2025 v1.2.32
+------------------
+* Update firebase/php-jwt to 6.11.0 with PHP 7.4 compatibility
 
 Nov 27, 2024 v1.2.31
 ------------------
