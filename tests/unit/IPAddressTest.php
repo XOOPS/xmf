@@ -81,10 +81,15 @@ class IPAddressTest extends \PHPUnit\Framework\TestCase
         $testAddress = '203.0.113.195';
         $_SERVER['HTTP_CLIENT_IP'] = $testAddress;
         $_SERVER['REMOTE_ADDR'] = '10.1.1.1';
+
+        // header is ignored until the peer is a trusted proxy
+        $this->assertEquals('10.1.1.1', IPAddress::fromRequest()->asReadable());
+
+        $xoopsConfig['proxy_trusted'] = ['10.1.1.1'];
         $instance = IPAddress::fromRequest();
         $actual = $instance->asReadable();
         $this->assertEquals($testAddress, $actual);
-        unset($xoopsConfig['proxy_env']);
+        unset($xoopsConfig['proxy_env'], $xoopsConfig['proxy_trusted']);
         unset($_SERVER['HTTP_CLIENT_IP']);
     }
 

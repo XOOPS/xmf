@@ -1,5 +1,24 @@
 # XMF ChangeLog
 
+## [1.3.3] - NOT RELEASED
+
+### Security
+* `ProxyCheck`/`IPAddress::fromRequest()`: the `proxy_env` header is only used when `REMOTE_ADDR` is listed in the new `$xoopsConfig['proxy_trusted']` (addresses or CIDR ranges, array or comma separated). Entries are read from right to left, skipping trusted proxies, and any entry that is not an IP address stops the search. **Sites that set `proxy_env` must add `proxy_trusted`**; until then the peer address is used (#187)
+
+### Bug Fixes
+* `ProxyCheck`: parse RFC 7239 `Forwarded` values case-insensitively, respect quoted delimiters, strip node ports, reject elements with zero or several `for` parameters, and stop at any node that is not an IP address with an optional numeric port (#189)
+* `I18n\BlockPosition`: default side values now match XOOPS (0 = left, 1 = right) (#188)
+* `Mail\SendmailRunner`: new `$timeout` constructor argument (default 30 seconds) limits a delivery, including process exit, and stops the process with SIGTERM, then SIGKILL; lone CR line endings are normalized; stdout/stderr buffers are capped (#190)
+* `Security\Serializer`: `fromLegacy()` accepts serialized `null`, short and gzip payloads (rejecting data after the gzip stream), and every payload `toLegacy()` can produce; `detect()` recognizes gzip legacy payloads and skips oversized input; `jsonOnly()` enforces the size limit; the legacy logger reports the actual call site (#191)
+* `Security\SerializableTrait::migrateSerializedData()` keeps the stored data when it cannot be decoded (#192)
+* `Database\Tables`: `CURRENT_TIMESTAMP` defaults of `TIMESTAMP`/`DATETIME` columns reported as `current_timestamp()` or with a precision are no longer quoted, and the same text in a string column stays a quoted literal (#193); tables with functional index key parts are refused with an error instead of loading a wrong index definition (#194)
+* `Database\Migrate`: `getCurrentSchema()` leaves out missing tables instead of writing an empty definition; `getCurrentSchema()`, `saveCurrentSchema()`, `getSynchronizeDDL()` and `synchronizeSchema()` throw `RuntimeException` when a table cannot be read, instead of treating it as missing (#194, #195)
+* `Jwt\TokenReader::fromHeader()`: custom headers accept `Bearer <token>` again, as in 1.2.x (#196)
+* `Ulid::getDateTime()`: document `@throws \RuntimeException`
+
+### Tests
+* Add `Serializer` and `SerializableTrait` tests
+
 ## [1.3.2] - 2026-10-06
 
 ### Security

@@ -2,6 +2,7 @@
 
 namespace Xmf\Test\Mail;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Xmf\Mail\SendmailException;
 use Xmf\Mail\SendmailRunner;
 
@@ -113,6 +114,91 @@ class SendmailRunnerTest extends \PHPUnit\Framework\TestCase
         $runner->deliver($script, '');
 
         $this->assertSame('', file_get_contents($outputFile));
+    }
+
+    public function testConstructorRejectsTimeoutBelowOneSecond()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        new SendmailRunner(null, null, null, null, true, 0);
+    }
+
+    public function testDeliverNormalizesLoneCarriageReturns()
+    {
+        if (DIRECTORY_SEPARATOR === '\\') {
+            $this->markTestSkipped('Sendmail runner process test requires a POSIX shell.');
+        }
+
+        $outputFile = $this->createTempFile('sendmail-output-', '');
+        $script = $this->createExecutableScript(
+            "#!/usr/bin/env bash\ncat > " . escapeshellarg($outputFile) . "\nexit 0\n"
+        );
+        $runner = new SendmailRunner(array($script));
+
+        $runner->deliver($script, "Subject: Test\rX-Test: 1\n\r\nBody\r");
+
+        $this->assertSame("Subject: Test\r\nX-Test: 1\r\n\r\nBody\r\n", file_get_contents($outputFile));
+    }
+
+    public static function hangingScriptProvider(): array
+    {
+        return [
+            'keeps pipes open' => ["cat > /dev/null\nexec sleep 30\n"],
+            'closes pipes, keeps running' => ["cat > /dev/null\nexec 1>&- 2>&-\nexec sleep 30\n"],
+            'ignores SIGTERM' => ["trap '' TERM\ncat > /dev/null\nexec sleep 30\n"],
+        ];
+    }
+
+    #[DataProvider('hangingScriptProvider')]
+    public function testDeliverTimesOutOnHangingProcess(string $body)
+    {
+        if (DIRECTORY_SEPARATOR === '\\') {
+            $this->markTestSkipped('Sendmail runner process test requires a POSIX shell.');
+        }
+
+        $script = $this->createExecutableScript("#!/usr/bin/env bash\n" . $body);
+        $runner = new SendmailRunner(array($script), null, null, null, true, 1);
+        $start = microtime(true);
+
+        try {
+            $runner->deliver($script, "Subject: Test\n\nHello world\n");
+            $this->fail('Expected a timeout.');
+        } catch (SendmailException $e) {
+            $this->assertSame('Sendmail did not finish within 1 seconds.', $e->getMessage());
+        }
+
+        // 1 s limit + 2 s SIGTERM grace, with slack for slow CI
+        $this->assertLessThan(6, microtime(true) - $start);
+    }
+
+    public function testDeliverBoundsBufferedOutput()
+    {
+        if (DIRECTORY_SEPARATOR === '\\') {
+            $this->markTestSkipped('Sendmail runner process test requires a POSIX shell.');
+        }
+
+        $script = $this->createExecutableScript(
+            "#!/usr/bin/env bash\ncat > /dev/null\nhead -c 20000000 /dev/zero | tr '\\0' x\n"
+            . "head -c 20000000 /dev/zero | tr '\\0' y >&2\nexit 0\n"
+        );
+        $runner = new SendmailRunner(array($script));
+        $warning = null;
+        $before = memory_get_usage();
+        memory_reset_peak_usage();
+
+        set_error_handler(static function (int $errno, string $errstr) use (&$warning): bool {
+            $warning = $errstr;
+            return true;
+        });
+
+        try {
+            $runner->deliver($script, "Subject: Test\n\nHello world\n");
+        } finally {
+            restore_error_handler();
+        }
+
+        $this->assertStringStartsWith('sendmail warning (success): yyyy', (string) $warning);
+        $this->assertLessThan(2000000, memory_get_peak_usage() - $before);
     }
 
     private function createTempFile(string $prefix, string $contents): string
