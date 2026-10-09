@@ -1,6 +1,7 @@
 <?php
 namespace Xmf\Test\Jwt;
 
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use Xmf\Jwt\KeyFactory;
 use Xmf\Jwt\JsonWebToken;
 use Xmf\Jwt\TokenReader;
@@ -124,5 +125,27 @@ class TokenReaderTest extends \PHPUnit\Framework\TestCase
         unset($_SERVER['HTTP_AUTHORIZATION']);
         $actual = TokenReader::fromHeader($this->testKey);
         $this->assertFalse($actual);
+    }
+
+    #[RunInSeparateProcess]
+    public function testFromHeaderAcceptsBearerTokenOnCustomHeader()
+    {
+        $claims = array('rat' => 'cute');
+        $jwt = new JsonWebToken($this->testKey);
+        $token = $jwt->create($claims, 60);
+
+        foreach (array('Bearer ', 'bearer ', 'BEARER  ') as $prefix) {
+            $_SERVER['HTTP_X_AUTH_TOKEN'] = $prefix . $token;
+            $actual = TokenReader::fromHeader($this->testKey, $claims, 'X-Auth-Token');
+            $this->assertIsObject($actual, $prefix);
+            $this->assertSame('cute', $actual->rat);
+        }
+    }
+
+    #[RunInSeparateProcess]
+    public function testFromHeaderRejectsOtherSchemeOnCustomHeader()
+    {
+        $_SERVER['HTTP_X_AUTH_TOKEN'] = 'Basic dXNlcjpwYXNz';
+        $this->assertFalse(TokenReader::fromHeader($this->testKey, array(), 'X-Auth-Token'));
     }
 }

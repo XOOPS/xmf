@@ -461,6 +461,7 @@ class Ulid
      *
      * @return \DateTimeImmutable The timestamp as a DateTime object
      * @throws \InvalidArgumentException If the ULID is invalid
+     * @throws \RuntimeException If the timestamp cannot be converted
      */
     public static function getDateTime(string $ulid): \DateTimeImmutable
     {

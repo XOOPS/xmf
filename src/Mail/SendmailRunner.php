@@ -58,13 +58,27 @@ final class SendmailRunner
     /** @var callable(string):bool */
     private $isFile;
 
+    /** @var int wall-clock limit in seconds for one delivery, including process exit */
+    private int $timeout;
+
+    /** bytes of stdout/stderr kept for diagnostics; the rest is read and discarded */
+    private const MAX_OUTPUT = 8192;
+
+    /** seconds to wait for exit after SIGTERM before sending SIGKILL */
+    private const TERMINATE_GRACE = 2;
+
     public function __construct(
         ?array $allowlist = null,
         ?callable $isExecutable = null,
         ?callable $isLink = null,
         ?callable $isFile = null,
-        bool $allowSymlinks = true
+        bool $allowSymlinks = true,
+        int $timeout = 30
     ) {
+        if ($timeout < 1) {
+            throw new \InvalidArgumentException('Sendmail timeout must be at least 1 second.');
+        }
+        $this->timeout = $timeout;
         $this->allowlist = $allowlist ?? [
             '/usr/sbin/sendmail',
             '/usr/lib/sendmail',
@@ -154,7 +168,7 @@ final class SendmailRunner
      * @return void
      *
      * @throws SendmailException on invalid path, process startup or pipe-open failures,
-     *                           write failures, premature pipe closure, or non-zero exit
+     *                           write failures, premature pipe closure, timeout, or non-zero exit
      */
     public function deliver(string $sendmailPath, string $rfc822, ?string $envelopeFrom = null): void
     {
@@ -163,8 +177,8 @@ final class SendmailRunner
             throw SendmailException::invalidPath();
         }
 
-        // Normalize line endings to CRLF for RFC 5322 compliance (two-step, no double expansion).
-        $rfc822 = str_replace("\r\n", "\n", $rfc822);
+        // Normalize CRLF, lone CR and LF to CRLF for RFC 5322 compliance (two-step, no double expansion).
+        $rfc822 = str_replace(["\r\n", "\r"], "\n", $rfc822);
         $rfc822 = str_replace("\n", "\r\n", $rfc822);
 
         // Prefer the literal path if it resolves to the same canonical target; else use canonical.
@@ -209,7 +223,8 @@ final class SendmailRunner
 
         $stdout = '';
         $stderr = '';
-        $code   = null;
+        $exitCode = null;
+        $deadline = (int) hrtime(true) + $this->timeout * 1000000000;
         stream_set_blocking($stdin, false);
         stream_set_blocking($stdoutPipe, false);
         stream_set_blocking($stderrPipe, false);
@@ -243,7 +258,12 @@ final class SendmailRunner
                     break;
                 }
 
-                $ready = @stream_select($read, $write, $except, 1);
+                $remaining = $deadline - (int) hrtime(true);
+                if ($remaining <= 0) {
+                    throw SendmailException::timedOut($this->timeout);
+                }
+                $wait = min($remaining, 1000000000);
+                $ready = @stream_select($read, $write, $except, 0, intdiv($wait, 1000));
                 if ($ready === false) {
                     throw SendmailException::failedToOpenPipes();
                 }
@@ -277,20 +297,26 @@ final class SendmailRunner
                 }
 
                 foreach ($read as $stream) {
-                    $chunk = stream_get_contents($stream);
+                    $chunk = fread($stream, $chunkSize);
                     if ($chunk === false || $chunk === '') {
                         continue;
                     }
                     if ($stream === $stdoutPipe) {
-                        $stdout .= $chunk;
+                        $stdout .= substr($chunk, 0, self::MAX_OUTPUT - strlen($stdout));
                     } elseif ($stream === $stderrPipe) {
-                        $stderr .= $chunk;
+                        $stderr .= substr($chunk, 0, self::MAX_OUTPUT - strlen($stderr));
                     }
                 }
             }
 
             if ($stdinOpen && $off < $len) {
                 throw SendmailException::prematurePipeClosure();
+            }
+
+            // The pipes can close before the process exits.
+            $exitCode = $this->waitForExit($proc, $deadline);
+            if ($exitCode === null) {
+                throw SendmailException::timedOut($this->timeout);
             }
         } finally {
             if (is_resource($stdin)) {
@@ -302,10 +328,16 @@ final class SendmailRunner
             if (is_resource($stderrPipe)) {
                 fclose($stderrPipe);
             }
-            // $proc is guaranteed a resource here (checked right after proc_open),
-            // so close it unconditionally; this also makes $code an int below.
-            $code = proc_close($proc);
+            // On an error path, give the process until the deadline to exit, then
+            // terminate it, so proc_close() cannot block the request indefinitely.
+            if ($exitCode === null && $this->waitForExit($proc, $deadline) === null) {
+                $this->terminate($proc);
+            }
+            proc_close($proc);
         }
+        // Use the code from proc_get_status(): proc_close() returns -1 on PHP < 8.3
+        // once proc_get_status() has seen the exit.
+        $code = $exitCode;
 
         // Warn if stderr contains content despite success.
         if ($code === 0 && $stderr !== '') {
@@ -326,6 +358,42 @@ final class SendmailRunner
     }
 
     /* ====================== helpers ====================== */
+
+    /**
+     * Poll until the process exits or the deadline passes.
+     *
+     * @param resource $proc     process from proc_open()
+     * @param int      $deadline hrtime() value in nanoseconds
+     *
+     * @return int|null exit code, or null if the process is still running
+     */
+    private function waitForExit($proc, int $deadline): ?int
+    {
+        while (true) {
+            $status = proc_get_status($proc);
+            if (!$status['running']) {
+                return $status['exitcode'];
+            }
+            if ((int) hrtime(true) >= $deadline) {
+                return null;
+            }
+            usleep(10000);
+        }
+    }
+
+    /**
+     * Stop a process: SIGTERM, then SIGKILL if it is still running after the grace period.
+     *
+     * @param resource $proc process from proc_open()
+     */
+    private function terminate($proc): void
+    {
+        proc_terminate($proc);
+        $grace = (int) hrtime(true) + self::TERMINATE_GRACE * 1000000000;
+        if ($this->waitForExit($proc, $grace) === null) {
+            proc_terminate($proc, 9);
+        }
+    }
 
     /**
      * Filesystem checks for the target binary.

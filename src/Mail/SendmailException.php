@@ -77,6 +77,18 @@ final class SendmailException extends \RuntimeException
     }
 
     /**
+     * Build an exception for a sendmail process that did not finish in time.
+     *
+     * @param int $seconds configured time limit
+     *
+     * @return self
+     */
+    public static function timedOut(int $seconds): self
+    {
+        return new self('Sendmail did not finish within ' . $seconds . ' seconds.');
+    }
+
+    /**
      * Build an exception for a non-zero sendmail exit code.
      *
      * @param int    $code      process exit code
