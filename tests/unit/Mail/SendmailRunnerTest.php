@@ -119,8 +119,10 @@ class SendmailRunnerTest extends \PHPUnit\Framework\TestCase
     public function testConstructorRejectsTimeoutBelowOneSecond()
     {
         $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Sendmail timeout must be at least 1 second.');
 
-        new SendmailRunner(null, null, null, null, true, 0);
+        // the constructor must throw before this assertion runs
+        $this->assertInstanceOf(SendmailRunner::class, new SendmailRunner(null, null, null, null, true, 0));
     }
 
     public function testDeliverNormalizesLoneCarriageReturns()

@@ -84,6 +84,7 @@ class IPAddressTest extends \PHPUnit\Framework\TestCase
 
         try {
             // header is ignored until the peer is a trusted proxy
+            $xoopsConfig['proxy_trusted'] = [];
             $this->assertEquals('10.1.1.1', IPAddress::fromRequest()->asReadable());
 
             $xoopsConfig['proxy_trusted'] = ['10.1.1.1'];

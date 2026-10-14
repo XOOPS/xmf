@@ -291,21 +291,29 @@ class ProxyCheck
         $address = $this->unmapIPv4($address);
         foreach ($this->trustedProxies as $entry) {
             $parts = explode('/', $entry, 2);
-            $network = @inet_pton(trim($parts[0]));
-            if (false === $network) {
+            $packed = @inet_pton(trim($parts[0]));
+            if (false === $packed) {
                 continue;
             }
-            $network = $this->unmapIPv4($network);
+            $network = $this->unmapIPv4($packed);
             if (strlen($network) !== strlen($address)) {
                 continue;
             }
             $bits = strlen($address) * 8;
             if (isset($parts[1])) {
                 $prefix = trim($parts[1]);
-                if (!ctype_digit($prefix) || (int) $prefix > $bits) {
+                if (!ctype_digit($prefix)) {
                     continue;
                 }
-                $bits = (int) $prefix;
+                $prefix = (int) $prefix;
+                if (strlen($packed) !== strlen($network)) {
+                    // a mapped entry's prefix counts the 96 bit ::ffff:0:0 part
+                    $prefix -= 96;
+                }
+                if ($prefix < 0 || $prefix > $bits) {
+                    continue;
+                }
+                $bits = $prefix;
             }
             $bytes = intdiv($bits, 8);
             if (substr($address, 0, $bytes) !== substr($network, 0, $bytes)) {

@@ -1,6 +1,6 @@
 # XMF ChangeLog
 
-## [1.3.3] - NOT RELEASED
+## [Unreleased]
 
 ### Security
 * `ProxyCheck`/`IPAddress::fromRequest()`: the `proxy_env` header is only used when `REMOTE_ADDR` is listed in the new `$xoopsConfig['proxy_trusted']` (addresses or CIDR ranges, array or comma separated). Entries are read from right to left, skipping trusted proxies, and any entry that is not an IP address stops the search. IPv4-mapped IPv6 addresses (`::ffff:10.0.0.1`, as a dual-stack listener reports an IPv4 peer) match IPv4 entries. **Sites that set `proxy_env` must add `proxy_trusted`**; until then the peer address is used (#187)
