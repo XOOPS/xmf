@@ -25,7 +25,7 @@ class IPAddressTest extends \PHPUnit\Framework\TestCase
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->object = new IPAddress($this->testIPV4);
         $this->objectV6 = new IPAddress($this->testIPV6);
@@ -35,7 +35,7 @@ class IPAddressTest extends \PHPUnit\Framework\TestCase
      * Tears down the fixture, for example, closes a network connection.
      * This method is called after a test is executed.
      */
-    protected function tearDown()
+    protected function tearDown(): void
     {
     }
 
@@ -61,11 +61,20 @@ class IPAddressTest extends \PHPUnit\Framework\TestCase
         $testAddress = '203.0.113.195';
         $_SERVER['HTTP_CLIENT_IP'] = $testAddress;
         $_SERVER['REMOTE_ADDR'] = '10.1.1.1';
-        $instance = IPAddress::fromRequest();
-        $actual = $instance->asReadable();
-        $this->assertEquals($testAddress, $actual);
-        unset($xoopsConfig['proxy_env']);
-        unset($_SERVER['HTTP_CLIENT_IP']);
+
+        try {
+            // header is ignored until the peer is a trusted proxy
+            unset($xoopsConfig['proxy_trusted']);
+            $this->assertEquals('10.1.1.1', IPAddress::fromRequest()->asReadable());
+
+            $xoopsConfig['proxy_trusted'] = ['10.1.1.1'];
+            $instance = IPAddress::fromRequest();
+            $actual = $instance->asReadable();
+            $this->assertEquals($testAddress, $actual);
+        } finally {
+            unset($xoopsConfig['proxy_env'], $xoopsConfig['proxy_trusted']);
+            unset($_SERVER['HTTP_CLIENT_IP']);
+        }
     }
 
     public function testAsReadable()

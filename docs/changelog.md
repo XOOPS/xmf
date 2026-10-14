@@ -1,5 +1,14 @@
 xmf ChangeLog
 =============
+NOT RELEASED v1.2.33
+------------------
+* security: ProxyCheck/IPAddress::fromRequest() only use the proxy_env header when REMOTE_ADDR is listed in the new $xoopsConfig['proxy_trusted'] (addresses or CIDR ranges, array or comma separated; IPv4-mapped IPv6 peers match IPv4 entries). Entries are read from right to left, skipping trusted proxies, and any entry that is not an IP address stops the search. Sites that set proxy_env must add proxy_trusted; until then the peer address is used (backport of #187)
+* ProxyCheck: parse RFC 7239 Forwarded values case-insensitively, respect quoted delimiters, strip node ports, reject elements with zero or several for parameters, and stop at any node that is not an IP address with an optional numeric port (backport of #189)
+* Database\Tables: CURRENT_TIMESTAMP defaults of TIMESTAMP/DATETIME columns reported as current_timestamp() or with a precision are no longer quoted and render in the canonical CURRENT_TIMESTAMP form, and the same text in a string column stays a quoted literal (backport of #193); tables with functional index key parts are refused with an error instead of loading a wrong index definition (backport of #194)
+* Database\Migrate: getCurrentSchema() leaves out missing tables instead of writing an empty definition; getCurrentSchema(), saveCurrentSchema(), getSynchronizeDDL() and synchronizeSchema() throw RuntimeException when a table cannot be read (backport of #194, #195)
+* FilterInput::cleanVar() accepts a null type, which Request::getHeader() passes, without a PHP 8.1+ deprecation
+* dev: PHPUnit 9 fixture signatures in the test suite; roave/security-advisories dropped from require-dev and the low-severity php-jwt 6.x advisory (PKSA-y2cr-5h3j-g3ys, fixed only in php-jwt 7 which needs PHP 8) ignored so the dev install resolves on PHP 7.4
+
 Oct 6, 2026 v1.2.32.1
 ------------------
 * security: FilterInput filtering always terminates; a value containing "<>" followed by more text exhausted the memory limit; passes are now capped at 10 (GHSA-8j4x-8r8r-5jgw)
