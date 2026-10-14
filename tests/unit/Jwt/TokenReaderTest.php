@@ -1,6 +1,7 @@
 <?php
 namespace Xmf\Test\Jwt;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use Xmf\Jwt\KeyFactory;
 use Xmf\Jwt\JsonWebToken;
@@ -127,19 +128,30 @@ class TokenReaderTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($actual);
     }
 
+    public static function bearerPrefixProvider(): array
+    {
+        return array(
+            'canonical' => array('Bearer '),
+            'lower case' => array('bearer '),
+            'upper case extra space' => array('BEARER  '),
+        );
+    }
+
+    /**
+     * One process per prefix: Request::getHeader() caches the header map on first use
+     */
+    #[DataProvider('bearerPrefixProvider')]
     #[RunInSeparateProcess]
-    public function testFromHeaderAcceptsBearerTokenOnCustomHeader()
+    public function testFromHeaderAcceptsBearerTokenOnCustomHeader(string $prefix)
     {
         $claims = array('rat' => 'cute');
         $jwt = new JsonWebToken($this->testKey);
         $token = $jwt->create($claims, 60);
 
-        foreach (array('Bearer ', 'bearer ', 'BEARER  ') as $prefix) {
-            $_SERVER['HTTP_X_AUTH_TOKEN'] = $prefix . $token;
-            $actual = TokenReader::fromHeader($this->testKey, $claims, 'X-Auth-Token');
-            $this->assertIsObject($actual, $prefix);
-            $this->assertSame('cute', $actual->rat);
-        }
+        $_SERVER['HTTP_X_AUTH_TOKEN'] = $prefix . $token;
+        $actual = TokenReader::fromHeader($this->testKey, $claims, 'X-Auth-Token');
+        $this->assertIsObject($actual, $prefix);
+        $this->assertSame('cute', $actual->rat);
     }
 
     #[RunInSeparateProcess]

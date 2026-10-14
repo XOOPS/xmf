@@ -227,7 +227,8 @@ class TablesTest extends \PHPUnit\Framework\TestCase
     {
         return array(
             'mysql' => array('CURRENT_TIMESTAMP', ' DEFAULT CURRENT_TIMESTAMP '),
-            'mariadb' => array('current_timestamp()', ' DEFAULT CURRENT_TIMESTAMP() '),
+            'mariadb' => array('current_timestamp()', ' DEFAULT CURRENT_TIMESTAMP '),
+            'empty parentheses' => array('CURRENT_TIMESTAMP()', ' DEFAULT CURRENT_TIMESTAMP '),
             'precision' => array('CURRENT_TIMESTAMP(6)', ' DEFAULT CURRENT_TIMESTAMP(6) '),
             'mariadb precision' => array('current_timestamp(3)', ' DEFAULT CURRENT_TIMESTAMP(3) '),
             'literal text' => array('current_timestamp_x', " DEFAULT 'current_timestamp_x' "),
@@ -245,7 +246,7 @@ class TablesTest extends \PHPUnit\Framework\TestCase
     public static function columnTypeDefaultProvider(): array
     {
         return array(
-            'timestamp' => array('timestamp', 'current_timestamp()', ' DEFAULT CURRENT_TIMESTAMP() '),
+            'timestamp' => array('timestamp', 'current_timestamp()', ' DEFAULT CURRENT_TIMESTAMP '),
             'datetime precision' => array('datetime(6)', 'CURRENT_TIMESTAMP(6)', ' DEFAULT CURRENT_TIMESTAMP(6) '),
             'varchar keeps literal' => array('varchar(50)', 'current_timestamp()', " DEFAULT 'current_timestamp()' "),
             'varchar keeps literal upper' => array('varchar(50)', 'CURRENT_TIMESTAMP', " DEFAULT 'CURRENT_TIMESTAMP' "),

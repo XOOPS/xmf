@@ -288,10 +288,15 @@ class ProxyCheck
         if (false === $address) {
             return false;
         }
+        $address = $this->unmapIPv4($address);
         foreach ($this->trustedProxies as $entry) {
             $parts = explode('/', $entry, 2);
             $network = @inet_pton(trim($parts[0]));
-            if (false === $network || strlen($network) !== strlen($address)) {
+            if (false === $network) {
+                continue;
+            }
+            $network = $this->unmapIPv4($network);
+            if (strlen($network) !== strlen($address)) {
                 continue;
             }
             $bits = strlen($address) * 8;
@@ -317,6 +322,22 @@ class ProxyCheck
         }
 
         return false;
+    }
+
+    /**
+     * Reduce an IPv4-mapped IPv6 address (::ffff:a.b.c.d, as a dual-stack listener
+     * reports an IPv4 peer) to its 4 byte IPv4 form so it matches IPv4 trust entries
+     *
+     * @param string $packed address from inet_pton()
+     *
+     * @return string
+     */
+    protected function unmapIPv4($packed)
+    {
+        if (strlen($packed) === 16 && strncmp($packed, "\0\0\0\0\0\0\0\0\0\0\xff\xff", 12) === 0) {
+            return substr($packed, 12);
+        }
+        return $packed;
     }
 
     /**

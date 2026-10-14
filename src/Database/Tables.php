@@ -916,9 +916,12 @@ class Tables
         // Until mysql 8, only allowed function is CURRENT_TIMESTAMP
         // MariaDB reports it as current_timestamp(), and either may carry a precision
         // a string column can hold the literal text, so the column type decides
+        // Render the canonical CURRENT_TIMESTAMP form (empty parentheses dropped) so a
+        // Migrate comparison against a CURRENT_TIMESTAMP target does not churn on MariaDB
         $temporal = $columnType === null || preg_match('/^(timestamp|datetime)\b/i', $columnType) === 1;
-        if ($temporal && preg_match('/^current_timestamp(\(\d*\))?\z/i', $default, $matches)) {
-            return ' DEFAULT CURRENT_TIMESTAMP' . ($matches[1] ?? '') . ' ';
+        if ($temporal && preg_match('/^current_timestamp(?:\((\d*)\))?\z/i', $default, $matches)) {
+            $precision = isset($matches[1]) && $matches[1] !== '' ? '(' . $matches[1] . ')' : '';
+            return ' DEFAULT CURRENT_TIMESTAMP' . $precision . ' ';
         }
 
         // surround default with quotes — escape embedded single quotes for valid DDL

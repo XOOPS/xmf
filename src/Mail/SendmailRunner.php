@@ -26,6 +26,11 @@ namespace Xmf\Mail;
  * - Optional, validated envelope sender (-f)
  * - CRLF normalization (str_replace-based)
  * - Diagnostics: clipped stdout/stderr on failure; warns if stderr on success
+ * - Timeout: the sendmail process is stopped with SIGTERM, then SIGKILL. Only
+ *   that process is signalled; proc_open() cannot start it in its own process
+ *   group on POSIX, so children of a wrapper script are left to the wrapper.
+ *   A timeout means "delivery outcome unknown", not "not delivered": callers
+ *   must not resend automatically on SendmailException::timedOut().
  *
  * Customize:
  * - Pass a custom $allowlist (array of absolute paths) in the constructor.
@@ -365,13 +370,14 @@ final class SendmailRunner
      * @param resource $proc     process from proc_open()
      * @param int      $deadline hrtime() value in nanoseconds
      *
-     * @return int|null exit code, or null if the process is still running
+     * @return int|null exit code, or null if the process is still running (or stopped
+     *                  by a signal: it has not exited, and proc_close() would block on it)
      */
     private function waitForExit($proc, int $deadline): ?int
     {
         while (true) {
             $status = proc_get_status($proc);
-            if (!$status['running']) {
+            if (!$status['running'] && !$status['stopped']) {
                 return $status['exitcode'];
             }
             if ((int) hrtime(true) >= $deadline) {
