@@ -131,7 +131,13 @@ trait SerializableTrait
 
         if ($format === Format::PHP || $format === Format::LEGACY) {
             try {
-                $value = $this->unserializeProperty($oldData);
+                // a unique default tells a decoding failure apart from a stored null,
+                // so corrupt data is never overwritten
+                $failed = new \stdClass();
+                $value = $this->unserializeProperty($oldData, $failed);
+                if ($value === $failed) {
+                    throw new \UnexpectedValueException('stored data could not be decoded');
+                }
                 $newData = $this->serializeProperty($value, Format::JSON);
                 $this->setVar($property, $newData);
 

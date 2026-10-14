@@ -111,7 +111,9 @@ class TokenReader
             }
             $token = trim($parts[1]);
         } else {
-            $token = $header;
+            // custom headers may carry a bare token or "Bearer <token>"
+            $parts = explode(' ', $header, 2);
+            $token = (count($parts) === 2 && strcasecmp($parts[0], 'Bearer') === 0) ? trim($parts[1]) : $header;
         }
         return static::fromString($key, $token, $assertClaims);
     }

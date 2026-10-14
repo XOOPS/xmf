@@ -37,6 +37,9 @@ use UnexpectedValueException;
 final class Serializer
 {
     private const MAX_SIZE = 5000000; // 5MB
+
+    /** base64 length of a MAX_SIZE payload: 4 * ceil(MAX_SIZE / 3) */
+    private const MAX_LEGACY_SIZE = 6666668;
     private const JSON_DEPTH = 512;
     private const JSON_FLAGS = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR;
 
@@ -303,18 +306,19 @@ final class Serializer
      */
     public static function fromLegacy(string $payload, array $allowedClasses = [])
     {
-        self::validateInput($payload);
+        // base64 input may be up to a third larger than the MAX_SIZE that toLegacy() allows
+        self::validateInput($payload, self::MAX_LEGACY_SIZE);
         self::validateSecurity($payload, empty($allowedClasses));
 
         // Try plain PHP serialize first
-        $result = self::tryUnserialize($payload, $allowedClasses);
-        if ($result !== null) {
+        if (\strlen($payload) <= self::MAX_SIZE && self::tryUnserialize($payload, $allowedClasses, $result)) {
             self::logLegacy($payload);
             return $result;
         }
 
         // Check if it looks like base64 before attempting decode
         if (!self::isLikelyBase64($payload)) {
+            self::validateInput($payload);
             throw new RuntimeException('Invalid legacy format: not serialized or base64');
         }
 
@@ -394,10 +398,19 @@ final class Serializer
             return Format::AUTO;
         }
 
+        // nothing larger can be decoded; don't parse it here
+        if (\strlen($payload) > self::MAX_LEGACY_SIZE) {
+            return Format::AUTO;
+        }
+
         $trimmed = ltrim($payload);
 
         // Check JSON (use trimmed for consistency with the leading-char check)
-        if (isset($trimmed[0]) && ($trimmed[0] === '{' || $trimmed[0] === '[')) {
+        if (
+            isset($trimmed[0])
+            && ($trimmed[0] === '{' || $trimmed[0] === '[')
+            && \strlen($payload) <= self::MAX_SIZE
+        ) {
             if (self::isValidJson($trimmed)) {
                 return Format::JSON;
             }
@@ -414,7 +427,7 @@ final class Serializer
             if (
                 $decoded !== false
                 && \strlen($decoded) <= self::MAX_SIZE
-                && self::looksLikeSerialized($decoded)
+                && (self::looksLikeSerialized($decoded) || self::isGzip($decoded))
             ) {
                 return Format::LEGACY;
             }
@@ -543,7 +556,7 @@ final class Serializer
      */
     public static function jsonOnly(string $payload)
     {
-        if ($payload === '' || !isset(ltrim($payload)[0])) {
+        if ($payload === '' || !isset(ltrim($payload)[0]) || \strlen($payload) > self::MAX_SIZE) {
             return null;
         }
 
@@ -614,21 +627,22 @@ final class Serializer
 
     /**
      * @param string $payload
+     * @param int    $maxSize
      *
      * @return void
      *
      * @throws UnexpectedValueException
      * @throws RuntimeException
      */
-    private static function validateInput(string $payload): void
+    private static function validateInput(string $payload, int $maxSize = self::MAX_SIZE): void
     {
         if ($payload === '') {
             throw new UnexpectedValueException('Cannot deserialize empty string');
         }
 
-        if (\strlen($payload) > self::MAX_SIZE) {
+        if (\strlen($payload) > $maxSize) {
             throw new RuntimeException(
-                sprintf('Payload exceeds maximum size of %d bytes', self::MAX_SIZE)
+                sprintf('Payload exceeds maximum size of %d bytes', $maxSize)
             );
         }
     }
@@ -674,11 +688,14 @@ final class Serializer
         $chunkSize = 8192;
         $maxSize = self::MAX_SIZE;
 
-        while ($offset < \strlen($data)) {
+        $length = \strlen($data);
+        while ($offset < $length) {
             $chunk = substr($data, $offset, $chunkSize);
             $offset += \strlen($chunk);
 
-            $inflated = inflate_add($context, $chunk);
+            // the last chunk finishes the stream; an extra empty ZLIB_FINISH after the
+            // end of the stream would leave a buffer error status instead of STREAM_END
+            $inflated = inflate_add($context, $chunk, $offset >= $length ? ZLIB_FINISH : ZLIB_SYNC_FLUSH);
             if ($inflated === false) {
                 throw new DecompressionException('Gzip decompression failed');
             }
@@ -689,23 +706,17 @@ final class Serializer
                     sprintf('Decompressed payload exceeds %d bytes', $maxSize)
                 );
             }
+            if (inflate_get_status($context) === ZLIB_STREAM_END) {
+                break;
+            }
         }
 
-        // Flush remaining and verify stream completed
-        $inflated = inflate_add($context, '', ZLIB_FINISH);
-        if ($inflated === false) {
-            throw new DecompressionException('Gzip decompression failed during final flush');
-        }
         if (inflate_get_status($context) !== ZLIB_STREAM_END) {
             throw new DecompressionException('Gzip stream is incomplete or truncated');
         }
-        if ($inflated !== '') {
-            $output .= $inflated;
-            if (\strlen($output) > $maxSize) {
-                throw new DecompressionException(
-                    sprintf('Decompressed payload exceeds %d bytes', $maxSize)
-                );
-            }
+        // toLegacy() data is a single gzip member; reject trailing bytes or further members
+        if (inflate_get_read_len($context) !== $length) {
+            throw new DecompressionException('Unexpected data after the gzip stream');
         }
 
         return $output;
@@ -773,19 +784,25 @@ final class Serializer
     }
 
     /**
-     * Attempt unserialization, returning null on failure instead of throwing.
+     * Attempt unserialization, reporting failure instead of throwing.
      *
-     * @param string                   $payload
+     * Success is returned separately so that a serialized null (N;) is not
+     * mistaken for a failure.
+     *
+     * @param string             $payload
      * @param array<int, string> $allowedClasses
+     * @param mixed              $result         set to the unserialized value on success
      *
-     * @return mixed|null
+     * @return bool true on success
      */
-    private static function tryUnserialize(string $payload, array $allowedClasses)
+    private static function tryUnserialize(string $payload, array $allowedClasses, &$result): bool
     {
         try {
-            return self::unserialize($payload, $allowedClasses);
+            $result = self::unserialize($payload, $allowedClasses);
+            return true;
         } catch (\Throwable $e) {
-            return null;
+            $result = null;
+            return false;
         }
     }
 
@@ -853,8 +870,8 @@ final class Serializer
     {
         $len = \strlen($s);
 
-        // Require reasonable minimum length and proper block alignment
-        if ($len < 16 || ($len % 4) !== 0) {
+        // Require proper block alignment; short values such as toLegacy(false) are valid
+        if ($len === 0 || ($len % 4) !== 0) {
             return false;
         }
 
@@ -898,13 +915,12 @@ final class Serializer
         }
 
         $preview = \substr($payload, 0, 50) . (\strlen($payload) > 50 ? '...' : '');
-        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
+        // A frame's file/line is where its function was called, so the first
+        // frame outside this file is the call into the Serializer.
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 10);
         $caller = ['file' => 'unknown', 'line' => 0];
         foreach ($trace as $frame) {
-            if (!isset($frame['file'], $frame['line'])) {
-                continue;
-            }
-            if (isset($frame['class']) && $frame['class'] === self::class) {
+            if (!isset($frame['file'], $frame['line']) || $frame['file'] === __FILE__) {
                 continue;
             }
             $caller = $frame;

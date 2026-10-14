@@ -216,8 +216,8 @@ class FilterInput
      */
     public function cleanVar($source, $type = 'string')
     {
-        // Handle the type constraint
-        switch (strtoupper($type)) {
+        // Handle the type constraint (null type, as Request::getHeader() passes, means string)
+        switch (strtoupper((string) $type)) {
             case 'INT':
             case 'INTEGER':
                 // Only use the first integer value
