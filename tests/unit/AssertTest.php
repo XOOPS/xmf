@@ -89,7 +89,7 @@ class AssertTest extends BaseTestCase
         return static::$resource;
     }
 
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass(): void
     {
         @fclose(self::$resource);
     }
