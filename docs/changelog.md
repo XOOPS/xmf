@@ -1,6 +1,6 @@
 xmf ChangeLog
 =============
-NOT RELEASED v1.2.33
+Oct 14, 2026 v1.2.33
 ------------------
 * security: ProxyCheck/IPAddress::fromRequest() only use the proxy_env header when REMOTE_ADDR is listed in the new $xoopsConfig['proxy_trusted'] (addresses or CIDR ranges, array or comma separated; IPv4-mapped IPv6 peers match IPv4 entries). Entries are read from right to left, skipping trusted proxies, and any entry that is not an IP address stops the search. Sites that set proxy_env must add proxy_trusted; until then the peer address is used (backport of #187)
 * ProxyCheck: parse RFC 7239 Forwarded values case-insensitively, respect quoted delimiters, strip node ports, reject elements with zero or several for parameters, and stop at any node that is not an IP address with an optional numeric port (backport of #189)
