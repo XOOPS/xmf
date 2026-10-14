@@ -71,10 +71,10 @@ class ProxyCheck
      */
     public function get()
     {
-        if (false === $this->proxyHeaderName || false === $this->proxyHeader) {
+        if (false === $this->proxyHeaderName || !is_string($this->proxyHeader)) {
             return false;
         }
-        if (false === $this->remoteAddr || !$this->isTrustedProxy($this->remoteAddr)) {
+        if (!is_string($this->remoteAddr) || !$this->isTrustedProxy($this->remoteAddr)) {
             return false;
         }
 
@@ -346,24 +346,6 @@ class ProxyCheck
             return substr($packed, 12);
         }
         return $packed;
-    }
-
-    /**
-     * Extract 'for' IP address from one element of a FORWARDED header as in RFC 7239
-     *
-     * @param string $header
-     *
-     * @return string|false IP address, or false if invalid
-     */
-    protected function getFor($header)
-    {
-        $nodes = $this->parseForwarded($header);
-        if (false === $nodes || count($nodes) !== 1) {
-            return false;
-        }
-        $ip = $this->cleanNode($nodes[0]);
-
-        return (false === $ip) ? false : $this->validateRoutableIP($ip);
     }
 
     /**

@@ -341,7 +341,8 @@ final class SendmailRunner
             proc_close($proc);
         }
         // Use the code from proc_get_status(): proc_close() returns -1 on PHP < 8.3
-        // once proc_get_status() has seen the exit.
+        // once proc_get_status() has seen the exit. A null code threw timedOut()
+        // above, so the code is an int here.
         $code = $exitCode;
 
         // Warn if stderr contains content despite success.
