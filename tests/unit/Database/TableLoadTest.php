@@ -128,13 +128,9 @@ namespace Xmf\Test\Database {
             return false;
         }
 
-        public function fetchArray(mixed $result): array|false
+        public function freeRecordSet(): void
         {
-            return false;
-        }
-
-        public function freeRecordSet(mixed $result): void
-        {
+            // extractRows() frees the result unconditionally; nothing to release here
         }
 
         public function exec(string $sql): bool
