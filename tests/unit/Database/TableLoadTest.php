@@ -77,6 +77,28 @@ namespace Xmf\Test\Database {
             $this->assertSame(array('queryF'), $db->calls);
             $this->assertSame(3, $result);
         }
+
+        public function testTableNamesAreQuotedIdentifiers()
+        {
+            $db = new FakeLoadDatabaseWithExec();
+            \XoopsDatabaseFactory::$connection = $db;
+            $table = 'de`mo, xoops_users';
+
+            $this->assertSame(0, TableLoad::countRows($table)); // the fake query() fails
+            TableLoad::extractRows($table);
+            TableLoad::truncateTable($table);
+            TableLoad::loadTableFromArray($table, array(array('id' => 1)));
+
+            $this->assertSame(
+                array(
+                    'SELECT COUNT(*) as `count` FROM `xoops_de``mo, xoops_users` ',
+                    'SELECT * FROM `xoops_de``mo, xoops_users` ',
+                    'TRUNCATE TABLE `xoops_de``mo, xoops_users`',
+                    "INSERT INTO `xoops_de``mo, xoops_users` (`id`)  VALUES ('1')",
+                ),
+                $db->sql
+            );
+        }
     }
 
     /**
@@ -86,6 +108,8 @@ namespace Xmf\Test\Database {
     {
         /** @var string[] */
         public array $calls = array();
+        /** @var string[] */
+        public array $sql = array();
         public int $affected = 0;
 
         public function prefix(string $table): string
@@ -98,9 +122,25 @@ namespace Xmf\Test\Database {
             return "'" . addslashes((string) $value) . "'";
         }
 
+        public function query(string $sql): bool
+        {
+            $this->sql[] = $sql;
+            return false;
+        }
+
+        public function fetchArray(mixed $result): array|false
+        {
+            return false;
+        }
+
+        public function freeRecordSet(mixed $result): void
+        {
+        }
+
         public function exec(string $sql): bool
         {
             $this->calls[] = 'exec';
+            $this->sql[] = $sql;
             return true;
         }
 

@@ -119,8 +119,8 @@ class Tables
                         return true;
                     }
                 }
-                $this->queue[] = "ALTER TABLE `{$tableDef['name']}`"
-                    . " ADD COLUMN `{$column}` {$columnDef['attributes']}";
+                $this->queue[] = "ALTER TABLE {$this->quoteIdentifier($tableDef['name'])}"
+                    . " ADD COLUMN {$this->quoteIdentifier($column)} {$columnDef['attributes']}";
                 array_push($tableDef['columns'], $columnDef);
             }
         } else {
@@ -145,14 +145,14 @@ class Tables
         $columnList = '';
         $firstComma = '';
         foreach ($columns as $col) {
-            $columnList .= "{$firstComma}`{$col}`";
+            $columnList .= $firstComma . $this->quoteIdentifier($col);
             $firstComma = ', ';
         }
         if (isset($this->tables[$table])) {
             if (isset($this->tables[$table]['create']) && $this->tables[$table]['create']) {
                 $this->tables[$table]['keys']['PRIMARY']['columns'] = $columnList;
             } else {
-                $this->queue[] = "ALTER TABLE `{$this->tables[$table]['name']}` ADD PRIMARY KEY({$columnList})";
+                $this->queue[] = "ALTER TABLE {$this->quoteIdentifier($this->tables[$table]['name'])} ADD PRIMARY KEY({$columnList})";
             }
         } else {
             return $this->tableNotEstablished();
@@ -194,7 +194,7 @@ class Tables
             } else {
                 $add = ($unique ? 'ADD UNIQUE INDEX' : 'ADD INDEX');
                 $tableName = isset($tableDef['name']) && is_string($tableDef['name']) ? $tableDef['name'] : $table;
-                $this->queue[] = "ALTER TABLE `{$tableName}` {$add} `{$name}` ({$columnList})";
+                $this->queue[] = "ALTER TABLE {$this->quoteIdentifier($tableName)} {$add} {$this->quoteIdentifier($name)} ({$columnList})";
             }
         } else {
             return $this->tableNotEstablished();
@@ -215,16 +215,13 @@ class Tables
     protected function quoteIndexColumnName($columnName)
     {
         $column = str_replace(' ', '', $columnName);
-        $length = '';
 
-        $lengthPosition = strpos($column, '(');
-        if ($lengthPosition) {
-            $length = ' ' . substr($column, $lengthPosition);
-            $column = substr($column, 0, $lengthPosition);
+        // only a numeric prefix length is split off; anything else stays part of the name
+        if (preg_match('/^(.+)\((\d+)\)\z/', $column, $matches)) {
+            return $this->quoteIdentifier($matches[1]) . " ({$matches[2]})";
         }
-        $quotedName = "`{$column}`{$length}";
 
-        return $quotedName;
+        return $this->quoteIdentifier($column);
     }
 
     /**
@@ -357,8 +354,8 @@ class Tables
 
                 return true;
             } else {
-                $this->queue[] = "ALTER TABLE `{$tableDef['name']}` " .
-                    "CHANGE COLUMN `{$column}` `{$newName}` {$attributes} ";
+                $this->queue[] = "ALTER TABLE {$this->quoteIdentifier($tableDef['name'])} " .
+                    "CHANGE COLUMN {$this->quoteIdentifier($column)} {$this->quoteIdentifier($newName)} {$attributes} ";
                 // loop through and find the column
                 foreach ($tableDef['columns'] as &$col) {
                     if (strcasecmp($col['name'], $column) === 0) {
@@ -397,8 +394,8 @@ class Tables
         if (is_array($tableDef)) {
             $tableDef['name'] = $copy;
             if ($withData) {
-                $this->queue[] = "CREATE TABLE `{$copy}` LIKE `{$original}` ;";
-                $this->queue[] = "INSERT INTO `{$copy}` SELECT * FROM `{$original}` ;";
+                $this->queue[] = "CREATE TABLE {$this->quoteIdentifier($copy)} LIKE {$this->quoteIdentifier($original)} ;";
+                $this->queue[] = "INSERT INTO {$this->quoteIdentifier($copy)} SELECT * FROM {$this->quoteIdentifier($original)} ;";
             } else {
                 $tableDef['create'] = true;
                 $this->queue[] = array('createtable' => $newTable);
@@ -424,7 +421,7 @@ class Tables
         // Find table def.
         if (isset($this->tables[$table])) {
             $tableDef = $this->tables[$table];
-            $this->queue[] = "ALTER TABLE `{$tableDef['name']}` DROP COLUMN `{$column}`";
+            $this->queue[] = "ALTER TABLE {$this->quoteIdentifier($tableDef['name'])} DROP COLUMN {$this->quoteIdentifier($column)}";
         } else {
             return $this->tableNotEstablished();
         }
@@ -444,7 +441,7 @@ class Tables
     {
         if (isset($this->tables[$table])) {
             $tableDef = $this->tables[$table];
-            $this->queue[] = "ALTER TABLE `{$tableDef['name']}` DROP INDEX `{$name}`";
+            $this->queue[] = "ALTER TABLE {$this->quoteIdentifier($tableDef['name'])} DROP INDEX {$this->quoteIdentifier($name)}";
         } else {
             return $this->tableNotEstablished();
         }
@@ -477,7 +474,7 @@ class Tables
                 // build drops to strip everything but the PRIMARY
                 foreach ($tableDef['keys'] as $keyName => $key) {
                     if ($keyName !== 'PRIMARY') {
-                        $this->queue[] = "ALTER TABLE `{$tableDef['name']}` DROP INDEX {$keyName}";
+                        $this->queue[] = "ALTER TABLE {$this->quoteIdentifier($tableDef['name'])} DROP INDEX {$this->quoteIdentifier($keyName)}";
                     }
                 }
             }
@@ -499,7 +496,7 @@ class Tables
     {
         if (isset($this->tables[$table])) {
             $tableDef = $this->tables[$table];
-            $this->queue[] = "ALTER TABLE `{$tableDef['name']}` DROP PRIMARY KEY ";
+            $this->queue[] = "ALTER TABLE {$this->quoteIdentifier($tableDef['name'])} DROP PRIMARY KEY ";
         } else {
             return $this->tableNotEstablished();
         }
@@ -518,7 +515,7 @@ class Tables
     {
         if (isset($this->tables[$table])) {
             $tableDef = $this->tables[$table];
-            $this->queue[] = "DROP TABLE `{$tableDef['name']}` ";
+            $this->queue[] = "DROP TABLE {$this->quoteIdentifier($tableDef['name'])} ";
             unset($this->tables[$table]);
         }
         // no table is not an error since we are dropping it anyway
@@ -539,7 +536,7 @@ class Tables
         if (isset($this->tables[$table])) {
             $tableDef = $this->tables[$table];
             $newTable = $this->name($newName);
-            $this->queue[] = "ALTER TABLE `{$tableDef['name']}` RENAME TO `{$newTable}`";
+            $this->queue[] = "ALTER TABLE {$this->quoteIdentifier($tableDef['name'])} RENAME TO {$this->quoteIdentifier($newTable)}";
             $tableDef['name'] = $newTable;
             $this->tables[$newName] = $tableDef;
             unset($this->tables[$table]);
@@ -568,7 +565,7 @@ class Tables
                 $tableDef['options'] = $options;
                 return true;
             } else {
-                $this->queue[] = "ALTER TABLE `{$tableDef['name']}` {$options} ";
+                $this->queue[] = "ALTER TABLE {$this->quoteIdentifier($tableDef['name'])} {$options} ";
                 $tableDef['options'] = $options;
                 return true;
             }
@@ -640,7 +637,7 @@ class Tables
                 /** @var  \CriteriaCompo $criteria */
                 $where = $criteria->renderWhere();
             }
-            $this->queue[] = "DELETE FROM `{$tableDef['name']}` {$where}";
+            $this->queue[] = "DELETE FROM {$this->quoteIdentifier($tableDef['name'])} {$where}";
         } else {
             return $this->tableNotEstablished();
         }
@@ -675,7 +672,7 @@ class Tables
                 $columnName = $col['name'];
                 $comma = empty($colSql) ? '' : ', ';
                 if (isset($columns[$columnName])) {
-                    $colSql .= "{$comma}`{$columnName}`";
+                    $colSql .= $comma . $this->quoteIdentifier($columnName);
                     $valSql .= $comma
                         . ($quoteValue ? $this->db->quote($columns[$columnName]) : $columns[$columnName]);
                 }
@@ -685,7 +682,7 @@ class Tables
                 $this->lastErrNo = -1;
                 return false;
             }
-            $sql = "INSERT INTO `{$tableDef['name']}` ({$colSql}) VALUES({$valSql})";
+            $sql = "INSERT INTO {$this->quoteIdentifier($tableDef['name'])} ({$colSql}) VALUES({$valSql})";
             $this->queue[] = $sql;
 
             return true;
@@ -728,7 +725,7 @@ class Tables
                 $columnName = $col['name'];
                 $comma = empty($colSql) ? '' : ', ';
                 if (isset($columns[$columnName])) {
-                    $colSql .= "{$comma}`{$columnName}` = "
+                    $colSql .= $comma . $this->quoteIdentifier($columnName) . ' = '
                         . ($quoteValue ? $this->db->quote($columns[$columnName]) : $columns[$columnName]);
                 }
             }
@@ -737,7 +734,7 @@ class Tables
                 $this->lastErrNo = -1;
                 return false;
             }
-            $sql = "UPDATE `{$tableDef['name']}` SET {$colSql} {$where}";
+            $sql = "UPDATE {$this->quoteIdentifier($tableDef['name'])} SET {$colSql} {$where}";
             $this->queue[] = $sql;
 
             return true;
@@ -757,7 +754,7 @@ class Tables
     {
         if (isset($this->tables[$table])) {
             $tableDef = $this->tables[$table];
-            $this->queue[] = "TRUNCATE TABLE `{$tableDef['name']}`";
+            $this->queue[] = "TRUNCATE TABLE {$this->quoteIdentifier($tableDef['name'])}";
         } else {
             return $this->tableNotEstablished();
         }
@@ -794,7 +791,7 @@ class Tables
             if ($prefixed && isset($tableDef['name']) && is_string($tableDef['name'])) {
                 $tableName = $tableDef['name'];
             }
-            $sql = "CREATE TABLE `{$tableName}` (";
+            $sql = "CREATE TABLE {$this->quoteIdentifier($tableName)} (";
             $firstComma = '';
             foreach ($tableDef['columns'] as $col) {
                 if (
@@ -808,7 +805,7 @@ class Tables
                     return false;
                 }
 
-                $sql .= "{$firstComma}\n    `{$col['name']}`  {$col['attributes']}";
+                $sql .= "{$firstComma}\n    {$this->quoteIdentifier($col['name'])}  {$col['attributes']}";
                 $firstComma = ',';
             }
             $keySql = '';
@@ -821,7 +818,7 @@ class Tables
                     $keySql .= ",\n  PRIMARY KEY ({$key['columns']})";
                 } else {
                     $unique = !empty($key['unique']) ? 'UNIQUE ' : '';
-                    $keySql .= ",\n  {$unique}KEY {$keyName} ({$key['columns']})";
+                    $keySql .= ",\n  {$unique}KEY {$this->quoteIdentifier($keyName)} ({$key['columns']})";
                 }
             }
             $sql .= $keySql;
@@ -951,8 +948,8 @@ class Tables
         $sql  = 'SELECT TABLE_NAME, ENGINE, CHARACTER_SET_NAME ';
         $sql .= ' FROM `INFORMATION_SCHEMA`.`TABLES` t, ';
         $sql .= ' `INFORMATION_SCHEMA`.`COLLATIONS` c ';
-        $sql .= ' WHERE t.TABLE_SCHEMA = \'' . $this->databaseName . '\' ';
-        $sql .= ' AND t.TABLE_NAME = \'' . $this->name($table) . '\' ';
+        $sql .= ' WHERE t.TABLE_SCHEMA = ' . $this->db->quote($this->databaseName) . ' ';
+        $sql .= ' AND t.TABLE_NAME = ' . $this->db->quote($this->name($table)) . ' ';
         $sql .= ' AND t.TABLE_COLLATION  = c.COLLATION_NAME ';
 
         $result = $this->execSql($sql);
@@ -969,8 +966,8 @@ class Tables
 
         $sql  = 'SELECT * ';
         $sql .= ' FROM `INFORMATION_SCHEMA`.`COLUMNS` ';
-        $sql .= ' WHERE TABLE_SCHEMA = \'' . $this->databaseName . '\' ';
-        $sql .= ' AND TABLE_NAME = \'' . $this->name($table) . '\' ';
+        $sql .= ' WHERE TABLE_SCHEMA = ' . $this->db->quote($this->databaseName) . ' ';
+        $sql .= ' AND TABLE_NAME = ' . $this->db->quote($this->name($table)) . ' ';
         $sql .= ' ORDER BY `ORDINAL_POSITION` ';
 
         $result = $this->execSql($sql);
@@ -999,8 +996,8 @@ class Tables
         $sql  = 'SELECT `INDEX_NAME`, `SEQ_IN_INDEX`, `NON_UNIQUE`, ';
         $sql .= ' `COLUMN_NAME`, `SUB_PART` ';
         $sql .= ' FROM `INFORMATION_SCHEMA`.`STATISTICS` ';
-        $sql .= ' WHERE TABLE_SCHEMA = \'' . $this->databaseName . '\' ';
-        $sql .= ' AND TABLE_NAME = \'' . $this->name($table) . '\' ';
+        $sql .= ' WHERE TABLE_SCHEMA = ' . $this->db->quote($this->databaseName) . ' ';
+        $sql .= ' AND TABLE_NAME = ' . $this->db->quote($this->name($table)) . ' ';
         $sql .= ' ORDER BY `INDEX_NAME`, `SEQ_IN_INDEX` ';
 
         $result = $this->execSql($sql);

@@ -45,7 +45,7 @@ class TableLoad
         /** @var \XoopsDatabase */
         $db = \XoopsDatabaseFactory::getDatabaseConnection();
 
-        $prefixedTable = $db->prefix($table);
+        $prefixedTable = static::quoteIdentifier($db->prefix($table));
         $count = 0;
 
         foreach ($data as $row) {
@@ -60,7 +60,7 @@ class TableLoad
                     $valueClause .= ', ';
                 }
 
-                $insertInto .= '`' . str_replace('`', '``', $column) . '`';
+                $insertInto .= static::quoteIdentifier($column);
                 $valueClause .= $db->quote($value);
             }
 
@@ -109,7 +109,7 @@ class TableLoad
         /** @var \XoopsDatabase */
         $db = \XoopsDatabaseFactory::getDatabaseConnection();
 
-        $prefixedTable = $db->prefix($table);
+        $prefixedTable = static::quoteIdentifier($db->prefix($table));
         $sql = 'TRUNCATE TABLE ' . $prefixedTable;
         // TRUNCATE is DDL — prefer exec() where the connection provides it,
         // falling back to queryF() on cores that predate exec().
@@ -133,17 +133,19 @@ class TableLoad
         /** @var \XoopsDatabase */
         $db = \XoopsDatabaseFactory::getDatabaseConnection();
 
-        $prefixedTable = $db->prefix($table);
+        $prefixedTable = static::quoteIdentifier($db->prefix($table));
         $sql = 'SELECT COUNT(*) as `count` FROM ' . $prefixedTable . ' ';
         if (isset($criteria) && is_subclass_of($criteria, '\CriteriaElement')) {
             /** @var  \CriteriaCompo $criteria */
             $sql .= $criteria->renderWhere();
         }
         $result = $db->query($sql);
+        if (!$result instanceof \mysqli_result) {
+            return 0;
+        }
         $row = $db->fetchArray($result);
-        $count = $row['count'];
         $db->freeRecordSet($result);
-        return (int)$count;
+        return is_array($row) ? (int) $row['count'] : 0;
     }
 
     /**
@@ -160,7 +162,7 @@ class TableLoad
         /** @var \XoopsDatabase */
         $db = \XoopsDatabaseFactory::getDatabaseConnection();
 
-        $prefixedTable = $db->prefix($table);
+        $prefixedTable = static::quoteIdentifier($db->prefix($table));
         $sql = 'SELECT * FROM ' . $prefixedTable . ' ';
         if (isset($criteria) && is_subclass_of($criteria, '\CriteriaElement')) {
             /** @var  \CriteriaCompo $criteria */

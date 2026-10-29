@@ -14,6 +14,7 @@
 
 ### Security
 * `ProxyCheck`/`IPAddress::fromRequest()`: the `proxy_env` header is only used when `REMOTE_ADDR` is listed in the new `$xoopsConfig['proxy_trusted']` (addresses or CIDR ranges, array or comma separated). Entries are read from right to left, skipping trusted proxies, and any entry that is not an IP address stops the search. IPv4-mapped IPv6 addresses (`::ffff:10.0.0.1`, as a dual-stack listener reports an IPv4 peer) match IPv4 entries. **Sites that set `proxy_env` must add `proxy_trusted`**; until then the peer address is used (#187)
+* `Database\Tables`/`Database\TableLoad`: caller-supplied table, column and index names are backtick-quoted with embedded backticks doubled (including `TableLoad::countRows()`/`extractRows()`/`truncateTable()` and `Tables::dropIndexes()`, which did not quote at all); `INFORMATION_SCHEMA` lookups quote the table and schema names as string literals; an index column prefix length must be numeric (`name(20)`). Index column lists read back from an existing table (`getTableIndexes()`) keep their unquoted form, which `Migrate` compares against. A name that is not a string or int throws `InvalidArgumentException`
 
 ### Bug Fixes
 * `ProxyCheck`: parse RFC 7239 `Forwarded` values case-insensitively, respect quoted delimiters, strip node ports, reject elements with zero or several `for` parameters, and stop at any node that is not an IP address with an optional numeric port (#189)
@@ -26,6 +27,7 @@
 * `Jwt\TokenReader::fromHeader()`: custom headers accept `Bearer <token>` again, as in 1.2.x (#196)
 * `FilterInput::cleanVar()` accepts a `null` type, which `Request::getHeader()` passes, without a PHP 8.1+ deprecation
 * `Ulid::getDateTime()`: document `@throws \RuntimeException`
+* `Database\TableLoad::countRows()` returns 0 when the query fails instead of raising a warning
 
 ### Tests
 * Add `Serializer` and `SerializableTrait` tests
