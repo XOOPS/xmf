@@ -52,11 +52,84 @@ class MigrateTest extends \PHPUnit\Framework\TestCase
                 array('setTableOptions', 'demo', 'ENGINE=InnoDB'),
                 array('addColumn', 'demo', 'id', 'int NOT NULL'),
                 array('addColumn', 'demo', 'title', 'varchar(255) NOT NULL'),
-                array('addPrimaryKey', 'demo', '`id`'),
-                array('addIndex', 'idx_title', 'demo', '`title`', false),
+                array('addPrimaryKey', 'demo', 'id'),
+                array('addIndex', 'idx_title', 'demo', 'title', false),
             ),
             $handler->calls
         );
+    }
+
+    public function testSynchronizeTableTreatsQuotedTargetKeysAsEqualToIntrospectedKeys()
+    {
+        $migrate = new TestableMigrate();
+        $migrate->setTargetDefinitions(array(
+            'demo' => array(
+                'columns' => array(
+                    array('name' => 'id', 'attributes' => 'int NOT NULL'),
+                    array('name' => 'title', 'attributes' => 'varchar(255) NOT NULL'),
+                ),
+                'keys' => array(
+                    'PRIMARY' => array('columns' => '`id`'),
+                    'idx_title' => array('columns' => '`id`, `title` (20)', 'unique' => false),
+                ),
+            ),
+        ));
+        $handler = new FakeMigrateTableHandler();
+        $handler->existingColumns = array('id' => 'int NOT NULL', 'title' => 'varchar(255) NOT NULL');
+        $handler->existingIndexes = array(
+            'PRIMARY' => array('columns' => 'id', 'unique' => true),
+            'idx_title' => array('columns' => 'id, title (20)', 'unique' => false),
+        );
+        $migrate->setTableHandler($handler);
+
+        $migrate->callSynchronizeTable('demo');
+
+        $this->assertSame(array(), $handler->calls);
+    }
+
+    public function testSynchronizeTablePassesCanonicalKeyColumnsToDdl()
+    {
+        $migrate = new TestableMigrate();
+        $migrate->setTargetDefinitions(array(
+            'demo' => array(
+                'columns' => array(
+                    array('name' => 'id', 'attributes' => 'int NOT NULL'),
+                ),
+                'keys' => array(
+                    'idx_odd' => array('columns' => '`we``ird`(10), b', 'unique' => true),
+                ),
+            ),
+        ));
+        $handler = new FakeMigrateTableHandler();
+        $handler->existingColumns = array('id' => 'int NOT NULL');
+        $handler->existingIndexes = array();
+        $migrate->setTableHandler($handler);
+
+        $migrate->callSynchronizeTable('demo');
+
+        $this->assertSame(array(array('addIndex', 'idx_odd', 'demo', 'we`ird (10), b', true)), $handler->calls);
+    }
+
+    public function testSynchronizeTableThrowsForEmptyKeyColumn()
+    {
+        $migrate = new TestableMigrate();
+        $migrate->setTargetDefinitions(array(
+            'demo' => array(
+                'columns' => array(
+                    array('name' => 'id', 'attributes' => 'int NOT NULL'),
+                ),
+                'keys' => array(
+                    'idx_bad' => array('columns' => 'id, ', 'unique' => false),
+                ),
+            ),
+        ));
+        $handler = new FakeMigrateTableHandler();
+        $handler->existingColumns = array('id' => 'int NOT NULL');
+        $migrate->setTableHandler($handler);
+
+        $this->expectException(SchemaDefinitionException::class);
+
+        $migrate->callSynchronizeTable('demo');
     }
 
     public function testSynchronizeTableThrowsForMalformedKeyDefinition()

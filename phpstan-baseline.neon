@@ -277,12 +277,6 @@ parameters:
 			path: src/Database/Tables.php
 
 		-
-			message: '#^Parameter \#1 \$columnName of method Xmf\\Database\\Tables\:\:quoteIndexColumnName\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Database/Tables.php
-
-		-
 			message: '#^Parameter \#1 \$default of method Xmf\\Database\\Tables\:\:quoteDefaultClause\(\) expects string\|null, mixed given\.$#'
 			identifier: argument.type
 			count: 1

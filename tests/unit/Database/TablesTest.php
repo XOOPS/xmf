@@ -65,7 +65,7 @@ class TablesTest extends \PHPUnit\Framework\TestCase
         );
 
         $tables->addColumn('demo', 'a` INT, DROP COLUMN `b', 'INT');
-        $tables->addPrimaryKey('demo', 'i`d');
+        $tables->addPrimaryKey('demo', 'i`d, code (8)');
         $tables->addIndex('ix`1', 'demo', 'c`1(10),c2');
         $tables->alterColumn('demo', 'o`ld', 'INT', 'n`ew');
         $tables->dropColumn('demo', 'x`y');
@@ -75,7 +75,7 @@ class TablesTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(
             array(
                 'ALTER TABLE `xoops_de``mo` ADD COLUMN `a`` INT, DROP COLUMN ``b` INT',
-                'ALTER TABLE `xoops_de``mo` ADD PRIMARY KEY(`i``d`)',
+                'ALTER TABLE `xoops_de``mo` ADD PRIMARY KEY(`i``d`, `code` (8))',
                 'ALTER TABLE `xoops_de``mo` ADD INDEX `ix``1` (`c``1` (10), `c2`)',
                 'ALTER TABLE `xoops_de``mo` CHANGE COLUMN `o``ld` `n``ew` INT ',
                 'ALTER TABLE `xoops_de``mo` DROP COLUMN `x``y`',

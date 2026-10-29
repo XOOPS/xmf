@@ -141,11 +141,11 @@ class Tables
      */
     public function addPrimaryKey($table, $column)
     {
-        $columns = str_getcsv(str_replace(' ', '', $column));
+        $columns = explode(',', $column);
         $columnList = '';
         $firstComma = '';
         foreach ($columns as $col) {
-            $columnList .= $firstComma . $this->quoteIdentifier($col);
+            $columnList .= $firstComma . $this->quoteIndexColumnName($col);
             $firstComma = ', ';
         }
         if (isset($this->tables[$table])) {
@@ -174,7 +174,7 @@ class Tables
      */
     public function addIndex($name, $table, $column, $unique = false)
     {
-        $columns = str_getcsv($column);
+        $columns = explode(',', $column);
         $columnList = '';
         $firstComma = '';
         foreach ($columns as $col) {

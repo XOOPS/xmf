@@ -403,9 +403,11 @@ class Migrate
             throw SchemaDefinitionException::forTable($tableName);
         }
 
+        $columns = $this->canonicalKeyColumns($tableName, $keyData['columns']);
+
         if ($keyName === 'PRIMARY') {
             return [
-                'columns' => $keyData['columns'],
+                'columns' => $columns,
                 'unique' => true,
             ];
         }
@@ -415,9 +417,38 @@ class Migrate
         }
 
         return [
-            'columns' => $keyData['columns'],
+            'columns' => $columns,
             'unique' => $keyData['unique'],
         ];
+    }
+
+    /**
+     * Normalize a key column list to the form Tables::getTable() reports,
+     * e.g. "`id`, `title`(20)" becomes "id, title (20)", so target and
+     * existing keys compare equal and Tables quotes each name exactly once.
+     *
+     * @throws SchemaDefinitionException on an empty column entry
+     */
+    private function canonicalKeyColumns(string $tableName, string $columns): string
+    {
+        $canonical = [];
+        foreach (explode(',', $columns) as $column) {
+            $column = trim($column);
+            $length = '';
+            if (preg_match('/^(.+?)\s*\((\d+)\)\z/', $column, $matches)) {
+                $column = $matches[1];
+                $length = " ({$matches[2]})";
+            }
+            if (preg_match('/^`((?:[^`]|``)*)`\z/', $column, $matches)) {
+                $column = str_replace('``', '`', $matches[1]);
+            }
+            if ($column === '') {
+                throw SchemaDefinitionException::forTable($tableName);
+            }
+            $canonical[] = $column . $length;
+        }
+
+        return implode(', ', $canonical);
     }
 
     /**
