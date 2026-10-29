@@ -89,5 +89,5 @@ class XoopsDatabaseFactory
     /**
      * @return XoopsDatabase
      */
-    public static function getDatabaseConnection() {}
+    public static function getDatabaseConnection() { return new XoopsDatabase(); }
 }

@@ -44,7 +44,7 @@ class XoopsCache
     /**
      * @return static
      */
-    public static function getInstance() {}
+    public static function getInstance() { return new static(); }
 
     /**
      * @param string $key
