@@ -3,6 +3,16 @@
 ## [Unreleased]
 
 ### Security
+* `FilterInput`: arrays are filtered at every nesting level (nested values were returned unfiltered; arrays deeper than 32 levels are dropped); `clean()` uses the calling class's own instance, so a subclass's policy no longer applies to later `FilterInput::clean()` and `Request` calls; `WEBURL` rejects values containing a backslash (`/\host` is protocol-relative in browsers) and values `parse_url()` cannot parse (their scheme went unchecked)
+* `Database\Tables`: unforced writes from `executeQueue()` are refused while the core's `allowWebChanges` is false (GET requests), as before 1.3.1; `executeQueue(true)` still runs them. `executeQueue()` keeps the error `execSql()` recorded instead of replacing it with the connection's
+
+### Bug Fixes
+* `Highlighter::apply()`: empty search terms (leading or trailing space, `''` in the array) are skipped instead of looping until memory runs out
+* `Debug`: first use no longer re-enables Kint when the application disabled it
+
+## [1.3.3] - 2026-10-14
+
+### Security
 * `ProxyCheck`/`IPAddress::fromRequest()`: the `proxy_env` header is only used when `REMOTE_ADDR` is listed in the new `$xoopsConfig['proxy_trusted']` (addresses or CIDR ranges, array or comma separated). Entries are read from right to left, skipping trusted proxies, and any entry that is not an IP address stops the search. IPv4-mapped IPv6 addresses (`::ffff:10.0.0.1`, as a dual-stack listener reports an IPv4 peer) match IPv4 entries. **Sites that set `proxy_env` must add `proxy_trusted`**; until then the peer address is used (#187)
 
 ### Bug Fixes

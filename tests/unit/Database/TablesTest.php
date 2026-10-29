@@ -205,6 +205,54 @@ class TablesTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(array('queryF'), $db->calls);
     }
 
+    public function testExecSqlRefusesUnforcedWriteDuringGetRequest()
+    {
+        $db = new WebChangesFakeDatabase(false);
+        $tables = new TestableTables();
+        $tables->setDb($db);
+
+        $this->assertFalse($tables->callExecSql('DROP TABLE `demo`'));
+        $this->assertSame(array(), $db->calls);
+        $this->assertSame(-1, $tables->getLastErrNo());
+    }
+
+    public function testExecuteQueueKeepsGetRequestRefusalError()
+    {
+        $db = new WebChangesFakeDatabase(false);
+        $tables = new TestableTables();
+        $tables->setDb($db);
+        $tables->setTables(array());
+        $tables->addToQueue('DROP TABLE `demo`');
+
+        $this->assertFalse($tables->executeQueue(false));
+        $this->assertSame(array(), $db->calls);
+        $this->assertSame(-1, $tables->getLastErrNo());
+        $this->assertNotSame('', $tables->getLastError());
+    }
+
+    public function testExecSqlForcedWriteRunsDuringGetRequest()
+    {
+        $db = new WebChangesFakeDatabase(false);
+        $tables = new TestableTables();
+        $tables->setDb($db);
+
+        $tables->callExecSql('ALTER TABLE `demo` ADD COLUMN `x` INT', true);
+        $tables->callExecSql('SELECT 1');
+
+        $this->assertSame(array('exec', 'query'), $db->calls);
+    }
+
+    public function testExecSqlUnforcedWriteRunsWhenWebChangesAllowed()
+    {
+        $db = new WebChangesFakeDatabase(true);
+        $tables = new TestableTables();
+        $tables->setDb($db);
+
+        $tables->callExecSql('DROP TABLE `demo`');
+
+        $this->assertSame(array('exec'), $db->calls);
+    }
+
     private function captureWarning(callable $callback): string
     {
         $warning = '';
@@ -383,6 +431,16 @@ class RoutingFakeDatabase
     public function errno(): int
     {
         return 0;
+    }
+}
+
+/**
+ * Fake connection carrying the core's allowWebChanges flag (false on GET).
+ */
+class WebChangesFakeDatabase extends RoutingFakeDatabase
+{
+    public function __construct(public bool $allowWebChanges)
+    {
     }
 }
 

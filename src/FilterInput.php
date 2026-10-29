@@ -41,6 +41,12 @@ class FilterInput
      */
     private const MAX_FILTER_PASSES = 10;
 
+    /**
+     * Deepest array nesting process() descends into (PHP's own
+     * max_input_nesting_level defaults to 64).
+     */
+    private const MAX_ARRAY_DEPTH = 32;
+
     protected $tagsArray;         // default is empty array
     protected $attrArray;         // default is empty array
 
@@ -158,14 +164,7 @@ class FilterInput
     public function process($source)
     {
         if (is_array($source)) {
-            // clean all elements in this array
-            foreach ($source as $key => $value) {
-                // filter element for XSS and other 'bad' code etc.
-                if (is_string($value)) {
-                    $source[$key] = $this->remove($this->decode($value));
-                }
-            }
-            return $source;
+            return $this->processArray($source, 1);
         }
         if (is_string($source)) {
             // clean this string
@@ -190,15 +189,34 @@ class FilterInput
      */
     public static function clean($source, $type = 'string')
     {
-        static $filter = null;
+        // getInstance() caches per class, so a subclass's policy never leaks
+        // into FilterInput::clean() (a method-local static would be shared)
+        return static::getInstance()->cleanVar($source, $type);
+    }
 
-        // need an instance for methods, since this is supposed to be static
-        // we must instantiate the class - this will take defaults
-        if (!is_object($filter)) {
-            $filter = static::getInstance();
+    /**
+     * Filter every string in an array, descending into nested arrays.
+     * Arrays nested deeper than MAX_ARRAY_DEPTH are dropped.
+     *
+     * @param array<mixed> $source array to be 'cleaned'
+     * @param int          $depth  nesting level of $source
+     *
+     * @return array<mixed> 'cleaned' array
+     */
+    private function processArray(array $source, int $depth): array
+    {
+        foreach ($source as $key => $value) {
+            if (is_string($value)) {
+                $source[$key] = $this->remove($this->decode($value));
+            } elseif (is_array($value)) {
+                if ($depth >= self::MAX_ARRAY_DEPTH) {
+                    unset($source[$key]);
+                } else {
+                    $source[$key] = $this->processArray($value, $depth + 1);
+                }
+            }
         }
-
-        return $filter->cleanVar($source, $type);
+        return $source;
     }
 
     /**
@@ -277,16 +295,18 @@ class FilterInput
             case 'WEBURL':
                 /** @var string $result */
                 $result = trim((string) $this->process($source));
-                // reject protocol-relative URLs (//evil.example) and non-http(s) schemes
-                if (str_starts_with($result, '//')) {
+                // reject protocol-relative URLs (//evil.example) and non-http(s) schemes;
+                // browsers read a backslash as a slash, so /\evil.example is protocol-relative too
+                if (str_starts_with($result, '//') || str_contains($result, '\\')) {
                     $result = '';
                 }
                 if ($result !== '') {
                     $urlparts = parse_url($result);
+                    // an unparseable value (javascript://host:99999/...) has no checkable scheme
                     if (
-                        is_array($urlparts)
-                        && !empty($urlparts['scheme'])
-                        && !($urlparts['scheme'] === 'http' || $urlparts['scheme'] === 'https')
+                        !is_array($urlparts)
+                        || (!empty($urlparts['scheme'])
+                        && !($urlparts['scheme'] === 'http' || $urlparts['scheme'] === 'https'))
                     ) {
                         $result = '';
                     }

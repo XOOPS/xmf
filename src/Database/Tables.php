@@ -610,11 +610,9 @@ class Tables
                 $this->lastErrNo = -1;
                 return false;
             }
+            // execSql() records the error, including its own GET-request refusal
             $result = $this->execSql($ddl, $force);
             if (!$result) {
-                $this->lastError = $this->db->error();
-                $this->lastErrNo = $this->db->errno();
-
                 return false;
             }
         }
@@ -853,8 +851,15 @@ class Tables
         // its only writes are the DDL rendered by executeQueue(). Route reads
         // through query() and writes/DDL through the cross-version write path
         // (exec() where available, else queryF()). $force keeps its "run even in
-        // safe requests" meaning by always taking the write path.
+        // safe requests" meaning by always taking the write path. Unforced
+        // writes honour the core's allowWebChanges (false during GET requests),
+        // which exec()/queryF() do not check themselves.
         $isSelect = 0 === stripos(ltrim($sql), 'select');
+        if (!$force && !$isSelect && property_exists($this->db, 'allowWebChanges') && !$this->db->allowWebChanges) {
+            $this->lastError = 'Database updates are not allowed during a GET request';
+            $this->lastErrNo = -1;
+            return false;
+        }
         if ($force || !$isSelect) {
             $result = self::executeWrite($this->db, $sql);
         } else {

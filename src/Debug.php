@@ -41,7 +41,6 @@ class Debug extends Kint
             $class = get_called_class();
             parent::$aliases[] = array($class, 'dump');
             parent::$aliases[] = array($class, 'backtrace');
-            parent::$enabled_mode = true;
             parent::$mode_default = Kint::MODE_RICH;
             // display output inline ::folder = false, true puts all output at bottom of window
             \Kint\Renderer\RichRenderer::$folder = false;
