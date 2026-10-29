@@ -152,6 +152,35 @@ class FilterInputTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * @dataProvider entityHiddenSchemeProvider
+     */
+    public function testWeburlRejectsEntityHiddenScheme(string $url)
+    {
+        $this->assertSame('', FilterInput::clean($url, 'WEBURL'));
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function entityHiddenSchemeProvider(): array
+    {
+        return array(
+            'html5 named colon' => array('javascript&colon;alert(1)'),
+            'html5 named tab' => array('java&Tab;script:alert(1)'),
+            'numeric without semicolon' => array('javascript&#0058alert(1)'),
+            'entity in host part' => array('page&colon;x'),
+        );
+    }
+
+    public function testWeburlKeepsAmpersandsAfterPathOrQueryStart()
+    {
+        $this->assertSame('https://example.com/a?b=1&c=2', FilterInput::clean('https://example.com/a?b=1&c=2', 'WEBURL'));
+        $this->assertSame('page.php?a=1&colon=2', FilterInput::clean('page.php?a=1&colon=2', 'WEBURL'));
+        $this->assertSame('/p&q', FilterInput::clean('/p&q', 'WEBURL'));
+        $this->assertSame('#a&b', FilterInput::clean('#a&b', 'WEBURL'));
+    }
+
+    /**
      * @dataProvider getTestForCleanVarType
      */
     public function testCleanVarTypes($value, $type, $expected)

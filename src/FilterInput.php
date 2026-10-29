@@ -296,8 +296,14 @@ class FilterInput
                 /** @var string $result */
                 $result = trim((string) $this->process($source));
                 // reject protocol-relative URLs (//evil.example) and non-http(s) schemes;
-                // browsers read a backslash as a slash, so /\evil.example is protocol-relative too
-                if (str_starts_with($result, '//') || str_contains($result, '\\')) {
+                // browsers read a backslash as a slash, so /\evil.example is protocol-relative too;
+                // an entity before the first / ? # can hide a scheme from parse_url()
+                // (javascript&colon;, java&Tab;script:, javascript&#0058) that the browser decodes
+                if (
+                    str_starts_with($result, '//')
+                    || str_contains($result, '\\')
+                    || preg_match('#^[^/?\#]*&#', $result)
+                ) {
                     $result = '';
                 }
                 if ($result !== '') {

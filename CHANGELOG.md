@@ -3,8 +3,8 @@
 ## [Unreleased]
 
 ### Security
-* `FilterInput`: arrays are filtered at every nesting level (nested values were returned unfiltered; arrays deeper than 32 levels are dropped); `clean()` uses the calling class's own instance, so a subclass's policy no longer applies to later `FilterInput::clean()` and `Request` calls; `WEBURL` rejects values containing a backslash (`/\host` is protocol-relative in browsers) and values `parse_url()` cannot parse (their scheme went unchecked)
-* `Database\Tables`: unforced writes from `executeQueue()` are refused while the core's `allowWebChanges` is false (GET requests), as before 1.3.1; `executeQueue(true)` still runs them. `executeQueue()` keeps the error `execSql()` recorded instead of replacing it with the connection's
+* `FilterInput`: arrays are filtered at every nesting level (nested values were returned unfiltered; arrays deeper than 32 levels are dropped); `clean()` uses the calling class's own instance, so a subclass's policy no longer applies to later `FilterInput::clean()` and `Request` calls; `WEBURL` rejects values containing a backslash (`/\host` is protocol-relative in browsers) and values `parse_url()` cannot parse (their scheme went unchecked), and values with an `&` before the first `/`, `?` or `#`, where an entity such as `javascript&colon;` hides a scheme the browser decodes
+* `Database\Tables`: unforced writes from `executeQueue()` are refused while the core's `allowWebChanges` is false (GET requests), as before 1.3.1; `executeQueue(true)` still runs them. `executeQueue()` keeps the error `execSql()` recorded instead of replacing it with the connection's last error, which is empty after a refused write
 
 ### Bug Fixes
 * `Highlighter::apply()`: empty search terms (leading or trailing space, `''` in the array) are skipped instead of looping until memory runs out
