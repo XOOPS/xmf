@@ -141,11 +141,11 @@ class Tables
      */
     public function addPrimaryKey($table, $column)
     {
-        $columns = explode(',', $column);
+        $columns = str_getcsv($column, ',', '"', '');
         $columnList = '';
         $firstComma = '';
         foreach ($columns as $col) {
-            $columnList .= $firstComma . $this->quoteIndexColumnName($col);
+            $columnList .= $firstComma . $this->quoteIndexColumnName((string) $col);
             $firstComma = ', ';
         }
         if (isset($this->tables[$table])) {
@@ -174,11 +174,11 @@ class Tables
      */
     public function addIndex($name, $table, $column, $unique = false)
     {
-        $columns = explode(',', $column);
+        $columns = str_getcsv($column, ',', '"', '');
         $columnList = '';
         $firstComma = '';
         foreach ($columns as $col) {
-            $columnList .= $firstComma . $this->quoteIndexColumnName($col);
+            $columnList .= $firstComma . $this->quoteIndexColumnName((string) $col);
             $firstComma = ', ';
         }
         if (isset($this->tables[$table])) {
@@ -214,10 +214,10 @@ class Tables
      */
     protected function quoteIndexColumnName($columnName)
     {
-        $column = str_replace(' ', '', $columnName);
+        $column = trim($columnName);
 
         // only a numeric prefix length is split off; anything else stays part of the name
-        if (preg_match('/^(.+)\((\d+)\)\z/', $column, $matches)) {
+        if (preg_match('/^(.+?)\s*\((\d+)\)\z/', $column, $matches)) {
             return $this->quoteIdentifier($matches[1]) . " ({$matches[2]})";
         }
 

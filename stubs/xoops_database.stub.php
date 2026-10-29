@@ -35,15 +35,21 @@ class XoopsDatabase
 
     /**
      * @param \mysqli_result $result
-     * @return array|null
+     * @return array|false
      */
-    public function fetchArray($result) { return $result->fetch_assoc() ?: null; }
+    public function fetchArray($result)
+    {
+        return $result->fetch_assoc() ?? false;
+    }
 
     /**
      * @param \mysqli_result $result
-     * @return array|null
+     * @return array|false
      */
-    public function fetchRow($result) { return $result->fetch_row() ?: null; }
+    public function fetchRow($result)
+    {
+        return $result->fetch_row() ?? false;
+    }
 
     /**
      * @return int

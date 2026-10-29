@@ -441,6 +441,10 @@ class Migrate
             }
             if (preg_match('/^`((?:[^`]|``)*)`\z/', $column, $matches)) {
                 $column = str_replace('``', '`', $matches[1]);
+                // Tables would read a trailing "(n)" as a prefix length, not part of the name
+                if ($length === '' && preg_match('/\(\d+\)\z/', $column)) {
+                    throw SchemaDefinitionException::forTable($tableName);
+                }
             }
             if ($column === '') {
                 throw SchemaDefinitionException::forTable($tableName);

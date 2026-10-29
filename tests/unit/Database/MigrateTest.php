@@ -110,6 +110,27 @@ class MigrateTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(array(array('addIndex', 'idx_odd', 'demo', 'we`ird (10), b', true)), $handler->calls);
     }
 
+    public function testSynchronizeTableThrowsForQuotedNameEndingInPrefixLength()
+    {
+        $migrate = new TestableMigrate();
+        $migrate->setTargetDefinitions(array(
+            'demo' => array(
+                'columns' => array(
+                    array('name' => 'id', 'attributes' => 'int NOT NULL'),
+                ),
+                'keys' => array(
+                    'idx_bad' => array('columns' => '`part(10)`', 'unique' => false),
+                ),
+            ),
+        ));
+        $handler = new FakeMigrateTableHandler();
+        $handler->existingColumns = array('id' => 'int NOT NULL');
+        $migrate->setTableHandler($handler);
+
+        $this->expectException(SchemaDefinitionException::class);
+        $migrate->callSynchronizeTable('demo');
+    }
+
     public function testSynchronizeTableThrowsForEmptyKeyColumn()
     {
         $migrate = new TestableMigrate();

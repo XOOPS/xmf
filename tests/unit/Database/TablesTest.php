@@ -103,8 +103,25 @@ class TablesTest extends \PHPUnit\Framework\TestCase
         $tables->addIndex('ix', 'demo', 'c(1)) , DROP TABLE x -- (');
 
         $this->assertSame(
-            'ALTER TABLE `xoops_demo` ADD INDEX `ix` (`c(1))`, `DROPTABLEx--(`)',
+            'ALTER TABLE `xoops_demo` ADD INDEX `ix` (`c(1))`, `DROP TABLE x -- (`)',
             $tables->dumpQueue()[0]
+        );
+    }
+
+    public function testIndexColumnsKeepInternalSpacesAndQuotedCommas()
+    {
+        $tables = new TestableTables();
+        $tables->setTables(array('demo' => array('name' => 'xoops_demo', 'columns' => array())));
+
+        $tables->addIndex('ix', 'demo', 'first name, "last,first", title (20)');
+        $tables->addPrimaryKey('demo', ' id ');
+
+        $this->assertSame(
+            array(
+                'ALTER TABLE `xoops_demo` ADD INDEX `ix` (`first name`, `last,first`, `title` (20))',
+                'ALTER TABLE `xoops_demo` ADD PRIMARY KEY(`id`)',
+            ),
+            $tables->dumpQueue()
         );
     }
 
