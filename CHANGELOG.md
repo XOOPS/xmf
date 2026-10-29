@@ -28,7 +28,7 @@
 * `FilterInput::cleanVar()` accepts a `null` type, which `Request::getHeader()` passes, without a PHP 8.1+ deprecation
 * `Ulid::getDateTime()`: document `@throws \RuntimeException`
 * `Database\TableLoad::countRows()` returns 0 when the query fails instead of raising a warning
-* `Database\Migrate`: target key column lists are normalized to the unquoted form `getTableIndexes()` reports (`` `id`, `title`(20) `` becomes `id, title (20)`), so unchanged indexes are no longer dropped and recreated and pre-quoted names are not quoted twice; an empty column entry throws `SchemaDefinitionException`. `Tables::addPrimaryKey()` accepts a prefix length (`code(8)`) like `addIndex()`
+* `Database\Migrate`: target key column lists are normalized to the unquoted form `getTableIndexes()` reports (`` `id`, `title`(20) `` becomes `id, title (20)`), so unchanged indexes are no longer dropped and recreated and pre-quoted names are not quoted twice; an empty column entry throws `SchemaDefinitionException`. A column name holding a literal double quote is CSV-encoded before it reaches `Tables`, so `"id"` is not read as the enclosed value `id`. `Tables::addPrimaryKey()` accepts a prefix length (`code(8)`) like `addIndex()`
 
 ### Tests
 * Add `Serializer` and `SerializableTrait` tests

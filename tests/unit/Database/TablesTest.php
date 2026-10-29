@@ -113,12 +113,12 @@ class TablesTest extends \PHPUnit\Framework\TestCase
         $tables = new TestableTables();
         $tables->setTables(array('demo' => array('name' => 'xoops_demo', 'columns' => array())));
 
-        $tables->addIndex('ix', 'demo', 'first name, "last,first", title (20)');
+        $tables->addIndex('ix', 'demo', 'first name, "last,first", title (20), """q"" (5)"');
         $tables->addPrimaryKey('demo', ' id ');
 
         $this->assertSame(
             array(
-                'ALTER TABLE `xoops_demo` ADD INDEX `ix` (`first name`, `last,first`, `title` (20))',
+                'ALTER TABLE `xoops_demo` ADD INDEX `ix` (`first name`, `last,first`, `title` (20), `"q"` (5))',
                 'ALTER TABLE `xoops_demo` ADD PRIMARY KEY(`id`)',
             ),
             $tables->dumpQueue()

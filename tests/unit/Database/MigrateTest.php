@@ -110,7 +110,37 @@ class MigrateTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(array(array('addIndex', 'idx_odd', 'demo', 'we`ird (10), b', true)), $handler->calls);
     }
 
-    public function testSynchronizeTableThrowsForQuotedNameEndingInPrefixLength()
+    public function testSynchronizeTableEncodesLiteralDoubleQuotesForDdlOnly()
+    {
+        $migrate = new TestableMigrate();
+        $migrate->setTargetDefinitions(array(
+            'demo' => array(
+                'columns' => array(
+                    array('name' => '"id"', 'attributes' => 'int NOT NULL'),
+                ),
+                'keys' => array(
+                    'PRIMARY' => array('columns' => '`"id"`'),
+                    'idx_q' => array('columns' => '`"id"`(5)', 'unique' => false),
+                ),
+            ),
+        ));
+        $handler = new FakeMigrateTableHandler();
+        $handler->existingColumns = array('"id"' => 'int NOT NULL');
+        $handler->existingIndexes = array(
+            'PRIMARY' => array('columns' => '"id"', 'unique' => true),
+        );
+        $migrate->setTableHandler($handler);
+
+        $migrate->callSynchronizeTable('demo');
+
+        // PRIMARY compares equal in raw form; the new index gets the CSV-encoded form
+        $this->assertSame(array(array('addIndex', 'idx_q', 'demo', '"""id"" (5)"', false)), $handler->calls);
+    }
+
+    /**
+     * @dataProvider invalidKeyColumnsProvider
+     */
+    public function testSynchronizeTableThrowsForInvalidKeyColumns(string $columns)
     {
         $migrate = new TestableMigrate();
         $migrate->setTargetDefinitions(array(
@@ -119,7 +149,7 @@ class MigrateTest extends \PHPUnit\Framework\TestCase
                     array('name' => 'id', 'attributes' => 'int NOT NULL'),
                 ),
                 'keys' => array(
-                    'idx_bad' => array('columns' => '`part(10)`', 'unique' => false),
+                    'idx_bad' => array('columns' => $columns, 'unique' => false),
                 ),
             ),
         ));
@@ -128,29 +158,19 @@ class MigrateTest extends \PHPUnit\Framework\TestCase
         $migrate->setTableHandler($handler);
 
         $this->expectException(SchemaDefinitionException::class);
+
         $migrate->callSynchronizeTable('demo');
     }
 
-    public function testSynchronizeTableThrowsForEmptyKeyColumn()
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function invalidKeyColumnsProvider(): array
     {
-        $migrate = new TestableMigrate();
-        $migrate->setTargetDefinitions(array(
-            'demo' => array(
-                'columns' => array(
-                    array('name' => 'id', 'attributes' => 'int NOT NULL'),
-                ),
-                'keys' => array(
-                    'idx_bad' => array('columns' => 'id, ', 'unique' => false),
-                ),
-            ),
-        ));
-        $handler = new FakeMigrateTableHandler();
-        $handler->existingColumns = array('id' => 'int NOT NULL');
-        $migrate->setTableHandler($handler);
-
-        $this->expectException(SchemaDefinitionException::class);
-
-        $migrate->callSynchronizeTable('demo');
+        return array(
+            'quoted name ending in prefix length' => array('`part(10)`'),
+            'empty column entry' => array('id, '),
+        );
     }
 
     public function testSynchronizeTableThrowsForMalformedKeyDefinition()
