@@ -9,7 +9,7 @@
  * @param string|null $optional_name
  * @return XoopsObjectHandler|XoopsPersistableObjectHandler|false
  */
-function xoops_getHandler($name, $optional_name = null) {}
+function xoops_getHandler($name, $optional_name = null) { return false; }
 
 /**
  * @param string $url
@@ -25,7 +25,7 @@ function redirect_header($url, $time = 3, $message = '', $addredirect = true, $a
  * @param string $dirname
  * @return bool
  */
-function xoops_isActiveModule($dirname) {}
+function xoops_isActiveModule($dirname) { return false; }
 
 // XOOPS Path Constants
 define('XOOPS_ROOT_PATH', '');

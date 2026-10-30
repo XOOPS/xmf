@@ -42,4 +42,17 @@ class HighlighterTest extends \PHPUnit\Framework\TestCase
         $output = Highlighter::apply(array('test','ok'), 'This test <test>is</test> OK.', '<i>', '</i>');
         $this->assertEquals('This <i>test</i> <test>is</test> <i>OK</i>.', $output);
     }
+
+    public function testEmptyTermsAreSkipped()
+    {
+        $this->assertSame('a <mark>foo</mark> b', Highlighter::apply(' foo', 'a foo b'));
+        $this->assertSame('a <mark>foo</mark> b', Highlighter::apply('foo ', 'a foo b'));
+        $this->assertSame('a foo b', Highlighter::apply('', 'a foo b'));
+        $this->assertSame('a <mark>foo</mark> b', Highlighter::apply(array('', 'foo'), 'a foo b'));
+    }
+
+    public function testZeroIsAValidTerm()
+    {
+        $this->assertSame('page <mark>0</mark>', Highlighter::apply('0', 'page 0'));
+    }
 }

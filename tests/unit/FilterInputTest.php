@@ -152,6 +152,57 @@ class FilterInputTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * @dataProvider entityHiddenSchemeProvider
+     */
+    public function testWeburlRejectsEntityHiddenScheme(string $url)
+    {
+        $this->assertSame('', FilterInput::clean($url, 'WEBURL'));
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function entityHiddenSchemeProvider(): array
+    {
+        return array(
+            'html5 named colon' => array('javascript&colon;alert(1)'),
+            'html5 named tab' => array('java&Tab;script:alert(1)'),
+            'numeric without semicolon' => array('javascript&#0058alert(1)'),
+            'entity in host part' => array('page&colon;x'),
+            'encoded second slash' => array('/&sol;evil.example'),
+            'encoded backslash' => array('/&bsol;evil.example'),
+            'numeric slash without semicolon' => array('/&#47evil.example'),
+            'tab between slashes' => array('/&Tab;/evil.example'),
+            'newline between slashes' => array('/&NewLine;/evil.example'),
+            'https with encoded second slash' => array('https:/&sol;evil.example'),
+            'http with one slash' => array('http:/evil.example'),
+            'https without slashes' => array('https:evil.example'),
+            'entity slash before userinfo' => array('https://evil.example&sol;@good.example'),
+            'entity hash before userinfo' => array('https://evil.example&num;@good.example'),
+            'double-encoded slash before userinfo' => array('https://evil.example&amp;sol;@good.example'),
+            'entity tab in host' => array('https://evil&Tab;.example'),
+            'numeric slash in userinfo' => array('https://good&#47@evil.example'),
+            'percent-encoded host' => array('https://%65vil.example'),
+            'javascript read as host:port' => array('javascript:1/alert(1)'),
+            'data read as host:port' => array('data:80/text/html,test'),
+            'http read as host:port' => array('http:80/evil'),
+            'uppercase http scheme' => array('HTTP://example.com/'),
+            'relative path parse_url reads as host:port' => array('good.example/a:80/x'),
+        );
+    }
+
+    public function testWeburlKeepsAmpersandsAfterPathOrQueryStart()
+    {
+        $this->assertSame('https://example.com/a?b=1&c=2', FilterInput::clean('https://example.com/a?b=1&c=2', 'WEBURL'));
+        $this->assertSame('page.php?a=1&colon=2', FilterInput::clean('page.php?a=1&colon=2', 'WEBURL'));
+        $this->assertSame('/p&q', FilterInput::clean('/p&q', 'WEBURL'));
+        $this->assertSame('#a&b', FilterInput::clean('#a&b', 'WEBURL'));
+        $this->assertSame('https://good.example/a&sol;b?x=%41&y=1', FilterInput::clean('https://good.example/a&sol;b?x=%41&y=1', 'WEBURL'));
+        $this->assertSame('a%20b.html', FilterInput::clean('a%20b.html', 'WEBURL'));
+        $this->assertSame('page.php?time=12:30', FilterInput::clean('page.php?time=12:30', 'WEBURL'));
+    }
+
+    /**
      * @dataProvider getTestForCleanVarType
      */
     public function testCleanVarTypes($value, $type, $expected)
@@ -246,5 +297,52 @@ class FilterInputTest extends \PHPUnit\Framework\TestCase
         $this->assertSame('alert(1)', $filter->cleanVar("<script\n>alert(1)</script\n>", 'html'));
         $this->assertSame('<form />', $filter->cleanVar("<form action\n=\"https://evil.example\">", 'html'));
         $this->assertStringNotContainsString("\n", FilterInput::clean("https://example.com/a\n", 'weburl'));
+    }
+
+    public function testNestedArraysAreFiltered()
+    {
+        $input = array('a' => '<script>x</script>', 'child' => array('x' => '<script>y</script>', 'n' => 5));
+        $result = $this->object->cleanVar($input, 'array');
+        $this->assertSame(array('a' => 'x', 'child' => array('x' => 'y', 'n' => 5)), $result);
+    }
+
+    public function testArraysNestedTooDeeplyAreDropped()
+    {
+        $deep = '<b>leaf</b>';
+        for ($i = 0; $i < 40; $i++) {
+            $deep = array($deep);
+        }
+        $result = $this->object->cleanVar(array('ok' => '<b>v</b>', 'deep' => $deep), 'array');
+        $this->assertSame('v', $result['ok']);
+        $this->assertStringNotContainsString('<b>', serialize($result));
+        $this->assertLessThan(33, substr_count(serialize($result), 'a:'));
+    }
+
+    public function testSubclassPolicyDoesNotLeakIntoBaseClean()
+    {
+        $this->assertSame('<b>x</b>', PermissiveFilterInput::clean('<b>x</b>'));
+        $this->assertSame('x', FilterInput::clean('<b>x</b>'));
+    }
+
+    public function testWebUrlRejectsBackslashForms()
+    {
+        foreach (array('/\\evil.example', '\\\\evil.example', '\\/evil.example', 'https://ok.example/a\\b') as $url) {
+            $this->assertSame('', FilterInput::clean($url, 'weburl'), $url);
+        }
+        $this->assertSame('/local/page', FilterInput::clean('/local/page', 'weburl'));
+    }
+
+    public function testWebUrlRejectsUnparseableValues()
+    {
+        $this->assertSame('', FilterInput::clean('javascript://example.com:99999/%0Aalert(1)', 'weburl'));
+        $this->assertSame('https://example.com/a', FilterInput::clean('https://example.com/a', 'weburl'));
+    }
+}
+
+class PermissiveFilterInput extends FilterInput
+{
+    protected function __construct()
+    {
+        parent::__construct(array('b'));
     }
 }

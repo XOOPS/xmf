@@ -49,6 +49,10 @@ class Highlighter
             $words = explode(' ', $words);
         }
         foreach ($words as $word) {
+            // an empty term matches everywhere and never advances the scan
+            if ($word === '') {
+                continue;
+            }
             $body = static::splitOnTag($word, $body, $pre, $post);
         }
 
@@ -67,6 +71,9 @@ class Highlighter
      */
     protected static function splitOnTag($needle, $haystack, $pre, $post)
     {
+        if ($needle === '') {
+            return $haystack;
+        }
         $encoding = static::ENCODING;
         return preg_replace_callback(
             '#((?:(?!<[/a-z]).)*)([^>]*>|$)#si',

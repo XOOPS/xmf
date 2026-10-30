@@ -3,6 +3,12 @@ build:
     php: 8.2
   nodes:
     analysis:
+      dependencies:
+        override:
+          # roave/security-advisories conflicts with the image's PHP 8.2.0 patch level;
+          # the advisory gate runs in GitHub CI, analysis only needs the code.
+          - composer remove --dev roave/security-advisories --no-update --no-interaction
+          - composer install --no-interaction --no-scripts
       tests:
         override:
           - php-scrutinizer-run

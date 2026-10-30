@@ -6,6 +6,9 @@
 
 class XoopsDatabase
 {
+    /** @var bool false during GET requests: unforced writes are refused */
+    public $allowWebChanges = false;
+
     /**
      * @param string $sql
      * @return \mysqli_result|bool
@@ -86,5 +89,5 @@ class XoopsDatabaseFactory
     /**
      * @return XoopsDatabase
      */
-    public static function getDatabaseConnection() {}
+    public static function getDatabaseConnection() { return new XoopsDatabase(); }
 }
