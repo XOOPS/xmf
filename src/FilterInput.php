@@ -298,21 +298,30 @@ class FilterInput
                 // reject protocol-relative URLs (//evil.example) and non-http(s) schemes;
                 // browsers read a backslash as a slash, so /\evil.example is protocol-relative too;
                 // an entity before the first / ? # can hide a scheme from parse_url()
-                // (javascript&colon;, java&Tab;script:, javascript&#0058) that the browser decodes
+                // (javascript&colon;, java&Tab;script:, javascript&#0058) that the browser decodes,
+                // and one right after a leading / can hide the second slash (/&sol;, /&Tab;/);
+                // in the authority an entity or %-escape moves the host the browser uses
+                // (https://evil&sol;@good is evil.example to a browser, good to parse_url())
                 if (
                     str_starts_with($result, '//')
                     || str_contains($result, '\\')
-                    || preg_match('#^[^/?\#]*&#', $result)
+                    || preg_match('#^(?:/&|[^/?\#]*&)#', $result)
+                    || preg_match('#^https?://[^/?\#]*[&%]#i', $result)
                 ) {
                     $result = '';
                 }
                 if ($result !== '') {
                     $urlparts = parse_url($result);
-                    // an unparseable value (javascript://host:99999/...) has no checkable scheme
+                    // an unparseable value (javascript://host:99999/...) has no checkable scheme.
+                    // The scheme is read as a browser reads it: parse_url() takes javascript:1/x
+                    // for host:port with no scheme. http(s) needs // and a host, since browsers
+                    // send https:/&sol;host, http:/host and https:host to whatever host follows.
+                    // A relative value has no host, though parse_url() reports one for good.example/a:80/x
+                    $hasScheme = 1 === preg_match('#^[a-z][a-z0-9+.\-]*:#i', $result);
                     if (
                         !is_array($urlparts)
-                        || (!empty($urlparts['scheme'])
-                        && !($urlparts['scheme'] === 'http' || $urlparts['scheme'] === 'https'))
+                        || ($hasScheme && (!preg_match('#^https?://#', $result) || empty($urlparts['host'])))
+                        || (!$hasScheme && isset($urlparts['host']))
                     ) {
                         $result = '';
                     }
