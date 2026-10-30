@@ -324,9 +324,13 @@ class FilterInputTest extends \PHPUnit\Framework\TestCase
         $this->assertSame($expected, $filter->process($input));
         // close tags far behind their openers use up the search budget; later names count as unclosed
         $farClosed = $filter->process($input . str_replace('<', '</', $input));
+        $this->assertIsString($farClosed);
         $this->assertStringStartsWith('<t0>', $farClosed);
         $this->assertStringContainsString('<t99999 />', $farClosed);
-        $this->assertLessThan(5000, (hrtime(true) - $start) / 1e6, 'filtering ~2 MB took over 5 s');
+        // Xdebug (the coverage job) slows this loop over tenfold; the other jobs keep the bound
+        if (!extension_loaded('xdebug')) {
+            $this->assertLessThan(5000, (hrtime(true) - $start) / 1e6, 'filtering ~2 MB took over 5 s');
+        }
     }
 
     public function testRemoveDropsAValueThatNeverSettles()
