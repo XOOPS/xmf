@@ -394,6 +394,10 @@ class FilterInput
         $tagClose = -1;
         // per tag name: next "</name" at or after $pos + 1, or false when there is none
         $closeTagAt = array();
+        // ponytail: bytes the close-tag searches may scan in all (32 passes over the input). Past
+        // it, a name needing a new search counts as unclosed ("<x />"), so many distinct unclosed
+        // names stay linear; an index of every close tag cost ~35x the input in memory.
+        $scanBudget = 32 * max(strlen($source), 4096);
         // iterate through string until no tags left
         while (($tagOpen = strpos($source, '<', $pos)) !== false) {
             // process tag iteratively
@@ -495,12 +499,16 @@ class FilterInput
                     for ($i = 0; $i < $attrSetCount; ++$i) {
                         $preTag .= ' ' . $attrSet[$i];
                     }
-                    // reformat single tags to XHTML: a matching close tag anywhere later keeps it open.
-                    // ponytail: one cached search per tag name; in blacklist mode many distinct
-                    // unclosed names still cost one scan each (as before this rewrite).
+                    // reformat single tags to XHTML: a later "</name..." keeps it open (searched once
+                    // per name and again only after $pos passes the match; see $scanBudget)
                     $closeAt = $closeTagAt[$tagName] ?? -1;
                     if ($closeAt !== false && $closeAt <= $pos) {
-                        $closeAt = $closeTagAt[$tagName] = strpos($source, '</' . $tagName, $pos + 1);
+                        $closeAt = false;
+                        if ($scanBudget > 0) {
+                            $closeAt = strpos($source, '</' . $tagName, $pos + 1);
+                            $scanBudget -= ($closeAt === false ? strlen($source) : $closeAt) - $pos;
+                        }
+                        $closeTagAt[$tagName] = $closeAt;
                     }
                     if ($closeAt !== false) {
                         $preTag .= '>';

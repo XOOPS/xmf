@@ -285,6 +285,7 @@ class FilterInputTest extends \PHPUnit\Framework\TestCase
             'close tag only earlier'   => ['<b>x</b><img src=y><b>z', '<b>x</b><img src="y" /><b />z'],
             'nested opener'            => ['a<<b>x</b>', 'a<<b>x</b>'],
             'adjacent attributes'      => ['<b title="x"y="z">q</b>', '<b title="x">q</b>'],
+            'close name other case'    => ['<b>x</B>', '<b />x</B>'],
         ];
     }
 
@@ -305,6 +306,27 @@ class FilterInputTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(str_repeat('<b>x</b>y ', 40000), $filter->process($tags));
         $this->assertSame('<b>z</b>', $filter->process($attrs));
         $this->assertLessThan(5000, (hrtime(true) - $start) / 1e6, 'filtering ~1 MB took over 5 s');
+    }
+
+    public function testManyDistinctUnclosedTagsAreFilteredInLinearTime()
+    {
+        // blacklist mode searched the rest of the input once per distinct unclosed name; ~1 MB took minutes
+        $filter = FilterInput::getInstance(['script'], [], 1, 1);
+        // a later close tag whose name starts with the tag name keeps it open, as before
+        $this->assertSame('<a>y</abbr><p1 />', $filter->process('<a>y</abbr><p1>'));
+        $input = '';
+        $expected = '';
+        for ($i = 0; $i < 100000; ++$i) {
+            $input .= '<t' . $i . '>';
+            $expected .= '<t' . $i . ' />';
+        }
+        $start = hrtime(true);
+        $this->assertSame($expected, $filter->process($input));
+        // close tags far behind their openers use up the search budget; later names count as unclosed
+        $farClosed = $filter->process($input . str_replace('<', '</', $input));
+        $this->assertStringStartsWith('<t0>', $farClosed);
+        $this->assertStringContainsString('<t99999 />', $farClosed);
+        $this->assertLessThan(5000, (hrtime(true) - $start) / 1e6, 'filtering ~2 MB took over 5 s');
     }
 
     public function testRemoveDropsAValueThatNeverSettles()
