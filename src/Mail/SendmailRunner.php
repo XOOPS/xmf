@@ -186,10 +186,12 @@ final class SendmailRunner
         $rfc822 = str_replace(["\r\n", "\r"], "\n", $rfc822);
         $rfc822 = str_replace("\n", "\r\n", $rfc822);
 
-        // Prefer the literal path if it resolves to the same canonical target; else use canonical.
+        // Prefer the literal path (multi-call binaries such as busybox dispatch on argv[0]) only if
+        // it resolves to the validated target and no other account can swap the link after this
+        // check: every directory above it must be closed to group and other writes. Else canonical.
         $literal  = $sendmailPath;
         $resolved = realpath($literal);
-        if (!is_string($resolved) || $resolved !== $validatedPath) {
+        if (!is_string($resolved) || $resolved !== $validatedPath || !$this->hasTrustedParents($literal)) {
             $literal = $validatedPath;
         }
 
@@ -400,6 +402,29 @@ final class SendmailRunner
         if ($this->waitForExit($proc, $grace) === null) {
             proc_terminate($proc, 9);
         }
+    }
+
+    /**
+     * True when every directory above $path is owned by root or this process's user
+     * and is not writable by group or other. POSIX ACLs are not checked.
+     */
+    private function hasTrustedParents(string $path): bool
+    {
+        if (!\function_exists('posix_geteuid')) {
+            return false;
+        }
+        $uid = posix_geteuid();
+        $dir = $path;
+        do {
+            $dir = \dirname($dir);
+            $mode = fileperms($dir);
+            $owner = fileowner($dir);
+            if ($mode === false || ($mode & 0022) !== 0 || ($owner !== 0 && $owner !== $uid)) {
+                return false;
+            }
+        } while ($dir !== \dirname($dir));
+
+        return true;
     }
 
     /**

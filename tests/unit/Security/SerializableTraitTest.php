@@ -111,6 +111,24 @@ class SerializableTraitTest extends \PHPUnit\Framework\TestCase
         $this->assertSame([], $entity->written);
     }
 
+    public function testMigrateFailureLogsOneLine(): void
+    {
+        $entity = new SerializableEntity();
+        $log = tempnam(sys_get_temp_dir(), 'xmf-log-');
+        $previous = ini_set('error_log', $log);
+
+        try {
+            $this->assertFalse($entity->migrateSerializedData("tags\nFAKE RECORD", 'a:2:{i:0;s:1:"x";'));
+            $logged = (string) file_get_contents($log);
+        } finally {
+            ini_set('error_log', (string) $previous);
+            @unlink($log);
+        }
+
+        $this->assertStringContainsString('tags\nFAKE RECORD', $logged);
+        $this->assertSame(1, substr_count(rtrim($logged), "\n") + 1);
+    }
+
     public function testMigrateConvertsGzipLegacyPayloadToJson(): void
     {
         $entity = new SerializableEntity();

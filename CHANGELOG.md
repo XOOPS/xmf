@@ -7,12 +7,23 @@
 * `Database\Tables`: unforced writes from `executeQueue()` are refused while the core's `allowWebChanges` is false (GET requests), as before 1.3.1; `executeQueue(true)` still runs them. `executeQueue()` keeps the error `execSql()` recorded instead of replacing it with the connection's last error, which is empty after a refused write
 * `Database\Tables`/`Database\TableLoad`: caller-supplied table, column and index names are backtick-quoted with embedded backticks doubled (including `TableLoad::countRows()`/`extractRows()`/`truncateTable()` and `Tables::dropIndexes()`, which did not quote at all); `INFORMATION_SCHEMA` lookups quote the table and schema names as string literals; an index column prefix length must be numeric (`name(20)`). Index column lists read back from an existing table (`getTableIndexes()`) keep their unquoted form, which `Migrate` compares against. A name that is not a string or int throws `InvalidArgumentException`
 * `FilterInput`: tag filtering walks the input by offset instead of copying the remaining text for every tag and attribute, and caps the bytes its close-tag searches scan at 32 passes over the input, so its cost grows linearly with input size (a ~1.4 MB value took over 20 seconds per pass; one tag with many attributes, a long run of `<`, or, in blacklist mode, many distinct tag names without a close tag, were as slow or slower). Output is unchanged, except that once the cap is reached a tag whose name has not been searched yet is written self-closed (`<x />`)
+* `Security\Serializer::toJson()`: data whose JSON form would hold more than 5 million values is rejected before `json_encode()` builds it; unserialized data sharing one array between references (as `SerializableTrait::migrateSerializedData()` converts) expanded a payload of a few hundred bytes until memory ran out. The value a `JsonSerializable` object returns is counted too, so `jsonSerialize()` is called once more
+* `Highlighter::apply()`: a `>` inside a quoted attribute value no longer ends the tag, so a term (such as one containing a quote) is never highlighted inside an attribute, where the inserted markup could close the tag early and turn the rest of the attribute into live HTML; comments (`<!-- -->`) and declarations (`<!DOCTYPE>`) are not highlighted either (highlighting `--` left a comment unclosed); after an unclosed quote or comment nothing is highlighted
+* `Mail\SendmailRunner::deliver()`: the path as given (a symlink) is run only when every directory above it is owned by root or the PHP process's user and is not writable by group or other (requires ext-posix; POSIX ACLs are not checked); otherwise the validated canonical target runs, so a link swapped after validation cannot run another program
+* `Module\Helper::getHandler()`: handler names must consist of letters, digits and `_`; a name holding `/` or `.` could include a PHP file outside the module's `class/` directory
+* `Yaml::read()`/`readWrapped()`: reads stop at the 2 MB limit, which was checked only against the reported file size
+* `Debug::startTrace()`: refuses to start when parameter values should be hidden (`$collect_params` below 3) on Xdebug 3, which removed that setting and always records them
+* `Security\SerializableTrait::migrateSerializedData()`: control characters in the property name and error message are escaped in the failure log, so one failure is one log line
+* `Metagen::getSearchSummary()`: duplicate search terms are searched once, and the search stops at a match at the start of the text
 
 ### Bug Fixes
 * `Highlighter::apply()`: empty search terms (leading or trailing space, `''` in the array) are skipped instead of looping until memory runs out
 * `Debug`: first use no longer re-enables Kint when the application disabled it
 * `Database\TableLoad::countRows()` returns 0 when the query fails instead of raising a warning
 * `Database\Migrate`: target key column lists are normalized to the unquoted form `getTableIndexes()` reports (`` `id`, `title`(20) `` becomes `id, title (20)`), so unchanged indexes are no longer dropped and recreated and pre-quoted names are not quoted twice; an empty column entry throws `SchemaDefinitionException`. A column name holding a literal double quote is CSV-encoded before it reaches `Tables`, so `"id"` is not read as the enclosed value `id`. `Tables::addPrimaryKey()` accepts a prefix length (`code(8)`) like `addIndex()`
+
+### Tests
+* `FileStorageTest` keeps its key files, which `fetch()` includes as PHP, in a private directory instead of a fixed name in the shared temp directory
 
 ## [1.3.3] - 2026-10-14
 

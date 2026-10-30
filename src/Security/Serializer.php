@@ -69,6 +69,8 @@ final class Serializer
      */
     public static function toJson($data): string
     {
+        $budget = self::MAX_SIZE;
+        self::guardExpandedSize($data, 0, $budget);
         $json = json_encode($data, self::JSON_FLAGS);
 
         if (\strlen($json) > self::MAX_SIZE) {
@@ -78,6 +80,54 @@ final class Serializer
         }
 
         return $json;
+    }
+
+    /**
+     * Reject data whose JSON form cannot fit in MAX_SIZE before json_encode() builds it.
+     *
+     * Unserialized data can share one array between many references; json_encode()
+     * writes it out once per use, so a payload of a few hundred bytes expands
+     * exponentially. Every encoded value takes at least one byte, so more than
+     * MAX_SIZE values can never pass the size check after encoding.
+     *
+     * @param mixed $data
+     * @param int   $depth  nesting level of $data
+     * @param int   $budget values still allowed
+     *
+     * @throws RuntimeException If the data holds more than MAX_SIZE values
+     */
+    private static function guardExpandedSize($data, int $depth, int &$budget): void
+    {
+        // json_encode() encodes what jsonSerialize() returns; walking it calls it one extra time
+        if ($data instanceof \JsonSerializable) {
+            $serialized = $data->jsonSerialize();
+            // an object returned as itself is encoded by its public properties
+            $data = $serialized === $data ? get_object_vars($data) : $serialized;
+        } elseif (\is_object($data)) {
+            $data = get_object_vars($data);
+        }
+        // json_encode() reports the depth error itself
+        // jsonSerialize() returned an object; the depth bound stops one that returns itself
+        if (\is_object($data)) {
+            if ($depth < self::JSON_DEPTH) {
+                self::guardExpandedSize($data, $depth + 1, $budget);
+            }
+            return;
+        }
+        if (!\is_array($data) || $depth >= self::JSON_DEPTH) {
+            return;
+        }
+        $budget -= \count($data);
+        if ($budget < 0) {
+            throw new RuntimeException(
+                sprintf('Serialized JSON exceeds maximum allowed size of %d bytes', self::MAX_SIZE)
+            );
+        }
+        foreach ($data as $value) {
+            if (\is_array($value) || \is_object($value)) {
+                self::guardExpandedSize($value, $depth + 1, $budget);
+            }
+        }
     }
 
     /**

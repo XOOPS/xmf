@@ -203,6 +203,33 @@ class SendmailRunnerTest extends \PHPUnit\Framework\TestCase
         $this->assertLessThan(2000000, memory_get_peak_usage() - $before);
     }
 
+    public function testDeliverRunsCanonicalTargetWhenLinkDirectoryIsWritableByOthers()
+    {
+        if (DIRECTORY_SEPARATOR === '\\') {
+            $this->markTestSkipped('Sendmail runner process test requires a POSIX shell.');
+        }
+
+        $outputFile = $this->createTempFile('sendmail-argv0-', '');
+        $script = $this->createExecutableScript(
+            "#!/usr/bin/env bash\nprintf '%s' \"\$0\" > " . escapeshellarg($outputFile) . "\ncat > /dev/null\nexit 0\n"
+        );
+        $linkDir = sys_get_temp_dir() . '/sendmail-linkdir-' . bin2hex(random_bytes(8));
+        $this->assertTrue(mkdir($linkDir));
+        chmod($linkDir, 0770); // group members could swap the link after validation
+        $link = $linkDir . '/sendmail';
+        $this->assertTrue(symlink($script, $link));
+        $this->cleanupPaths[] = $link;
+
+        try {
+            (new SendmailRunner(array($link)))->deliver($link, "Subject: Test\n\nHello\n");
+        } finally {
+            @unlink($link);
+            @rmdir($linkDir);
+        }
+
+        $this->assertSame(realpath($script), file_get_contents($outputFile));
+    }
+
     private function createTempFile(string $prefix, string $contents): string
     {
         $path = tempnam(sys_get_temp_dir(), $prefix);
