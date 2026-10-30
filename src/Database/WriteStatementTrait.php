@@ -22,6 +22,8 @@ namespace Xmf\Database;
  * only offer queryF(). Prefer exec() when the connection provides it and fall
  * back to queryF() otherwise, so the same code is correct on every core.
  *
+ * Also holds the identifier quoting shared by the statement builders.
+ *
  * @category  Xmf\Database\WriteStatementTrait
  * @package   Xmf
  * @author    XOOPS Project <www.xoops.org>
@@ -43,5 +45,24 @@ trait WriteStatementTrait
     protected static function executeWrite($db, $sql)
     {
         return method_exists($db, 'exec') ? $db->exec($sql) : $db->queryF($sql);
+    }
+
+    /**
+     * Backtick quote a MySQL identifier (table, column or index name), doubling
+     * embedded backticks so the name cannot break out of the quotes.
+     *
+     * @param mixed $name identifier; an int is accepted for numeric array keys
+     *
+     * @return string quoted identifier
+     *
+     * @throws \InvalidArgumentException if $name is not a string or int
+     */
+    protected static function quoteIdentifier($name)
+    {
+        if (!is_string($name) && !is_int($name)) {
+            throw new \InvalidArgumentException('SQL identifier must be a string, ' . get_debug_type($name) . ' given');
+        }
+
+        return '`' . str_replace('`', '``', (string) $name) . '`';
     }
 }

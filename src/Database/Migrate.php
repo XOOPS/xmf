@@ -261,12 +261,12 @@ class Migrate
                 }
                 $validatedKey = $this->validatedTargetKey($tableName, $key, $keyData);
                 if ($key === 'PRIMARY') {
-                    $this->tableHandler->addPrimaryKey($tableName, $validatedKey['columns']);
+                    $this->tableHandler->addPrimaryKey($tableName, $validatedKey['ddlColumns']);
                 } else {
                     $this->tableHandler->addIndex(
                         $key,
                         $tableName,
-                        $validatedKey['columns'],
+                        $validatedKey['ddlColumns'],
                         $validatedKey['unique']
                     );
                 }
@@ -318,17 +318,17 @@ class Migrate
                 $validatedKey = $this->validatedTargetKey($tableName, $key, $keyData);
                 if ($key === 'PRIMARY') {
                     if (!isset($existingIndexes[$key])) {
-                        $this->tableHandler->addPrimaryKey($tableName, $validatedKey['columns']);
+                        $this->tableHandler->addPrimaryKey($tableName, $validatedKey['ddlColumns']);
                     } elseif ($existingIndexes[$key]['columns'] !== $validatedKey['columns']) {
                         $this->tableHandler->dropPrimaryKey($tableName);
-                        $this->tableHandler->addPrimaryKey($tableName, $validatedKey['columns']);
+                        $this->tableHandler->addPrimaryKey($tableName, $validatedKey['ddlColumns']);
                     }
                 } else {
                     if (!isset($existingIndexes[$key])) {
                         $this->tableHandler->addIndex(
                             $key,
                             $tableName,
-                            $validatedKey['columns'],
+                            $validatedKey['ddlColumns'],
                             $validatedKey['unique']
                         );
                     } elseif (
@@ -339,7 +339,7 @@ class Migrate
                         $this->tableHandler->addIndex(
                             $key,
                             $tableName,
-                            $validatedKey['columns'],
+                            $validatedKey['ddlColumns'],
                             $validatedKey['unique']
                         );
                     }
@@ -388,7 +388,10 @@ class Migrate
     /**
      * @param mixed $keyData
      *
-     * @return array{columns: string, unique: bool}
+     * 'columns' is compared with getTableIndexes(); 'ddlColumns' is the same
+     * list encoded for the CSV parsing in Tables::addIndex()/addPrimaryKey().
+     *
+     * @return array{columns: string, ddlColumns: string, unique: bool}
      *
      * @throws SchemaDefinitionException
      */
@@ -404,20 +407,62 @@ class Migrate
         }
 
         if ($keyName === 'PRIMARY') {
-            return [
-                'columns' => $keyData['columns'],
-                'unique' => true,
-            ];
-        }
-
-        if (!array_key_exists('unique', $keyData) || !is_bool($keyData['unique'])) {
+            $unique = true;
+        } elseif (array_key_exists('unique', $keyData) && is_bool($keyData['unique'])) {
+            $unique = $keyData['unique'];
+        } else {
             throw SchemaDefinitionException::forTable($tableName);
         }
 
+        $columns = $this->canonicalKeyColumns($tableName, $keyData['columns']);
+        $ddlColumns = array_map(
+            // a literal double quote would otherwise be read as a CSV enclosure
+            static fn(string $column): string => str_contains($column, '"')
+                ? '"' . str_replace('"', '""', $column) . '"'
+                : $column,
+            $columns
+        );
+
         return [
-            'columns' => $keyData['columns'],
-            'unique' => $keyData['unique'],
+            'columns' => implode(', ', $columns),
+            'ddlColumns' => implode(', ', $ddlColumns),
+            'unique' => $unique,
         ];
+    }
+
+    /**
+     * Normalize a key column list to the form Tables::getTable() reports,
+     * e.g. "`id`, `title`(20)" becomes ["id", "title (20)"], so target and
+     * existing keys compare equal and Tables quotes each name exactly once.
+     *
+     * @return list<string>
+     *
+     * @throws SchemaDefinitionException on an empty column entry
+     */
+    private function canonicalKeyColumns(string $tableName, string $columns): array
+    {
+        $canonical = [];
+        foreach (explode(',', $columns) as $column) {
+            $column = trim($column);
+            $length = '';
+            if (preg_match('/^(.+?)\s*\((\d+)\)\z/', $column, $matches)) {
+                $column = $matches[1];
+                $length = " ({$matches[2]})";
+            }
+            if (preg_match('/^`((?:[^`]|``)*)`\z/', $column, $matches)) {
+                $column = str_replace('``', '`', $matches[1]);
+                // Tables would read a trailing "(n)" as a prefix length, not part of the name
+                if ($length === '' && preg_match('/\(\d+\)\z/', $column)) {
+                    throw SchemaDefinitionException::forTable($tableName);
+                }
+            }
+            if ($column === '') {
+                throw SchemaDefinitionException::forTable($tableName);
+            }
+            $canonical[] = $column . $length;
+        }
+
+        return $canonical;
     }
 
     /**

@@ -52,10 +52,124 @@ class MigrateTest extends \PHPUnit\Framework\TestCase
                 array('setTableOptions', 'demo', 'ENGINE=InnoDB'),
                 array('addColumn', 'demo', 'id', 'int NOT NULL'),
                 array('addColumn', 'demo', 'title', 'varchar(255) NOT NULL'),
-                array('addPrimaryKey', 'demo', '`id`'),
-                array('addIndex', 'idx_title', 'demo', '`title`', false),
+                array('addPrimaryKey', 'demo', 'id'),
+                array('addIndex', 'idx_title', 'demo', 'title', false),
             ),
             $handler->calls
+        );
+    }
+
+    public function testSynchronizeTableTreatsQuotedTargetKeysAsEqualToIntrospectedKeys()
+    {
+        $migrate = new TestableMigrate();
+        $migrate->setTargetDefinitions(array(
+            'demo' => array(
+                'columns' => array(
+                    array('name' => 'id', 'attributes' => 'int NOT NULL'),
+                    array('name' => 'title', 'attributes' => 'varchar(255) NOT NULL'),
+                ),
+                'keys' => array(
+                    'PRIMARY' => array('columns' => '`id`'),
+                    'idx_title' => array('columns' => '`id`, `title` (20)', 'unique' => false),
+                ),
+            ),
+        ));
+        $handler = new FakeMigrateTableHandler();
+        $handler->existingColumns = array('id' => 'int NOT NULL', 'title' => 'varchar(255) NOT NULL');
+        $handler->existingIndexes = array(
+            'PRIMARY' => array('columns' => 'id', 'unique' => true),
+            'idx_title' => array('columns' => 'id, title (20)', 'unique' => false),
+        );
+        $migrate->setTableHandler($handler);
+
+        $migrate->callSynchronizeTable('demo');
+
+        $this->assertSame(array(), $handler->calls);
+    }
+
+    public function testSynchronizeTablePassesCanonicalKeyColumnsToDdl()
+    {
+        $migrate = new TestableMigrate();
+        $migrate->setTargetDefinitions(array(
+            'demo' => array(
+                'columns' => array(
+                    array('name' => 'id', 'attributes' => 'int NOT NULL'),
+                ),
+                'keys' => array(
+                    'idx_odd' => array('columns' => '`we``ird`(10), b', 'unique' => true),
+                ),
+            ),
+        ));
+        $handler = new FakeMigrateTableHandler();
+        $handler->existingColumns = array('id' => 'int NOT NULL');
+        $handler->existingIndexes = array();
+        $migrate->setTableHandler($handler);
+
+        $migrate->callSynchronizeTable('demo');
+
+        $this->assertSame(array(array('addIndex', 'idx_odd', 'demo', 'we`ird (10), b', true)), $handler->calls);
+    }
+
+    public function testSynchronizeTableEncodesLiteralDoubleQuotesForDdlOnly()
+    {
+        $migrate = new TestableMigrate();
+        $migrate->setTargetDefinitions(array(
+            'demo' => array(
+                'columns' => array(
+                    array('name' => '"id"', 'attributes' => 'int NOT NULL'),
+                ),
+                'keys' => array(
+                    'PRIMARY' => array('columns' => '`"id"`'),
+                    'idx_q' => array('columns' => '`"id"`(5)', 'unique' => false),
+                ),
+            ),
+        ));
+        $handler = new FakeMigrateTableHandler();
+        $handler->existingColumns = array('"id"' => 'int NOT NULL');
+        $handler->existingIndexes = array(
+            'PRIMARY' => array('columns' => '"id"', 'unique' => true),
+        );
+        $migrate->setTableHandler($handler);
+
+        $migrate->callSynchronizeTable('demo');
+
+        // PRIMARY compares equal in raw form; the new index gets the CSV-encoded form
+        $this->assertSame(array(array('addIndex', 'idx_q', 'demo', '"""id"" (5)"', false)), $handler->calls);
+    }
+
+    /**
+     * @dataProvider invalidKeyColumnsProvider
+     */
+    public function testSynchronizeTableThrowsForInvalidKeyColumns(string $columns)
+    {
+        $migrate = new TestableMigrate();
+        $migrate->setTargetDefinitions(array(
+            'demo' => array(
+                'columns' => array(
+                    array('name' => 'id', 'attributes' => 'int NOT NULL'),
+                ),
+                'keys' => array(
+                    'idx_bad' => array('columns' => $columns, 'unique' => false),
+                ),
+            ),
+        ));
+        $handler = new FakeMigrateTableHandler();
+        $handler->existingColumns = array('id' => 'int NOT NULL');
+        $migrate->setTableHandler($handler);
+
+        $this->expectException(SchemaDefinitionException::class);
+
+        $migrate->callSynchronizeTable('demo');
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function invalidKeyColumnsProvider(): array
+    {
+        return array(
+            'quoted name ending in prefix length' => array('`part(10)`'),
+            'empty column entry' => array('id, '),
         );
     }
 

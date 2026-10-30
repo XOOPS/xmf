@@ -1,27 +1,5 @@
 parameters:
 	ignoreErrors:
-		# Xmf\I18n\Direction::dir() — false positives, not bugs. PHPStan folds the
-		# runtime-variable legacy/global detection (class_exists('Xoops', false) against
-		# the bundled stub) and so treats the locale-specific cache branch as dead. The
-		# logic is correct at runtime: e.g. dir('ar') returns 'rtl' via that branch.
-		-
-			message: '#^Comparison operation "\>\=" between \*NEVER\* and 50 results in an error\.$#'
-			identifier: greaterOrEqual.invalid
-			count: 1
-			path: src/I18n/Direction.php
-
-		-
-			message: '#^If condition is always true\.$#'
-			identifier: if.alwaysTrue
-			count: 1
-			path: src/I18n/Direction.php
-
-		-
-			message: '#^Right side of && is always true\.$#'
-			identifier: booleanAnd.rightAlwaysTrue
-			count: 1
-			path: src/I18n/Direction.php
-
 		-
 			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
@@ -125,26 +103,8 @@ parameters:
 			path: src/Database/TableLoad.php
 
 		-
-			message: '#^Parameter \#2 \$data of static method Xmf\\Database\\TableLoad\:\:loadTableFromArray\(\) expects array\<int, array\<string, mixed\>\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Database/TableLoad.php
-
-		-
 			message: '#^Method Xmf\\Database\\TableLoad\:\:truncateTable\(\) should return int but returns int\|false\.$#'
 			identifier: return.type
-			count: 1
-			path: src/Database/TableLoad.php
-
-		-
-			message: '#^Offset ''count'' might not exist on array\|null\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: src/Database/TableLoad.php
-
-		-
-			message: '#^Parameter \#1 \$result of method XoopsDatabase\:\:fetchArray\(\) expects mysqli_result, bool\|mysqli_result given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Database/TableLoad.php
 
@@ -157,11 +117,17 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$result of method XoopsDatabase\:\:freeRecordSet\(\) expects mysqli_result, bool\|mysqli_result given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: src/Database/TableLoad.php
 
 		-
 			message: '#^Parameter \#1 \$str of method XoopsDatabase\:\:quote\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Database/TableLoad.php
+
+		-
+			message: '#^Parameter \#2 \$data of static method Xmf\\Database\\TableLoad\:\:loadTableFromArray\(\) expects array\<int, array\<string, mixed\>\>, array given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Database/TableLoad.php
@@ -311,12 +277,6 @@ parameters:
 			path: src/Database/Tables.php
 
 		-
-			message: '#^Parameter \#1 \$columnName of method Xmf\\Database\\Tables\:\:quoteIndexColumnName\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Database/Tables.php
-
-		-
 			message: '#^Parameter \#1 \$default of method Xmf\\Database\\Tables\:\:quoteDefaultClause\(\) expects string\|null, mixed given\.$#'
 			identifier: argument.type
 			count: 1
@@ -349,24 +309,6 @@ parameters:
 		-
 			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, mixed given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Part \$keyName \(mixed\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 1
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Part \$tableDef\[''name''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 13
-			path: src/Database/Tables.php
-
-		-
-			message: '#^Part \$this\-\>tables\[\$table\]\[''name''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
 			count: 1
 			path: src/Database/Tables.php
 
@@ -496,13 +438,11 @@ parameters:
 			count: 2
 			path: src/FilterInput.php
 
-
 		-
 			message: '#^Parameter \#2 \$haystack of function in_array expects array, mixed given\.$#'
 			identifier: argument.type
 			count: 4
 			path: src/FilterInput.php
-
 
 		-
 			message: '#^Parameter \#3 \$encoding of function html_entity_decode expects string\|null, mixed given\.$#'
@@ -1543,26 +1483,8 @@ parameters:
 			path: src/ProxyCheck.php
 
 		-
-			message: '#^Parameter \#1 \$header of method Xmf\\ProxyCheck\:\:getFor\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/ProxyCheck.php
-
-		-
-			message: '#^Parameter \#1 \$ip of method Xmf\\ProxyCheck\:\:getXForwardedFor\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/ProxyCheck.php
-
-		-
 			message: '#^Parameter \#1 \$string of function trim expects string, mixed given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/ProxyCheck.php
-
-		-
-			message: '#^Property Xmf\\ProxyCheck\:\:\$proxyHeaderName \(string\|false\) does not accept bool\|string\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: src/ProxyCheck.php
 

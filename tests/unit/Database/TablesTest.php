@@ -47,7 +47,114 @@ class TablesTest extends \PHPUnit\Framework\TestCase
 
         $this->assertStringContainsString('CREATE TABLE `xoops_demo`', $sql);
         $this->assertStringContainsString('PRIMARY KEY (`id`)', $sql);
-        $this->assertStringContainsString('UNIQUE KEY idx_title (`title`)', $sql);
+        $this->assertStringContainsString('UNIQUE KEY `idx_title` (`title`)', $sql);
+    }
+
+    public function testIdentifiersEscapeEmbeddedBackticks()
+    {
+        $tables = new TestableTables();
+        $tables->setDb(new FakeTablesDatabase());
+        $tables->setTables(
+            array(
+                'demo' => array(
+                    'name' => 'xoops_de`mo',
+                    'columns' => array(),
+                    'keys' => array('PRIMARY' => array('columns' => '`id`'), 'k`1' => array('columns' => '`id`')),
+                ),
+            )
+        );
+
+        $tables->addColumn('demo', 'a` INT, DROP COLUMN `b', 'INT');
+        $tables->addPrimaryKey('demo', 'i`d, code (8)');
+        $tables->addIndex('ix`1', 'demo', 'c`1(10),c2');
+        $tables->alterColumn('demo', 'o`ld', 'INT', 'n`ew');
+        $tables->dropColumn('demo', 'x`y');
+        $tables->dropIndex('ix`2', 'demo');
+        $tables->dropIndexes('demo');
+
+        $this->assertSame(
+            array(
+                'ALTER TABLE `xoops_de``mo` ADD COLUMN `a`` INT, DROP COLUMN ``b` INT',
+                'ALTER TABLE `xoops_de``mo` ADD PRIMARY KEY(`i``d`, `code` (8))',
+                'ALTER TABLE `xoops_de``mo` ADD INDEX `ix``1` (`c``1` (10), `c2`)',
+                'ALTER TABLE `xoops_de``mo` CHANGE COLUMN `o``ld` `n``ew` INT ',
+                'ALTER TABLE `xoops_de``mo` DROP COLUMN `x``y`',
+                'ALTER TABLE `xoops_de``mo` DROP INDEX `ix``2`',
+                'ALTER TABLE `xoops_de``mo` DROP INDEX `k``1`',
+            ),
+            $tables->dumpQueue()
+        );
+    }
+
+    public function testNonStringIdentifierIsRejected()
+    {
+        $tables = new TestableTables();
+        $tables->setTables(array('demo' => array('name' => null, 'columns' => array())));
+
+        $this->expectException(\InvalidArgumentException::class);
+        $tables->dropColumn('demo', 'x');
+    }
+
+    public function testIndexColumnPrefixLengthMustBeNumeric()
+    {
+        $tables = new TestableTables();
+        $tables->setTables(array('demo' => array('name' => 'xoops_demo', 'columns' => array())));
+
+        $tables->addIndex('ix', 'demo', 'c(1)) , DROP TABLE x -- (');
+
+        $this->assertSame(
+            'ALTER TABLE `xoops_demo` ADD INDEX `ix` (`c(1))`, `DROP TABLE x -- (`)',
+            $tables->dumpQueue()[0]
+        );
+    }
+
+    public function testIndexColumnsKeepInternalSpacesAndQuotedCommas()
+    {
+        $tables = new TestableTables();
+        $tables->setTables(array('demo' => array('name' => 'xoops_demo', 'columns' => array())));
+
+        $tables->addIndex('ix', 'demo', 'first name, "last,first", title (20), """q"" (5)"');
+        $tables->addPrimaryKey('demo', ' id ');
+
+        $this->assertSame(
+            array(
+                'ALTER TABLE `xoops_demo` ADD INDEX `ix` (`first name`, `last,first`, `title` (20), `"q"` (5))',
+                'ALTER TABLE `xoops_demo` ADD PRIMARY KEY(`id`)',
+            ),
+            $tables->dumpQueue()
+        );
+    }
+
+    public function testRenderTableCreateQuotesKeyName()
+    {
+        $tables = new TestableTables();
+        $tables->setTables(
+            array(
+                'demo' => array(
+                    'options' => 'ENGINE=InnoDB',
+                    'columns' => array(array('name' => 'i`d', 'attributes' => 'int')),
+                    'keys' => array('k`1' => array('columns' => '`i``d`')),
+                ),
+            )
+        );
+
+        $sql = $tables->callRenderTableCreate('demo');
+
+        $this->assertStringContainsString('`i``d`  int', $sql);
+        $this->assertStringContainsString('KEY `k``1` (`i``d`)', $sql);
+    }
+
+    public function testGetTableQuotesTableNameAsLiteral()
+    {
+        $tables = new CannedTables(array());
+
+        $tables->useTable("demo' OR '1'='1");
+
+        foreach ($tables->sql as $sql) {
+            $this->assertStringContainsString("TABLE_NAME = 'demo\\' OR \\'1\\'=\\'1'", $sql);
+            $this->assertStringContainsString("TABLE_SCHEMA = 'test'", $sql);
+        }
+        $this->assertCount(3, $tables->sql);
     }
 
     public function testInsertSkipsMalformedColumnDefinitionWithWarning()
@@ -482,8 +589,12 @@ class CannedTables extends Tables
 {
     private array $results = array();
 
+    /** @var string[] SQL passed to execSql() */
+    public array $sql = array();
+
     public function __construct(array $indexRows, bool $exists = true)
     {
+        $this->db = new FakeTablesDatabase();
         $this->databaseName = 'test';
         $this->tables = array();
         $this->queue = array();
@@ -512,6 +623,7 @@ class CannedTables extends Tables
 
     protected function execSql($sql, $force = false)
     {
+        $this->sql[] = $sql;
         foreach (array_keys($this->results) as $view) {
             if (strpos($sql, '`INFORMATION_SCHEMA`.`' . $view . '`') !== false) {
                 return new \ArrayIterator($this->results[$view]);
