@@ -8,6 +8,7 @@ v1.2.34 NOT RELEASED
 * security: Debug::startTrace() refuses to start when $collect_params asks for less than full parameter values (below 3) and the installed Xdebug cannot honour it: Xdebug 3.0-3.2 always record them, and 3.3+ can only leave them out (0) or record them in full. It also refuses when xdebug.collect_params cannot be changed at runtime (locked with php_admin_value) (backport of #204)
 * Metagen::getSearchSummary(): duplicate search terms are searched once, and the search stops at a match at the start of the text (backport of #204)
 * dev: FileStorageTest keeps its key files, which fetch() includes as PHP, in a private directory instead of a fixed name in the shared temp directory (backport of #204)
+* security: FilterInput tag filtering walks the input by offset instead of copying the remaining text for every tag and attribute, and caps the bytes its close-tag searches scan at 32 passes over the input, so its cost grows linearly with input size (a ~1.4 MB value took over 20 seconds per pass). Output is unchanged, except that once the cap is reached a tag whose name has not been searched yet is written self-closed (<x />) (backport of #203)
 
 Oct 14, 2026 v1.2.33
 ------------------
