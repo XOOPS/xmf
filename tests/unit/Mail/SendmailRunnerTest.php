@@ -215,7 +215,7 @@ class SendmailRunnerTest extends \PHPUnit\Framework\TestCase
         );
         $linkDir = sys_get_temp_dir() . '/sendmail-linkdir-' . bin2hex(random_bytes(8));
         $this->assertTrue(mkdir($linkDir));
-        chmod($linkDir, 0777); // another account could swap the link after validation
+        chmod($linkDir, 0770); // group members could swap the link after validation
         $link = $linkDir . '/sendmail';
         $this->assertTrue(symlink($script, $link));
         $this->cleanupPaths[] = $link;
