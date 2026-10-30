@@ -386,53 +386,55 @@ class FilterInput
      */
     protected function filterTags($source)
     {
-        // filter pass setup
-        $preTag = null;
-        $postTag = $source;
-        // find initial tag's position
-        $tagOpen_start = strpos($source, '<');
+        // filter pass setup; $pos is where the unprocessed text starts. Walking $source by
+        // offset (instead of re-copying the remainder for every tag) keeps a pass linear.
+        $preTag = '';
+        $pos = 0;
+        // first ">" at or after $pos + 1, kept while $pos moves inside the same tag
+        $tagClose = -1;
+        // per tag name: next "</name" at or after $pos + 1, or false when there is none
+        $closeTagAt = array();
         // iterate through string until no tags left
-        while ($tagOpen_start !== false) {
+        while (($tagOpen = strpos($source, '<', $pos)) !== false) {
             // process tag iteratively
-            $preTag .= substr($postTag, 0, $tagOpen_start);
-            $postTag = substr($postTag, $tagOpen_start);
-            $fromTagOpen = substr($postTag, 1);
+            $preTag .= substr($source, $pos, $tagOpen - $pos);
+            $pos = $tagOpen;
             // end of tag
-            $tagOpen_end = strpos($fromTagOpen, '>');
-            if ($tagOpen_end === false) {
-                break;
+            if ($tagClose <= $pos) {
+                $tagClose = strpos($source, '>', $pos + 1);
+                if ($tagClose === false) {
+                    break;
+                }
             }
-            // next start of tag (for nested tag assessment)
-            $tagOpen_nested = strpos($fromTagOpen, '<');
-            if (($tagOpen_nested !== false) && ($tagOpen_nested < $tagOpen_end)) {
-                $preTag .= $this->stripTagOpeners(substr($postTag, 0, ($tagOpen_nested + 1)));
-                $postTag = substr($postTag, ($tagOpen_nested + 1));
-                $tagOpen_start = strpos($postTag, '<');
+            $tagOpen_end = $tagClose - $pos - 1;
+            // a "<" inside the tag (nested tag assessment) restarts the tag there
+            $tagOpen_nested = strcspn($source, '<', $pos + 1, $tagOpen_end);
+            if ($tagOpen_nested < $tagOpen_end) {
+                $preTag .= $this->stripTagOpeners(substr($source, $pos, $tagOpen_nested + 1));
+                $pos += $tagOpen_nested + 1;
                 continue;
             }
-            $currentTag = substr($fromTagOpen, 0, $tagOpen_end);
-            $tagLength = strlen($currentTag);
+            $currentTag = substr($source, $pos + 1, $tagOpen_end);
+            $tagLength = $tagOpen_end;
             if (!$tagOpen_end) {
                 // "<>" is not a tag: keep it as text and move past it. Appending the whole
                 // remainder here made every pass longer, so remove() never terminated.
                 $preTag .= '<>';
-                $postTag = substr($postTag, 2);
-                $tagOpen_start = strpos($postTag, '<');
+                $pos += 2;
                 continue;
             }
             // iterate through tag finding attribute pairs - setup
-            $tagLeft = $currentTag;
             $attrSet = array();
-            $currentSpace = strpos($tagLeft, ' ');
+            $currentSpace = strpos($currentTag, ' ');
             if (substr($currentTag, 0, 1) === "/") {
                 // is end tag
                 $isCloseTag = true;
-                list($tagName) = explode(' ', $currentTag);
+                list($tagName) = explode(' ', $currentTag, 2);
                 $tagName = substr($tagName, 1);
             } else {
                 // is start tag
                 $isCloseTag = false;
-                list($tagName) = explode(' ', $currentTag);
+                list($tagName) = explode(' ', $currentTag, 2);
             }
             // excludes all "non-regular" tagnames OR remove if xssauto is on and tag is blacklisted.
             // An empty (or "0") tag name is already rejected by the regex below, so a
@@ -442,42 +444,44 @@ class FilterInput
                 || ((in_array(strtolower($tagName), $this->tagBlacklist))
                     && ($this->xssAuto))
             ) {
-                $postTag = substr($postTag, ($tagLength + 2));
-                $tagOpen_start = strpos($postTag, '<');
+                $pos += $tagLength + 2;
                 // don't append this tag
                 continue;
             }
             // this while is needed to support attribute values with spaces in!
+            // Offsets into $currentTag; the quote positions are cached the same way as $tagClose.
+            $lastEquals = strrpos($currentTag, '=');
+            $openQuotes = -1;
+            $closeQuotes = -1;
             while ($currentSpace !== false) {
-                $fromSpace = substr($tagLeft, ($currentSpace + 1));
-                $nextSpace = strpos($fromSpace, ' ');
-                $openQuotes = strpos($fromSpace, '"');
-                $closeQuotes = strpos(substr($fromSpace, ($openQuotes + 1)), '"') + $openQuotes + 1;
-                // another equals exists
-                if (strpos($fromSpace, '=') !== false) {
-                    // opening and closing quotes exists
-                    if (
-                        ($openQuotes !== false)
-                        && (strpos(substr($fromSpace, ($openQuotes + 1)), '"') !== false)
-                    ) {
-                        $attr = substr($fromSpace, 0, ($closeQuotes + 1));
-                    } else {
-                        $attr = substr($fromSpace, 0, $nextSpace);
-                    }
-                    // one or neither exist
-                } else {
-                    // no more equals exist
-                    $attr = substr($fromSpace, 0, $nextSpace);
+                $attrStart = $currentSpace + 1;
+                // first quote pair at or after the attribute start
+                if ($openQuotes !== false && $openQuotes < $attrStart) {
+                    $openQuotes = strpos($currentTag, '"', $attrStart);
                 }
+                if ($openQuotes !== false && $closeQuotes !== false && $closeQuotes <= $openQuotes) {
+                    $closeQuotes = strpos($currentTag, '"', $openQuotes + 1);
+                }
+                if (
+                    // another equals exists, and opening and closing quotes exist
+                    ($lastEquals !== false && $lastEquals >= $attrStart)
+                    && ($openQuotes !== false && $closeQuotes !== false)
+                ) {
+                    $attrLength = $closeQuotes - $attrStart + 1;
+                } else {
+                    // up to the next space; none left means an empty attr (the remainder, below)
+                    $nextSpace = strpos($currentTag, ' ', $attrStart);
+                    $attrLength = ($nextSpace === false) ? 0 : $nextSpace - $attrStart;
+                }
+                $attr = substr($currentTag, $attrStart, $attrLength);
                 // last attr pair
                 if (!$attr) {
-                    $attr = $fromSpace;
+                    $attr = substr($currentTag, $attrStart);
                 }
                 // add to attribute pairs array
                 $attrSet[] = $attr;
                 // next inc
-                $tagLeft = substr($fromSpace, strlen($attr));
-                $currentSpace = strpos($tagLeft, ' ');
+                $currentSpace = strpos($currentTag, ' ', $attrStart + strlen($attr));
             }
             // appears in array specified by user
             $tagFound = in_array(strtolower($tagName), $this->tagsArray);
@@ -491,8 +495,14 @@ class FilterInput
                     for ($i = 0; $i < $attrSetCount; ++$i) {
                         $preTag .= ' ' . $attrSet[$i];
                     }
-                    // reformat single tags to XHTML
-                    if (strpos($fromTagOpen, "</" . $tagName)) {
+                    // reformat single tags to XHTML: a matching close tag anywhere later keeps it open.
+                    // ponytail: one cached search per tag name; in blacklist mode many distinct
+                    // unclosed names still cost one scan each (as before this rewrite).
+                    $closeAt = $closeTagAt[$tagName] ?? -1;
+                    if ($closeAt !== false && $closeAt <= $pos) {
+                        $closeAt = $closeTagAt[$tagName] = strpos($source, '</' . $tagName, $pos + 1);
+                    }
+                    if ($closeAt !== false) {
                         $preTag .= '>';
                     } else {
                         $preTag .= ' />';
@@ -503,11 +513,10 @@ class FilterInput
                 }
             }
             // find next tag's start
-            $postTag = substr($postTag, ($tagLength + 2));
-            $tagOpen_start = strpos($postTag, '<');
+            $pos += $tagLength + 2;
         }
         // append any code after end of tags; an unclosed "<img ..." must not survive as a tag opener
-        $preTag .= $this->stripTagOpeners($postTag);
+        $preTag .= $this->stripTagOpeners(substr($source, $pos));
 
         return $preTag;
     }
