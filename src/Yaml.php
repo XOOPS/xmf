@@ -102,9 +102,14 @@ class Yaml
             return false;
         }
         try {
-            $yamlString = @file_get_contents($yamlFile);
+            // the size check above is metadata only; a growing file or a device can return more
+            $yamlString = @file_get_contents($yamlFile, false, null, 0, $maxSize + 1);
             if ($yamlString === false) {
                 trigger_error("Failed to read YAML file: " . basename($yamlFile), E_USER_WARNING);
+                return false;
+            }
+            if (strlen($yamlString) > $maxSize) {
+                trigger_error("YAML file exceeds maximum size of 2MB", E_USER_WARNING);
                 return false;
             }
             $ret = VendorYaml::parse($yamlString);
@@ -235,9 +240,14 @@ class Yaml
             trigger_error("Failed to read YAML file (not readable): " . basename($yamlFile), E_USER_WARNING);
             return false;
         }
-        $yamlString = @file_get_contents($yamlFile);
+        // the size check above is metadata only; a growing file or a device can return more
+        $yamlString = @file_get_contents($yamlFile, false, null, 0, $maxSize + 1);
         if ($yamlString === false) {
             trigger_error("Failed to read YAML file: " . basename($yamlFile), E_USER_WARNING);
+            return false;
+        }
+        if (strlen($yamlString) > $maxSize) {
+            trigger_error("YAML file exceeds maximum size of 2MB", E_USER_WARNING);
             return false;
         }
         try {

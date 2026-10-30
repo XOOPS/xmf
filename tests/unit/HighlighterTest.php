@@ -43,6 +43,29 @@ class HighlighterTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('This <i>test</i> <test>is</test> <i>OK</i>.', $output);
     }
 
+    public function testQuotedGreaterThanDoesNotEndTheTag()
+    {
+        $body = '<a title="x>y">y</a>';
+        $this->assertSame('<a title="x>y"><mark>y</mark></a>', Highlighter::apply('y', $body));
+
+        // a term spanning the quote must not close the attribute and expose its value as markup
+        $body = '<a title="x>y" data-z=\'<img src=x onerror=alert(1)>\'>t</a>';
+        $this->assertSame($body, Highlighter::apply('y"', $body));
+    }
+
+    public function testCommentsAndDeclarationsAreNotHighlighted()
+    {
+        $body = '<!DOCTYPE html><!-- foo -- a > b -->foo';
+        $this->assertSame('<!DOCTYPE html><!-- foo -- a > b --><mark>foo</mark>', Highlighter::apply('foo', $body));
+        $this->assertSame($body, Highlighter::apply('--', $body));
+    }
+
+    public function testUnclosedQuoteStopsHighlighting()
+    {
+        $body = 'y <a title="x>y y';
+        $this->assertSame('<mark>y</mark> <a title="x>y y', Highlighter::apply('y', $body));
+    }
+
     public function testEmptyTermsAreSkipped()
     {
         $this->assertSame('a <mark>foo</mark> b', Highlighter::apply(' foo', 'a foo b'));
