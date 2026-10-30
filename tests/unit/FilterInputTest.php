@@ -1,6 +1,7 @@
 <?php
 namespace Xmf\Test;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Xmf\FilterInput;
 
 class FilterInputTest extends \PHPUnit\Framework\TestCase
@@ -266,6 +267,70 @@ class FilterInputTest extends \PHPUnit\Framework\TestCase
         $this->assertSame('<a>x</a>', $filter->cleanVar('<a href="javascript&colon;alert(1)">x</a>', 'html'));
         $this->assertSame('<a>x</a>', $filter->cleanVar('<a href="java&Tab;script:alert(1)">x</a>', 'html'));
         $this->assertSame('<a href="https://example.com/recipes">x</a>', $filter->cleanVar('<a href="https://example.com/recipes">x</a>', 'html'));
+    }
+
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public static function allowedTagShapesProvider(): array
+    {
+        // outputs of the substr-based filterTags(), kept by the offset-based rewrite
+        return [
+            'quoted value with spaces' => ['<b title="a b c">x</b>', '<b title="abc">x</b>'],
+            'quoted then bare value'   => ['<img src="a b" title=c>', '<img src="ab" title="c" />'],
+            'two quoted values'        => ['<a title="a b" href="c d">x</a>', '<a title="ab" href="cd">x</a>'],
+            'attribute "0"'            => ['<b 0 title="x">y</b>', '<b>y</b>'],
+            'double space'             => ['<b  title="x">y</b>', '<b title="x">y</b>'],
+            'unclosed single tag'      => ['<img src=x>', '<img src="x" />'],
+            'close tag only earlier'   => ['<b>x</b><img src=y><b>z', '<b>x</b><img src="y" /><b />z'],
+            'nested opener'            => ['a<<b>x</b>', 'a<<b>x</b>'],
+            'adjacent attributes'      => ['<b title="x"y="z">q</b>', '<b title="x">q</b>'],
+            'close name other case'    => ['<b>x</B>', '<b />x</B>'],
+        ];
+    }
+
+    #[DataProvider('allowedTagShapesProvider')]
+    public function testAllowedTagShapes(string $input, string $expected)
+    {
+        $filter = FilterInput::getInstance(['b', 'img', 'a'], ['title', 'src', 'href']);
+        $this->assertSame($expected, $filter->process($input));
+    }
+
+    public function testLargeInputIsFilteredInLinearTime()
+    {
+        // filterTags() re-copied the remaining text for every tag and attribute; ~1 MB took minutes
+        $filter = FilterInput::getInstance(['b']);
+        $tags = str_repeat('<b>x</b><u>y</u> ', 40000);
+        $attrs = '<b' . str_repeat(' t="x y"', 40000) . '>z</b>';
+        $start = hrtime(true);
+        $this->assertSame(str_repeat('<b>x</b>y ', 40000), $filter->process($tags));
+        $this->assertSame('<b>z</b>', $filter->process($attrs));
+        $this->assertLessThan(5000, (hrtime(true) - $start) / 1e6, 'filtering ~1 MB took over 5 s');
+    }
+
+    public function testManyDistinctUnclosedTagsAreFilteredInLinearTime()
+    {
+        // blacklist mode searched the rest of the input once per distinct unclosed name; ~1 MB took minutes
+        $filter = FilterInput::getInstance(['script'], [], 1, 1);
+        // a later close tag whose name starts with the tag name keeps it open, as before
+        $this->assertSame('<a>y</abbr><p1 />', $filter->process('<a>y</abbr><p1>'));
+        $input = '';
+        $expected = '';
+        for ($i = 0; $i < 100000; ++$i) {
+            $input .= '<t' . $i . '>';
+            $expected .= '<t' . $i . ' />';
+        }
+        $start = hrtime(true);
+        $this->assertSame($expected, $filter->process($input));
+        // close tags far behind their openers use up the search budget; later names count as unclosed
+        $farClosed = $filter->process($input . str_replace('<', '</', $input));
+        $this->assertIsString($farClosed);
+        $this->assertStringStartsWith('<t0>', $farClosed);
+        $this->assertStringContainsString('<t99999 />', $farClosed);
+        // Xdebug (the coverage job) slows this loop over tenfold; the other jobs keep the bound
+        if (!extension_loaded('xdebug')) {
+            $this->assertLessThan(5000, (hrtime(true) - $start) / 1e6, 'filtering ~2 MB took over 5 s');
+        }
     }
 
     public function testRemoveDropsAValueThatNeverSettles()
