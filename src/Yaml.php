@@ -37,6 +37,8 @@ use Symfony\Component\Yaml\Yaml as VendorYaml;
  */
 class Yaml
 {
+    private const SIZE_ERROR = 'YAML file exceeds maximum size of 2MB';
+
     /**
      * Dump an PHP array as a YAML string
      *
@@ -94,7 +96,7 @@ class Yaml
             return false;
         }
         if ($fileSize > $maxSize) {
-            trigger_error("YAML file exceeds maximum size of 2MB", E_USER_WARNING);
+            trigger_error(self::SIZE_ERROR, E_USER_WARNING);
             return false;
         }
         if (!is_readable($yamlFile)) {
@@ -109,7 +111,7 @@ class Yaml
                 return false;
             }
             if (strlen($yamlString) > $maxSize) {
-                trigger_error("YAML file exceeds maximum size of 2MB", E_USER_WARNING);
+                trigger_error(self::SIZE_ERROR, E_USER_WARNING);
                 return false;
             }
             $ret = VendorYaml::parse($yamlString);
@@ -233,7 +235,7 @@ class Yaml
             return false;
         }
         if ($fileSize > $maxSize) {
-            trigger_error("YAML file exceeds maximum size of 2MB", E_USER_WARNING);
+            trigger_error(self::SIZE_ERROR, E_USER_WARNING);
             return false;
         }
         if (!is_readable($yamlFile)) {
@@ -247,7 +249,7 @@ class Yaml
             return false;
         }
         if (strlen($yamlString) > $maxSize) {
-            trigger_error("YAML file exceeds maximum size of 2MB", E_USER_WARNING);
+            trigger_error(self::SIZE_ERROR, E_USER_WARNING);
             return false;
         }
         try {
