@@ -5,7 +5,7 @@ v1.2.34 NOT RELEASED
 * security: Highlighter::apply() no longer ends a tag at a ">" inside a quoted attribute value, so a term (such as one containing a quote) is never highlighted inside an attribute, where the inserted markup could close the tag early and turn the rest of the attribute into live HTML; comments and declarations (<!-- -->, <!DOCTYPE>) are not highlighted, and after an unclosed quote or comment nothing is highlighted (backport of #204)
 * security: Highlighter::apply() skips empty search terms (leading or trailing space, '' in the array) instead of looping until memory runs out
 * security: Module\Helper::getHandler() handler names must consist of letters, digits and _; a name holding / or . could include a PHP file outside the module's class/ directory (backport of #204)
-* security: Debug::startTrace() refuses to start when $collect_params asks for less than full parameter values (below 3) and the installed Xdebug cannot honour it: Xdebug 3.0-3.2 always record them, and 3.3+ can only leave them out (0) or record them in full (backport of #204)
+* security: Debug::startTrace() refuses to start when $collect_params asks for less than full parameter values (below 3) and the installed Xdebug cannot honour it: Xdebug 3.0-3.2 always record them, and 3.3+ can only leave them out (0) or record them in full. It also refuses when xdebug.collect_params cannot be changed at runtime (locked with php_admin_value) (backport of #204)
 * Metagen::getSearchSummary(): duplicate search terms are searched once, and the search stops at a match at the start of the text (backport of #204)
 * dev: FileStorageTest keeps its key files, which fetch() includes as PHP, in a private directory instead of a fixed name in the shared temp directory (backport of #204)
 

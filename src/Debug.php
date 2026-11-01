@@ -102,7 +102,14 @@ class Debug extends Kint
                 );
                 return;
             }
-            ini_set('xdebug.collect_params', $collect_params);
+            // a setting locked by php_admin_value would record the arguments the caller left out
+            if (ini_set('xdebug.collect_params', $collect_params) === false && $level < 3) {
+                trigger_error(
+                    "Xdebug {$xdebugVersion} could not limit parameters to level {$level}; trace not started",
+                    E_USER_WARNING
+                );
+                return;
+            }
             ini_set('xdebug.collect_return', $collect_return);
             if ($tracefile == '') {
                 $tracefile = XOOPS_VAR_PATH . '/logs/php_trace';
