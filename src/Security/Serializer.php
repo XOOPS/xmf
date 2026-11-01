@@ -105,6 +105,9 @@ final class Serializer
             $serialized = $data->jsonSerialize();
             // an object returned as itself is encoded by its public properties
             $data = $serialized === $data ? get_object_vars($data) : $serialized;
+        } elseif ($data instanceof \BackedEnum) {
+            // json_encode() writes only the backing value, not the name
+            $data = $data->value;
         } elseif (\is_object($data)) {
             $data = get_object_vars($data);
         }

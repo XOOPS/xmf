@@ -10,6 +10,7 @@ use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use Xmf\Security\DecompressionException;
 use Xmf\Security\Format;
 use Xmf\Security\Serializer;
+use Xmf\Test\Fixtures\LongNamedStatus;
 
 #[CoversClass(Serializer::class)]
 class SerializerTest extends \PHPUnit\Framework\TestCase
@@ -69,6 +70,13 @@ class SerializerTest extends \PHPUnit\Framework\TestCase
             $this->assertStringContainsString('exceeds maximum allowed size', $e->getMessage());
         }
         $this->assertLessThan($before + 1000000, memory_get_peak_usage(), 'JSON was built before the guard ran');
+    }
+
+    public function testToJsonCountsBackedEnumsAsTheirValue(): void
+    {
+        // counted by name and value this is over 5 MB; json_encode() writes "[1,1,...]"
+        $json = Serializer::toJson(array_fill(0, 150000, LongNamedStatus::PROCESSING_INSTRUCTION_COMPLETE));
+        $this->assertSame(300001, \strlen($json));
     }
 
     public function testToJsonCountsStringsReturnedByJsonSerialize(): void
