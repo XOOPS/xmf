@@ -23,6 +23,6 @@ interface BackedEnum extends UnitEnum
     public static function tryFrom(int|string $value): ?static;
 }
 
-function array_is_list(array $array): bool
+function array_is_list(array $array): bool // NOSONAR - native name and signature, declaration only
 {
 }
