@@ -203,6 +203,64 @@ class SendmailRunnerTest extends \PHPUnit\Framework\TestCase
         $this->assertLessThan(2000000, memory_get_peak_usage() - $before);
     }
 
+    public function testDeliverRunsCanonicalTargetWhenLinkDirectoryIsWritableByOthers()
+    {
+        if (DIRECTORY_SEPARATOR === '\\') {
+            $this->markTestSkipped('Sendmail runner process test requires a POSIX shell.');
+        }
+
+        $outputFile = $this->createTempFile('sendmail-argv0-', '');
+        $script = $this->createExecutableScript(
+            "#!/usr/bin/env bash\nprintf '%s' \"\$0\" > " . escapeshellarg($outputFile) . "\ncat > /dev/null\nexit 0\n"
+        );
+        // not under the temp dir: a world-writable /tmp would make the walk fail before the group bit
+        $linkDir = __DIR__ . '/sendmail-linkdir-' . bin2hex(random_bytes(8));
+        $this->assertTrue(mkdir($linkDir, 0700));
+        $link = $linkDir . '/sendmail';
+
+        try {
+            chmod($linkDir, 0700);
+            if (!$this->parentsTrusted($linkDir)) {
+                $this->markTestSkipped('A directory above the test directory is group/other-writable or owned by another user.');
+            }
+            $this->assertTrue(symlink($script, $link));
+            $runner = new SendmailRunner(array($link));
+
+            $runner->deliver($link, "Subject: Test\n\nHello\n");
+            $this->assertSame($link, file_get_contents($outputFile), 'A private link directory keeps the literal path');
+
+            chmod($linkDir, 0770); // group members could swap the link after validation
+            $runner->deliver($link, "Subject: Test\n\nHello\n");
+        } finally {
+            @unlink($link);
+            @rmdir($linkDir);
+        }
+
+        $this->assertSame(realpath($script), file_get_contents($outputFile));
+    }
+
+    /**
+     * True when $dir and every directory above it are owned by root or this user and closed to
+     * group and other writes, the condition SendmailRunner needs to keep the literal path
+     */
+    private function parentsTrusted(string $dir): bool
+    {
+        if (!function_exists('posix_geteuid')) {
+            return false;
+        }
+        do {
+            $mode = fileperms($dir);
+            $owner = fileowner($dir);
+            if ($mode === false || ($mode & 0022) !== 0 || ($owner !== 0 && $owner !== posix_geteuid())) {
+                return false;
+            }
+            $parent = $dir;
+            $dir = dirname($dir);
+        } while ($dir !== $parent);
+
+        return true;
+    }
+
     private function createTempFile(string $prefix, string $contents): string
     {
         $path = tempnam(sys_get_temp_dir(), $prefix);

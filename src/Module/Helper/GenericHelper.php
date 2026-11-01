@@ -186,6 +186,11 @@ abstract class GenericHelper extends AbstractHelper
     {
         $this->addLog('INIT ' . $name . ' HANDLER');
 
+        // the name becomes a file name in class/: no path separators or dots
+        if (!preg_match('/^[a-z0-9_]+\z/i', $name)) {
+            $this->addLog("ERROR :: Invalid handler name '{$name}'");
+            return;
+        }
         if (!isset($this->handlers[$name])) {
             $hnd_file = XOOPS_ROOT_PATH . "/modules/{$this->dirname}/class/{$name}.php";
             if (file_exists($hnd_file)) {

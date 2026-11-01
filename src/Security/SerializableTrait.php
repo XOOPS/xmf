@@ -145,8 +145,9 @@ trait SerializableTrait
             } catch (\Throwable $e) {
                 \error_log(\sprintf(
                     'Serializer migration failed for property "%s": %s',
-                    $property,
-                    $e->getMessage()
+                    // one record per failure: control characters must not start a new log line
+                    \addcslashes($property, "\0..\37\177"),
+                    \addcslashes($e->getMessage(), "\0..\37\177")
                 ));
 
                 return false;

@@ -37,6 +37,8 @@ use Symfony\Component\Yaml\Yaml as VendorYaml;
  */
 class Yaml
 {
+    private const SIZE_ERROR = 'YAML file exceeds maximum size of 2MB';
+
     /**
      * Dump an PHP array as a YAML string
      *
@@ -94,7 +96,7 @@ class Yaml
             return false;
         }
         if ($fileSize > $maxSize) {
-            trigger_error("YAML file exceeds maximum size of 2MB", E_USER_WARNING);
+            trigger_error(self::SIZE_ERROR, E_USER_WARNING);
             return false;
         }
         if (!is_readable($yamlFile)) {
@@ -102,9 +104,14 @@ class Yaml
             return false;
         }
         try {
-            $yamlString = @file_get_contents($yamlFile);
+            // the size check above is metadata only; a growing file or a device can return more
+            $yamlString = @file_get_contents($yamlFile, false, null, 0, $maxSize + 1);
             if ($yamlString === false) {
                 trigger_error("Failed to read YAML file: " . basename($yamlFile), E_USER_WARNING);
+                return false;
+            }
+            if (strlen($yamlString) > $maxSize) {
+                trigger_error(self::SIZE_ERROR, E_USER_WARNING);
                 return false;
             }
             $ret = VendorYaml::parse($yamlString);
@@ -228,16 +235,21 @@ class Yaml
             return false;
         }
         if ($fileSize > $maxSize) {
-            trigger_error("YAML file exceeds maximum size of 2MB", E_USER_WARNING);
+            trigger_error(self::SIZE_ERROR, E_USER_WARNING);
             return false;
         }
         if (!is_readable($yamlFile)) {
             trigger_error("Failed to read YAML file (not readable): " . basename($yamlFile), E_USER_WARNING);
             return false;
         }
-        $yamlString = @file_get_contents($yamlFile);
+        // the size check above is metadata only; a growing file or a device can return more
+        $yamlString = @file_get_contents($yamlFile, false, null, 0, $maxSize + 1);
         if ($yamlString === false) {
             trigger_error("Failed to read YAML file: " . basename($yamlFile), E_USER_WARNING);
+            return false;
+        }
+        if (strlen($yamlString) > $maxSize) {
+            trigger_error(self::SIZE_ERROR, E_USER_WARNING);
             return false;
         }
         try {

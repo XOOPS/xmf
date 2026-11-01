@@ -305,7 +305,10 @@ class FilterInputTest extends \PHPUnit\Framework\TestCase
         $start = hrtime(true);
         $this->assertSame(str_repeat('<b>x</b>y ', 40000), $filter->process($tags));
         $this->assertSame('<b>z</b>', $filter->process($attrs));
-        $this->assertLessThan(5000, (hrtime(true) - $start) / 1e6, 'filtering ~1 MB took over 5 s');
+        // Xdebug slows this loop several times over; the other jobs keep the bound
+        if (!extension_loaded('xdebug')) {
+            $this->assertLessThan(5000, (hrtime(true) - $start) / 1e6, 'filtering ~1 MB took over 5 s');
+        }
     }
 
     public function testManyDistinctUnclosedTagsAreFilteredInLinearTime()

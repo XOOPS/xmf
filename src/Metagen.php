@@ -421,7 +421,13 @@ class Metagen
     {
         $pos = array();
         $needles = empty($needles) ? array() : (array) $needles;
+        $seen = array();
         foreach ($needles as $needle) {
+            if (!is_scalar($needle) || isset($seen[(string) $needle])) {
+                continue;
+            }
+            $needle = (string) $needle;
+            $seen[$needle] = true;
             if (function_exists('mb_stripos')) {
                 $i = mb_stripos($haystack, $needle, 0, static::ENCODING);
             } else {
@@ -429,6 +435,9 @@ class Metagen
             }
             if ($i !== false) {
                 $pos[] = $i; // only store matches
+                if ($i === 0) {
+                    break; // no later needle can start earlier
+                }
             }
         }
         return $pos;

@@ -39,6 +39,86 @@ class SerializerTest extends \PHPUnit\Framework\TestCase
         Serializer::toJson(str_repeat('a', self::MAX_SIZE));
     }
 
+    public function testToJsonRejectsSharedReferenceExpansionBeforeEncoding(): void
+    {
+        // each level holds the one below twice through a reference: 2^40 values from ~1.7 KB
+        $data = 'x';
+        for ($i = 0; $i < 40; $i++) {
+            $level = [$data];
+            $level[1] = &$level[0];
+            $data = $level;
+            unset($level);
+        }
+        $value = Serializer::fromPhp(serialize($data));
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('exceeds maximum allowed size');
+        Serializer::toJson($value);
+    }
+
+    public function testToJsonGuardsJsonSerializableOutput(): void
+    {
+        $data = 'x';
+        for ($i = 0; $i < 40; $i++) {
+            $level = [$data];
+            $level[1] = &$level[0];
+            $data = $level;
+            unset($level);
+        }
+        $object = new class ($data) implements \JsonSerializable {
+            public function __construct(private array $data)
+            {
+            }
+
+            public function jsonSerialize(): mixed
+            {
+                return $this->data;
+            }
+        };
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('exceeds maximum allowed size');
+        Serializer::toJson($object);
+    }
+
+    public function testToJsonEncodesJsonSerializableReturningItself(): void
+    {
+        $object = new class implements \JsonSerializable {
+            public function jsonSerialize(): mixed
+            {
+                return $this;
+            }
+        };
+
+        // json_encode() encodes the properties of an object returned as itself
+        $this->assertSame('{}', Serializer::toJson($object));
+    }
+
+    public function testToJsonGuardsPropertiesOfJsonSerializableReturningItself(): void
+    {
+        $data = 'x';
+        for ($i = 0; $i < 40; $i++) {
+            $level = [$data];
+            $level[1] = &$level[0];
+            $data = $level;
+            unset($level);
+        }
+        $object = new class ($data) implements \JsonSerializable {
+            public function __construct(public array $data)
+            {
+            }
+
+            public function jsonSerialize(): mixed
+            {
+                return $this;
+            }
+        };
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('exceeds maximum allowed size');
+        Serializer::toJson($object);
+    }
+
     public function testToJsonRejectsUnencodableData(): void
     {
         $this->expectException(\JsonException::class);

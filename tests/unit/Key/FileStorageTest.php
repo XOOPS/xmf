@@ -16,13 +16,21 @@ class FileStorageTest extends \PHPUnit\Framework\TestCase
     protected $testKey = 'x-unit-test-key-file';
 
     /**
+     * @var string private directory for the key files, which fetch() includes as PHP
+     */
+    protected $storageDir;
+
+    /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
      */
     protected function setUp(): void
     {
-        //$this->markTestIncomplete('FileStorage testing incomplete');
-        $this->object = new FileStorage('/tmp', 'fubar');
+        $this->storageDir = sys_get_temp_dir() . '/xmf-filestorage-' . bin2hex(random_bytes(8));
+        if (!mkdir($this->storageDir, 0700)) {
+            $this->fail('cannot create private test directory');
+        }
+        $this->object = new FileStorage($this->storageDir, 'fubar');
     }
 
     /**
@@ -32,13 +40,14 @@ class FileStorageTest extends \PHPUnit\Framework\TestCase
     protected function tearDown(): void
     {
         @$this->object->delete($this->testKey);
+        @rmdir($this->storageDir);
     }
 
     public function testSave()
     {
         $name = $this->testKey;
         $data = 'data';
-        $this->object->save($name, $data);
+        $this->assertTrue($this->object->save($name, $data));
         $this->assertEquals($data, $this->object->fetch($name));
     }
 
@@ -47,7 +56,7 @@ class FileStorageTest extends \PHPUnit\Framework\TestCase
         $name = $this->testKey;
         $data = 'data';
         $this->assertFalse(@$this->object->fetch($name));
-        $this->object->save($name, $data);
+        $this->assertTrue($this->object->save($name, $data));
         $this->assertEquals($this->object->fetch($name), $data);
     }
 
@@ -56,7 +65,7 @@ class FileStorageTest extends \PHPUnit\Framework\TestCase
         $name = $this->testKey;
         $data = 'data';
         $this->assertFalse($this->object->exists($name));
-        $this->object->save($name, $data);
+        $this->assertTrue($this->object->save($name, $data));
         $this->assertTrue($this->object->exists($name));
     }
 
@@ -64,7 +73,7 @@ class FileStorageTest extends \PHPUnit\Framework\TestCase
     {
         $name = $this->testKey;
         $data = 'data';
-        $this->object->save($name, $data);
+        $this->assertTrue($this->object->save($name, $data));
         $this->assertTrue($this->object->exists($name));
         $this->assertTrue($this->object->delete($name));
         $this->assertFalse(@$this->object->delete($name));
