@@ -8,6 +8,9 @@ use Xmf\Debug;
 
 class DebugTest extends \PHPUnit\Framework\TestCase
 {
+    /** The argument tests/unit/Fixtures/xdebug-trace.php passes to the traced call */
+    private const TRACE_ARGUMENT = 'xmf-trace-argument';
+
     #[RunInSeparateProcess]
     public function testFirstDumpKeepsDisabledKintDisabled()
     {
@@ -37,13 +40,21 @@ class DebugTest extends \PHPUnit\Framework\TestCase
     {
         $this->requireXdebug('3.3');
 
-        [$warnings, $started] = $this->runStartTrace('0');
+        [$warnings] = $this->runStartTrace('0');
 
         $this->assertSame('0', ini_get('xdebug.collect_params'));
         $this->assertStringNotContainsString('trace not started', $warnings);
-        // xdebug.mode is startup-only, so a trace can only begin where it includes trace
-        $traceMode = in_array('trace', xdebug_info('mode'), true);
-        $this->assertSame($traceMode, $started);
+    }
+
+    /**
+     * xdebug.mode is startup-only, so the real trace runs in a child process in trace mode
+     */
+    public function testLevelZeroTraceOmitsArgumentValues()
+    {
+        $this->requireXdebug('3.3');
+
+        $this->assertStringContainsString(self::TRACE_ARGUMENT, $this->childTrace('3'));
+        $this->assertStringNotContainsString(self::TRACE_ARGUMENT, $this->childTrace('0'));
     }
 
     private function requireXdebug(string $minVersion): void
@@ -74,15 +85,62 @@ class DebugTest extends \PHPUnit\Framework\TestCase
         try {
             Debug::startTrace($traceFile, $collectParams);
             $started = xdebug_get_tracefile_name() !== false;
-            if ($started) {
-                $written = xdebug_stop_trace();
-                if (is_string($written) && is_file($written)) {
-                    unlink($written);
-                }
-            }
         } finally {
+            if ($started) {
+                $this->removeFile(xdebug_stop_trace());
+            }
             restore_error_handler();
         }
         return [implode("\n", $warnings), $started];
+    }
+
+    /**
+     * Trace the fixture's call in a child PHP process and return the trace file contents
+     */
+    private function childTrace(string $collectParams): string
+    {
+        $command = [PHP_BINARY];
+        $ini = php_ini_loaded_file();
+        if ($ini !== false) {
+            array_push($command, '-c', $ini);
+        }
+        array_push(
+            $command,
+            '-d',
+            'xdebug.start_with_request=no',
+            '-d',
+            'xdebug.use_compression=0',
+            __DIR__ . '/Fixtures/xdebug-trace.php',
+            dirname(__DIR__, 2) . '/vendor/autoload.php',
+            sys_get_temp_dir() . '/xmf_child_trace_' . bin2hex(random_bytes(6)),
+            $collectParams
+        );
+        $env = getenv();
+        $env['XDEBUG_MODE'] = 'trace';
+
+        $process = proc_open($command, [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, null, $env);
+        $this->assertIsResource($process);
+        $written = (string) stream_get_contents($pipes[1]);
+        $errors = (string) stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        proc_close($process);
+
+        try {
+            $this->assertFileExists($written, "Child trace failed: {$errors}");
+            return (string) file_get_contents($written);
+        } finally {
+            $this->removeFile($written);
+        }
+    }
+
+    /**
+     * @param mixed $path trace file name, or false when no trace was written
+     */
+    private function removeFile($path): void
+    {
+        if (is_string($path) && $path !== '' && is_file($path)) {
+            unlink($path);
+        }
     }
 }
