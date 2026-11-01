@@ -46,6 +46,17 @@ class DebugTest extends \PHPUnit\Framework\TestCase
         $this->assertStringNotContainsString('trace not started', $warnings);
     }
 
+    #[RunInSeparateProcess]
+    public function testStartTraceSwitchesReturnCollectionOff()
+    {
+        $this->requireXdebug('3.0');
+
+        [$warnings] = $this->runStartTrace('3', 'Off');
+
+        $this->assertFalse(filter_var(ini_get('xdebug.collect_return'), FILTER_VALIDATE_BOOLEAN));
+        $this->assertStringNotContainsString('trace not started', $warnings);
+    }
+
     /**
      * xdebug.mode is startup-only, so the real trace runs in a child process in trace mode
      */
@@ -70,7 +81,7 @@ class DebugTest extends \PHPUnit\Framework\TestCase
      *
      * @return array{string, bool} the warnings it raised, and whether a trace was running
      */
-    private function runStartTrace(string $collectParams): array
+    private function runStartTrace(string $collectParams, string $collectReturn = 'On'): array
     {
         if (xdebug_get_tracefile_name() !== false) {
             $this->markTestSkipped('A trace is already running');
@@ -83,7 +94,7 @@ class DebugTest extends \PHPUnit\Framework\TestCase
         }, E_WARNING | E_USER_WARNING);
         $traceFile = sys_get_temp_dir() . '/xmf_debug_trace_' . getmypid();
         try {
-            Debug::startTrace($traceFile, $collectParams);
+            Debug::startTrace($traceFile, $collectParams, $collectReturn);
             $started = xdebug_get_tracefile_name() !== false;
         } finally {
             if ($started) {

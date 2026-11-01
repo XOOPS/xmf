@@ -60,6 +60,15 @@ class HighlighterTest extends \PHPUnit\Framework\TestCase
         $this->assertSame($body, Highlighter::apply('--', $body));
     }
 
+    public function testProcessingInstructionsAreNotHighlighted()
+    {
+        // a browser reads "<?" up to the first ">" as a comment: a mark inside would close it early
+        $body = '<?x foo <img src=x onerror=alert(1)//>foo';
+        $this->assertSame('<?x foo <img src=x onerror=alert(1)//><mark>foo</mark>', Highlighter::apply('foo', $body));
+        $this->assertSame('<?x "foo>"', Highlighter::apply('foo', '<?x "foo>"'));
+        $this->assertSame('<?x foo', Highlighter::apply('foo', '<?x foo'));
+    }
+
     public function testUnclosedQuoteStopsHighlighting()
     {
         $body = 'y <a title="x>y y';

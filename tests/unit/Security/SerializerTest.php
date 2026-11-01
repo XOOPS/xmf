@@ -56,6 +56,42 @@ class SerializerTest extends \PHPUnit\Framework\TestCase
         Serializer::toJson($value);
     }
 
+    public function testToJsonRejectsSharedStringExpansionBeforeEncoding(): void
+    {
+        // 1000 entries share one 100 KB string: 100 MB of JSON from 100 KB of memory
+        $data = array_fill(0, 1000, str_repeat('a', 100000));
+        memory_reset_peak_usage();
+        $before = memory_get_peak_usage();
+        try {
+            Serializer::toJson($data);
+            $this->fail('expected the size guard to reject the data');
+        } catch (\RuntimeException $e) {
+            $this->assertStringContainsString('exceeds maximum allowed size', $e->getMessage());
+        }
+        $this->assertLessThan($before + 1000000, memory_get_peak_usage(), 'JSON was built before the guard ran');
+    }
+
+    public function testToJsonCountsStringsReturnedByJsonSerialize(): void
+    {
+        $item = new class implements \JsonSerializable {
+            public function jsonSerialize(): mixed
+            {
+                return str_repeat('a', 100000);
+            }
+        };
+        $data = array_fill(0, 1000, $item);
+        memory_reset_peak_usage();
+        $before = memory_get_peak_usage();
+        try {
+            Serializer::toJson($data);
+            $this->fail('expected the size guard to reject the data');
+        } catch (\RuntimeException $e) {
+            $this->assertStringContainsString('exceeds maximum allowed size', $e->getMessage());
+        }
+        // the guard holds one returned string at a time; json_encode() builds 100 MB
+        $this->assertLessThan($before + 1000000, memory_get_peak_usage(), 'JSON was built before the guard ran');
+    }
+
     public function testToJsonGuardsJsonSerializableOutput(): void
     {
         $data = 'x';

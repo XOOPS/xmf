@@ -87,14 +87,16 @@ final class Serializer
      *
      * Unserialized data can share one array between many references; json_encode()
      * writes it out once per use, so a payload of a few hundred bytes expands
-     * exponentially. Every encoded value takes at least one byte, so more than
-     * MAX_SIZE values can never pass the size check after encoding.
+     * exponentially; a string shared by many entries is likewise written once per
+     * entry. Every encoded value takes at least one byte and every string key or
+     * value at least its own length (the flags never shrink a string), so data
+     * over that lower bound can never pass the size check after encoding.
      *
      * @param mixed $data
      * @param int   $depth  nesting level of $data
-     * @param int   $budget values still allowed
+     * @param int   $budget encoded bytes still allowed
      *
-     * @throws RuntimeException If the data holds more than MAX_SIZE values
+     * @throws RuntimeException If the encoded data must exceed MAX_SIZE bytes
      */
     private static function guardExpandedSize($data, int $depth, int &$budget): void
     {
@@ -114,19 +116,20 @@ final class Serializer
             }
             return;
         }
-        if (!\is_array($data) || $depth >= self::JSON_DEPTH) {
-            return;
-        }
-        $budget -= \count($data);
+        // this value's own bytes: a string is quoted, anything else takes at least one byte
+        $budget -= \is_string($data) ? \strlen($data) + 2 : 1;
         if ($budget < 0) {
             throw new RuntimeException(
                 sprintf('Serialized JSON exceeds maximum allowed size of %d bytes', self::MAX_SIZE)
             );
         }
-        foreach ($data as $value) {
-            if (\is_array($value) || \is_object($value)) {
-                self::guardExpandedSize($value, $depth + 1, $budget);
-            }
+        if (!\is_array($data) || $depth >= self::JSON_DEPTH) {
+            return;
+        }
+        foreach ($data as $key => $value) {
+            // a string key only occurs in an object, where it is written before every value
+            $budget -= \is_string($key) ? \strlen($key) : 0;
+            self::guardExpandedSize($value, $depth + 1, $budget);
         }
     }
 
