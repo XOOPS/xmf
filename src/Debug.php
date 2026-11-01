@@ -89,11 +89,18 @@ class Debug extends Kint
     public static function startTrace($tracefile = '', $collect_params = '3', $collect_return = 'On')
     {
         if (function_exists('xdebug_start_trace')) {
-            // Xdebug 3 removed collect_params and always records argument values;
-            // refuse to trace when the caller asked for less than that
+            // Xdebug 3.0-3.2 always record argument values; 3.3+ can only leave them out (0)
+            // or record them in full, so refuse any request in between
             $xdebugVersion = (string) phpversion('xdebug');
-            if (version_compare($xdebugVersion, '3', '>=') && (int) $collect_params < 3) {
-                trigger_error('Xdebug 3 cannot suppress parameter values; trace not started', E_USER_WARNING);
+            $level = (int) $collect_params;
+            $honoured = $level >= 3
+                || version_compare($xdebugVersion, '3', '<')
+                || ($level === 0 && version_compare($xdebugVersion, '3.3', '>='));
+            if (!$honoured) {
+                trigger_error(
+                    "Xdebug {$xdebugVersion} cannot limit parameters to level {$level}; trace not started",
+                    E_USER_WARNING
+                );
                 return;
             }
             ini_set('xdebug.collect_params', $collect_params);

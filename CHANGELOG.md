@@ -12,7 +12,7 @@
 * `Mail\SendmailRunner::deliver()`: the path as given (a symlink) is run only when every directory above it is owned by root or the PHP process's user and is not writable by group or other (requires ext-posix; POSIX ACLs are not checked); otherwise the validated canonical target runs, so a link swapped after validation cannot run another program
 * `Module\Helper::getHandler()`: handler names must consist of letters, digits and `_`; a name holding `/` or `.` could include a PHP file outside the module's `class/` directory
 * `Yaml::read()`/`readWrapped()`: reads stop at the 2 MB limit, which was checked only against the reported file size
-* `Debug::startTrace()`: refuses to start when parameter values should be hidden (`$collect_params` below 3) on Xdebug 3, which removed that setting and always records them
+* `Debug::startTrace()`: refuses to start when `$collect_params` asks for less than full parameter values (below 3) and the installed Xdebug cannot honour it: Xdebug 3.0–3.2 always record them, and 3.3+ can only leave them out (`0`) or record them in full
 * `Security\SerializableTrait::migrateSerializedData()`: control characters in the property name and error message are escaped in the failure log, so one failure is one log line
 * `Metagen::getSearchSummary()`: duplicate search terms are searched once, and the search stops at a match at the start of the text
 
