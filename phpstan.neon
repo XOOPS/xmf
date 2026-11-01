@@ -9,6 +9,8 @@ parameters:
         - stubs
     excludePaths:
         - tests/
+        # PHP 8.1 declarations for Scrutinizer only; PHPStan knows the real ones
+        - stubs/php81.stub.php
     treatPhpDocTypesAsCertain: false
     # The CI matrix spans PHPStan 2.1 (prefer-lowest) and 2.2+ (prefer-stable).
     # Some findings only exist in the newer line, so their baseline entries are
