@@ -48,6 +48,10 @@ class Highlighter
             $words = explode(' ', $words);
         }
         foreach ($words as $word) {
+            // an empty term matches everywhere and never advances the scan
+            if ($word === '') {
+                continue;
+            }
             $body = static::splitOnTag($word, $body, $pre, $post);
         }
 
@@ -66,9 +70,16 @@ class Highlighter
      */
     protected static function splitOnTag($needle, $haystack, $pre, $post)
     {
+        if ($needle === '') {
+            return $haystack;
+        }
         $encoding = static::ENCODING;
         return preg_replace_callback(
-            '#((?:(?!<[/a-z]).)*)([^>]*>|$)#si',
+            // text up to markup, then the markup: a comment runs to "-->", a ">" inside a quoted
+            // attribute value does not end a tag, and an unclosed comment or quote runs to the end,
+            // so nothing after it is highlighted
+            '#((?>(?:(?!<[/a-z!]).)*))(<!--(?:.*?-->|.*+)'
+            . '|<[/a-z!](?:[^>"\']++|"[^"]*+(?:"|$)|\'[^\']*+(?:\'|$))*+(?:>|$)|$)#si',
             function ($capture) use ($needle, $pre, $post, $encoding) {
                 $haystack = $capture[1];
                 if (function_exists('mb_substr')) {
