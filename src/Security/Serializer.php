@@ -88,9 +88,10 @@ final class Serializer
      * Unserialized data can share one array between many references; json_encode()
      * writes it out once per use, so a payload of a few hundred bytes expands
      * exponentially; a string shared by many entries is likewise written once per
-     * entry. Every encoded value takes at least one byte and every string key or
-     * value at least its own length (the flags never shrink a string), so data
-     * over that lower bound can never pass the size check after encoding.
+     * entry. Every encoded value takes at least one byte, every array its brackets
+     * and commas, and every string value or object key at least its quoted length
+     * (the flags never shrink a string), so data over that lower bound can never
+     * pass the size check after encoding.
      *
      * @param mixed $data
      * @param int   $depth  nesting level of $data
@@ -100,11 +101,14 @@ final class Serializer
      */
     private static function guardExpandedSize($data, int $depth, int &$budget): void
     {
+        // an object stays a JSON object even when its properties are named 0, 1, 2...
+        $isObject = \is_object($data);
         // json_encode() encodes what jsonSerialize() returns; walking it calls it one extra time
         if ($data instanceof \JsonSerializable) {
             $serialized = $data->jsonSerialize();
             // an object returned as itself is encoded by its public properties
-            $data = $serialized === $data ? get_object_vars($data) : $serialized;
+            $isObject = $serialized === $data;
+            $data = $isObject ? get_object_vars($data) : $serialized;
         } elseif ($data instanceof \BackedEnum) {
             // json_encode() writes only the backing value, not the name
             $data = $data->value;
@@ -119,8 +123,13 @@ final class Serializer
             }
             return;
         }
-        // this value's own bytes: a string is quoted, anything else takes at least one byte
-        $budget -= \is_string($data) ? \strlen($data) + 2 : 1;
+        // this value's own bytes: a string is quoted, an array has its two brackets and a
+        // comma between elements, anything else takes at least one byte
+        $budget -= match (true) {
+            \is_string($data) => \strlen($data) + 2,
+            \is_array($data) => 1 + max(\count($data), 1),
+            default => 1,
+        };
         if ($budget < 0) {
             throw new RuntimeException(
                 sprintf('Serialized JSON exceeds maximum allowed size of %d bytes', self::MAX_SIZE)
@@ -129,9 +138,11 @@ final class Serializer
         if (!\is_array($data) || $depth >= self::JSON_DEPTH) {
             return;
         }
+        // a list is a JSON array; an object, or any other array, writes every key,
+        // integer keys too, as a quoted string followed by a colon
+        $isObject = $isObject || !array_is_list($data);
         foreach ($data as $key => $value) {
-            // a string key only occurs in an object, where it is written before every value
-            $budget -= \is_string($key) ? \strlen($key) : 0;
+            $budget -= $isObject ? \strlen((string) $key) + 3 : 0;
             self::guardExpandedSize($value, $depth + 1, $budget);
         }
     }

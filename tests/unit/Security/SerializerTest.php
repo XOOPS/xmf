@@ -57,10 +57,32 @@ class SerializerTest extends \PHPUnit\Framework\TestCase
         Serializer::toJson($value);
     }
 
-    public function testToJsonRejectsSharedStringExpansionBeforeEncoding(): void
+    /**
+     * Builders, so the large fixtures exist only while their own case runs
+     *
+     * @return array<string, array{\Closure(): array<mixed>}>
+     */
+    public static function oversizedJsonProvider(): array
     {
-        // 1000 entries share one 100 KB string: 100 MB of JSON from 100 KB of memory
-        $data = array_fill(0, 1000, str_repeat('a', 100000));
+        return [
+            // 1000 entries share one 100 KB string: 100 MB of JSON from 100 KB of memory
+            'shared string' => [static fn (): array => array_fill(0, 1000, str_repeat('a', 100000))],
+            // "[]," per entry: 6 MB of JSON
+            'empty arrays' => [static fn (): array => array_fill(0, 2000000, [])],
+            // "\"100000\":0," per entry: 6.6 MB of JSON
+            'integer object keys' => [static fn (): array => array_fill_keys(range(100000, 699999), 0)],
+            // one object with properties named 0..4999 ("{\"0\":0,..."), 200 times: 8.6 MB of JSON
+            'numeric object properties' => [static fn (): array => array_fill(0, 200, (object) array_fill(0, 5000, 0))],
+        ];
+    }
+
+    /**
+     * @param \Closure(): array<mixed> $build
+     */
+    #[DataProvider('oversizedJsonProvider')]
+    public function testToJsonRejectsOversizedDataBeforeEncoding(\Closure $build): void
+    {
+        $data = $build();
         memory_reset_peak_usage();
         $before = memory_get_peak_usage();
         try {
