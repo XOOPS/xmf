@@ -111,6 +111,16 @@ class Debug extends Kint
                 return;
             }
             ini_set('xdebug.collect_return', $collect_return);
+            $returnLocked = !filter_var($collect_return, FILTER_VALIDATE_BOOLEAN)
+                // fail closed: a value that is not plainly off counts as on
+                && filter_var(ini_get('xdebug.collect_return'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) !== false;
+            if ($returnLocked) {
+                trigger_error(
+                    "Xdebug {$xdebugVersion} could not leave out return values; trace not started",
+                    E_USER_WARNING
+                );
+                return;
+            }
             if ($tracefile == '') {
                 $tracefile = XOOPS_VAR_PATH . '/logs/php_trace';
             }

@@ -77,8 +77,8 @@ class Highlighter
         return preg_replace_callback(
             // text up to markup, then the markup: a comment runs to "-->", a ">" inside a quoted
             // attribute value does not end a tag, and an unclosed comment or quote runs to the end,
-            // so nothing after it is highlighted
-            '#((?>(?:(?!<[/a-z!]).)*))(<!--(?:.*?-->|.*+)'
+            // so nothing after it is highlighted; "<?" opens a comment that ends at the first ">"
+            '#((?>(?:(?!<[/a-z!?]).)*))(<!--(?:.*?-->|.*+)|<\?[^>]*+(?:>|$)'
             . '|<[/a-z!](?:[^>"\']++|"[^"]*+(?:"|$)|\'[^\']*+(?:\'|$))*+(?:>|$)|$)#si',
             function ($capture) use ($needle, $pre, $post, $encoding) {
                 $haystack = $capture[1];
