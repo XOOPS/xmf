@@ -73,6 +73,9 @@ class SerializerTest extends \PHPUnit\Framework\TestCase
             'integer object keys' => [static fn (): array => array_fill_keys(range(100000, 699999), 0)],
             // one object with properties named 0..4999 ("{\"0\":0,..."), 200 times: 8.6 MB of JSON
             'numeric object properties' => [static fn (): array => array_fill(0, 200, (object) array_fill(0, 5000, 0))],
+            // json_encode() writes the storage of internal iterable objects, which get_object_vars() does not see
+            'ArrayObject entries' => [static fn (): array => [new \ArrayObject(array_fill(0, 1000, str_repeat('a', 100000)))]],
+            'ArrayIterator entries' => [static fn (): array => [new \ArrayIterator(array_fill(0, 1000, str_repeat('a', 100000)))]],
         ];
     }
 
@@ -92,6 +95,23 @@ class SerializerTest extends \PHPUnit\Framework\TestCase
             $this->assertStringContainsString('exceeds maximum allowed size', $e->getMessage());
         }
         $this->assertLessThan($before + 1000000, memory_get_peak_usage(), 'JSON was built before the guard ran');
+    }
+
+    public function testToJsonCountsOnlyThePropertiesJsonEncodeWrites(): void
+    {
+        $object = new class {
+            public string $shown = 'a';
+            // never encoded, so it must not count against the budget
+            protected string $hidden;
+
+            public function __construct()
+            {
+                $this->hidden = str_repeat('h', 6000000);
+            }
+        };
+
+        $this->assertSame('{"shown":"a"}', Serializer::toJson($object));
+        $this->assertSame('{"k":"v"}', Serializer::toJson(new \ArrayObject(['k' => 'v'])));
     }
 
     public function testToJsonCountsBackedEnumsAsTheirValue(): void

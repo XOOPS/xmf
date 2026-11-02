@@ -108,12 +108,12 @@ final class Serializer
             $serialized = $data->jsonSerialize();
             // an object returned as itself is encoded by its public properties
             $isObject = $serialized === $data;
-            $data = $isObject ? get_object_vars($data) : $serialized;
+            $data = $isObject ? self::jsonProperties($data) : $serialized;
         } elseif ($data instanceof \BackedEnum) {
             // json_encode() writes only the backing value, not the name
             $data = $data->value;
         } elseif (\is_object($data)) {
-            $data = get_object_vars($data);
+            $data = self::jsonProperties($data);
         }
         // json_encode() reports the depth error itself
         // jsonSerialize() returned an object; the depth bound stops one that returns itself
@@ -145,6 +145,32 @@ final class Serializer
             $budget -= $isObject ? \strlen((string) $key) + 3 : 0;
             self::guardExpandedSize($value, $depth + 1, $budget);
         }
+    }
+
+    /**
+     * The entries json_encode() writes for an object.
+     *
+     * Internal classes such as ArrayObject, ArrayIterator and DateTime expose their
+     * contents through the property table that json_encode() and an array cast read,
+     * not through get_object_vars(). json_encode() skips the NUL-prefixed keys a cast
+     * gives non-public properties, so they are dropped here too.
+     *
+     * The cast copies an ArrayObject's storage table: memory in proportion to the
+     * input already held, freed before the next value, never to the JSON output.
+     *
+     * @return array<int|string, mixed>
+     */
+    private static function jsonProperties(object $object): array
+    {
+        $properties = (array) $object;
+        // unset() copies the table only when there is something to drop
+        foreach ($properties as $key => $value) {
+            if (\is_string($key) && str_starts_with($key, "\0")) {
+                unset($properties[$key]);
+            }
+        }
+
+        return $properties;
     }
 
     /**
