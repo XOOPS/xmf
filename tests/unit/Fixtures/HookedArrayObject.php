@@ -13,7 +13,9 @@ namespace Xmf\Test\Fixtures;
 final class HookedArrayObject extends \ArrayObject
 {
     public string $virtual {
-        get => str_repeat('v', $this->length);
+        get {
+            return str_repeat('v', $this->length);
+        }
     }
 
     public function __construct(private int $length)

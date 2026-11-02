@@ -11,11 +11,15 @@ namespace Xmf\Test\Fixtures;
 final class HookedProperties
 {
     public string $virtual {
-        get => str_repeat('v', $this->length);
+        get {
+            return str_repeat('v', $this->length);
+        }
     }
 
     public string $backed = 'raw' {
-        get => strtoupper($this->backed);
+        get {
+            return strtoupper($this->backed);
+        }
     }
 
     public function __construct(private int $length)
