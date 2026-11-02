@@ -150,10 +150,17 @@ final class Serializer
     /**
      * The entries json_encode() writes for an object.
      *
-     * Internal classes such as ArrayObject, ArrayIterator and DateTime expose their
-     * contents through the property table that json_encode() and an array cast read,
-     * not through get_object_vars(). json_encode() skips the NUL-prefixed keys a cast
-     * gives non-public properties, so they are dropped here too.
+     * json_encode() writes the public properties as get_object_vars() sees them from
+     * outside, through their get hooks. An ArrayObject or ArrayIterator without
+     * STD_PROP_LIST writes its storage instead, which only an array cast reads. Other
+     * classes derived from an internal one, such as DateTime, may add entries to the
+     * cast table that get_object_vars() does not see, so those are added. Cast keys
+     * starting with NUL belong to non-public properties, which json_encode() skips.
+     *
+     * ponytail: a key in both tables counts with its get_object_vars() value; a subclass
+     * of DateTime or a like class whose get hook shrinks a property is undercounted
+     * here and still rejected by the size check after encoding; a virtual property of
+     * such a subclass, which json_encode() skips, is counted anyway.
      *
      * The cast copies an ArrayObject's storage table: memory in proportion to the
      * input already held, freed before the next value, never to the JSON output.
@@ -162,15 +169,40 @@ final class Serializer
      */
     private static function jsonProperties(object $object): array
     {
-        $properties = (array) $object;
-        // unset() copies the table only when there is something to drop
-        foreach ($properties as $key => $value) {
-            if (\is_string($key) && str_starts_with($key, "\0")) {
-                unset($properties[$key]);
+        if ($object instanceof \ArrayObject || $object instanceof \ArrayIterator) {
+            if (($object->getFlags() & \ArrayObject::STD_PROP_LIST) === 0) {
+                return self::publicTable($object);
             }
+            return get_object_vars($object);
+        }
+        $properties = get_object_vars($object);
+        $root = $object::class;
+        while (($parent = get_parent_class($root)) !== false) {
+            $root = $parent;
+        }
+        if ($root !== \stdClass::class && (new \ReflectionClass($root))->isInternal()) {
+            $properties += self::publicTable($object);
         }
 
         return $properties;
+    }
+
+    /**
+     * An object's array cast without the NUL-prefixed keys of its non-public properties
+     *
+     * @return array<int|string, mixed>
+     */
+    private static function publicTable(object $object): array
+    {
+        $table = (array) $object;
+        // unset() copies the table only when there is something to drop
+        foreach ($table as $key => $value) {
+            if (\is_string($key) && str_starts_with($key, "\0")) {
+                unset($table[$key]);
+            }
+        }
+
+        return $table;
     }
 
     /**

@@ -6,10 +6,13 @@ namespace Xmf\Test\Security;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RequiresPhp;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use Xmf\Security\DecompressionException;
 use Xmf\Security\Format;
 use Xmf\Security\Serializer;
+use Xmf\Test\Fixtures\HookedArrayObject;
+use Xmf\Test\Fixtures\HookedProperties;
 use Xmf\Test\Fixtures\LongNamedStatus;
 
 #[CoversClass(Serializer::class)]
@@ -112,6 +115,57 @@ class SerializerTest extends \PHPUnit\Framework\TestCase
 
         $this->assertSame('{"shown":"a"}', Serializer::toJson($object));
         $this->assertSame('{"k":"v"}', Serializer::toJson(new \ArrayObject(['k' => 'v'])));
+    }
+
+    public function testToJsonCountsEachPropertyOfAnInternalSubclassOnce(): void
+    {
+        // a property both get_object_vars() and an array cast see must not count twice
+        $object = new class (['k' => 'v'], \ArrayObject::STD_PROP_LIST) extends \ArrayObject {
+            public string $text = '';
+        };
+        $object->text = str_repeat('a', 3000000);
+
+        $this->assertSame(3000011, \strlen(Serializer::toJson($object)));
+    }
+
+    #[RequiresPhp('>= 8.4')]
+    public function testToJsonCountsValuesReturnedByPropertyGetHooks(): void
+    {
+        // json_encode() calls get hooks; a virtual property is absent from an array cast
+        $this->assertSame('{"virtual":"vv","backed":"RAW"}', Serializer::toJson(new HookedProperties(2)));
+
+        $this->assertSame('{"virtual":"vv"}', Serializer::toJson(new HookedArrayObject(2)));
+    }
+
+    /**
+     * @return array<string, array{\Closure(): object}>
+     */
+    public static function largeGetHookProvider(): array
+    {
+        return [
+            'user class' => [static fn (): object => new HookedProperties(100000)],
+            'ArrayObject with STD_PROP_LIST' => [static fn (): object => new HookedArrayObject(100000)],
+        ];
+    }
+
+    /**
+     * @param \Closure(): object $build
+     */
+    #[RequiresPhp('>= 8.4')]
+    #[DataProvider('largeGetHookProvider')]
+    public function testToJsonRejectsLargePropertyGetHooksBeforeEncoding(\Closure $build): void
+    {
+        $data = array_fill(0, 1000, $build());
+        memory_reset_peak_usage();
+        $before = memory_get_peak_usage();
+        try {
+            Serializer::toJson($data);
+            $this->fail('expected the size guard to reject the data');
+        } catch (\RuntimeException $e) {
+            $this->assertStringContainsString('exceeds maximum allowed size', $e->getMessage());
+        }
+        // the guard holds one hooked value at a time; json_encode() builds 100 MB
+        $this->assertLessThan($before + 1000000, memory_get_peak_usage(), 'JSON was built before the guard ran');
     }
 
     public function testToJsonCountsBackedEnumsAsTheirValue(): void
