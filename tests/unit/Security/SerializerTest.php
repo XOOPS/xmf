@@ -6,10 +6,14 @@ namespace Xmf\Test\Security;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RequiresPhp;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use Xmf\Security\DecompressionException;
 use Xmf\Security\Format;
 use Xmf\Security\Serializer;
+use Xmf\Test\Fixtures\HookedArrayObject;
+use Xmf\Test\Fixtures\HookedProperties;
+use Xmf\Test\Fixtures\LongNamedStatus;
 
 #[CoversClass(Serializer::class)]
 class SerializerTest extends \PHPUnit\Framework\TestCase
@@ -54,6 +58,142 @@ class SerializerTest extends \PHPUnit\Framework\TestCase
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('exceeds maximum allowed size');
         Serializer::toJson($value);
+    }
+
+    /**
+     * Builders, so the large fixtures exist only while their own case runs
+     *
+     * @return array<string, array{\Closure(): array<mixed>}>
+     */
+    public static function oversizedJsonProvider(): array
+    {
+        return [
+            // 1000 entries share one 100 KB string: 100 MB of JSON from 100 KB of memory
+            'shared string' => [static fn (): array => array_fill(0, 1000, str_repeat('a', 100000))],
+            // "[]," per entry: 6 MB of JSON
+            'empty arrays' => [static fn (): array => array_fill(0, 2000000, [])],
+            // "\"100000\":0," per entry: 6.6 MB of JSON
+            'integer object keys' => [static fn (): array => array_fill_keys(range(100000, 699999), 0)],
+            // one object with properties named 0..4999 ("{\"0\":0,..."), 200 times: 8.6 MB of JSON
+            'numeric object properties' => [static fn (): array => array_fill(0, 200, (object) array_fill(0, 5000, 0))],
+            // json_encode() writes the storage of internal iterable objects, which get_object_vars() does not see
+            'ArrayObject entries' => [static fn (): array => [new \ArrayObject(array_fill(0, 1000, str_repeat('a', 100000)))]],
+            'ArrayIterator entries' => [static fn (): array => [new \ArrayIterator(array_fill(0, 1000, str_repeat('a', 100000)))]],
+        ];
+    }
+
+    /**
+     * @param \Closure(): array<mixed> $build
+     */
+    #[DataProvider('oversizedJsonProvider')]
+    public function testToJsonRejectsOversizedDataBeforeEncoding(\Closure $build): void
+    {
+        $data = $build();
+        memory_reset_peak_usage();
+        $before = memory_get_peak_usage();
+        try {
+            Serializer::toJson($data);
+            $this->fail('expected the size guard to reject the data');
+        } catch (\RuntimeException $e) {
+            $this->assertStringContainsString('exceeds maximum allowed size', $e->getMessage());
+        }
+        $this->assertLessThan($before + 1000000, memory_get_peak_usage(), 'JSON was built before the guard ran');
+    }
+
+    public function testToJsonCountsOnlyThePropertiesJsonEncodeWrites(): void
+    {
+        $object = new class {
+            public string $shown = 'a';
+            // never encoded, so it must not count against the budget
+            protected string $hidden;
+
+            public function __construct()
+            {
+                $this->hidden = str_repeat('h', 6000000);
+            }
+        };
+
+        $this->assertSame('{"shown":"a"}', Serializer::toJson($object));
+        $this->assertSame('{"k":"v"}', Serializer::toJson(new \ArrayObject(['k' => 'v'])));
+    }
+
+    public function testToJsonCountsEachPropertyOfAnInternalSubclassOnce(): void
+    {
+        // a property both get_object_vars() and an array cast see must not count twice
+        $object = new class (['k' => 'v'], \ArrayObject::STD_PROP_LIST) extends \ArrayObject {
+            public string $text = '';
+        };
+        $object->text = str_repeat('a', 3000000);
+
+        $this->assertSame(3000011, \strlen(Serializer::toJson($object)));
+    }
+
+    #[RequiresPhp('>= 8.4')]
+    public function testToJsonCountsValuesReturnedByPropertyGetHooks(): void
+    {
+        // json_encode() calls get hooks; a virtual property is absent from an array cast
+        $this->assertSame('{"virtual":"vv","backed":"RAW"}', Serializer::toJson(new HookedProperties(2)));
+
+        $this->assertSame('{"virtual":"vv"}', Serializer::toJson(new HookedArrayObject(2)));
+    }
+
+    /**
+     * @return array<string, array{\Closure(): object}>
+     */
+    public static function largeGetHookProvider(): array
+    {
+        return [
+            'user class' => [static fn (): object => new HookedProperties(100000)],
+            'ArrayObject with STD_PROP_LIST' => [static fn (): object => new HookedArrayObject(100000)],
+        ];
+    }
+
+    /**
+     * @param \Closure(): object $build
+     */
+    #[RequiresPhp('>= 8.4')]
+    #[DataProvider('largeGetHookProvider')]
+    public function testToJsonRejectsLargePropertyGetHooksBeforeEncoding(\Closure $build): void
+    {
+        $data = array_fill(0, 1000, $build());
+        memory_reset_peak_usage();
+        $before = memory_get_peak_usage();
+        try {
+            Serializer::toJson($data);
+            $this->fail('expected the size guard to reject the data');
+        } catch (\RuntimeException $e) {
+            $this->assertStringContainsString('exceeds maximum allowed size', $e->getMessage());
+        }
+        // the guard holds one hooked value at a time; json_encode() builds 100 MB
+        $this->assertLessThan($before + 1000000, memory_get_peak_usage(), 'JSON was built before the guard ran');
+    }
+
+    public function testToJsonCountsBackedEnumsAsTheirValue(): void
+    {
+        // counted by name and value this is over 5 MB; json_encode() writes "[1,1,...]"
+        $json = Serializer::toJson(array_fill(0, 150000, LongNamedStatus::PROCESSING_INSTRUCTION_COMPLETE));
+        $this->assertSame(300001, \strlen($json));
+    }
+
+    public function testToJsonCountsStringsReturnedByJsonSerialize(): void
+    {
+        $item = new class implements \JsonSerializable {
+            public function jsonSerialize(): mixed
+            {
+                return str_repeat('a', 100000);
+            }
+        };
+        $data = array_fill(0, 1000, $item);
+        memory_reset_peak_usage();
+        $before = memory_get_peak_usage();
+        try {
+            Serializer::toJson($data);
+            $this->fail('expected the size guard to reject the data');
+        } catch (\RuntimeException $e) {
+            $this->assertStringContainsString('exceeds maximum allowed size', $e->getMessage());
+        }
+        // the guard holds one returned string at a time; json_encode() builds 100 MB
+        $this->assertLessThan($before + 1000000, memory_get_peak_usage(), 'JSON was built before the guard ran');
     }
 
     public function testToJsonGuardsJsonSerializableOutput(): void

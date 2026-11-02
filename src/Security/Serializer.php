@@ -87,24 +87,33 @@ final class Serializer
      *
      * Unserialized data can share one array between many references; json_encode()
      * writes it out once per use, so a payload of a few hundred bytes expands
-     * exponentially. Every encoded value takes at least one byte, so more than
-     * MAX_SIZE values can never pass the size check after encoding.
+     * exponentially; a string shared by many entries is likewise written once per
+     * entry. Every encoded value takes at least one byte, every array its brackets
+     * and commas, and every string value or object key at least its quoted length
+     * (the flags never shrink a string), so data over that lower bound can never
+     * pass the size check after encoding.
      *
      * @param mixed $data
      * @param int   $depth  nesting level of $data
-     * @param int   $budget values still allowed
+     * @param int   $budget encoded bytes still allowed
      *
-     * @throws RuntimeException If the data holds more than MAX_SIZE values
+     * @throws RuntimeException If the encoded data must exceed MAX_SIZE bytes
      */
     private static function guardExpandedSize($data, int $depth, int &$budget): void
     {
+        // an object stays a JSON object even when its properties are named 0, 1, 2...
+        $isObject = \is_object($data);
         // json_encode() encodes what jsonSerialize() returns; walking it calls it one extra time
         if ($data instanceof \JsonSerializable) {
             $serialized = $data->jsonSerialize();
             // an object returned as itself is encoded by its public properties
-            $data = $serialized === $data ? get_object_vars($data) : $serialized;
+            $isObject = $serialized === $data;
+            $data = $isObject ? self::jsonProperties($data) : $serialized;
+        } elseif ($data instanceof \BackedEnum) {
+            // json_encode() writes only the backing value, not the name
+            $data = $data->value;
         } elseif (\is_object($data)) {
-            $data = get_object_vars($data);
+            $data = self::jsonProperties($data);
         }
         // json_encode() reports the depth error itself
         // jsonSerialize() returned an object; the depth bound stops one that returns itself
@@ -114,20 +123,86 @@ final class Serializer
             }
             return;
         }
-        if (!\is_array($data) || $depth >= self::JSON_DEPTH) {
-            return;
-        }
-        $budget -= \count($data);
+        // this value's own bytes: a string is quoted, an array has its two brackets and a
+        // comma between elements, anything else takes at least one byte
+        $budget -= match (true) {
+            \is_string($data) => \strlen($data) + 2,
+            \is_array($data) => 1 + max(\count($data), 1),
+            default => 1,
+        };
         if ($budget < 0) {
             throw new RuntimeException(
                 sprintf('Serialized JSON exceeds maximum allowed size of %d bytes', self::MAX_SIZE)
             );
         }
-        foreach ($data as $value) {
-            if (\is_array($value) || \is_object($value)) {
-                self::guardExpandedSize($value, $depth + 1, $budget);
+        if (!\is_array($data) || $depth >= self::JSON_DEPTH) {
+            return;
+        }
+        // a list is a JSON array; an object, or any other array, writes every key,
+        // integer keys too, as a quoted string followed by a colon
+        $isObject = $isObject || !array_is_list($data);
+        foreach ($data as $key => $value) {
+            $budget -= $isObject ? \strlen((string) $key) + 3 : 0;
+            self::guardExpandedSize($value, $depth + 1, $budget);
+        }
+    }
+
+    /**
+     * The entries json_encode() writes for an object.
+     *
+     * json_encode() writes the public properties as get_object_vars() sees them from
+     * outside, through their get hooks. An ArrayObject or ArrayIterator without
+     * STD_PROP_LIST writes its storage instead, which only an array cast reads. Other
+     * classes derived from an internal one, such as DateTime, may add entries to the
+     * cast table that get_object_vars() does not see, so those are added. Cast keys
+     * starting with NUL belong to non-public properties, which json_encode() skips.
+     *
+     * ponytail: a key in both tables counts with its get_object_vars() value; a subclass
+     * of DateTime or a like class whose get hook shrinks a property is undercounted
+     * here and still rejected by the size check after encoding; a virtual property of
+     * such a subclass, which json_encode() skips, is counted anyway.
+     *
+     * The cast copies an ArrayObject's storage table: memory in proportion to the
+     * input already held, freed before the next value, never to the JSON output.
+     *
+     * @return array<int|string, mixed>
+     */
+    private static function jsonProperties(object $object): array
+    {
+        if ($object instanceof \ArrayObject || $object instanceof \ArrayIterator) {
+            if (($object->getFlags() & \ArrayObject::STD_PROP_LIST) === 0) {
+                return self::publicTable($object);
+            }
+            return get_object_vars($object);
+        }
+        $properties = get_object_vars($object);
+        $root = $object::class;
+        while (($parent = get_parent_class($root)) !== false) {
+            $root = $parent;
+        }
+        if ($root !== \stdClass::class && (new \ReflectionClass($root))->isInternal()) {
+            $properties += self::publicTable($object);
+        }
+
+        return $properties;
+    }
+
+    /**
+     * An object's array cast without the NUL-prefixed keys of its non-public properties
+     *
+     * @return array<int|string, mixed>
+     */
+    private static function publicTable(object $object): array
+    {
+        $table = (array) $object;
+        // unset() copies the table only when there is something to drop
+        foreach ($table as $key => $value) {
+            if (\is_string($key) && str_starts_with($key, "\0")) {
+                unset($table[$key]);
             }
         }
+
+        return $table;
     }
 
     /**
