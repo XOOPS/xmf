@@ -87,4 +87,28 @@ class HighlighterTest extends \PHPUnit\Framework\TestCase
     {
         $this->assertSame('page <mark>0</mark>', Highlighter::apply('0', 'page 0'));
     }
+
+    public function testLongBodiesAreHighlighted()
+    {
+        // the old splitter exhausted the PCRE JIT stack on ~40 KB of text and returned null
+        $body = str_repeat('foo bar ', 20000);
+        $this->assertSame(str_repeat('<mark>foo</mark> bar ', 20000), Highlighter::apply('foo', $body));
+
+        // a comment too long for a lazy regex still ends at its "-->"
+        $comment = '<!--' . str_repeat('foo -', 300000) . '-->';
+        $this->assertSame($comment . ' <mark>foo</mark>', Highlighter::apply('foo', $comment . ' foo'));
+    }
+
+    public function testTermsMatchLiterallyAndCaseInsensitively()
+    {
+        $this->assertSame('[Äpfel] und [ÄPFEL]', Highlighter::apply('äpfel', 'Äpfel und ÄPFEL', '[', ']'));
+        $this->assertSame('[a.b] axb [A.B]', Highlighter::apply('a.b', 'a.b axb A.B', '[', ']'));
+        $this->assertSame('cost <i>$1</i> \1', Highlighter::apply('$1', 'cost $1 \1', '<i>', '</i>'));
+        $this->assertSame('[aa][aa]a', Highlighter::apply('aa', 'aaaaa', '[', ']'));
+    }
+
+    public function testInvalidUtf8IsKeptByteForByte()
+    {
+        $this->assertSame("\xFF[ab] [AB]", Highlighter::apply('ab', "\xFFab AB", '[', ']'));
+    }
 }

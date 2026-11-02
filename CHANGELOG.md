@@ -1,5 +1,14 @@
 # XMF ChangeLog
 
+## [Unreleased]
+
+### Security
+* `Security\Serializer::toJson()`: numbers, booleans and `null` count against the size guard at their encoded length instead of one byte, so data sharing an array of large integers or long floats between references is rejected before `json_encode()` builds tens of megabytes
+* `Highlighter::apply()`: each text segment is highlighted in one pass instead of copying the rest of the segment for every match, so the cost grows linearly with the number of matches
+
+### Bug Fixes
+* `Highlighter::apply()`: returns the highlighted body for long input; text of about 40 KB or more outside tags exhausted the PCRE JIT stack and `null` was returned. A comment ends at its `-->` however long it is. Invalid UTF-8 is kept byte for byte (it was replaced by `?`); in such text only ASCII letters match in either case
+
 ## [1.3.4-Beta1] - 2026-11-02
 
 ### Security

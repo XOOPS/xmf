@@ -67,47 +67,77 @@ class Highlighter
      * @param string $pre      insert before needle
      * @param string $post     insert after needle
      *
-     * @return mixed return from preg_replace_callback()
+     * @return string highlighted haystack
      */
     protected static function splitOnTag($needle, $haystack, $pre, $post)
     {
+        $needle = (string) $needle;
+        $haystack = (string) $haystack;
         if ($needle === '') {
             return $haystack;
         }
-        $encoding = static::ENCODING;
-        return preg_replace_callback(
-            // text up to markup, then the markup: a comment runs to "-->", a ">" inside a quoted
-            // attribute value does not end a tag, and an unclosed comment or quote runs to the end,
-            // so nothing after it is highlighted; "<?" opens a comment that ends at the first ">"
-            '#((?>(?:(?!<[/a-z!?]).)*))(<!--(?:.*?-->|.*+)|<\?[^>]*+(?:>|$)'
-            . '|<[/a-z!](?:[^>"\']++|"[^"]*+(?:"|$)|\'[^\']*+(?:\'|$))*+(?:>|$)|$)#si',
-            function ($capture) use ($needle, $pre, $post, $encoding) {
-                $haystack = $capture[1];
-                if (function_exists('mb_substr')) {
-                    $p1 = mb_stripos($haystack, $needle, 0, $encoding);
-                    $l1 = mb_strlen($needle, $encoding);
-                    $ret = '';
-                    while ($p1 !== false) {
-                        $ret .= mb_substr($haystack, 0, $p1, $encoding) . $pre
-                            . mb_substr($haystack, $p1, $l1, $encoding) . $post;
-                        $haystack = mb_substr($haystack, $p1 + $l1, mb_strlen($haystack), $encoding);
-                        $p1 = mb_stripos($haystack, $needle, 0, $encoding);
-                    }
-                } else {
-                    $p1 = stripos($haystack, $needle);
-                    $l1 = strlen($needle);
-                    $ret = '';
-                    while ($p1 !== false) {
-                        $ret .= substr($haystack, 0, $p1) . $pre . substr($haystack, $p1, $l1) . $post;
-                        $haystack = substr($haystack, $p1 + $l1);
-                        $p1 = stripos($haystack, $needle);
-                    }
-                }
-                $ret .= $haystack . $capture[2];
+        $ret = '';
+        $offset = 0;
+        $length = strlen($haystack);
+        while ($offset < $length) {
+            $start = preg_match('#<[/a-z!?]#i', $haystack, $match, PREG_OFFSET_CAPTURE, $offset) === 1
+                ? $match[0][1] : $length;
+            $ret .= self::highlightText($needle, substr($haystack, $offset, $start - $offset), $pre, $post);
+            if ($start === $length) {
+                break;
+            }
+            // a comment runs to "-->", a ">" inside a quoted attribute value does not end a tag,
+            // and an unclosed comment or quote runs to the end, so nothing after it is highlighted;
+            // "<?" opens a comment that ends at the first ">"
+            if (substr_compare($haystack, '<!--', $start, 4) === 0) {
+                $end = strpos($haystack, '-->', $start + 4);
+                $markup = substr($haystack, $start, $end === false ? null : $end + 3 - $start);
+            } else {
+                $markup = preg_match(
+                    '#\G(?:<\?[^>]*+|<[/a-z!](?:[^>"\']++|"[^"]*+(?:"|$)|\'[^\']*+(?:\'|$))*+)(?:>|$)#i',
+                    $haystack,
+                    $match,
+                    0,
+                    $start
+                ) === 1 ? $match[0] : substr($haystack, $start); // on a PCRE error, highlight nothing more
+            }
+            $ret .= $markup;
+            $offset = $start + strlen($markup);
+        }
 
-                return $ret;
-            },
-            $haystack
+        return $ret;
+    }
+
+    /**
+     * Surround every case-insensitive occurrence of needle in plain text, in one pass
+     *
+     * @param string $needle string to find
+     * @param string $text   text without markup
+     * @param string $pre    insert before needle
+     * @param string $post   insert after needle
+     *
+     * @return string
+     */
+    private static function highlightText(string $needle, string $text, string $pre, string $post): string
+    {
+        // the "u" modifier reads both as ENCODING, UTF-8
+        $wrapped = preg_replace_callback(
+            '/' . preg_quote($needle, '/') . '/iu',
+            static fn (array $m): string => $pre . $m[0] . $post,
+            $text
         );
+        if ($wrapped !== null) {
+            return $wrapped;
+        }
+        // not valid UTF-8: match bytes, ASCII letters in either case
+        $ret = '';
+        $offset = 0;
+        $length = strlen($needle);
+        while (($pos = stripos($text, $needle, $offset)) !== false) {
+            $ret .= substr($text, $offset, $pos - $offset) . $pre . substr($text, $pos, $length) . $post;
+            $offset = $pos + $length;
+        }
+
+        return $ret . substr($text, $offset);
     }
 }

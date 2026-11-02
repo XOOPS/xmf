@@ -76,6 +76,10 @@ class SerializerTest extends \PHPUnit\Framework\TestCase
             'integer object keys' => [static fn (): array => array_fill_keys(range(100000, 699999), 0)],
             // one object with properties named 0..4999 ("{\"0\":0,..."), 200 times: 8.6 MB of JSON
             'numeric object properties' => [static fn (): array => array_fill(0, 200, (object) array_fill(0, 5000, 0))],
+            // scalars are charged their encoded length, not one byte: 6.3 MB, 7.5 MB and 6 MB of JSON
+            'large integers' => [static fn (): array => array_fill(0, 300000, PHP_INT_MAX)],
+            'long floats' => [static fn (): array => array_fill(0, 300000, -1.2345678901234567E-300)],
+            'booleans' => [static fn (): array => array_fill(0, 1000000, false)],
             // json_encode() writes the storage of internal iterable objects, which get_object_vars() does not see
             'ArrayObject entries' => [static fn (): array => [new \ArrayObject(array_fill(0, 1000, str_repeat('a', 100000)))]],
             'ArrayIterator entries' => [static fn (): array => [new \ArrayIterator(array_fill(0, 1000, str_repeat('a', 100000)))]],

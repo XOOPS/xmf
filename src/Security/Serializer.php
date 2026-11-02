@@ -88,8 +88,8 @@ final class Serializer
      * Unserialized data can share one array between many references; json_encode()
      * writes it out once per use, so a payload of a few hundred bytes expands
      * exponentially; a string shared by many entries is likewise written once per
-     * entry. Every encoded value takes at least one byte, every array its brackets
-     * and commas, and every string value or object key at least its quoted length
+     * entry. Every number, boolean and null takes its encoded length, every array its
+     * brackets and commas, and every string value or object key at least its quoted length
      * (the flags never shrink a string), so data over that lower bound can never
      * pass the size check after encoding.
      *
@@ -124,10 +124,15 @@ final class Serializer
             return;
         }
         // this value's own bytes: a string is quoted, an array has its two brackets and a
-        // comma between elements, anything else takes at least one byte
+        // comma between elements, a number or literal its exact encoded length
         $budget -= match (true) {
             \is_string($data) => \strlen($data) + 2,
             \is_array($data) => 1 + max(\count($data), 1),
+            \is_int($data) => \strlen((string) $data),
+            // INF and NAN fail to encode: json_encode() below reports them
+            \is_float($data) => max(\strlen((string) json_encode($data)), 1),
+            $data === false => 5,
+            $data === null, $data === true => 4,
             default => 1,
         };
         if ($budget < 0) {
