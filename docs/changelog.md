@@ -2,6 +2,7 @@ xmf ChangeLog
 =============
 v1.2.34 NOT RELEASED
 ------------------
+* security: Highlighter::apply() highlights each text segment in one pass instead of copying the rest of the segment for every match, so the cost grows linearly with the number of matches; it returns the highlighted body for long input (text of about 40 KB or more outside tags exhausted the PCRE JIT stack and null was returned), a comment ends at its --> however long it is, and invalid UTF-8 is kept byte for byte (it was replaced by ?), with only ASCII letters matching in either case in such text and for a search term over 8 KB (backport of #212)
 * security: Highlighter::apply() no longer ends a tag at a ">" inside a quoted attribute value, so a term (such as one containing a quote) is never highlighted inside an attribute, where the inserted markup could close the tag early and turn the rest of the attribute into live HTML; comments and declarations (<!-- -->, <!DOCTYPE>) are not highlighted, nor is text inside <?...>, which a browser reads as a comment ending at the first > (a highlight there closed it early and activated the markup after it), and after an unclosed quote or comment nothing is highlighted (backport of #204 and #208)
 * security: Highlighter::apply() skips empty search terms (leading or trailing space, '' in the array) instead of looping until memory runs out
 * security: Module\Helper::getHandler() handler names must consist of letters, digits and _; a name holding / or . could include a PHP file outside the module's class/ directory (backport of #204)
