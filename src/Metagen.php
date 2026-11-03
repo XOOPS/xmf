@@ -445,14 +445,15 @@ class Metagen
     /**
      * The scalar search terms as strings, one per case-insensitive term, at most MAX_SEARCH_TERMS
      * (each term scans the whole text, so this bounds the work).
+     * Lazy, so the caller's early exit also stops the normalization of the remaining terms.
      *
      * @param mixed $needles search term, array of search terms, or null
      *
-     * @return string[]
+     * @return \Generator<int, string>
      */
     private static function uniqueSearchTerms($needles)
     {
-        $terms = array();
+        $seen = array();
         foreach (empty($needles) ? array() : (array) $needles as $needle) {
             if (!is_scalar($needle)) {
                 continue;
@@ -460,12 +461,15 @@ class Metagen
             $needle = (string) $needle;
             // the search ignores case, so case variants are one term
             $key = function_exists('mb_strtolower') ? mb_strtolower($needle, self::ENCODING) : strtolower($needle);
-            if (!isset($terms[$key]) && count($terms) < self::MAX_SEARCH_TERMS) {
-                $terms[$key] = $needle;
+            if (isset($seen[$key])) {
+                continue;
             }
+            if (count($seen) >= self::MAX_SEARCH_TERMS) {
+                return;
+            }
+            $seen[$key] = true;
+            yield $needle;
         }
-
-        return array_values($terms);
     }
 
     /**
