@@ -80,8 +80,12 @@ class Highlighter
         $offset = 0;
         $length = strlen($haystack);
         while ($offset < $length) {
-            $start = preg_match('#<[/a-z!?]#i', $haystack, $match, PREG_OFFSET_CAPTURE, $offset) === 1
-                ? $match[0][1] : $length;
+            $found = preg_match('#<[/a-z!?]#i', $haystack, $match, PREG_OFFSET_CAPTURE, $offset);
+            if ($found === false) {
+                // a PCRE error: the rest may hold markup, so highlight nothing more
+                return $ret . substr($haystack, $offset);
+            }
+            $start = $found === 1 ? $match[0][1] : $length;
             $ret .= self::highlightText($needle, substr($haystack, $offset, $start - $offset), $pre, $post);
             if ($start === $length) {
                 break;
@@ -120,14 +124,17 @@ class Highlighter
      */
     private static function highlightText(string $needle, string $text, string $pre, string $post): string
     {
-        // the "u" modifier reads both as ENCODING, UTF-8
-        $wrapped = preg_replace_callback(
-            '/' . preg_quote($needle, '/') . '/iu',
-            static fn (array $m): string => $pre . $m[0] . $post,
-            $text
-        );
-        if ($wrapped !== null) {
-            return $wrapped;
+        // the "u" modifier reads both as ENCODING, UTF-8; a needle that is not valid UTF-8
+        // would fail to compile with a warning, a text that is not returns null quietly
+        if (preg_match('//u', $needle) === 1) {
+            $wrapped = preg_replace_callback(
+                '/' . preg_quote($needle, '/') . '/iu',
+                static fn (array $m): string => $pre . $m[0] . $post,
+                $text
+            );
+            if ($wrapped !== null) {
+                return $wrapped;
+            }
         }
         // not valid UTF-8: match bytes, ASCII letters in either case
         $ret = '';

@@ -123,18 +123,7 @@ final class Serializer
             }
             return;
         }
-        // this value's own bytes: a string is quoted, an array has its two brackets and a
-        // comma between elements, a number or literal its exact encoded length
-        $budget -= match (true) {
-            \is_string($data) => \strlen($data) + 2,
-            \is_array($data) => 1 + max(\count($data), 1),
-            \is_int($data) => \strlen((string) $data),
-            // INF and NAN fail to encode: json_encode() below reports them
-            \is_float($data) => max(\strlen((string) json_encode($data)), 1),
-            $data === false => 5,
-            $data === null, $data === true => 4,
-            default => 1,
-        };
+        $budget -= self::encodedOwnSize($data);
         if ($budget < 0) {
             throw new RuntimeException(
                 sprintf('Serialized JSON exceeds maximum allowed size of %d bytes', self::MAX_SIZE)
@@ -150,6 +139,27 @@ final class Serializer
             $budget -= $isObject ? \strlen((string) $key) + 3 : 0;
             self::guardExpandedSize($value, $depth + 1, $budget);
         }
+    }
+
+    /**
+     * The bytes json_encode() writes for a value itself, not counting array elements:
+     * a string is quoted, an array has its two brackets and a comma between elements,
+     * a number or literal its exact encoded length
+     *
+     * @param mixed $data anything but an object
+     */
+    private static function encodedOwnSize($data): int
+    {
+        return match (true) {
+            \is_string($data) => \strlen($data) + 2,
+            \is_array($data) => 1 + max(\count($data), 1),
+            \is_int($data) => \strlen((string) $data),
+            // INF and NAN fail to encode: json_encode() in toJson() reports them
+            \is_float($data) => max(\strlen((string) json_encode($data)), 1),
+            $data === false => 5,
+            $data === null, $data === true => 4,
+            default => 1,
+        };
     }
 
     /**

@@ -110,5 +110,19 @@ class HighlighterTest extends \PHPUnit\Framework\TestCase
     public function testInvalidUtf8IsKeptByteForByte()
     {
         $this->assertSame("\xFF[ab] [AB]", Highlighter::apply('ab', "\xFFab AB", '[', ']'));
+        // in such text only ASCII letters match in either case
+        $this->assertSame("\xFFÄpfel [äpfel]", Highlighter::apply('äpfel', "\xFFÄpfel äpfel", '[', ']'));
+        // invalid bytes inside a tag do not change where the tag ends
+        $this->assertSame("<a title=\"\xFFab\">[ab]</a>", Highlighter::apply('ab', "<a title=\"\xFFab\">ab</a>", '[', ']'));
+
+        // a term that is not valid UTF-8 must not raise a PCRE compile warning
+        set_error_handler(static function (int $errno, string $errstr): bool {
+            throw new \ErrorException($errstr, 0, $errno);
+        });
+        try {
+            $this->assertSame("[\xFF]ab", Highlighter::apply(["\xFF"], "\xFFab", '[', ']'));
+        } finally {
+            restore_error_handler();
+        }
     }
 }
