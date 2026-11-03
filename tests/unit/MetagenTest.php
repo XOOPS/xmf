@@ -186,6 +186,14 @@ EOT;
         $this->assertSame('x < b onmouseover=x and more text', $actual);
     }
 
+    public function testGetSearchSummaryCaseFolding()
+    {
+        $haystack = str_repeat('filler words here ', 10) . "a dotted i\u{0307} is here";
+        // full lowercasing maps U+0130 to "i" + U+0307, but mb_stripos() does not match them
+        $actual = Metagen::getSearchSummary($haystack, array("\u{0130}", "i\u{0307}"), 30);
+        $this->assertStringContainsString("i\u{0307}", $actual);
+    }
+
     public function testGetSearchSummaryCountsCaseVariantsAsOneSearchTerm()
     {
         $haystack = 'Testing this method will require a long string that will exceed one hundred '

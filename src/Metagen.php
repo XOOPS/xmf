@@ -387,8 +387,10 @@ class Metagen
                 continue;
             }
             $needle = (string) $needle;
-            // the search ignores case, so case variants are one term
-            $key = function_exists('mb_strtolower') ? mb_strtolower($needle, self::ENCODING) : strtolower($needle);
+            // case variants are one term; mb_stripos() uses simple case folding, so fold the same way
+            $key = function_exists('mb_convert_case')
+                ? mb_convert_case($needle, MB_CASE_FOLD_SIMPLE, self::ENCODING)
+                : strtolower($needle);
             if (isset($seen[$key])) {
                 continue;
             }
