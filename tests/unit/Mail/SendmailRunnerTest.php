@@ -329,6 +329,48 @@ class SendmailRunnerTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(realpath($script), file_get_contents($outputFile));
     }
 
+    public function testDeliverRunsCanonicalTargetWhenDotDotLeavesASwappableDirectory()
+    {
+        if (DIRECTORY_SEPARATOR === '\\') {
+            $this->markTestSkipped('Sendmail runner process test requires a POSIX shell.');
+        }
+
+        $outputFile = $this->createTempFile('sendmail-argv0-', '');
+        $script = $this->createExecutableScript(
+            "#!/usr/bin/env bash\nprintf '%s' \"\$0\" > " . escapeshellarg($outputFile) . "\ncat > /dev/null\nexit 0\n"
+        );
+        $linkDir = __DIR__ . '/sendmail-linkdir-' . bin2hex(random_bytes(8));
+        $openDir = $linkDir . '/open';
+        $stepDir = $openDir . '/step';
+        $link = $linkDir . '/sendmail';
+        $path = $stepDir . '/../../sendmail'; // the kernel walks open/step, then back up to linkDir
+
+        try {
+            $this->assertTrue(mkdir($stepDir, 0700, true));
+            chmod($linkDir, 0700);
+            chmod($openDir, 0700);
+            chmod($stepDir, 0700);
+            if (!$this->parentsTrusted($linkDir)) {
+                $this->markTestSkipped('A directory above the test directory is group/other-writable or owned by another user.');
+            }
+            $this->assertTrue(symlink($script, $link));
+            $runner = new SendmailRunner(array($path));
+
+            $runner->deliver($path, "Subject: Test\n\nHello\n");
+            $this->assertSame($path, file_get_contents($outputFile), 'Private directories keep the literal path');
+
+            chmod($openDir, 0770); // group members could swap step for a link, moving where ".." leads
+            $runner->deliver($path, "Subject: Test\n\nHello\n");
+        } finally {
+            @unlink($link);
+            @rmdir($stepDir);
+            @rmdir($openDir);
+            @rmdir($linkDir);
+        }
+
+        $this->assertSame(realpath($script), file_get_contents($outputFile));
+    }
+
     /**
      * True when $dir and every directory above it are owned by root or this user and closed to
      * group and other writes, the condition SendmailRunner needs to keep the literal path

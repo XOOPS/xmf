@@ -187,12 +187,11 @@ final class SendmailRunner
         $rfc822 = str_replace("\n", "\r\n", $rfc822);
 
         // Prefer the literal path (multi-call binaries such as busybox dispatch on argv[0]) only if
-        // it resolves to the validated target and no other account can swap any link in its chain
-        // after this check: every directory above every hop must be closed to group and other
-        // writes. Else canonical.
-        $literal  = $sendmailPath;
-        $resolved = realpath($literal);
-        if (!is_string($resolved) || $resolved !== $validatedPath || !$this->hasTrustedLinkChain($literal)) {
+        // it still resolves to the validated target and no other account can swap any link or
+        // ".."-crossed directory in its chain: every directory above them must be closed to group
+        // and other writes. Else canonical.
+        $literal = $sendmailPath;
+        if ($this->resolveTrustedLinkChain($literal) !== $validatedPath) {
             $literal = $validatedPath;
         }
 
@@ -408,30 +407,37 @@ final class SendmailRunner
     /**
      * Resolve $path one component at a time, as the kernel does, and require every symlink
      * met on the way (the path itself, a later hop such as /etc/alternatives/mta, or a
-     * linked directory component) to sit in a trusted canonical directory, so no other
-     * account can swap any link between validation and launch. Non-link components need
-     * no check: the canonical fallback passes through the same directories.
+     * linked directory component) and every directory a ".." leaves to sit in a trusted
+     * canonical directory, so no other account can swap them between validation and launch.
+     * Other components need no check: they lie on the resolved path, which the canonical
+     * fallback passes through too.
+     *
+     * @return string|null the resolved path, or null when a link or ".." step is not trusted
      */
-    private function hasTrustedLinkChain(string $path): bool
+    private function resolveTrustedLinkChain(string $path): ?string
     {
         $pending  = explode('/', $path);
         $resolved = ''; // canonical prefix without symlinks; '' is the root
         $links    = 0;
         while ($pending !== []) {
-            $candidate = self::appendComponent($resolved, array_shift($pending));
+            $part = array_shift($pending);
+            if ($part === '..' && $resolved !== '' && !$this->hasTrustedParents($resolved)) {
+                return null; // the kernel walks through $resolved, which another account could swap
+            }
+            $candidate = self::appendComponent($resolved, $part);
             if (!is_link($candidate)) {
                 $resolved = $candidate;
                 continue;
             }
             $target = $this->readTrustedLink($candidate, ++$links);
             if ($target === null) {
-                return false;
+                return null;
             }
             $resolved = $target[0] === '/' ? '' : $resolved;
             $pending  = array_merge(explode('/', $target), $pending);
         }
 
-        return true;
+        return $resolved === '' ? '/' : $resolved;
     }
 
     /**
@@ -460,7 +466,7 @@ final class SendmailRunner
         }
         $target = readlink($link);
 
-        return $target === false || $target === '' ? null : $target;
+        return $target === false ? null : $target;
     }
 
     /**

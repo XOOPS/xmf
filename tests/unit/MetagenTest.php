@@ -214,6 +214,11 @@ EOT;
 
         $actual = Metagen::getSearchSummary($haystack, $needles, 40);
         $this->assertSame('Testing this method will require a long' . Metagen::ELLIPSIS, $actual);
+
+        // control: as the 32nd term it is still searched
+        $inBudget = array_merge(array_slice($needles, 0, 31), array('significant'));
+        $actual = Metagen::getSearchSummary($haystack, $inBudget, 40);
+        $this->assertSame(Metagen::ELLIPSIS . 'very different significant keywords.', $actual);
     }
 
     public function testGetSearchSummary()
