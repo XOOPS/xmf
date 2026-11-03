@@ -177,6 +177,31 @@ EOT;
     public function testGetSearchSummaryKeepsLiteralLessThanText()
     {
         $this->assertSame('x < 5', Metagen::getSearchSummary('x &lt; 5', '5'));
+        $this->assertSame('x <5 and y <10', Metagen::getSearchSummary('x &amp;#x3c;5 and y &amp;#x3c;10', 'y'));
+    }
+
+    public function testGetSearchSummaryKeepsTextAfterAnUnclosedTagButCannotOpenOne()
+    {
+        $actual = Metagen::getSearchSummary('x &amp;#x3c;b onmouseover=x and more text', 'more');
+        $this->assertSame('x < b onmouseover=x and more text', $actual);
+    }
+
+    public function testGetSearchSummaryCountsCaseVariantsAsOneSearchTerm()
+    {
+        $haystack = 'Testing this method will require a long string that will exceed one hundred '
+            . 'twenty characters and has some very different significant keywords.';
+        $needles = array();
+        for ($mask = 0; $mask < 40; $mask++) { // 40 spellings of "absent": aBsent, ABsent, ...
+            $variant = '';
+            foreach (str_split('absent') as $bit => $letter) {
+                $variant .= ($mask >> $bit) & 1 ? strtoupper($letter) : $letter;
+            }
+            $needles[] = $variant;
+        }
+        $needles[] = 'significant';
+
+        $actual = Metagen::getSearchSummary($haystack, $needles, 40);
+        $this->assertSame(Metagen::ELLIPSIS . 'very different significant keywords.', $actual);
     }
 
     public function testGetSearchSummaryIgnoresTermsBeyondTheSearchBudget()
