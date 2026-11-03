@@ -115,14 +115,27 @@ class HighlighterTest extends \PHPUnit\Framework\TestCase
         // invalid bytes inside a tag do not change where the tag ends
         $this->assertSame("<a title=\"\xFFab\">[ab]</a>", Highlighter::apply('ab', "<a title=\"\xFFab\">ab</a>", '[', ']'));
 
-        // a term that is not valid UTF-8 must not raise a PCRE compile warning
-        set_error_handler(static function (int $errno, string $errstr): bool {
-            throw new \ErrorException($errstr, 0, $errno);
+        // a term that is not valid UTF-8, or too long to compile, must not raise a PCRE warning
+        $warnings = [];
+        set_error_handler(static function (int $errno, string $errstr) use (&$warnings): bool {
+            $warnings[] = $errstr;
+            return true;
         });
         try {
             $this->assertSame("[\xFF]ab", Highlighter::apply(["\xFF"], "\xFFab", '[', ']'));
+            $long = str_repeat("\u{1F600}", 20000);
+            $this->assertSame("x[$long]", Highlighter::apply([$long], "x$long", '[', ']'));
         } finally {
             restore_error_handler();
         }
+        $this->assertSame([], $warnings);
+    }
+
+    public function testQuotesAndCommentsBoundMarkup()
+    {
+        $this->assertSame("<a title='x\">y'>[y]</a>", Highlighter::apply('y', "<a title='x\">y'>y</a>", '[', ']'));
+        $this->assertSame('<?x y>[y]', Highlighter::apply('y', '<?x y>y', '[', ']'));
+        $this->assertSame('<!-->y-->[y]', Highlighter::apply('y', '<!-->y-->y', '[', ']'));
+        $this->assertSame('[y] <b', Highlighter::apply('y', 'y <b', '[', ']'));
     }
 }
