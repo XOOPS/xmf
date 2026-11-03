@@ -40,8 +40,12 @@ class SerializerTest extends \PHPUnit\Framework\TestCase
     public function testToJsonKeepsTheCallersJsonErrorState(): void
     {
         json_decode('{');
-        Serializer::toJson([1.5]);
-        $this->assertSame(JSON_ERROR_SYNTAX, json_last_error());
+        try {
+            Serializer::toJson([1.5]);
+            $this->assertSame(JSON_ERROR_SYNTAX, json_last_error());
+        } finally {
+            json_decode('[]'); // no stale error for later tests
+        }
     }
 
     public function testToJsonRejectsOversizedOutput(): void
