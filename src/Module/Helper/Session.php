@@ -63,8 +63,8 @@ class Session extends AbstractHelper
     /**
      * Sets a named session variable respecting our module prefix
      *
-     * Store scalars and arrays only: get() returns false for a value holding
-     * an object or enum, or one it cannot read; $default is not used then.
+     * Store scalars and arrays only: a value get() could not read back (one
+     * holding an object or enum, or over the size limit) is refused, not stored.
      *
      * @param string $name  name of variable
      * @param mixed  $value value of variable
@@ -72,12 +72,15 @@ class Session extends AbstractHelper
      * @return void
      *
      * @throws \InvalidArgumentException When $value holds a resource or closure
-     * @throws \RuntimeException When the serialized value exceeds the Serializer size limit
+     * @throws \RuntimeException When $value holds an object or enum, or exceeds the Serializer size limit
      */
     public function set($name, $value)
     {
         $prefixedName = $this->prefix($name);
-        $_SESSION[$prefixedName] = Serializer::toPhp($value);
+        $serialized = Serializer::toPhp($value);
+        // the same check get() applies, so nothing is stored that would read back as false
+        Serializer::fromPhp($serialized);
+        $_SESSION[$prefixedName] = $serialized;
     }
 
     /**
@@ -86,13 +89,15 @@ class Session extends AbstractHelper
      * @param string $name    name of variable
      * @param mixed  $default default value to return if config $name is not set
      *
-     * @return mixed  $value value of session variable or false if not set
+     * @return mixed  $value value of session variable, $default if not set, or false if unreadable
      */
     public function get($name, $default = false)
     {
         $prefixedName = $this->prefix($name);
         if (isset($_SESSION[$prefixedName])) {
-            return Serializer::tryFrom((string) $_SESSION[$prefixedName], false, Format::PHP);
+            $stored = $_SESSION[$prefixedName];
+            // set() stores a string; anything else was written around it and is not read
+            return \is_string($stored) ? Serializer::tryFrom($stored, false, Format::PHP) : false;
         } else {
             return $default;
         }

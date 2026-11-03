@@ -29,19 +29,23 @@ final class SessionTest extends TestCase
 {
     private Session $session;
 
-    /** @var array<string, mixed> */
-    private array $savedSession = [];
+    /** @var array<string, mixed>|null $_SESSION before the test, null when it was not set */
+    private ?array $savedSession = null;
 
     protected function setUp(): void
     {
-        $this->savedSession = $_SESSION ?? [];
+        $this->savedSession = $_SESSION ?? null;
         $_SESSION = [];
         $this->session = new PrefixedSessionTestHelper();
     }
 
     protected function tearDown(): void
     {
-        $_SESSION = $this->savedSession;
+        if ($this->savedSession === null) {
+            unset($_SESSION);
+        } else {
+            $_SESSION = $this->savedSession;
+        }
     }
 
     public function testGetRoundTripsScalarsArraysAndBinaryStrings(): void
@@ -63,11 +67,25 @@ final class SessionTest extends TestCase
         $this->session->set('big', str_repeat('a', 5000000));
     }
 
+    public function testSetRefusesEnumGetCouldNotRead(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->session->set('enum', [SessionTestEnum::On]);
+    }
+
     public function testGetRefusesStoredEnum(): void
     {
-        // allowed_classes=false alone would return the enum case
-        $this->session->set('enum', [SessionTestEnum::On]);
+        // written by older code; allowed_classes=false alone would return the enum case
+        $_SESSION['xmftest_enum'] = serialize([SessionTestEnum::On]);
 
         $this->assertFalse($this->session->get('enum', 'dflt'));
+    }
+
+    public function testGetRefusesNonStringValue(): void
+    {
+        // set() always stores a string; an array written around it is not read
+        $_SESSION['xmftest_raw'] = ['not', 'serialized'];
+
+        $this->assertFalse($this->session->get('raw', 'dflt'));
     }
 }
