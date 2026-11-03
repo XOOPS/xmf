@@ -202,7 +202,7 @@ EOT;
         $this->assertSame(Metagen::ELLIPSIS . 'very different significant keywords.', $actual);
     }
 
-    public function testGetSearchSummaryIgnoresTermsBeyondTheSearchBudget()
+    public function testGetSearchSummaryTermBudget()
     {
         $haystack = 'Testing this method will require a long string that will exceed one hundred '
             . 'twenty characters and has some very different significant keywords.';

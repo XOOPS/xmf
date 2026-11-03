@@ -426,22 +426,7 @@ class Metagen
     protected static function getNeedlePositions($haystack, $needles)
     {
         $pos = array();
-        $needles = empty($needles) ? array() : (array) $needles;
-        $seen = array();
-        foreach ($needles as $needle) {
-            if (!is_scalar($needle)) {
-                continue;
-            }
-            $needle = (string) $needle;
-            // the search ignores case, so case variants are one term
-            $key = function_exists('mb_strtolower') ? mb_strtolower($needle, self::ENCODING) : strtolower($needle);
-            if (isset($seen[$key])) {
-                continue;
-            }
-            if (count($seen) >= self::MAX_SEARCH_TERMS) {
-                break; // each term scans the whole text; bound the work
-            }
-            $seen[$key] = true;
+        foreach (self::uniqueSearchTerms($needles) as $needle) {
             if (function_exists('mb_stripos')) {
                 $i = mb_stripos($haystack, $needle, 0, static::ENCODING);
             } else {
@@ -455,6 +440,32 @@ class Metagen
             }
         }
         return $pos;
+    }
+
+    /**
+     * The scalar search terms as strings, one per case-insensitive term, at most MAX_SEARCH_TERMS
+     * (each term scans the whole text, so this bounds the work).
+     *
+     * @param mixed $needles search term, array of search terms, or null
+     *
+     * @return string[]
+     */
+    private static function uniqueSearchTerms($needles)
+    {
+        $terms = array();
+        foreach (empty($needles) ? array() : (array) $needles as $needle) {
+            if (!is_scalar($needle)) {
+                continue;
+            }
+            $needle = (string) $needle;
+            // the search ignores case, so case variants are one term
+            $key = function_exists('mb_strtolower') ? mb_strtolower($needle, self::ENCODING) : strtolower($needle);
+            if (!isset($terms[$key]) && count($terms) < self::MAX_SEARCH_TERMS) {
+                $terms[$key] = $needle;
+            }
+        }
+
+        return array_values($terms);
     }
 
     /**
