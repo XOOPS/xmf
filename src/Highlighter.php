@@ -86,30 +86,45 @@ class Highlighter
             }
             $start = $found === 1 ? $match[0][1] : $length;
             $ret .= self::highlightText($needle, substr($haystack, $offset, $start - $offset), $pre, $post);
-            if ($start === $length) {
-                break;
-            }
-            // a comment runs to "-->", a ">" inside a quoted attribute value does not end a tag,
-            // and an unclosed comment or quote runs to the end, so nothing after it is highlighted;
-            // "<?" opens a comment that ends at the first ">"
-            if (substr_compare($haystack, '<!--', $start, 4) === 0) {
-                $end = strpos($haystack, '-->', $start + 4);
-                // PHP 7.4 reads a null length as 0
-                $markup = $end === false ? substr($haystack, $start) : substr($haystack, $start, $end + 3 - $start);
-            } else {
-                $markup = preg_match(
-                    '#\G(?:<\?[^>]*+|<[/a-z!](?:[^>"\']++|"[^"]*+(?:"|$)|\'[^\']*+(?:\'|$))*+)(?:>|$)#i',
-                    $haystack,
-                    $match,
-                    0,
-                    $start
-                ) === 1 ? $match[0] : substr($haystack, $start); // on a PCRE error, highlight nothing more
-            }
+            $markup = $start < $length ? self::readMarkup($haystack, $start) : '';
             $ret .= $markup;
             $offset = $start + strlen($markup);
         }
 
         return $ret;
+    }
+
+    /**
+     * The markup starting at $start: a comment runs to "-->", "<?" is a comment a browser
+     * ends at the first ">", and a ">" inside a quoted attribute value does not end a tag.
+     * An unclosed comment or quote runs to the end, so nothing after it is highlighted.
+     *
+     * @param string $haystack html text
+     * @param int    $start    offset of a "<" followed by "/", "!", "?" or a letter
+     *
+     * @return string
+     */
+    private static function readMarkup(string $haystack, int $start): string
+    {
+        $isComment = substr_compare($haystack, '<!--', $start, 4) === 0;
+        if ($isComment || $haystack[$start + 1] === '?') {
+            $close = $isComment ? '-->' : '>';
+            $end = strpos($haystack, $close, $start + ($isComment ? 4 : 2));
+            return $end === false ? substr($haystack, $start) : substr($haystack, $start, $end + \strlen($close) - $start);
+        }
+        $pos = $start + 2;
+        while (($pos += strcspn($haystack, '>"\'', $pos)) < \strlen($haystack)) {
+            if ($haystack[$pos] === '>') {
+                return substr($haystack, $start, $pos + 1 - $start);
+            }
+            $quote = strpos($haystack, $haystack[$pos], $pos + 1);
+            if ($quote === false) {
+                break;
+            }
+            $pos = $quote + 1;
+        }
+
+        return substr($haystack, $start);
     }
 
     /**
@@ -124,9 +139,11 @@ class Highlighter
      */
     private static function highlightText(string $needle, string $text, string $pre, string $post): string
     {
-        // the "u" modifier reads both as ENCODING, UTF-8; a needle that is not valid UTF-8
-        // would fail to compile with a warning, a text that is not returns null quietly
-        if (preg_match('//u', $needle) === 1) {
+        // the "u" modifier reads both as ENCODING, UTF-8; a needle that is not valid UTF-8,
+        // or too long to compile (13,105 four-byte or 32,764 one-byte characters), would fail
+        // with a warning, a text that is not valid returns null quietly
+        // ponytail: a needle over 8 KB matches only ASCII letters in either case
+        if (\strlen($needle) <= 8192 && preg_match('//u', $needle) === 1) {
             $wrapped = preg_replace_callback(
                 '/' . preg_quote($needle, '/') . '/iu',
                 static fn (array $m): string => $pre . $m[0] . $post,
@@ -136,7 +153,7 @@ class Highlighter
                 return $wrapped;
             }
         }
-        // not valid UTF-8: match bytes, ASCII letters in either case
+        // not valid UTF-8 or too long: match bytes, ASCII letters in either case
         $ret = '';
         $offset = 0;
         $length = strlen($needle);
