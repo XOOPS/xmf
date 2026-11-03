@@ -187,11 +187,11 @@ final class SendmailRunner
         $rfc822 = str_replace("\n", "\r\n", $rfc822);
 
         // Prefer the literal path (multi-call binaries such as busybox dispatch on argv[0]) only if
-        // it resolves to the validated target and no other account can swap the link after this
-        // check: every directory above it must be closed to group and other writes. Else canonical.
-        $literal  = $sendmailPath;
-        $resolved = realpath($literal);
-        if (!is_string($resolved) || $resolved !== $validatedPath || !$this->hasTrustedParents($literal)) {
+        // it still resolves to the validated target and no other account can swap any link or
+        // ".."-crossed directory in its chain: every directory above them must be closed to group
+        // and other writes. Else canonical.
+        $literal = $sendmailPath;
+        if ($this->resolveTrustedLinkChain($literal) !== $validatedPath) {
             $literal = $validatedPath;
         }
 
@@ -402,6 +402,71 @@ final class SendmailRunner
         if ($this->waitForExit($proc, $grace) === null) {
             proc_terminate($proc, 9);
         }
+    }
+
+    /**
+     * Resolve $path one component at a time, as the kernel does, and require every symlink
+     * met on the way (the path itself, a later hop such as /etc/alternatives/mta, or a
+     * linked directory component) and every directory a ".." leaves to sit in a trusted
+     * canonical directory, so no other account can swap them between validation and launch.
+     * Other components need no check: they lie on the resolved path, which the canonical
+     * fallback passes through too.
+     *
+     * @return string|null the resolved path, or null when a link or ".." step is not trusted
+     */
+    private function resolveTrustedLinkChain(string $path): ?string
+    {
+        $pending  = explode('/', $path);
+        $resolved = ''; // canonical prefix without symlinks; '' is the root
+        $links    = 0;
+        while ($pending !== []) {
+            $part = array_shift($pending);
+            if ($part === '..' && $resolved !== '' && !$this->hasTrustedParents($resolved)) {
+                return null; // the kernel walks through $resolved, which another account could swap
+            }
+            $candidate = self::appendComponent($resolved, $part);
+            if (!is_link($candidate)) {
+                $resolved = $candidate;
+                continue;
+            }
+            $target = $this->readTrustedLink($candidate, ++$links);
+            if ($target === null) {
+                return null;
+            }
+            $resolved = $target[0] === '/' ? '' : $resolved;
+            $pending  = array_merge(explode('/', $target), $pending);
+        }
+
+        return $resolved === '' ? '/' : $resolved;
+    }
+
+    /**
+     * The canonical prefix after one path component ('' is the root; '..' stops at the root).
+     */
+    private static function appendComponent(string $resolved, string $part): string
+    {
+        if ($part === '' || $part === '.') {
+            return $resolved;
+        }
+        if ($part === '..') {
+            $parent = \dirname($resolved === '' ? '/' : $resolved);
+            return $parent === '/' ? '' : $parent;
+        }
+
+        return $resolved . '/' . $part;
+    }
+
+    /**
+     * The target of $link when it is within the hop limit and sits in a trusted directory; else null.
+     */
+    private function readTrustedLink(string $link, int $hop): ?string
+    {
+        if ($hop > 40 || !$this->hasTrustedParents($link)) { // 40 = Linux MAXSYMLINKS
+            return null;
+        }
+        $target = readlink($link);
+
+        return $target === false ? null : $target;
     }
 
     /**

@@ -5,6 +5,9 @@
 ### Security
 * `Security\Serializer::toJson()`: numbers, booleans and `null` count against the size guard at their encoded length instead of one byte, so data sharing an array of large integers or long floats between references is rejected before `json_encode()` builds tens of megabytes
 * `Highlighter::apply()`: each text segment is highlighted in one pass instead of copying the rest of the segment for every match, so the cost grows linearly with the number of matches
+* `Metagen`: plain text built from HTML (`getSearchSummary()`, descriptions, keywords, titles) has complete tags removed again after entities are decoded, and any other `<` before a letter, `/`, `!` or `?` is followed by a space, so encoded markup (`&amp;amp;lt;b&amp;amp;gt;`, `&#x3c;svg&#x3e;`) no longer comes out as a live tag in a summary a template prints unescaped; text such as `x <5` is kept
+* `Metagen::getSearchSummary()`: only the first 32 distinct search terms are looked for (terms differing only in case count once), since each one scans the whole text
+* `Mail\SendmailRunner::deliver()`: the path as given is run only when it still resolves to the validated target and every link in its chain (`/usr/sbin/sendmail` → `/etc/alternatives/mta` → …, a linked directory, not just the first link) and every directory a `..` leaves sits in a directory closed to group and other writes and owned by root or the PHP process's user; a writable directory holding a later link made the swap after validation possible again
 
 ### Bug Fixes
 * `Highlighter::apply()`: returns the highlighted body for long input; text of about 40 KB or more outside tags exhausted the PCRE JIT stack and `null` was returned. A comment ends at its `-->` however long it is. Invalid UTF-8 is kept byte for byte (it was replaced by `?`); in such text, and for a search term over 8 KB, only ASCII letters match in either case
