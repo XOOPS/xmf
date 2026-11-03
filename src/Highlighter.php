@@ -1,4 +1,5 @@
 <?php
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -17,7 +18,7 @@ namespace Xmf;
  * @category  Xmf\Highlighter
  * @package   Xmf
  * @author    Richard Griffith <richard@geekwright.com>
- * @copyright 2011-2018 XOOPS Project (https://xoops.org)
+ * @copyright 2000-2026 XOOPS Project (https://xoops.org)
  * @license   GNU GPL 2.0 or later (https://www.gnu.org/licenses/gpl-2.0.html)
  * @link      https://xoops.org
  */
@@ -26,7 +27,15 @@ class Highlighter
     /**
      * mbstring encoding
      */
-    const ENCODING = 'UTF-8';
+    public const ENCODING = 'UTF-8';
+
+    /** distinct terms highlighted; each one rescans the whole body */
+    private const MAX_TERMS = 32;
+
+    /** elements whose content a browser does not parse as tags; plaintext never ends */
+    private const RAW_TEXT_ELEMENTS = [
+        'iframe', 'noembed', 'noframes', 'noscript', 'plaintext', 'script', 'style', 'textarea', 'title', 'xmp',
+    ];
 
     /**
      * Apply highlight to words in body text
@@ -47,11 +56,28 @@ class Highlighter
             $words = preg_replace('/[\s]+/', ' ', $words);
             $words = explode(' ', $words);
         }
+        // each term rescans the body, wrappers included, and a term repeated in any case
+        // wraps the same matches again, so skip repeats and bound the number of terms
+        $seen = [];
+        // a body that is not valid UTF-8 is matched bytewise (see highlightText())
+        $unicodeBody = \function_exists('mb_convert_case') && preg_match('//u', (string) $body) === 1;
         foreach ($words as $word) {
+            $word = (string) $word;
             // an empty term matches everywhere and never advances the scan
             if ($word === '') {
                 continue;
             }
+            // fold as the matcher does: /iu treats simple case variants alike, the byte fallback ASCII letters
+            $key = $unicodeBody && self::matchesAsUtf8($word)
+                ? mb_convert_case($word, MB_CASE_FOLD_SIMPLE, self::ENCODING)
+                : self::asciiLower($word);
+            if (isset($seen[$key])) {
+                continue;
+            }
+            if (\count($seen) >= self::MAX_TERMS) {
+                break;
+            }
+            $seen[$key] = true;
             $body = static::splitOnTag($word, $body, $pre, $post);
         }
 
@@ -95,9 +121,17 @@ class Highlighter
     }
 
     /**
-     * The markup starting at $start: a comment runs to "-->", "<?" is a comment a browser
-     * ends at the first ">", and a ">" inside a quoted attribute value does not end a tag.
-     * An unclosed comment or quote runs to the end, so nothing after it is highlighted.
+     * The markup starting at $start, read as a browser's HTML tokenizer reads it:
+     * - a comment runs to "-->" ("<!-->" and "<!--->" are complete comments);
+     * - "<!", "<?" and "</" not followed by a letter are bogus comments ending at the first ">";
+     * - in a tag, a quote opens a value only right after "=", so a quote inside an unquoted
+     *   value or an attribute name is literal, and a ">" inside a quoted value does not end it;
+     * - a raw text element (script, style, textarea, title, ...) is markup up to its end tag,
+     *   since nothing inside it is a tag or text a highlight may go into.
+     * An unclosed comment, quote, tag or raw text element runs to the end, so nothing after
+     * it is highlighted.
+     * ponytail: script's "<!--<script" escape states are not tracked; such text ends at the
+     * first "</script", as an unescaped script does
      *
      * @param string $haystack html text
      * @param int    $start    offset of a "<" followed by "/", "!", "?" or a letter
@@ -106,25 +140,76 @@ class Highlighter
      */
     private static function readMarkup(string $haystack, int $start): string
     {
-        $isComment = substr_compare($haystack, '<!--', $start, 4) === 0;
-        if ($isComment || $haystack[$start + 1] === '?') {
-            $close = $isComment ? '-->' : '>';
-            $end = strpos($haystack, $close, $start + ($isComment ? 4 : 2));
-            return $end === false ? substr($haystack, $start) : substr($haystack, $start, $end + \strlen($close) - $start);
+        if (substr_compare($haystack, '<!--', $start, 4) === 0) {
+            if (preg_match('/\G-?>/', $haystack, $abrupt, 0, $start + 4) === 1) {
+                return substr($haystack, $start, 4 + \strlen($abrupt[0]));
+            }
+            $end = strpos($haystack, '-->', $start + 4);
+            return $end === false ? substr($haystack, $start) : substr($haystack, $start, $end + 3 - $start);
         }
-        $pos = $start + 2;
-        while (($pos += strcspn($haystack, '>"\'', $pos)) < \strlen($haystack)) {
-            if ($haystack[$pos] === '>') {
-                return substr($haystack, $start, $pos + 1 - $start);
+        $isEndTag = $haystack[$start + 1] === '/';
+        $nameStart = $start + ($isEndTag ? 2 : 1);
+        if (preg_match('#\G[a-z][^\t\n\f\r />]*#i', $haystack, $name, 0, $nameStart) !== 1) {
+            $end = strpos($haystack, '>', $start + 2);
+            return $end === false ? substr($haystack, $start) : substr($haystack, $start, $end + 1 - $start);
+        }
+        $end = self::endOfTag($haystack, $nameStart + \strlen($name[0]));
+        $element = self::asciiLower($name[0]);
+        if ($isEndTag || !\in_array($element, self::RAW_TEXT_ELEMENTS, true)) {
+            return substr($haystack, $start, $end - $start);
+        }
+        if ($element !== 'plaintext') {
+            $found = preg_match(
+                '#</' . $element . '[\t\n\f\r />]#i',
+                $haystack,
+                $close,
+                PREG_OFFSET_CAPTURE,
+                $end
+            );
+            if ($found === 1) {
+                $closeEnd = self::endOfTag($haystack, $close[0][1] + 2 + \strlen($element));
+                return substr($haystack, $start, $closeEnd - $start);
             }
-            $quote = strpos($haystack, $haystack[$pos], $pos + 1);
-            if ($quote === false) {
-                break;
-            }
-            $pos = $quote + 1;
         }
 
         return substr($haystack, $start);
+    }
+
+    /**
+     * The offset just past the ">" that ends a tag whose attributes begin at $pos,
+     * or the length of the haystack when the tag is not closed
+     *
+     * @param string $haystack html text
+     * @param int    $pos      offset after the tag name
+     */
+    private static function endOfTag(string $haystack, int $pos): int
+    {
+        $length = \strlen($haystack);
+        $space = "\t\n\f\r ";
+        while (($pos += strspn($haystack, $space . '/', $pos)) < $length) {
+            if ($haystack[$pos] === '>') {
+                return $pos + 1;
+            }
+            // an attribute name; its first character may be "=" or a quote
+            $pos += 1 + strcspn($haystack, $space . '/>=', $pos + 1);
+            $pos += strspn($haystack, $space, $pos);
+            if ($pos >= $length || $haystack[$pos] !== '=') {
+                continue;
+            }
+            $pos += 1 + strspn($haystack, $space, $pos + 1);
+            if ($pos < $length && ($haystack[$pos] === '"' || $haystack[$pos] === "'")) {
+                $quote = strpos($haystack, $haystack[$pos], $pos + 1);
+                if ($quote === false) {
+                    return $length;
+                }
+                $pos = $quote + 1;
+            } else {
+                // an unquoted value ends at a space or ">"; a quote in it is literal
+                $pos += strcspn($haystack, $space . '>', $pos);
+            }
+        }
+
+        return $length;
     }
 
     /**
@@ -143,7 +228,7 @@ class Highlighter
         // or too long to compile (13,105 four-byte or 32,764 one-byte characters), would fail
         // with a warning, a text that is not valid returns null quietly
         // ponytail: a needle over 8 KB matches only ASCII letters in either case
-        if (\strlen($needle) <= 8192 && preg_match('//u', $needle) === 1) {
+        if (self::matchesAsUtf8($needle)) {
             $wrapped = preg_replace_callback(
                 '/' . preg_quote($needle, '/') . '/iu',
                 static fn (array $m): string => $pre . $m[0] . $post,
@@ -158,13 +243,31 @@ class Highlighter
         $offset = 0;
         $length = strlen($needle);
         // lower-case once: stripos() lower-cases the whole text again on every call
-        $lowerText = strtolower($text);
-        $lowerNeedle = strtolower($needle);
+        $lowerText = self::asciiLower($text);
+        $lowerNeedle = self::asciiLower($needle);
         while (($pos = strpos($lowerText, $lowerNeedle, $offset)) !== false) {
             $ret .= substr($text, $offset, $pos - $offset) . $pre . substr($text, $pos, $length) . $post;
             $offset = $pos + $length;
         }
 
         return $ret . substr($text, $offset);
+    }
+
+    /**
+     * Whether a needle can be matched by the "u" pattern: valid UTF-8 and short enough
+     * to compile. Otherwise highlightText() matches bytes.
+     */
+    private static function matchesAsUtf8(string $needle): bool
+    {
+        return \strlen($needle) <= 8192 && preg_match('//u', $needle) === 1;
+    }
+
+    /**
+     * Lower-case ASCII letters only. Before PHP 8.2 strtolower() follows the locale, and a
+     * Turkish one turns the I of SCRIPT into a dotless i, so the tag is no longer recognised.
+     */
+    private static function asciiLower(string $value): string
+    {
+        return strtr($value, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz');
     }
 }

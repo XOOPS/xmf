@@ -40,7 +40,23 @@ class FilterInput
      */
     private const MAX_FILTER_PASSES = 10;
 
-    protected $tagsArray;         // default is empty array
+    /**
+     * Encoding used to decode entities in attribute values
+     */
+    private const ENCODING = 'UTF-8';
+
+    /**
+     * Attributes a browser loads or follows as a URL; their values may use only
+     * SAFE_URL_SCHEMES or no scheme (a relative URL). srcset holds several URLs.
+     */
+    private const URL_ATTRIBUTES = [
+        'action', 'background', 'cite', 'codebase', 'data', 'formaction', 'href', 'icon',
+        'imagesrcset', 'longdesc', 'manifest', 'ping', 'poster', 'src', 'srcset', 'xlink:href',
+    ];
+
+    private const SAFE_URL_SCHEMES = ['http', 'https', 'mailto'];
+
+    protected $tagsArray;        // default is empty array
     protected $attrArray;         // default is empty array
 
     protected $tagsMethod;        // default is 0
@@ -93,11 +109,11 @@ class FilterInput
         // make sure user defined arrays are in lowercase
         $tagsArrayCount = count($tagsArray);
         for ($i = 0; $i < $tagsArrayCount; ++$i) {
-            $tagsArray[$i] = strtolower($tagsArray[$i]);
+            $tagsArray[$i] = self::asciiLower($tagsArray[$i]);
         }
         $attrArrayCount = count($attrArray);
         for ($i = 0; $i < $attrArrayCount; ++$i) {
-            $attrArray[$i] = strtolower($attrArray[$i]);
+            $attrArray[$i] = self::asciiLower($attrArray[$i]);
         }
         // assign to member vars
         $this->tagsArray  = (array) $tagsArray;
@@ -247,7 +263,7 @@ class FilterInput
 
             case 'CMD':
                 $result = (string) preg_replace('/[^A-Z0-9_\.-]/i', '', $source);
-                $result = strtolower($result);
+                $result = self::asciiLower($result);
                 break;
 
             case 'BASE64':
@@ -274,13 +290,37 @@ class FilterInput
                 break;
 
             case 'WEBURL':
-                $result = (string) $this->process($source);
-                // allow only relative, http or https
-                $urlparts = parse_url($result);
-                if (!empty($urlparts['scheme'])
-                    && !($urlparts['scheme'] === 'http' || $urlparts['scheme'] === 'https')
+                $result = trim((string) $this->process($source));
+                // reject protocol-relative URLs (//evil.example) and non-http(s) schemes;
+                // browsers read a backslash as a slash, so /\evil.example is protocol-relative too;
+                // an entity before the first / ? # can hide a scheme from parse_url()
+                // (javascript&colon;, java&Tab;script:, javascript&#0058) that the browser decodes,
+                // and one right after a leading / can hide the second slash (/&sol;, /&Tab;/);
+                // in the authority an entity or %-escape moves the host the browser uses
+                // (https://evil&sol;@good is evil.example to a browser, good to parse_url())
+                if (
+                    substr($result, 0, 2) === '//'
+                    || strpos($result, '\\') !== false
+                    || preg_match('#^(?:/&|[^/?\#]*&)#', $result)
+                    || preg_match('#^https?://[^/?\#]*[&%]#i', $result)
                 ) {
                     $result = '';
+                }
+                if ($result !== '') {
+                    $urlparts = parse_url($result);
+                    // an unparseable value (javascript://host:99999/...) has no checkable scheme.
+                    // The scheme is read as a browser reads it: parse_url() takes javascript:1/x
+                    // for host:port with no scheme. http(s) needs // and a host, since browsers
+                    // send https:/&sol;host, http:/host and https:host to whatever host follows.
+                    // A relative value has no host, though parse_url() reports one for good.example/a:80/x
+                    $hasScheme = 1 === preg_match('#^[a-z][a-z0-9+.\-]*:#i', $result);
+                    if (
+                        !is_array($urlparts)
+                        || ($hasScheme && (!preg_match('#^https?://#', $result) || empty($urlparts['host'])))
+                        || (!$hasScheme && isset($urlparts['host']))
+                    ) {
+                        $result = '';
+                    }
                 }
                 // do not allow quotes, tag brackets or controls
                 if (!preg_match('#^[^"<>\x00-\x1F]+\z#', $result)) {
@@ -401,7 +441,7 @@ class FilterInput
             // separate "!$tagName" test would be dead code.
             if (
                 (!preg_match('/^[a-z][a-z0-9]*\z/i', $tagName))
-                || ((in_array(strtolower($tagName), $this->tagBlacklist))
+                || ((in_array(self::asciiLower($tagName), $this->tagBlacklist))
                     && ($this->xssAuto))
             ) {
                 $pos += $tagLength + 2;
@@ -444,7 +484,7 @@ class FilterInput
                 $currentSpace = strpos($currentTag, ' ', $attrStart + strlen($attr));
             }
             // appears in array specified by user
-            $tagFound = in_array(strtolower($tagName), $this->tagsArray);
+            $tagFound = in_array(self::asciiLower($tagName), $this->tagsArray);
             // remove this tag on condition
             if ($tagFound !== (bool) $this->tagsMethod) {
                 // reconstruct tag with allowed attributes
@@ -501,6 +541,43 @@ class FilterInput
     }
 
     /**
+     * Whether a URL attribute uses only safe schemes (a data: link opens attacker content).
+     * Other attributes always pass.
+     *
+     * @param string $name  attribute name, lower case
+     * @param string $value value as a browser reads it: entities decoded, controls and
+     *                      whitespace removed, lower case
+     */
+    private static function hasSafeUrlSchemes(string $name, string $value): bool
+    {
+        if (!in_array($name, self::URL_ATTRIBUTES, true)) {
+            return true;
+        }
+        // srcset and ping list several URLs; a comma inside one URL only splits off its tail
+        foreach (explode(',', $value) as $url) {
+            if (
+                preg_match('#^([a-z][a-z0-9+.\-]*):#', $url, $scheme) === 1
+                && !in_array($scheme[1], self::SAFE_URL_SCHEMES, true)
+            ) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Lower-case ASCII letters only. Before PHP 8.2 strtolower() follows the locale, and a
+     * Turkish one turns the I of SCRIPT or JAVASCRIPT: into a dotless i that no check matches.
+     *
+     * @param mixed $value cast to string, as strtolower() did
+     */
+    private static function asciiLower($value): string
+    {
+        return strtr((string) $value,'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz');
+    }
+
+    /**
      * Internal method to strip a tag of certain attributes
      *
      * @param array $attrSet attributes
@@ -525,7 +602,7 @@ class FilterInput
             if (
                 (!preg_match('/^[a-z][a-z0-9_:.-]*\z/i', $attrSubSet[0]))
                 || (($this->xssAuto)
-                    && ((in_array(strtolower($attrSubSet[0]), $this->attrBlacklist))
+                    && ((in_array(self::asciiLower($attrSubSet[0]), $this->attrBlacklist))
                         || (strncasecmp($attrSubSet[0], 'on', 2) === 0)))
             ) {
                 continue;
@@ -551,23 +628,23 @@ class FilterInput
             // auto strip attr's with "javascript:
             // Check the value as a browser reads it: named entities decoded ("&colon;", "&Tab;")
             // and whitespace/control characters removed ("java\tscript:").
-            $attrValue = strtolower(
-                preg_replace('/[\x00-\x20]+/', '', html_entity_decode($attrSubSet[1], ENT_QUOTES | ENT_HTML5, 'UTF-8')) ?? ''
-            );
+            $decoded = html_entity_decode($attrSubSet[1], ENT_QUOTES | ENT_HTML5, self::ENCODING);
+            $attrValue = self::asciiLower(preg_replace('/[\x00-\x20]+/', '', $decoded) ?? '');
             if (
                 ((strpos($attrValue, 'expression') !== false)
-                    && (strtolower($attrSubSet[0]) === 'style'))
+                    && (self::asciiLower($attrSubSet[0]) === 'style'))
                 || (strpos($attrValue, 'javascript:') !== false)
                 || (strpos($attrValue, 'behaviour:') !== false)
                 || (strpos($attrValue, 'vbscript:') !== false)
                 || (strpos($attrValue, 'mocha:') !== false)
                 || (strpos($attrValue, 'livescript:') !== false)
+                || !self::hasSafeUrlSchemes(self::asciiLower($attrSubSet[0]), $attrValue)
             ) {
                 continue;
             }
 
             // if matches user defined array
-            $attrFound = in_array(strtolower($attrSubSet[0]), $this->attrArray);
+            $attrFound = in_array(self::asciiLower($attrSubSet[0]), $this->attrArray);
             // keep this attr on condition
             if ($attrFound !== (bool) $this->attrMethod) {
                 if ($attrSubSet[1]) {

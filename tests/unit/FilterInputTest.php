@@ -252,4 +252,112 @@ class FilterInputTest extends \PHPUnit\Framework\TestCase
         $this->assertSame('<form />', $filter->cleanVar("<form action\n=\"https://evil.example\">", 'html'));
         $this->assertStringNotContainsString("\n", FilterInput::clean("https://example.com/a\n", 'weburl'));
     }
+
+    public function testWeburlRejectsProtocolRelativeUrl()
+    {
+        $result = FilterInput::clean('//evil.example/path', 'WEBURL');
+        $this->assertSame('', $result);
+    }
+
+    public function testWeburlAllowsHttpUrl()
+    {
+        $result = FilterInput::clean('http://example.com/page', 'WEBURL');
+        $this->assertSame('http://example.com/page', $result);
+    }
+
+    public function testWeburlAllowsRelativeUrl()
+    {
+        $result = FilterInput::clean('/local/path', 'WEBURL');
+        $this->assertSame('/local/path', $result);
+    }
+
+    public function testWeburlRejectsProtocolRelativeUrlWithLeadingWhitespace()
+    {
+        $result = FilterInput::clean('  //evil.example/path', 'WEBURL');
+        $this->assertSame('', $result);
+    }
+
+    public function testWeburlRejectsJavascriptScheme()
+    {
+        $result = FilterInput::clean('javascript:alert(1)', 'WEBURL');
+        $this->assertSame('', $result);
+    }
+
+    /**
+     * @dataProvider entityHiddenSchemeProvider
+     */
+    public function testWeburlRejectsEntityHiddenScheme(string $url)
+    {
+        $this->assertSame('', FilterInput::clean($url, 'WEBURL'));
+    }
+
+    public function testWeburlKeepsAmpersandsAfterPathOrQueryStart()
+    {
+        $this->assertSame('https://example.com/a?b=1&c=2', FilterInput::clean('https://example.com/a?b=1&c=2', 'WEBURL'));
+        $this->assertSame('page.php?a=1&colon=2', FilterInput::clean('page.php?a=1&colon=2', 'WEBURL'));
+        $this->assertSame('/p&q', FilterInput::clean('/p&q', 'WEBURL'));
+        $this->assertSame('#a&b', FilterInput::clean('#a&b', 'WEBURL'));
+        $this->assertSame('https://good.example/a&sol;b?x=%41&y=1', FilterInput::clean('https://good.example/a&sol;b?x=%41&y=1', 'WEBURL'));
+        $this->assertSame('a%20b.html', FilterInput::clean('a%20b.html', 'WEBURL'));
+        $this->assertSame('page.php?time=12:30', FilterInput::clean('page.php?time=12:30', 'WEBURL'));
+    }
+
+    public function testUrlAttributesRejectUnsafeSchemes()
+    {
+        $filter = FilterInput::getInstance(['a', 'img'], ['href', 'src', 'srcset', 'title']);
+        $this->assertSame('<a>x</a>', $filter->process('<a href="data:text/html;base64,PHNjcmlwdD4=">x</a>'));
+        $this->assertSame('<a>x</a>', $filter->process('<a href="DaTa&colon;text/html,x">x</a>'));
+        $this->assertSame('<img />', $filter->process('<img srcset="/a.png 1x, data:image/svg+xml,x 2x" />'));
+        $this->assertSame('<a href="https://example.com/a">x</a>', $filter->process('<a href="https://example.com/a">x</a>'));
+        $this->assertSame('<a href="mailto:a@example.com">x</a>', $filter->process('<a href="mailto:a@example.com">x</a>'));
+        $this->assertSame('<a href="/page#a:b">x</a>', $filter->process('<a href="/page#a:b">x</a>'));
+        // only URL attributes are checked
+        $this->assertSame('<a title="metadata:x">x</a>', $filter->process('<a title="metadata:x">x</a>'));
+    }
+
+    public function testWebUrlRejectsBackslashForms()
+    {
+        foreach (array('/\\evil.example', '\\\\evil.example', '\\/evil.example', 'https://ok.example/a\\b') as $url) {
+            $this->assertSame('', FilterInput::clean($url, 'weburl'), $url);
+        }
+        $this->assertSame('/local/page', FilterInput::clean('/local/page', 'weburl'));
+    }
+
+    public function testWebUrlRejectsUnparseableValues()
+    {
+        $this->assertSame('', FilterInput::clean('javascript://example.com:99999/%0Aalert(1)', 'weburl'));
+        $this->assertSame('https://example.com/a', FilterInput::clean('https://example.com/a', 'weburl'));
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function entityHiddenSchemeProvider(): array
+    {
+        return array(
+            'html5 named colon' => array('javascript&colon;alert(1)'),
+            'html5 named tab' => array('java&Tab;script:alert(1)'),
+            'numeric without semicolon' => array('javascript&#0058alert(1)'),
+            'entity in host part' => array('page&colon;x'),
+            'encoded second slash' => array('/&sol;evil.example'),
+            'encoded backslash' => array('/&bsol;evil.example'),
+            'numeric slash without semicolon' => array('/&#47evil.example'),
+            'tab between slashes' => array('/&Tab;/evil.example'),
+            'newline between slashes' => array('/&NewLine;/evil.example'),
+            'https with encoded second slash' => array('https:/&sol;evil.example'),
+            'http with one slash' => array('http:/evil.example'),
+            'https without slashes' => array('https:evil.example'),
+            'entity slash before userinfo' => array('https://evil.example&sol;@good.example'),
+            'entity hash before userinfo' => array('https://evil.example&num;@good.example'),
+            'double-encoded slash before userinfo' => array('https://evil.example&amp;sol;@good.example'),
+            'entity tab in host' => array('https://evil&Tab;.example'),
+            'numeric slash in userinfo' => array('https://good&#47@evil.example'),
+            'percent-encoded host' => array('https://%65vil.example'),
+            'javascript read as host:port' => array('javascript:1/alert(1)'),
+            'data read as host:port' => array('data:80/text/html,test'),
+            'http read as host:port' => array('http:80/evil'),
+            'uppercase http scheme' => array('HTTP://example.com/'),
+            'relative path parse_url reads as host:port' => array('good.example/a:80/x'),
+        );
+    }
 }
