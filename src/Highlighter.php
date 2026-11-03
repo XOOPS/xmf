@@ -158,7 +158,10 @@ class Highlighter
         $ret = '';
         $offset = 0;
         $length = strlen($needle);
-        while (($pos = stripos($text, $needle, $offset)) !== false) {
+        // lower-case once: stripos() lower-cases the whole text again on every call
+        $lowerText = strtolower($text);
+        $lowerNeedle = strtolower($needle);
+        while (($pos = strpos($lowerText, $lowerNeedle, $offset)) !== false) {
             $ret .= substr($text, $offset, $pos - $offset) . $pre . substr($text, $pos, $length) . $post;
             $offset = $pos + $length;
         }

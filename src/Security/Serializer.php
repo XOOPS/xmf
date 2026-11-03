@@ -154,8 +154,9 @@ final class Serializer
             \is_string($data) => \strlen($data) + 2,
             \is_array($data) => 1 + max(\count($data), 1),
             \is_int($data) => \strlen((string) $data),
-            // INF and NAN fail to encode: json_encode() in toJson() reports them
-            \is_float($data) => max(\strlen((string) json_encode($data)), 1),
+            // the throw flag leaves json_last_error() alone; INF and NAN fail to encode,
+            // which json_encode() in toJson() reports
+            \is_float($data) => is_finite($data) ? \strlen(json_encode($data, JSON_THROW_ON_ERROR)) : 1,
             $data === false => 5,
             $data === null, $data === true => 4,
             default => 1,

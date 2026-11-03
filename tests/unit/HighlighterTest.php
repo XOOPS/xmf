@@ -125,6 +125,11 @@ class HighlighterTest extends \PHPUnit\Framework\TestCase
             $this->assertSame("[\xFF]ab", Highlighter::apply(["\xFF"], "\xFFab", '[', ']'));
             $long = str_repeat("\u{1F600}", 20000);
             $this->assertSame("x[$long]", Highlighter::apply([$long], "x$long", '[', ']'));
+            // the Kelvin sign matches "K" only through the unicode pattern, used up to 8,192 bytes
+            $atLimit = str_repeat('a', 8189);
+            $this->assertSame("[{$atLimit}K]", Highlighter::apply([$atLimit . "\u{212A}"], $atLimit . 'K', '[', ']'));
+            $overLimit = str_repeat('a', 8190);
+            $this->assertSame($overLimit . 'K', Highlighter::apply([$overLimit . "\u{212A}"], $overLimit . 'K', '[', ']'));
         } finally {
             restore_error_handler();
         }
