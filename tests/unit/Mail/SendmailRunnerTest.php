@@ -239,6 +239,96 @@ class SendmailRunnerTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(realpath($script), file_get_contents($outputFile));
     }
 
+    public function testDeliverRunsCanonicalTargetWhenALaterLinkHopIsWritableByOthers()
+    {
+        if (DIRECTORY_SEPARATOR === '\\') {
+            $this->markTestSkipped('Sendmail runner process test requires a POSIX shell.');
+        }
+
+        $outputFile = $this->createTempFile('sendmail-argv0-', '');
+        $script = $this->createExecutableScript(
+            "#!/usr/bin/env bash\nprintf '%s' \"\$0\" > " . escapeshellarg($outputFile) . "\ncat > /dev/null\nexit 0\n"
+        );
+        $suffix = bin2hex(random_bytes(8));
+        $linkDir = __DIR__ . '/sendmail-linkdir-' . $suffix;
+        $hopDir = __DIR__ . '/sendmail-hopdir-' . $suffix;
+        $this->assertTrue(mkdir($linkDir, 0700));
+        $this->assertTrue(mkdir($hopDir, 0700));
+        $link = $linkDir . '/sendmail';
+        $hop = $hopDir . '/mta';
+
+        try {
+            chmod($linkDir, 0700);
+            chmod($hopDir, 0700);
+            if (!$this->parentsTrusted($linkDir)) {
+                $this->markTestSkipped('A directory above the test directory is group/other-writable or owned by another user.');
+            }
+            $this->assertTrue(symlink($script, $hop));
+            $this->assertTrue(symlink('../' . basename($hopDir) . '/mta', $link)); // relative hop
+            $runner = new SendmailRunner(array($link));
+
+            $runner->deliver($link, "Subject: Test\n\nHello\n");
+            $this->assertSame($link, file_get_contents($outputFile), 'A private link chain keeps the literal path');
+
+            chmod($hopDir, 0777); // another account could swap the middle link after validation
+            $runner->deliver($link, "Subject: Test\n\nHello\n");
+        } finally {
+            @unlink($link);
+            @unlink($hop);
+            @rmdir($linkDir);
+            @rmdir($hopDir);
+        }
+
+        $this->assertSame(realpath($script), file_get_contents($outputFile));
+    }
+
+    public function testDeliverRunsCanonicalTargetWhenALinkedDirectoryCanBeSwapped()
+    {
+        if (DIRECTORY_SEPARATOR === '\\') {
+            $this->markTestSkipped('Sendmail runner process test requires a POSIX shell.');
+        }
+
+        $outputFile = $this->createTempFile('sendmail-argv0-', '');
+        $script = $this->createExecutableScript(
+            "#!/usr/bin/env bash\nprintf '%s' \"\$0\" > " . escapeshellarg($outputFile) . "\ncat > /dev/null\nexit 0\n"
+        );
+        $suffix = bin2hex(random_bytes(8));
+        $linkDir = __DIR__ . '/sendmail-linkdir-' . $suffix;
+        $openDir = __DIR__ . '/sendmail-opendir-' . $suffix;
+        $subDir = $openDir . '/sub';
+        $this->assertTrue(mkdir($linkDir, 0700));
+        $this->assertTrue(mkdir($subDir, 0700, true));
+        $dirLink = $linkDir . '/bin';
+        $hop = $subDir . '/sendmail';
+        $path = $dirLink . '/sendmail'; // linkDir/bin -> openDir/sub, sub/sendmail -> script
+
+        try {
+            chmod($linkDir, 0700);
+            chmod($openDir, 0700);
+            chmod($subDir, 0700);
+            if (!$this->parentsTrusted($linkDir)) {
+                $this->markTestSkipped('A directory above the test directory is group/other-writable or owned by another user.');
+            }
+            $this->assertTrue(symlink($subDir, $dirLink));
+            $this->assertTrue(symlink($script, $hop));
+            $runner = new SendmailRunner(array($path));
+
+            $runner->deliver($path, "Subject: Test\n\nHello\n");
+            $this->assertSame($path, file_get_contents($outputFile), 'A private linked directory keeps the literal path');
+
+            chmod($openDir, 0777); // another account could swap sub, which the directory link points into
+            $runner->deliver($path, "Subject: Test\n\nHello\n");
+        } finally {
+            @unlink($hop);
+            @unlink($dirLink);
+            @rmdir($subDir);
+            @rmdir($openDir);
+            @rmdir($linkDir);
+        }
+
+        $this->assertSame(realpath($script), file_get_contents($outputFile));
+    }
+
     /**
      * True when $dir and every directory above it are owned by root or this user and closed to
      * group and other writes, the condition SendmailRunner needs to keep the literal path

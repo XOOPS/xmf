@@ -187,11 +187,12 @@ final class SendmailRunner
         $rfc822 = str_replace("\n", "\r\n", $rfc822);
 
         // Prefer the literal path (multi-call binaries such as busybox dispatch on argv[0]) only if
-        // it resolves to the validated target and no other account can swap the link after this
-        // check: every directory above it must be closed to group and other writes. Else canonical.
+        // it resolves to the validated target and no other account can swap any link in its chain
+        // after this check: every directory above every hop must be closed to group and other
+        // writes. Else canonical.
         $literal  = $sendmailPath;
         $resolved = realpath($literal);
-        if (!is_string($resolved) || $resolved !== $validatedPath || !$this->hasTrustedParents($literal)) {
+        if (!is_string($resolved) || $resolved !== $validatedPath || !$this->hasTrustedLinkChain($literal)) {
             $literal = $validatedPath;
         }
 
@@ -402,6 +403,49 @@ final class SendmailRunner
         if ($this->waitForExit($proc, $grace) === null) {
             proc_terminate($proc, 9);
         }
+    }
+
+    /**
+     * Resolve $path one component at a time, as the kernel does, and require every symlink
+     * met on the way (the path itself, a later hop such as /etc/alternatives/mta, or a
+     * linked directory component) to sit in a trusted canonical directory, so no other
+     * account can swap any link between validation and launch. Non-link components need
+     * no check: the canonical fallback passes through the same directories.
+     */
+    private function hasTrustedLinkChain(string $path): bool
+    {
+        $pending  = explode('/', $path);
+        $resolved = ''; // canonical prefix without symlinks; '' is the root
+        $links    = 0;
+        while ($pending !== []) {
+            $part = array_shift($pending);
+            if ($part === '' || $part === '.') {
+                continue;
+            }
+            if ($part === '..') {
+                $parent   = \dirname($resolved === '' ? '/' : $resolved);
+                $resolved = $parent === '/' ? '' : $parent;
+                continue;
+            }
+            $candidate = $resolved . '/' . $part;
+            if (!is_link($candidate)) {
+                $resolved = $candidate;
+                continue;
+            }
+            if (++$links > 40 || !$this->hasTrustedParents($candidate)) { // 40 = Linux MAXSYMLINKS
+                return false;
+            }
+            $target = readlink($candidate);
+            if ($target === false || $target === '') {
+                return false;
+            }
+            if ($target[0] === '/') {
+                $resolved = '';
+            }
+            $pending = array_merge(explode('/', $target), $pending);
+        }
+
+        return true;
     }
 
     /**

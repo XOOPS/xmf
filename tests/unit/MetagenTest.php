@@ -154,6 +154,43 @@ EOT;
         $this->assertEquals($expected, $actual, $actual);
     }
 
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function encodedMarkupProvider(): array
+    {
+        return array(
+            'triple-encoded tag' => array('&amp;amp;lt;b onmouseover=x&amp;amp;gt;hi'),
+            'hex entity tag'     => array('&#x3c;svg onload=x&#x3e;hi'),
+        );
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('encodedMarkupProvider')]
+    public function testGetSearchSummaryNeverDecodesEntitiesIntoMarkup(string $haystack)
+    {
+        $actual = Metagen::getSearchSummary($haystack, 'hi');
+        $this->assertSame('hi', $actual);
+    }
+
+    public function testGetSearchSummaryKeepsLiteralLessThanText()
+    {
+        $this->assertSame('x < 5', Metagen::getSearchSummary('x &lt; 5', '5'));
+    }
+
+    public function testGetSearchSummaryIgnoresTermsBeyondTheSearchBudget()
+    {
+        $haystack = 'Testing this method will require a long string that will exceed one hundred '
+            . 'twenty characters and has some very different significant keywords.';
+        $needles = array();
+        for ($i = 0; $i < 40; $i++) {
+            $needles[] = 'absent' . $i;
+        }
+        $needles[] = 'significant';
+
+        $actual = Metagen::getSearchSummary($haystack, $needles, 40);
+        $this->assertSame('Testing this method will require a long' . Metagen::ELLIPSIS, $actual);
+    }
+
     public function testGetSearchSummary()
     {
         $ellipsis = Metagen::ELLIPSIS;
