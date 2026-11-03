@@ -382,13 +382,15 @@ class Metagen
         $pos = array();
         $needles = empty($needles) ? array() : (array) $needles;
         $seen = array();
+        // dedupe and search must fold case the same way, so pick both from one check
+        $mb = function_exists('mb_stripos') && function_exists('mb_convert_case');
         foreach ($needles as $needle) {
             if (!is_scalar($needle)) {
                 continue;
             }
             $needle = (string) $needle;
-            // the search ignores case, so case variants are one term
-            $key = function_exists('mb_strtolower') ? mb_strtolower($needle, self::ENCODING) : strtolower($needle);
+            // case variants are one term; mb_stripos() uses simple case folding, stripos() folds like strtolower()
+            $key = $mb ? mb_convert_case($needle, MB_CASE_FOLD_SIMPLE, self::ENCODING) : strtolower($needle);
             if (isset($seen[$key])) {
                 continue;
             }
@@ -396,7 +398,7 @@ class Metagen
                 break; // each term scans the whole text; bound the work
             }
             $seen[$key] = true;
-            if (function_exists('mb_stripos')) {
+            if ($mb) {
                 $i = mb_stripos($haystack, $needle, 0, static::ENCODING);
             } else {
                 $i = stripos($haystack, $needle, 0);
