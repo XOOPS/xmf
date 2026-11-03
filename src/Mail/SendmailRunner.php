@@ -418,34 +418,49 @@ final class SendmailRunner
         $resolved = ''; // canonical prefix without symlinks; '' is the root
         $links    = 0;
         while ($pending !== []) {
-            $part = array_shift($pending);
-            if ($part === '' || $part === '.') {
-                continue;
-            }
-            if ($part === '..') {
-                $parent   = \dirname($resolved === '' ? '/' : $resolved);
-                $resolved = $parent === '/' ? '' : $parent;
-                continue;
-            }
-            $candidate = $resolved . '/' . $part;
+            $candidate = self::appendComponent($resolved, array_shift($pending));
             if (!is_link($candidate)) {
                 $resolved = $candidate;
                 continue;
             }
-            if (++$links > 40 || !$this->hasTrustedParents($candidate)) { // 40 = Linux MAXSYMLINKS
+            $target = $this->readTrustedLink($candidate, ++$links);
+            if ($target === null) {
                 return false;
             }
-            $target = readlink($candidate);
-            if ($target === false || $target === '') {
-                return false;
-            }
-            if ($target[0] === '/') {
-                $resolved = '';
-            }
-            $pending = array_merge(explode('/', $target), $pending);
+            $resolved = $target[0] === '/' ? '' : $resolved;
+            $pending  = array_merge(explode('/', $target), $pending);
         }
 
         return true;
+    }
+
+    /**
+     * The canonical prefix after one path component ('' is the root; '..' stops at the root).
+     */
+    private static function appendComponent(string $resolved, string $part): string
+    {
+        if ($part === '' || $part === '.') {
+            return $resolved;
+        }
+        if ($part === '..') {
+            $parent = \dirname($resolved === '' ? '/' : $resolved);
+            return $parent === '/' ? '' : $parent;
+        }
+
+        return $resolved . '/' . $part;
+    }
+
+    /**
+     * The target of $link when it is within the hop limit and sits in a trusted directory; else null.
+     */
+    private function readTrustedLink(string $link, int $hop): ?string
+    {
+        if ($hop > 40 || !$this->hasTrustedParents($link)) { // 40 = Linux MAXSYMLINKS
+            return null;
+        }
+        $target = readlink($link);
+
+        return $target === false || $target === '' ? null : $target;
     }
 
     /**

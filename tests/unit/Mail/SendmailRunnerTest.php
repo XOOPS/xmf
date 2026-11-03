@@ -270,7 +270,7 @@ class SendmailRunnerTest extends \PHPUnit\Framework\TestCase
             $runner->deliver($link, "Subject: Test\n\nHello\n");
             $this->assertSame($link, file_get_contents($outputFile), 'A private link chain keeps the literal path');
 
-            chmod($hopDir, 0777); // another account could swap the middle link after validation
+            chmod($hopDir, 0770); // group members could swap the middle link after validation
             $runner->deliver($link, "Subject: Test\n\nHello\n");
         } finally {
             @unlink($link);
@@ -316,7 +316,7 @@ class SendmailRunnerTest extends \PHPUnit\Framework\TestCase
             $runner->deliver($path, "Subject: Test\n\nHello\n");
             $this->assertSame($path, file_get_contents($outputFile), 'A private linked directory keeps the literal path');
 
-            chmod($openDir, 0777); // another account could swap sub, which the directory link points into
+            chmod($openDir, 0770); // group members could swap sub, which the directory link points into
             $runner->deliver($path, "Subject: Test\n\nHello\n");
         } finally {
             @unlink($hop);
