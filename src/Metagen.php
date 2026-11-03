@@ -37,6 +37,11 @@ class Metagen
     const ELLIPSIS = "...";
 
     /**
+     * Distinct search terms getSearchSummary() looks for; later terms are ignored.
+     */
+    private const MAX_SEARCH_TERMS = 32;
+
+    /**
      * assignTitle set the page title
      *
      * @param string $title page title
@@ -380,6 +385,9 @@ class Metagen
             if (!is_scalar($needle) || isset($seen[(string) $needle])) {
                 continue;
             }
+            if (count($seen) >= self::MAX_SEARCH_TERMS) {
+                break; // each term scans the whole text; bound the work
+            }
             $needle = (string) $needle;
             $seen[$needle] = true;
             if (function_exists('mb_stripos')) {
@@ -414,6 +422,8 @@ class Metagen
         $text = strip_tags($text);
         $text = html_entity_decode($text);
         $text = htmlspecialchars_decode($text, ENT_QUOTES);
+        // Decoding can turn encoded text (&amp;lt;b&amp;gt;, &#x3c;svg&#x3e;) back into tags; plain text has none.
+        $text = strip_tags($text);
         $text = str_replace(')', ' ', $text);
         $text = str_replace('(', ' ', $text);
         $text = str_replace(':', ' ', $text);
