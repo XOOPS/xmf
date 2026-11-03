@@ -307,6 +307,10 @@ class FilterInputTest extends \PHPUnit\Framework\TestCase
         $this->assertSame('<a href="/page#a:b">x</a>', $filter->process('<a href="/page#a:b">x</a>'));
         // only URL attributes are checked
         $this->assertSame('<a title="metadata:x">x</a>', $filter->process('<a title="metadata:x">x</a>'));
+        // a comma is part of a single URL; only srcset lists are split
+        $this->assertSame('<a href="/docs/a,b:c">x</a>', $filter->process('<a href="/docs/a,b:c">x</a>'));
+        $legacy = FilterInput::getInstance(['img'], ['dynsrc', 'lowsrc'], 0, 0, 0);
+        $this->assertSame('<img />', $legacy->process('<img dynsrc="data:video/x,x" lowsrc="data:image/x,x" />'));
     }
 
     public function testLargeInputIsFilteredInLinearTime()

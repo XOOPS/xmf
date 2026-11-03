@@ -116,6 +116,8 @@ class HighlighterTest extends \PHPUnit\Framework\TestCase
         $this->assertSame('<!---><mark>foo</mark>', Highlighter::apply('foo', '<!--->foo'));
         $this->assertSame('</3 x><mark>foo</mark>', Highlighter::apply('foo', '</3 x>foo'));
         $this->assertSame('<!DOCTYPE html><mark>foo</mark>', Highlighter::apply('foo', '<!DOCTYPE html>foo'));
+        // a ">" in a quoted identifier ends the DOCTYPE as well
+        $this->assertSame('<!DOCTYPE html SYSTEM "x><mark>foo</mark>"', Highlighter::apply('foo', '<!DOCTYPE html SYSTEM "x>foo"'));
     }
 
     public function testRepeatedTermsWrapOnce()
@@ -125,6 +127,50 @@ class HighlighterTest extends \PHPUnit\Framework\TestCase
         $this->assertSame("<mark>\u{e4}</mark> <mark>\u{c4}</mark>", Highlighter::apply($words, $words));
         // a body that is not UTF-8 is matched bytewise, where the two differ: both stay terms
         $this->assertStringContainsString("<mark>\u{c4}</mark>", Highlighter::apply($words, $words . "\xff"));
+    }
+
+    public function testCaseVariantsWrapOnceWhereMatchedAsUnicode()
+    {
+        // the invalid byte is in markup only, so the text is matched with /iu
+        $this->assertSame("<a title=\"\xff\"><mark>\u{e4}</mark></a>", Highlighter::apply(["\u{e4}", "\u{c4}"], "<a title=\"\xff\">\u{e4}</a>"));
+        // in valid UTF-8 a variant wraps nothing new and takes no place in the term limit
+        $words = array();
+        for ($i = 0; $i < 40; $i++) {
+            // äääääää with the letters for the set bits of $i upper-cased: 40 distinct variants
+            $words[] = implode('', array_map(static fn ($b) => ($i >> $b) & 1 ? "\u{c4}" : "\u{e4}", range(0, 6)));
+        }
+        $words[] = 'foo';
+        $this->assertSame('<mark>' . $words[0] . '</mark> <mark>foo</mark>', Highlighter::apply($words, $words[0] . ' foo'));
+    }
+
+    /**
+     * Bodies whose markup a browser tokenizes in a state readMarkup() fails closed on:
+     * highlighting y" must not insert a wrapper that exposes the inert image
+     */
+    public static function unsupportedStateProvider(): array
+    {
+        $attack = '<a title="-->y" data-z=\'<img src=x onerror=alert(1)>\'>t</a>';
+        return [
+            'svg style' => ['<svg><style><a title="</style>y" data-z=\'<img src=x onerror=alert(1)>\'>t</a></style></svg>'],
+            'svg self-closed script' => ['<svg><script /></svg><a title="</script>y" data-z=\'<img src=x onerror=alert(1)>\'>t</a>'],
+            'svg cdata' => ['<svg><![CDATA[ > <a title=\']]><b title="\'>y" data-z=\'<img src=x onerror=alert(1)>\'>'],
+            'script double escape' => ['<script type="application/json"><!--<script></script><!--</script>' . $attack],
+            // with scripting off, the noscript content is tags and title runs past "</noscript>"
+            'noscript markup' => ['<noscript><a title="</noscript>y" data-z=\'<img src=x onerror=alert(1)>\'>t</a></noscript>'],
+        ];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('unsupportedStateProvider')]
+    public function testUnsupportedTokenizerStatesStopHighlighting(string $body)
+    {
+        $this->assertSame($body, Highlighter::apply('y"', $body));
+    }
+
+    public function testCommentEndsAtBangClose()
+    {
+        $body = '<!--x--!><a title="-->y" data-z=\'<img src=x onerror=alert(1)>\'>t</a>';
+        $this->assertSame($body, Highlighter::apply('y"', $body));
+        $this->assertSame('<!--x--!><mark>foo</mark>', Highlighter::apply('foo', '<!--x--!>foo'));
     }
 
     public function testTermCountIsBounded()

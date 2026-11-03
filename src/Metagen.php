@@ -433,6 +433,10 @@ class Metagen
                 $i = stripos($haystack, $needle, 0);
             }
             if ($i !== false) {
+                // getSearchSummary() counts characters whenever mb_strlen() exists; stripos() counts bytes
+                if (!self::foldsWithMbstring() && function_exists('mb_strlen')) {
+                    $i = mb_strlen(substr($haystack, 0, $i), self::ENCODING);
+                }
                 $pos[] = $i; // only store matches
                 if ($i === 0) {
                     break; // no later needle can start earlier
