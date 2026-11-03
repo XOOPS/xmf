@@ -88,8 +88,8 @@ final class Serializer
      * Unserialized data can share one array between many references; json_encode()
      * writes it out once per use, so a payload of a few hundred bytes expands
      * exponentially; a string shared by many entries is likewise written once per
-     * entry. Every encoded value takes at least one byte, every array its brackets
-     * and commas, and every string value or object key at least its quoted length
+     * entry. Every number, boolean and null takes its encoded length, every array its
+     * brackets and commas, and every string value or object key at least its quoted length
      * (the flags never shrink a string), so data over that lower bound can never
      * pass the size check after encoding.
      *
@@ -123,13 +123,7 @@ final class Serializer
             }
             return;
         }
-        // this value's own bytes: a string is quoted, an array has its two brackets and a
-        // comma between elements, anything else takes at least one byte
-        $budget -= match (true) {
-            \is_string($data) => \strlen($data) + 2,
-            \is_array($data) => 1 + max(\count($data), 1),
-            default => 1,
-        };
+        $budget -= self::encodedOwnSize($data);
         if ($budget < 0) {
             throw new RuntimeException(
                 sprintf('Serialized JSON exceeds maximum allowed size of %d bytes', self::MAX_SIZE)
@@ -145,6 +139,28 @@ final class Serializer
             $budget -= $isObject ? \strlen((string) $key) + 3 : 0;
             self::guardExpandedSize($value, $depth + 1, $budget);
         }
+    }
+
+    /**
+     * The bytes json_encode() writes for a value itself, not counting array elements:
+     * a string is quoted, an array has its two brackets and a comma between elements,
+     * a number or literal its exact encoded length
+     *
+     * @param mixed $data anything but an object
+     */
+    private static function encodedOwnSize($data): int
+    {
+        return match (true) {
+            \is_string($data) => \strlen($data) + 2,
+            \is_array($data) => 1 + max(\count($data), 1),
+            \is_int($data) => \strlen((string) $data),
+            // the throw flag leaves json_last_error() alone; INF and NAN fail to encode,
+            // which json_encode() in toJson() reports
+            \is_float($data) => is_finite($data) ? \strlen(json_encode($data, JSON_THROW_ON_ERROR)) : 1,
+            $data === false => 5,
+            $data === null, $data === true => 4,
+            default => 1,
+        };
     }
 
     /**
