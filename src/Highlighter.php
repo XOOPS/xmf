@@ -32,6 +32,11 @@ class Highlighter
     /** distinct terms highlighted; each one rescans the whole body */
     private const MAX_TERMS = 32;
 
+    /** elements whose content a browser does not parse as tags; plaintext never ends */
+    private const RAW_TEXT_ELEMENTS = [
+        'iframe', 'noembed', 'noframes', 'noscript', 'plaintext', 'script', 'style', 'textarea', 'title', 'xmp',
+    ];
+
     /**
      * Apply highlight to words in body text
      *
@@ -116,9 +121,17 @@ class Highlighter
     }
 
     /**
-     * The markup starting at $start: a comment runs to "-->", "<?" is a comment a browser
-     * ends at the first ">", and a ">" inside a quoted attribute value does not end a tag.
-     * An unclosed comment or quote runs to the end, so nothing after it is highlighted.
+     * The markup starting at $start, read as a browser's HTML tokenizer reads it:
+     * - a comment runs to "-->" ("<!-->" and "<!--->" are complete comments);
+     * - "<!", "<?" and "</" not followed by a letter are bogus comments ending at the first ">";
+     * - in a tag, a quote opens a value only right after "=", so a quote inside an unquoted
+     *   value or an attribute name is literal, and a ">" inside a quoted value does not end it;
+     * - a raw text element (script, style, textarea, title, ...) is markup up to its end tag,
+     *   since nothing inside it is a tag or text a highlight may go into.
+     * An unclosed comment, quote, tag or raw text element runs to the end, so nothing after
+     * it is highlighted.
+     * ponytail: script's "<!--<script" escape states are not tracked; such text ends at the
+     * first "</script", as an unescaped script does
      *
      * @param string $haystack html text
      * @param int    $start    offset of a "<" followed by "/", "!", "?" or a letter
@@ -127,25 +140,76 @@ class Highlighter
      */
     private static function readMarkup(string $haystack, int $start): string
     {
-        $isComment = substr_compare($haystack, '<!--', $start, 4) === 0;
-        if ($isComment || $haystack[$start + 1] === '?') {
-            $close = $isComment ? '-->' : '>';
-            $end = strpos($haystack, $close, $start + ($isComment ? 4 : 2));
-            return $end === false ? substr($haystack, $start) : substr($haystack, $start, $end + \strlen($close) - $start);
+        if (substr_compare($haystack, '<!--', $start, 4) === 0) {
+            if (preg_match('/\G-?>/', $haystack, $abrupt, 0, $start + 4) === 1) {
+                return substr($haystack, $start, 4 + \strlen($abrupt[0]));
+            }
+            $end = strpos($haystack, '-->', $start + 4);
+            return $end === false ? substr($haystack, $start) : substr($haystack, $start, $end + 3 - $start);
         }
-        $pos = $start + 2;
-        while (($pos += strcspn($haystack, '>"\'', $pos)) < \strlen($haystack)) {
-            if ($haystack[$pos] === '>') {
-                return substr($haystack, $start, $pos + 1 - $start);
+        $isEndTag = $haystack[$start + 1] === '/';
+        $nameStart = $start + ($isEndTag ? 2 : 1);
+        if (preg_match('#\G[a-z][^\t\n\f\r />]*#i', $haystack, $name, 0, $nameStart) !== 1) {
+            $end = strpos($haystack, '>', $start + 2);
+            return $end === false ? substr($haystack, $start) : substr($haystack, $start, $end + 1 - $start);
+        }
+        $end = self::endOfTag($haystack, $nameStart + \strlen($name[0]));
+        $element = strtolower($name[0]);
+        if ($isEndTag || !\in_array($element, self::RAW_TEXT_ELEMENTS, true)) {
+            return substr($haystack, $start, $end - $start);
+        }
+        if ($element !== 'plaintext') {
+            $found = preg_match(
+                '#</' . $element . '[\t\n\f\r />]#i',
+                $haystack,
+                $close,
+                PREG_OFFSET_CAPTURE,
+                $end
+            );
+            if ($found === 1) {
+                $closeEnd = self::endOfTag($haystack, $close[0][1] + 2 + \strlen($element));
+                return substr($haystack, $start, $closeEnd - $start);
             }
-            $quote = strpos($haystack, $haystack[$pos], $pos + 1);
-            if ($quote === false) {
-                break;
-            }
-            $pos = $quote + 1;
         }
 
         return substr($haystack, $start);
+    }
+
+    /**
+     * The offset just past the ">" that ends a tag whose attributes begin at $pos,
+     * or the length of the haystack when the tag is not closed
+     *
+     * @param string $haystack html text
+     * @param int    $pos      offset after the tag name
+     */
+    private static function endOfTag(string $haystack, int $pos): int
+    {
+        $length = \strlen($haystack);
+        $space = "\t\n\f\r ";
+        while (($pos += strspn($haystack, $space . '/', $pos)) < $length) {
+            if ($haystack[$pos] === '>') {
+                return $pos + 1;
+            }
+            // an attribute name; its first character may be "=" or a quote
+            $pos += 1 + strcspn($haystack, $space . '/>=', $pos + 1);
+            $pos += strspn($haystack, $space, $pos);
+            if ($pos >= $length || $haystack[$pos] !== '=') {
+                continue;
+            }
+            $pos += 1 + strspn($haystack, $space, $pos + 1);
+            if ($pos < $length && ($haystack[$pos] === '"' || $haystack[$pos] === "'")) {
+                $quote = strpos($haystack, $haystack[$pos], $pos + 1);
+                if ($quote === false) {
+                    return $length;
+                }
+                $pos = $quote + 1;
+            } else {
+                // an unquoted value ends at a space or ">"; a quote in it is literal
+                $pos += strcspn($haystack, $space . '>', $pos);
+            }
+        }
+
+        return $length;
     }
 
     /**

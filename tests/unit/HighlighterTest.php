@@ -83,12 +83,48 @@ class HighlighterTest extends \PHPUnit\Framework\TestCase
         $this->assertSame('a <mark>foo</mark> b', Highlighter::apply(array('', 'foo'), 'a foo b'));
     }
 
+    public function testRawTextElementsAreMarkup()
+    {
+        // script text that looks like a comment opener must not swallow the next tag
+        $body = '<script type="application/json">"<!--"</script>'
+            . '<a title="-->y" data-z=\'<img src=x onerror=alert(1)>\'>t</a>';
+        $this->assertSame($body, Highlighter::apply('y"', $body));
+        $this->assertSame(
+            '<textarea><b>foo</textarea> <mark>foo</mark>',
+            Highlighter::apply('foo', '<textarea><b>foo</textarea> foo')
+        );
+        $this->assertSame(
+            '<style>p{content:"foo"}</style ><mark>foo</mark>',
+            Highlighter::apply('foo', '<style>p{content:"foo"}</style >foo')
+        );
+        $this->assertSame('<script>foo', Highlighter::apply('foo', '<script>foo'));
+        $this->assertSame('<plaintext>foo</plaintext>foo', Highlighter::apply('foo', '<plaintext>foo</plaintext>foo'));
+    }
+
+    public function testQuotesOpenValuesOnlyAfterEquals()
+    {
+        // the quote in the unquoted value y' is literal; title='foo>bar' stays one value
+        $body = '<a x=y\'><a title=\'foo>bar\' data-z="<img src=x onerror=alert(1)>">t</a>';
+        $this->assertSame($body, Highlighter::apply("bar'", $body));
+        $this->assertSame('<a b\'c>x <mark>foo</mark>', Highlighter::apply('foo', '<a b\'c>x foo'));
+        $this->assertSame('<a href = "x>foo">t</a>', Highlighter::apply('foo', '<a href = "x>foo">t</a>'));
+    }
+
+    public function testCommentEdgeCases()
+    {
+        $this->assertSame('<!--><mark>foo</mark>', Highlighter::apply('foo', '<!-->foo'));
+        $this->assertSame('<!---><mark>foo</mark>', Highlighter::apply('foo', '<!--->foo'));
+        $this->assertSame('</3 x><mark>foo</mark>', Highlighter::apply('foo', '</3 x>foo'));
+        $this->assertSame('<!DOCTYPE html><mark>foo</mark>', Highlighter::apply('foo', '<!DOCTYPE html>foo'));
+    }
+
     public function testRepeatedTermsWrapOnce()
     {
         $this->assertSame('a <mark>foo</mark> b', Highlighter::apply('foo FOO foo Foo', 'a foo b'));
-        $this->assertSame("<mark>\u{e4}</mark> <mark>\u{c4}</mark>", Highlighter::apply("\u{e4} \u{c4}", "\u{e4} \u{c4}"));
+        $words = "\u{e4} \u{c4}";
+        $this->assertSame("<mark>\u{e4}</mark> <mark>\u{c4}</mark>", Highlighter::apply($words, $words));
         // a body that is not UTF-8 is matched bytewise, where the two differ: both stay terms
-        $this->assertStringContainsString("<mark>\u{c4}</mark>", Highlighter::apply("\u{e4} \u{c4}", "\u{e4} \u{c4}\xff"));
+        $this->assertStringContainsString("<mark>\u{c4}</mark>", Highlighter::apply($words, $words . "\xff"));
     }
 
     public function testTermCountIsBounded()
@@ -160,7 +196,9 @@ class HighlighterTest extends \PHPUnit\Framework\TestCase
     {
         $this->assertSame("<a title='x\">y'>[y]</a>", Highlighter::apply('y', "<a title='x\">y'>y</a>", '[', ']'));
         $this->assertSame('<?x y>[y]', Highlighter::apply('y', '<?x y>y', '[', ']'));
-        $this->assertSame('<!-->y-->[y]', Highlighter::apply('y', '<!-->y-->y', '[', ']'));
+        // "<!-->" is a whole comment, so the y after it is text
+        $this->assertSame('<!-->[y]-->[y]', Highlighter::apply('y', '<!-->y-->y', '[', ']'));
+        $this->assertSame('<!-- y -->[y]', Highlighter::apply('y', '<!-- y -->y', '[', ']'));
         $this->assertSame('[y] <b', Highlighter::apply('y', 'y <b', '[', ']'));
     }
 }

@@ -47,6 +47,22 @@ class FilterInput
      */
     private const MAX_ARRAY_DEPTH = 32;
 
+    /**
+     * Encoding used to decode entities in attribute values
+     */
+    private const ENCODING = 'UTF-8';
+
+    /**
+     * Attributes a browser loads or follows as a URL; their values may use only
+     * SAFE_URL_SCHEMES or no scheme (a relative URL). srcset holds several URLs.
+     */
+    private const URL_ATTRIBUTES = [
+        'action', 'background', 'cite', 'codebase', 'data', 'formaction', 'href', 'icon',
+        'imagesrcset', 'longdesc', 'manifest', 'ping', 'poster', 'src', 'srcset', 'xlink:href',
+    ];
+
+    private const SAFE_URL_SCHEMES = ['http', 'https', 'mailto'];
+
     protected $tagsArray;         // default is empty array
     protected $attrArray;         // default is empty array
 
@@ -545,6 +561,32 @@ class FilterInput
     }
 
     /**
+     * Whether a URL attribute uses only safe schemes (a data: link opens attacker content).
+     * Other attributes always pass.
+     *
+     * @param string $name  attribute name, lower case
+     * @param string $value value as a browser reads it: entities decoded, controls and
+     *                      whitespace removed, lower case
+     */
+    private static function hasSafeUrlSchemes(string $name, string $value): bool
+    {
+        if (!in_array($name, self::URL_ATTRIBUTES, true)) {
+            return true;
+        }
+        // srcset and ping list several URLs; a comma inside one URL only splits off its tail
+        foreach (explode(',', $value) as $url) {
+            if (
+                preg_match('#^([a-z][a-z0-9+.\-]*):#', $url, $scheme) === 1
+                && !in_array($scheme[1], self::SAFE_URL_SCHEMES, true)
+            ) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Internal method to strip a tag of certain attributes
      *
      * @param array $attrSet attributes
@@ -596,9 +638,8 @@ class FilterInput
             // auto strip attr's with "javascript:
             // Check the value as a browser reads it: named entities decoded ("&colon;", "&Tab;")
             // and whitespace/control characters removed ("java\tscript:").
-            $attrValue = strtolower(
-                preg_replace('/[\x00-\x20]+/', '', html_entity_decode($attrSubSet[1], ENT_QUOTES | ENT_HTML5, 'UTF-8')) ?? ''
-            );
+            $decoded = html_entity_decode($attrSubSet[1], ENT_QUOTES | ENT_HTML5, self::ENCODING);
+            $attrValue = strtolower(preg_replace('/[\x00-\x20]+/', '', $decoded) ?? '');
             if (
                 ((strpos($attrValue, 'expression') !== false)
                     && (strtolower($attrSubSet[0]) === 'style'))
@@ -607,6 +648,7 @@ class FilterInput
                 || (strpos($attrValue, 'vbscript:') !== false)
                 || (strpos($attrValue, 'mocha:') !== false)
                 || (strpos($attrValue, 'livescript:') !== false)
+                || !self::hasSafeUrlSchemes(strtolower($attrSubSet[0]), $attrValue)
             ) {
                 continue;
             }

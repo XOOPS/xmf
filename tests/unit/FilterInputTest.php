@@ -296,6 +296,19 @@ class FilterInputTest extends \PHPUnit\Framework\TestCase
         $this->assertSame($expected, $filter->process($input));
     }
 
+    public function testUrlAttributesRejectUnsafeSchemes()
+    {
+        $filter = FilterInput::getInstance(['a', 'img'], ['href', 'src', 'srcset', 'title']);
+        $this->assertSame('<a>x</a>', $filter->process('<a href="data:text/html;base64,PHNjcmlwdD4=">x</a>'));
+        $this->assertSame('<a>x</a>', $filter->process('<a href="DaTa&colon;text/html,x">x</a>'));
+        $this->assertSame('<img />', $filter->process('<img srcset="/a.png 1x, data:image/svg+xml,x 2x" />'));
+        $this->assertSame('<a href="https://example.com/a">x</a>', $filter->process('<a href="https://example.com/a">x</a>'));
+        $this->assertSame('<a href="mailto:a@example.com">x</a>', $filter->process('<a href="mailto:a@example.com">x</a>'));
+        $this->assertSame('<a href="/page#a:b">x</a>', $filter->process('<a href="/page#a:b">x</a>'));
+        // only URL attributes are checked
+        $this->assertSame('<a title="metadata:x">x</a>', $filter->process('<a title="metadata:x">x</a>'));
+    }
+
     public function testLargeInputIsFilteredInLinearTime()
     {
         // filterTags() re-copied the remaining text for every tag and attribute; ~1 MB took minutes
