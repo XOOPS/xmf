@@ -427,7 +427,7 @@ class Metagen
     {
         $pos = array();
         foreach (self::uniqueSearchTerms($needles) as $needle) {
-            if (function_exists('mb_stripos')) {
+            if (self::foldsWithMbstring()) {
                 $i = mb_stripos($haystack, $needle, 0, static::ENCODING);
             } else {
                 $i = stripos($haystack, $needle, 0);
@@ -459,8 +459,8 @@ class Metagen
                 continue;
             }
             $needle = (string) $needle;
-            // case variants are one term; mb_stripos() uses simple case folding, so fold the same way
-            $key = function_exists('mb_convert_case')
+            // case variants are one term; mb_stripos() uses simple case folding, stripos() folds like strtolower()
+            $key = self::foldsWithMbstring()
                 ? mb_convert_case($needle, MB_CASE_FOLD_SIMPLE, self::ENCODING)
                 : strtolower($needle);
             if (isset($seen[$key])) {
@@ -472,6 +472,17 @@ class Metagen
             $seen[$key] = true;
             yield $needle;
         }
+    }
+
+    /**
+     * Whether the summary search uses mbstring. The term deduplication and the search
+     * must fold case the same way, so both decide from this one check.
+     *
+     * @return bool
+     */
+    private static function foldsWithMbstring()
+    {
+        return function_exists('mb_stripos') && function_exists('mb_convert_case');
     }
 
     /**

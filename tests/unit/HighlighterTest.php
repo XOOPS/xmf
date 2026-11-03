@@ -83,6 +83,26 @@ class HighlighterTest extends \PHPUnit\Framework\TestCase
         $this->assertSame('a <mark>foo</mark> b', Highlighter::apply(array('', 'foo'), 'a foo b'));
     }
 
+    public function testRepeatedTermsWrapOnce()
+    {
+        $this->assertSame('a <mark>foo</mark> b', Highlighter::apply('foo FOO foo Foo', 'a foo b'));
+        $this->assertSame("<mark>\u{e4}</mark> <mark>\u{c4}</mark>", Highlighter::apply("\u{e4} \u{c4}", "\u{e4} \u{c4}"));
+        // a body that is not UTF-8 is matched bytewise, where the two differ: both stay terms
+        $this->assertStringContainsString("<mark>\u{c4}</mark>", Highlighter::apply("\u{e4} \u{c4}", "\u{e4} \u{c4}\xff"));
+    }
+
+    public function testTermCountIsBounded()
+    {
+        $words = array();
+        for ($i = 0; $i < 32; $i++) {
+            $words[] = 'absent' . $i;
+        }
+        $words[] = 'foo';
+        $this->assertSame('a foo b', Highlighter::apply($words, 'a foo b'));
+        array_shift($words);
+        $this->assertSame('a <mark>foo</mark> b', Highlighter::apply($words, 'a foo b'));
+    }
+
     public function testZeroIsAValidTerm()
     {
         $this->assertSame('page <mark>0</mark>', Highlighter::apply('0', 'page 0'));

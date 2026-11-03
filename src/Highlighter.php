@@ -29,6 +29,9 @@ class Highlighter
      */
     public const ENCODING = 'UTF-8';
 
+    /** distinct terms highlighted; each one rescans the whole body */
+    private const MAX_TERMS = 32;
+
     /**
      * Apply highlight to words in body text
      *
@@ -48,11 +51,28 @@ class Highlighter
             $words = preg_replace('/[\s]+/', ' ', $words);
             $words = explode(' ', $words);
         }
+        // each term rescans the body, wrappers included, and a term repeated in any case
+        // wraps the same matches again, so skip repeats and bound the number of terms
+        $seen = [];
+        // a body that is not valid UTF-8 is matched bytewise (see highlightText())
+        $unicodeBody = \function_exists('mb_convert_case') && preg_match('//u', (string) $body) === 1;
         foreach ($words as $word) {
+            $word = (string) $word;
             // an empty term matches everywhere and never advances the scan
             if ($word === '') {
                 continue;
             }
+            // fold as the matcher does: /iu treats simple case variants alike, the byte fallback ASCII letters
+            $key = $unicodeBody && self::matchesAsUtf8($word)
+                ? mb_convert_case($word, MB_CASE_FOLD_SIMPLE, self::ENCODING)
+                : strtolower($word);
+            if (isset($seen[$key])) {
+                continue;
+            }
+            if (\count($seen) >= self::MAX_TERMS) {
+                break;
+            }
+            $seen[$key] = true;
             $body = static::splitOnTag($word, $body, $pre, $post);
         }
 
@@ -144,7 +164,7 @@ class Highlighter
         // or too long to compile (13,105 four-byte or 32,764 one-byte characters), would fail
         // with a warning, a text that is not valid returns null quietly
         // ponytail: a needle over 8 KB matches only ASCII letters in either case
-        if (\strlen($needle) <= 8192 && preg_match('//u', $needle) === 1) {
+        if (self::matchesAsUtf8($needle)) {
             $wrapped = preg_replace_callback(
                 '/' . preg_quote($needle, '/') . '/iu',
                 static fn (array $m): string => $pre . $m[0] . $post,
@@ -167,5 +187,14 @@ class Highlighter
         }
 
         return $ret . substr($text, $offset);
+    }
+
+    /**
+     * Whether a needle can be matched by the "u" pattern: valid UTF-8 and short enough
+     * to compile. Otherwise highlightText() matches bytes.
+     */
+    private static function matchesAsUtf8(string $needle): bool
+    {
+        return \strlen($needle) <= 8192 && preg_match('//u', $needle) === 1;
     }
 }
