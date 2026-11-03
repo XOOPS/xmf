@@ -154,6 +154,75 @@ EOT;
         $this->assertEquals($expected, $actual, $actual);
     }
 
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function encodedMarkupProvider(): array
+    {
+        return array(
+            'triple-encoded tag' => array('&amp;amp;lt;b onmouseover=x&amp;amp;gt;hi'),
+            'hex entity tag'     => array('&#x3c;svg onload=x&#x3e;hi'),
+        );
+    }
+
+    /**
+     * @dataProvider encodedMarkupProvider
+     */
+    public function testGetSearchSummaryNeverDecodesEntitiesIntoMarkup(string $haystack)
+    {
+        $actual = Metagen::getSearchSummary($haystack, 'hi');
+        $this->assertSame('hi', $actual);
+    }
+
+    public function testGetSearchSummaryKeepsLiteralLessThanText()
+    {
+        $this->assertSame('x < 5', Metagen::getSearchSummary('x &lt; 5', '5'));
+        $this->assertSame('x <5 and y <10', Metagen::getSearchSummary('x &amp;#x3c;5 and y &amp;#x3c;10', 'y'));
+    }
+
+    public function testGetSearchSummaryKeepsTextAfterAnUnclosedTagButCannotOpenOne()
+    {
+        $actual = Metagen::getSearchSummary('x &amp;#x3c;b onmouseover=x and more text', 'more');
+        $this->assertSame('x < b onmouseover=x and more text', $actual);
+    }
+
+    public function testGetSearchSummaryCountsCaseVariantsAsOneSearchTerm()
+    {
+        $haystack = 'Testing this method will require a long string that will exceed one hundred '
+            . 'twenty characters and has some very different significant keywords.';
+        $needles = array();
+        for ($mask = 0; $mask < 40; $mask++) { // 40 spellings of "absent": aBsent, ABsent, ...
+            $variant = '';
+            foreach (str_split('absent') as $bit => $letter) {
+                $variant .= ($mask >> $bit) & 1 ? strtoupper($letter) : $letter;
+            }
+            $needles[] = $variant;
+        }
+        $needles[] = 'significant';
+
+        $actual = Metagen::getSearchSummary($haystack, $needles, 40);
+        $this->assertSame(Metagen::ELLIPSIS . 'very different significant keywords.', $actual);
+    }
+
+    public function testGetSearchSummaryIgnoresTermsBeyondTheSearchBudget()
+    {
+        $haystack = 'Testing this method will require a long string that will exceed one hundred '
+            . 'twenty characters and has some very different significant keywords.';
+        $needles = array();
+        for ($i = 0; $i < 40; $i++) {
+            $needles[] = 'absent' . $i;
+        }
+        $needles[] = 'significant';
+
+        $actual = Metagen::getSearchSummary($haystack, $needles, 40);
+        $this->assertSame('Testing this method will require a long' . Metagen::ELLIPSIS, $actual);
+
+        // control: as the 32nd term it is still searched
+        $inBudget = array_merge(array_slice($needles, 0, 31), array('significant'));
+        $actual = Metagen::getSearchSummary($haystack, $inBudget, 40);
+        $this->assertSame(Metagen::ELLIPSIS . 'very different significant keywords.', $actual);
+    }
+
     public function testGetSearchSummary()
     {
         $ellipsis = Metagen::ELLIPSIS;

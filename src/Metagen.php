@@ -37,6 +37,11 @@ class Metagen
     const ELLIPSIS = "...";
 
     /**
+     * Distinct search terms getSearchSummary() looks for; later terms are ignored.
+     */
+    private const MAX_SEARCH_TERMS = 32;
+
+    /**
      * assignTitle set the page title
      *
      * @param string $title page title
@@ -289,7 +294,8 @@ class Metagen
      * added to the string when broken.
      *
      * @param string $haystack the string to summarize
-     * @param mixed  $needles  search term, array of search terms, or null
+     * @param mixed  $needles  search term, array of search terms, or null; only the first
+     *                         32 distinct terms (ignoring case) are looked for
      * @param int    $length   maximum character length for the summary
      *
      * @return string a substring of haystack
@@ -377,11 +383,19 @@ class Metagen
         $needles = empty($needles) ? array() : (array) $needles;
         $seen = array();
         foreach ($needles as $needle) {
-            if (!is_scalar($needle) || isset($seen[(string) $needle])) {
+            if (!is_scalar($needle)) {
                 continue;
             }
             $needle = (string) $needle;
-            $seen[$needle] = true;
+            // the search ignores case, so case variants are one term
+            $key = function_exists('mb_strtolower') ? mb_strtolower($needle, self::ENCODING) : strtolower($needle);
+            if (isset($seen[$key])) {
+                continue;
+            }
+            if (count($seen) >= self::MAX_SEARCH_TERMS) {
+                break; // each term scans the whole text; bound the work
+            }
+            $seen[$key] = true;
             if (function_exists('mb_stripos')) {
                 $i = mb_stripos($haystack, $needle, 0, static::ENCODING);
             } else {
@@ -414,6 +428,11 @@ class Metagen
         $text = strip_tags($text);
         $text = html_entity_decode($text);
         $text = htmlspecialchars_decode($text, ENT_QUOTES);
+        // Decoding can turn encoded text (&amp;lt;b&amp;gt;, &#x3c;svg&#x3e;) back into tags: drop complete ones,
+        // then keep any other "<" from opening a tag, which HTML does only before a letter, "/", "!" or "?".
+        // strip_tags() would also drop text such as "x <5" or everything after an unclosed "<b".
+        $text = (string) preg_replace('~<[A-Za-z/!?][^<>]*>~', '', $text);
+        $text = (string) preg_replace('~<(?=[A-Za-z/!?])~', '< ', $text);
         $text = str_replace(')', ' ', $text);
         $text = str_replace('(', ' ', $text);
         $text = str_replace(':', ' ', $text);
