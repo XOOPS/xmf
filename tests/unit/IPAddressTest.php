@@ -57,12 +57,14 @@ class IPAddressTest extends \PHPUnit\Framework\TestCase
     public function testFromRequestProxy()
     {
         global $xoopsConfig;
-        $xoopsConfig['proxy_env'] = 'HTTP_CLIENT_IP';
-        $testAddress = '203.0.113.195';
-        $_SERVER['HTTP_CLIENT_IP'] = $testAddress;
-        $_SERVER['REMOTE_ADDR'] = '10.1.1.1';
-
+        $saved = $xoopsConfig;
+        $savedServer = $_SERVER;
         try {
+            $xoopsConfig['proxy_env'] = 'HTTP_CLIENT_IP';
+            $testAddress = '203.0.113.195';
+            $_SERVER['HTTP_CLIENT_IP'] = $testAddress;
+            $_SERVER['REMOTE_ADDR'] = '10.1.1.1';
+
             // header is ignored until the peer is a trusted proxy
             unset($xoopsConfig['proxy_trusted']);
             $this->assertEquals('10.1.1.1', IPAddress::fromRequest()->asReadable());
@@ -72,8 +74,8 @@ class IPAddressTest extends \PHPUnit\Framework\TestCase
             $actual = $instance->asReadable();
             $this->assertEquals($testAddress, $actual);
         } finally {
-            unset($xoopsConfig['proxy_env'], $xoopsConfig['proxy_trusted']);
-            unset($_SERVER['HTTP_CLIENT_IP']);
+            $xoopsConfig = $saved;
+            $_SERVER = $savedServer;
         }
     }
 

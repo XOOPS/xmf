@@ -879,6 +879,9 @@ class Tables
         $sql .= ' ORDER BY `ORDINAL_POSITION` ';
 
         $result = $this->execSql($sql);
+        if (!$result) {
+            return false;
+        }
 
         while ($column = $this->fetch($result)) {
             $attributes = ' ' . $column['COLUMN_TYPE'] . ' '
@@ -906,6 +909,9 @@ class Tables
         $sql .= ' ORDER BY `INDEX_NAME`, `SEQ_IN_INDEX` ';
 
         $result = $this->execSql($sql);
+        if (!$result) {
+            return false;
+        }
 
         $lastKey = '';
         $keyCols = '';
