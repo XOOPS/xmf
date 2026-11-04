@@ -47,12 +47,15 @@ class FilterInput
 
     /**
      * Attributes a browser loads or follows as a URL; their values may use only
-     * SAFE_URL_SCHEMES or no scheme (a relative URL). srcset holds several URLs.
+     * SAFE_URL_SCHEMES or no scheme (a relative URL).
      */
     private const URL_ATTRIBUTES = [
-        'action', 'background', 'cite', 'codebase', 'data', 'formaction', 'href', 'icon',
-        'imagesrcset', 'longdesc', 'manifest', 'ping', 'poster', 'src', 'srcset', 'xlink:href',
+        'action', 'background', 'cite', 'codebase', 'data', 'dynsrc', 'formaction', 'href', 'icon',
+        'imagesrcset', 'longdesc', 'lowsrc', 'manifest', 'ping', 'poster', 'src', 'srcset', 'xlink:href',
     ];
+
+    /** URL attributes holding a comma-separated list of URLs, each with an optional descriptor */
+    private const URL_LIST_ATTRIBUTES = ['imagesrcset', 'srcset'];
 
     private const SAFE_URL_SCHEMES = ['http', 'https', 'mailto'];
 
@@ -232,7 +235,8 @@ class FilterInput
     public function cleanVar($source, $type = 'string')
     {
         // Handle the type constraint (null type, as Request::getHeader() passes, means string)
-        switch (strtoupper((string) $type)) {
+        // ASCII only: before PHP 8.2 strtoupper() follows the locale, and a Turkish one turns "int" into "İNT"
+        switch (strtr((string) $type, 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')) {
             case 'INT':
             case 'INTEGER':
                 // Only use the first integer value
@@ -553,8 +557,10 @@ class FilterInput
         if (!in_array($name, self::URL_ATTRIBUTES, true)) {
             return true;
         }
-        // srcset and ping list several URLs; a comma inside one URL only splits off its tail
-        foreach (explode(',', $value) as $url) {
+        // a comma may be part of a single URL (/a,b:c is relative); in a list it may end one,
+        // and splitting at every comma checks each URL's start, rejecting at most a few valid ones
+        $urls = in_array($name, self::URL_LIST_ATTRIBUTES, true) ? explode(',', $value) : [$value];
+        foreach ($urls as $url) {
             if (
                 preg_match('#^([a-z][a-z0-9+.\-]*):#', $url, $scheme) === 1
                 && !in_array($scheme[1], self::SAFE_URL_SCHEMES, true)
