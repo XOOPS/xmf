@@ -548,6 +548,7 @@ class SerializerTest extends \PHPUnit\Framework\TestCase
     public function testFromPhpIgnoresTrailingBytesLikeUnserialize(): void
     {
         $this->assertSame(['1.2.3.4' => 5], Serializer::fromPhp(serialize(['1.2.3.4' => 5]) . "\n"));
+        $this->assertFalse(Serializer::fromPhp("b:0;\n"));
     }
 
     public function testFromPhpRejectsUnknownTokens(): void

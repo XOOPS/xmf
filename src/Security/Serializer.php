@@ -901,7 +901,8 @@ final class Serializer
             restore_error_handler();
         }
 
-        if ($result === false && $payload !== 'b:0;') {
+        // serialized false is the one value unserialize() reports as false; trailing bytes pass as elsewhere
+        if ($result === false && !str_starts_with($payload, 'b:0;')) {
             throw new UnexpectedValueException(self::MALFORMED);
         }
 
