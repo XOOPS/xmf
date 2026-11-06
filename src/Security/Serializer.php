@@ -1109,7 +1109,8 @@ final class Serializer
 
             case 'O':
             case 'C':
-                return (bool) preg_match('/^[OC]:\d+:"/', $str);
+            case 'E':
+                return (bool) preg_match('/^[OCE]:\d+:"/', $str);
 
             default:
                 return false;
