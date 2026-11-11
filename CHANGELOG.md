@@ -1,5 +1,7 @@
 # XMF ChangeLog
 
+## [Unreleased]
+
 ## [1.3.4-RC1] - 2026-11-10
 
 ### Security
