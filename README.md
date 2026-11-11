@@ -90,6 +90,19 @@ xmf/src/
   |           |-- Cache        Module-scoped caching
   |           +-- GenericHelper  Common helper utilities
   |
+  |-- Security/
+  |     |-- Serializer     Safe JSON/PHP/legacy serialization (no objects by default)
+  |     +-- SerializableTrait  Serialization utilities for object properties
+  |
+  |-- Mail/
+  |     +-- SendmailRunner Hardened sendmail delivery with path validation & timeout
+  |
+  |-- I18n/
+  |     |-- Translator     Resolves XOOPS-style constant labels
+  |     |-- Direction      RTL/LTR text direction detection
+  |     |-- BlockPosition  Block positioning for RTL/LTR layouts
+  |     +-- ImageResolver  Locale-aware image paths with direction fallbacks
+  |
   |-- Metagen.php          Meta keywords, descriptions & SEO titles
   |-- Highlighter.php      Search term highlighting
   |-- StopWords.php        Keyword filtering (multi-language)

@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.3.4-RC1] - 2026-11-10
+
 ### Security
 * `Security\Serializer::fromPhp()`/`fromLegacy()`/`from()`/`tryFrom()`: a payload containing an object (`O:`), custom-serialized class (`C:`) or enum (`E:`) whose class is not in the allowed classes (none by default) is rejected before `unserialize()` runs; `allowed_classes` alone still autoloaded an unlisted enum class and returned the case on PHP 8.1+. Declared lengths past the end of the payload are rejected. Text that only looks like such a token inside an ordinary string is not affected; inside the body of an allowed `C:` class, whose format the class defines, it is rejected. Trailing bytes after the value, including after a serialized `false`, are ignored as `unserialize()` does. BC: a stored object is rejected instead of returned as `__PHP_Incomplete_Class`. The blanket NUL-byte rejection, a heuristic for object payloads, is replaced by this check, so binary strings (`random_bytes()` output) now round-trip. `detect()` recognizes a plain or base64 enum payload as PHP or legacy format instead of `AUTO`. `Module\Helper\Session::get()` reads through `Serializer`, so it returns `false` for a stored object, enum or non-string value, and `set()` throws for a value `get()` could not read back
 * `Security\Serializer::toJson()`: numbers, booleans and `null` count against the size guard at their encoded length instead of one byte, so data sharing an array of large integers or long floats between references is rejected before `json_encode()` builds tens of megabytes
