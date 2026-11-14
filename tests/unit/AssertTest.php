@@ -803,7 +803,7 @@ class AssertTest extends BaseTestCase
             array('string', array(self::getResource()), 'Expected a string. Got: resource'),
 
             array('eq', array('1', '2'), 'Expected a value equal to "2". Got: "1"'),
-            array('eq', array(new ToStringClass("XXX"), new ToStringClass("YYY")), 'Expected a value equal to '. __NAMESPACE__ . '\ToStringClass: "YYY". Got: '. __NAMESPACE__ . '\ToStringClass: "XXX"'),
+            array('eq', array(new ToStringClass('XXX'), new ToStringClass('YYY')), 'Expected a value equal to ' . __NAMESPACE__ . '\ToStringClass: "YYY". Got: ' . __NAMESPACE__ . '\ToStringClass: "XXX"'),
             array('eq', array(1, 2), 'Expected a value equal to 2. Got: 1'),
             array('eq', array(true, false), 'Expected a value equal to false. Got: true'),
             array('eq', array(true, null), 'Expected a value equal to null. Got: true'),

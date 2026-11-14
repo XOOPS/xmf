@@ -19,16 +19,16 @@
 //
 
 // Info
-define("_AM_XMF_CONFIG","Préférences");
-define("_AM_XMF_CONFIG_CHMOD","Le dossier '%s' doit avoir CHMOD '%s'(a actuellement %s).");
-define("_AM_XMF_CONFIG_FOLDERKO","Le dossier '%s' n'existe pas");
-define("_AM_XMF_CONFIG_FOLDEROK","Le dossier '%s' existe");
-define("_AM_XMF_CONFIG_PHP","Vous avez besoin de PHP version %s au minimum (votre Version utilisée actuellement est %s)");
-define("_AM_XMF_CONFIG_XOOPS","Vous avez besoin de XOOPS version %s (votre Version utilisée actuellement est %s)");
+define('_AM_XMF_CONFIG', 'Préférences');
+define('_AM_XMF_CONFIG_CHMOD',"Le dossier '%s' doit avoir CHMOD '%s'(a actuellement %s).");
+define('_AM_XMF_CONFIG_FOLDERKO',"Le dossier '%s' n'existe pas");
+define('_AM_XMF_CONFIG_FOLDEROK',"Le dossier '%s' existe");
+define('_AM_XMF_CONFIG_PHP', 'Vous avez besoin de PHP version %s au minimum (votre Version utilisée actuellement est %s)');
+define('_AM_XMF_CONFIG_XOOPS', 'Vous avez besoin de XOOPS version %s (votre Version utilisée actuellement est %s)');
 
 // About
-define("_AM_XMF_ABOUT_CHANGELOG","Histoire des modifications");
-define("_AM_XMF_ABOUT_MODULEINFO","Infos module");
-define("_AM_XMF_ABOUT_MODULESTATUS","Statut:");
-define("_AM_XMF_ABOUT_UPDATEDATE","Date de dernière mise à jour:");
-define("_AM_XMF_ABOUT_WEBSITE","Site:");
+define('_AM_XMF_ABOUT_CHANGELOG', 'Histoire des modifications');
+define('_AM_XMF_ABOUT_MODULEINFO', 'Infos module');
+define('_AM_XMF_ABOUT_MODULESTATUS', 'Statut:');
+define('_AM_XMF_ABOUT_UPDATEDATE', 'Date de dernière mise à jour:');
+define('_AM_XMF_ABOUT_WEBSITE', 'Site:');

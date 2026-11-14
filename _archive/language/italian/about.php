@@ -28,4 +28,4 @@ define ('_AB_XMF_PEOPLE_TRANSLATERS', 'I traduttori:');
 define ('_AB_XMF_PEOPLE_OTHER', 'Altri collaboratori:');
 define ('_AB_XMF_VERSION_HISTORY', 'Cronologia delle versioni:');
 
-define ('_AB_XMF_AUTHOR', "Autore Originale:");
+define ('_AB_XMF_AUTHOR', 'Autore Originale:');

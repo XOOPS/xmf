@@ -66,7 +66,7 @@ class Migrate
         $module = $this->helper->getModule();
         $this->moduleTables = $module->getInfo('tables');
         if (empty($this->moduleTables)) {
-            throw new \RuntimeException("No tables established in module");
+            throw new \RuntimeException('No tables established in module');
         }
 
         $version = preg_replace_callback(
