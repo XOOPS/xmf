@@ -34,12 +34,12 @@ class Buttonbox extends AbstractTemplate
     /**
      * @var string
      */
-    private $delimiter = "&nbsp;";
+    private $delimiter = '&nbsp;';
 
     /**
      * @var string
      */
-    private $position = "right";
+    private $position = 'right';
 
     /**
      * @var string
@@ -125,15 +125,15 @@ class Buttonbox extends AbstractTemplate
         $path = $this->path;
         switch ($this->position) {
             default:
-            case "right":
+            case 'right':
                 $ret = "<div class=\"floatright\">\n";
                 break;
 
-            case "left":
+            case 'left':
                 $ret = "<div class=\"floatleft\">\n";
                 break;
 
-            case "center":
+            case 'center':
                 $ret = "<div class=\"aligncenter\">\n";
         }
         $ret .= "<div class=\"xo-buttons\">\n";

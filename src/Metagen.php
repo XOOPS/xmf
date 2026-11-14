@@ -34,7 +34,7 @@ class Metagen
      * horizontal ellipsis
      * This will be used to replace omitted text.
      */
-    public const ELLIPSIS = "...";
+    public const ELLIPSIS = '...';
 
     /**
      * assignTitle set the page title
@@ -186,7 +186,7 @@ class Metagen
     {
         $text = static::asPlainText($body);
 
-        $words = explode(" ", $text);
+        $words = explode(' ', $text);
 
         // Only keep $maxWords words
         $newWords = array();
@@ -269,12 +269,12 @@ class Metagen
      */
     public static function generateSeoTitle($title = '', $extension = '')
     {
-        $title = preg_replace("/[^\p{N}\p{L}]/u", "-", $title);
+        $title = preg_replace('/[^\p{N}\p{L}]/u', '-', $title);
 
-        $tableau = explode("-", $title);
+        $tableau = explode('-', $title);
         $tableau = array_filter($tableau, static::nonEmptyString(...));
         $tableau = array_filter($tableau, array(static::stopWordsObject(), 'check'));
-        $title = implode("-", $tableau);
+        $title = implode('-', $tableau);
 
         $title = (empty($title)) ? '' : $title . $extension;
         return $title;
@@ -502,15 +502,15 @@ class Metagen
         );
 
         $replace = array(
-            "",
-            "",
-            "",
-            "\\1",
-            "\"",
-            "&",
-            "<",
-            ">",
-            " ",
+            '',
+            '',
+            '',
+            '\\1',
+            '"',
+            '&',
+            '<',
+            '>',
+            ' ',
             chr(161),
             chr(162),
             chr(163),

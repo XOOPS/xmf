@@ -20,20 +20,20 @@
  * @author          trabis <lusopoemas@gmail.com>
  */
 
-defined("XOOPS_ROOT_PATH") or die("XOOPS root path not defined");
+defined('XOOPS_ROOT_PATH') or die('XOOPS root path not defined');
 
 $modversion['name'] = 'XMF';
 $modversion['version'] = 1.0;
 $modversion['description'] = '';
-$modversion['author'] = "geekwright";
-$modversion['credits'] = "trabis";
-$modversion['help'] = "";
-$modversion['license'] = "GNU GPL 2 or later";
+$modversion['author'] = 'geekwright';
+$modversion['credits'] = 'trabis';
+$modversion['help'] = '';
+$modversion['license'] = 'GNU GPL 2 or later';
 $modversion['license_url'] = 'http://www.gnu.org/licenses/gpl-2.0.html';
 $modversion['official'] = 1;
-$modversion['dirname'] = "xmf";
+$modversion['dirname'] = 'xmf';
 
-$modversion['image'] = "images/xmf.png";
+$modversion['image'] = 'images/xmf.png';
 
 // Admin things
 $modversion['hasAdmin'] = 0;
@@ -44,13 +44,13 @@ $modversion['hasSearch'] = 0;
 $modversion['hasMain'] = 0;
 
 // About stuff
-$modversion['module_status'] = "RC";
-$modversion['release_date'] = "02/01/2016";
+$modversion['module_status'] = 'RC';
+$modversion['release_date'] = '02/01/2016';
 
-$modversion['developer_lead'] = "geekwright";
-$modversion['developer_website_url'] = "https://xoops.org";
-$modversion['developer_website_name'] = "Xoops";
-$modversion['developer_email'] = "richard@geekwright.com";
+$modversion['developer_lead'] = 'geekwright';
+$modversion['developer_website_url'] = 'https://xoops.org';
+$modversion['developer_website_name'] = 'Xoops';
+$modversion['developer_email'] = 'richard@geekwright.com';
 
-$modversion['people']['developers'][] = "geekwright";
-$modversion['people']['developers'][] = "trabis";
+$modversion['people']['developers'][] = 'geekwright';
+$modversion['people']['developers'][] = 'trabis';

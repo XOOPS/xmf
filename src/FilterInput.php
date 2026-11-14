@@ -389,7 +389,7 @@ class FilterInput
             $tagLeft = $currentTag;
             $attrSet = array();
             $currentSpace = strpos($tagLeft, ' ');
-            if (substr($currentTag, 0, 1) === "/") {
+            if (substr($currentTag, 0, 1) === '/') {
                 // is end tag
                 $isCloseTag = true;
                 list($tagName) = explode(' ', $currentTag);
@@ -457,7 +457,7 @@ class FilterInput
                         $preTag .= ' ' . $attrSet[$i];
                     }
                     // reformat single tags to XHTML
-                    if (strpos($fromTagOpen, "</" . $tagName)) {
+                    if (strpos($fromTagOpen, '</' . $tagName)) {
                         $preTag .= '>';
                     } else {
                         $preTag .= ' />';
@@ -566,7 +566,7 @@ class FilterInput
                 if ($attrSubSet[1]) {
                     // attr has value
                     $newSet[] = $attrSubSet[0] . '="' . $attrSubSet[1] . '"';
-                } elseif ($attrSubSet[1] === "0") {
+                } elseif ($attrSubSet[1] === '0') {
                     // attr has decimal zero as value
                     $newSet[] = $attrSubSet[0] . '="0"';
                 } else {

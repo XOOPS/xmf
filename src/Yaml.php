@@ -90,21 +90,21 @@ class Yaml
         $maxSize = 2 * 1024 * 1024; // 2 MB
         $fileSize = @filesize($yamlFile);
         if ($fileSize === false) {
-            trigger_error("Unable to determine YAML file size", E_USER_WARNING);
+            trigger_error('Unable to determine YAML file size', E_USER_WARNING);
             return false;
         }
         if ($fileSize > $maxSize) {
-            trigger_error("YAML file exceeds maximum size of 2MB", E_USER_WARNING);
+            trigger_error('YAML file exceeds maximum size of 2MB', E_USER_WARNING);
             return false;
         }
         if (!is_readable($yamlFile)) {
-            trigger_error("Failed to read YAML file (not readable): " . basename($yamlFile), E_USER_WARNING);
+            trigger_error('Failed to read YAML file (not readable): ' . basename($yamlFile), E_USER_WARNING);
             return false;
         }
         try {
             $yamlString = @file_get_contents($yamlFile);
             if ($yamlString === false) {
-                trigger_error("Failed to read YAML file: " . basename($yamlFile), E_USER_WARNING);
+                trigger_error('Failed to read YAML file: ' . basename($yamlFile), E_USER_WARNING);
                 return false;
             }
             $ret = VendorYaml::parse($yamlString);
@@ -224,20 +224,20 @@ class Yaml
         $maxSize = 2 * 1024 * 1024; // 2 MB
         $fileSize = @filesize($yamlFile);
         if ($fileSize === false) {
-            trigger_error("Unable to determine YAML file size", E_USER_WARNING);
+            trigger_error('Unable to determine YAML file size', E_USER_WARNING);
             return false;
         }
         if ($fileSize > $maxSize) {
-            trigger_error("YAML file exceeds maximum size of 2MB", E_USER_WARNING);
+            trigger_error('YAML file exceeds maximum size of 2MB', E_USER_WARNING);
             return false;
         }
         if (!is_readable($yamlFile)) {
-            trigger_error("Failed to read YAML file (not readable): " . basename($yamlFile), E_USER_WARNING);
+            trigger_error('Failed to read YAML file (not readable): ' . basename($yamlFile), E_USER_WARNING);
             return false;
         }
         $yamlString = @file_get_contents($yamlFile);
         if ($yamlString === false) {
-            trigger_error("Failed to read YAML file: " . basename($yamlFile), E_USER_WARNING);
+            trigger_error('Failed to read YAML file: ' . basename($yamlFile), E_USER_WARNING);
             return false;
         }
         try {
