@@ -43,7 +43,7 @@ abstract class AbstractTemplate
     {
         \Xmf\Loader::loadFile(XOOPS_ROOT_PATH . '/class/template.php');
         $this->tpl = new \XoopsTpl();
-        $this->template = "db:system_dummy.tpl";
+        $this->template = 'db:system_dummy.tpl';
         $this->init();
     }
 
