@@ -92,7 +92,7 @@ abstract class GenericHelper extends AbstractHelper
             $this->initConfig();
         }
         if (empty($name)) {
-            $this->addLog("Getting all config");
+            $this->addLog('Getting all config');
 
             return $this->configs;
         }

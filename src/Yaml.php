@@ -92,7 +92,7 @@ class Yaml
         $maxSize = 2 * 1024 * 1024; // 2 MB
         $fileSize = @filesize($yamlFile);
         if ($fileSize === false) {
-            trigger_error("Unable to determine YAML file size", E_USER_WARNING);
+            trigger_error('Unable to determine YAML file size', E_USER_WARNING);
             return false;
         }
         if ($fileSize > $maxSize) {
@@ -100,14 +100,14 @@ class Yaml
             return false;
         }
         if (!is_readable($yamlFile)) {
-            trigger_error("Failed to read YAML file (not readable): " . basename($yamlFile), E_USER_WARNING);
+            trigger_error('Failed to read YAML file (not readable): ' . basename($yamlFile), E_USER_WARNING);
             return false;
         }
         try {
             // the size check above is metadata only; a growing file or a device can return more
             $yamlString = @file_get_contents($yamlFile, false, null, 0, $maxSize + 1);
             if ($yamlString === false) {
-                trigger_error("Failed to read YAML file: " . basename($yamlFile), E_USER_WARNING);
+                trigger_error('Failed to read YAML file: ' . basename($yamlFile), E_USER_WARNING);
                 return false;
             }
             if (strlen($yamlString) > $maxSize) {
@@ -231,7 +231,7 @@ class Yaml
         $maxSize = 2 * 1024 * 1024; // 2 MB
         $fileSize = @filesize($yamlFile);
         if ($fileSize === false) {
-            trigger_error("Unable to determine YAML file size", E_USER_WARNING);
+            trigger_error('Unable to determine YAML file size', E_USER_WARNING);
             return false;
         }
         if ($fileSize > $maxSize) {
@@ -239,13 +239,13 @@ class Yaml
             return false;
         }
         if (!is_readable($yamlFile)) {
-            trigger_error("Failed to read YAML file (not readable): " . basename($yamlFile), E_USER_WARNING);
+            trigger_error('Failed to read YAML file (not readable): ' . basename($yamlFile), E_USER_WARNING);
             return false;
         }
         // the size check above is metadata only; a growing file or a device can return more
         $yamlString = @file_get_contents($yamlFile, false, null, 0, $maxSize + 1);
         if ($yamlString === false) {
-            trigger_error("Failed to read YAML file: " . basename($yamlFile), E_USER_WARNING);
+            trigger_error('Failed to read YAML file: ' . basename($yamlFile), E_USER_WARNING);
             return false;
         }
         if (strlen($yamlString) > $maxSize) {
