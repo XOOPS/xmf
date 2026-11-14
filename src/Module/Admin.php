@@ -169,7 +169,7 @@ class Admin
      *
      * @return string
      */
-    public function renderButton($position = null, $delimiter = "&nbsp;")
+    public function renderButton($position = null, $delimiter = '&nbsp;')
     {
         if (null === $position) {
             $position = 'right';
@@ -186,7 +186,7 @@ class Admin
      *
      * @return void
      */
-    public function displayButton($position = null, $delimiter = "&nbsp;")
+    public function displayButton($position = null, $delimiter = '&nbsp;')
     {
         echo $this->renderButton($position, $delimiter);
     }
@@ -289,11 +289,11 @@ class Admin
     public function addConfigError($value = '')
     {
         $path = XOOPS_URL . '/Frameworks/moduleclasses/icons/16/';
-        $line = "";
+        $line = '';
         $line .= "<span style='color : red; font-weight : bold;'>";
         $line .= "<img src='" . $path . "0.png' >";
         $line .= htmlspecialchars($value, ENT_QUOTES, defined('_CHARSET') ? \constant('_CHARSET') : 'UTF-8');
-        $line .= "</span>";
+        $line .= '</span>';
         $value = $line;
         $type = 'default';
 
@@ -310,11 +310,11 @@ class Admin
     public function addConfigAccept($value = '')
     {
         $path = XOOPS_URL . '/Frameworks/moduleclasses/icons/16/';
-        $line = "";
+        $line = '';
         $line .= "<span style='color : green;'>";
         $line .= "<img src='" . $path . "1.png' >";
         $line .= htmlspecialchars($value, ENT_QUOTES, defined('_CHARSET') ? \constant('_CHARSET') : 'UTF-8');
-        $line .= "</span>";
+        $line .= '</span>';
         $value = $line;
         $type = 'default';
 
@@ -331,11 +331,11 @@ class Admin
     public function addConfigWarning($value = '')
     {
         $path = XOOPS_URL . '/Frameworks/moduleclasses/icons/16/';
-        $line = "";
+        $line = '';
         $line .= "<span style='color : orange; font-weight : bold;'>";
         $line .= "<img src='" . $path . "warning.png' >";
         $line .= htmlspecialchars($value, ENT_QUOTES, defined('_CHARSET') ? \constant('_CHARSET') : 'UTF-8');
-        $line .= "</span>";
+        $line .= '</span>';
         $value = $line;
         $type = 'default';
 

@@ -29,7 +29,7 @@ define('_AM_XMF_ABOUT_DESCRIPTION','Description');
 define('_AM_XMF_ABOUT_MODULEINFO','Module Info');
 define('_AM_XMF_ABOUT_MODULESTATUS','Status:');
 define('_AM_XMF_ABOUT_UPDATEDATE','Update date:');
-define('_AM_XMF_ABOUT_WEBSITE',"Website:");
+define('_AM_XMF_ABOUT_WEBSITE', 'Website:');
 
 // checkModuleVersion
 define('_AM_XMF_DEMOMVC_MODULE_NOTFOUND','Please install or reactivate %1$s module. Minimum version required: %2$s');

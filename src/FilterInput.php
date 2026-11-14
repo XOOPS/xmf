@@ -449,15 +449,15 @@ class FilterInput
             // iterate through tag finding attribute pairs - setup
             $attrSet = array();
             $currentSpace = strpos($currentTag, ' ');
-            if (substr($currentTag, 0, 1) === "/") {
+            if (substr($currentTag, 0, 1) === '/') {
                 // is end tag
                 $isCloseTag = true;
-                list($tagName) = explode(' ', $currentTag, 2);
+                [$tagName] = explode(' ', $currentTag, 2);
                 $tagName = substr($tagName, 1);
             } else {
                 // is start tag
                 $isCloseTag = false;
-                list($tagName) = explode(' ', $currentTag, 2);
+                [$tagName] = explode(' ', $currentTag, 2);
             }
             // excludes all "non-regular" tagnames OR remove if xssauto is on and tag is blacklisted.
             // An empty (or "0") tag name is already rejected by the regex below, so a
@@ -665,7 +665,7 @@ class FilterInput
                 if ($attrSubSet[1]) {
                     // attr has value
                     $newSet[] = $attrSubSet[0] . '="' . $attrSubSet[1] . '"';
-                } elseif ($attrSubSet[1] === "0") {
+                } elseif ($attrSubSet[1] === '0') {
                     // attr has decimal zero as value
                     $newSet[] = $attrSubSet[0] . '="0"';
                 } else {
