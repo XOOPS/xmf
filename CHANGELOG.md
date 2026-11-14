@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [1.3.4-RC2] - 2026-11-14
+
+### Code Style
+* Strings without escape sequences or interpolation use single quotes instead of double quotes across `src/` and `tests/` (#229, #232). Values are unchanged (`Metagen::ELLIPSIS` is still `...`); there are no behaviour changes
+
 ## [1.3.4-RC1] - 2026-11-10
 
 ### Security
