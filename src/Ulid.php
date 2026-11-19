@@ -398,7 +398,8 @@ class Ulid
         $decimal = '0';
         for ($i = 0; $i < 32; $i++) {
             $decimal = (string) \bcmul($decimal, '16');
-            $decimal = (string) \bcadd($decimal, (string) \hexdec($hex[$i]));
+            // intval() gives an int; hexdec() is int|float, and a float's text is no number to bcadd()
+            $decimal = (string) \bcadd($decimal, (string) \intval($hex[$i], 16));
         }
 
         // Convert decimal to base32 (ULID)
