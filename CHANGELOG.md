@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Fixed
+* `Security\Serializer::toJson()`: an `ArrayIterator` in the data no longer raises "Method ArrayIterator::getFlags() is deprecated since 8.6" on PHP 8.6. The size guard still reads the iterator's `STD_PROP_LIST` flag, which `json_encode()` honours on every PHP version, without that call
+
 ## [1.3.4-RC2] - 2026-11-14
 
 ### Code Style

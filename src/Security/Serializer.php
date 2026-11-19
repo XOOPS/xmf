@@ -187,7 +187,7 @@ final class Serializer
     private static function jsonProperties(object $object): array
     {
         if ($object instanceof \ArrayObject || $object instanceof \ArrayIterator) {
-            if (($object->getFlags() & \ArrayObject::STD_PROP_LIST) === 0) {
+            if ((self::arrayFlags($object) & \ArrayObject::STD_PROP_LIST) === 0) {
                 return self::publicTable($object);
             }
             return get_object_vars($object);
@@ -202,6 +202,27 @@ final class Serializer
         }
 
         return $properties;
+    }
+
+    /**
+     * The flags of an ArrayObject or ArrayIterator.
+     *
+     * PHP 8.6 deprecates ArrayIterator::getFlags() and names no replacement, while
+     * json_encode() still honours the iterator's STD_PROP_LIST. There __serialize() is
+     * read instead, which lists the flags first; it is invoked on ArrayIterator itself,
+     * so an override in a subclass is not asked. It shares the storage table but copies
+     * the iterator's own property table, so earlier versions keep getFlags().
+     *
+     * @param \ArrayObject<array-key, mixed>|\ArrayIterator<array-key, mixed> $object
+     */
+    private static function arrayFlags(\ArrayObject|\ArrayIterator $object): int
+    {
+        if ($object instanceof \ArrayObject || \PHP_VERSION_ID < 80600) {
+            return $object->getFlags();
+        }
+        $state = (new \ReflectionMethod(\ArrayIterator::class, '__serialize'))->invoke($object);
+
+        return \is_array($state) && \is_int($state[0] ?? null) ? $state[0] : 0;
     }
 
     /**
