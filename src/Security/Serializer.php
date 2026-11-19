@@ -208,16 +208,20 @@ final class Serializer
      * The flags of an ArrayObject or ArrayIterator.
      *
      * PHP 8.6 deprecates ArrayIterator::getFlags() and names no replacement, while
-     * json_encode() still honours the iterator's STD_PROP_LIST. There __serialize() is
-     * read instead, which lists the flags first; it is invoked on ArrayIterator itself,
-     * so an override in a subclass is not asked. It shares the storage table but copies
-     * the iterator's own property table, so earlier versions keep getFlags().
+     * json_encode() still honours the iterator's STD_PROP_LIST. Where PHP reports the
+     * method as deprecated, __serialize() is read instead, which lists the flags first;
+     * it is invoked on ArrayIterator itself, so an override in a subclass is not asked.
+     * It shares the storage table but copies the iterator's own property table, so
+     * earlier versions keep getFlags().
      *
      * @param \ArrayObject<array-key, mixed>|\ArrayIterator<array-key, mixed> $object
      */
     private static function arrayFlags(\ArrayObject|\ArrayIterator $object): int
     {
-        if ($object instanceof \ArrayObject || \PHP_VERSION_ID < 80600) {
+        // Asked of PHP itself: a version comparison is a constant to static analysis
+        static $getFlagsDeprecated = null;
+        $getFlagsDeprecated ??= (new \ReflectionMethod(\ArrayIterator::class, 'getFlags'))->isDeprecated();
+        if ($object instanceof \ArrayObject || !$getFlagsDeprecated) {
             return $object->getFlags();
         }
         $state = (new \ReflectionMethod(\ArrayIterator::class, '__serialize'))->invoke($object);
