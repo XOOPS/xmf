@@ -143,6 +143,51 @@ class SerializerTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(3000011, \strlen(Serializer::toJson($object)));
     }
 
+    /**
+     * @return array<string, array{\Closure(): \ArrayIterator<array-key, mixed>, string}>
+     */
+    public static function arrayIteratorProvider(): array
+    {
+        return [
+            'storage' => [static fn (): \ArrayIterator => new \ArrayIterator(['k' => 'v']), '{"k":"v"}'],
+            // 10 MB of storage json_encode() does not write under STD_PROP_LIST, so it must not count
+            'STD_PROP_LIST' => [
+                static fn (): \ArrayIterator => new class (array_fill(0, 100, str_repeat('a', 100000)), \ArrayIterator::STD_PROP_LIST) extends \ArrayIterator {
+                    public string $shown = 's';
+
+                    /**
+                     * @return array<mixed>
+                     */
+                    public function __serialize(): array
+                    {
+                        return [];
+                    }
+                },
+                '{"shown":"s"}',
+            ],
+        ];
+    }
+
+    /**
+     * @param \Closure(): \ArrayIterator<array-key, mixed> $build
+     */
+    #[DataProvider('arrayIteratorProvider')]
+    public function testToJsonReadsArrayIteratorFlagsWithoutADeprecatedCall(\Closure $build, string $expected): void
+    {
+        // ArrayIterator::getFlags() is deprecated as of PHP 8.6
+        set_error_handler(
+            static function (int $severity, string $message): never {
+                throw new \ErrorException($message, 0, $severity);
+            },
+            E_DEPRECATED
+        );
+        try {
+            $this->assertSame($expected, Serializer::toJson($build()));
+        } finally {
+            restore_error_handler();
+        }
+    }
+
     #[RequiresPhp('>= 8.4')]
     public function testToJsonCountsValuesReturnedByPropertyGetHooks(): void
     {
