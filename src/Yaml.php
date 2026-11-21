@@ -47,6 +47,8 @@ class Yaml
      * @param integer $indent Number of spaces to indent for nested nodes
      *
      * @return string|bool YAML string or false on error
+     *
+     * @throws \RuntimeException when the YAML library or the file function throws, see {@see self::logError()}
      */
     public static function dump($var, $inline = 4, $indent = 4)
     {
@@ -65,6 +67,8 @@ class Yaml
      * @param string $yamlString YAML dump string
      *
      * @return array|boolean PHP array or false on error
+     *
+     * @throws \RuntimeException when the YAML library or the file function throws, see {@see self::logError()}
      */
     public static function load($yamlString)
     {
@@ -83,6 +87,8 @@ class Yaml
      * @param string $yamlFile filename of YAML file
      *
      * @return array|false PHP array or false on error
+     *
+     * @throws \RuntimeException when the YAML library or the file function throws, see {@see self::logError()}
      */
     public static function read($yamlFile)
     {
@@ -131,6 +137,8 @@ class Yaml
      * @param integer $indent   Number of spaces to indent for nested nodes
      *
      * @return integer|boolean number of bytes written, or false on error
+     *
+     * @throws \RuntimeException when the YAML library or the file function throws, see {@see self::logError()}
      */
     public static function save($var, $yamlFile, $inline = 4, $indent = 4)
     {
@@ -157,6 +165,8 @@ class Yaml
      * @param integer $indent Number of spaces to indent for nested nodes
      *
      * @return string|boolean YAML string or false on error
+     *
+     * @throws \RuntimeException when the YAML library or the file function throws, see {@see self::logError()}
      */
     public static function dumpWrapped($var, $inline = 4, $indent = 4)
     {
@@ -180,6 +190,8 @@ class Yaml
      * @param string $yamlString YAML dump string
      *
      * @return array|boolean PHP array or false on error
+     *
+     * @throws \RuntimeException when the YAML library or the file function throws, see {@see self::logError()}
      */
     public static function loadWrapped($yamlString)
     {
@@ -222,6 +234,8 @@ class Yaml
      * @param string $yamlFile filename of YAML file
      *
      * @return array|false PHP array or false on error
+     *
+     * @throws \RuntimeException when the YAML library or the file function throws, see {@see self::logError()}
      */
     public static function readWrapped($yamlFile)
     {
@@ -275,6 +289,8 @@ class Yaml
      * @param integer $indent   Number of spaces to indent for nested nodes
      *
      * @return integer|boolean number of bytes written, or false on error
+     *
+     * @throws \RuntimeException when the YAML library or the file function throws, see {@see self::logError()}
      */
     public static function saveWrapped($var, $yamlFile, $inline = 4, $indent = 4)
     {
@@ -289,14 +305,31 @@ class Yaml
     }
 
     /**
-     * @param \Throwable $e throwable to log
+     * Report what a method caught: a failure of the YAML library, or an error
+     * thrown by the file function (a file name with a NUL byte)
+     *
+     * XOOPS 2.6 receives it as a core.exception event and the calling method
+     * goes on to its failure value. Everywhere else it is thrown. Before 1.3.4 it was raised with
+     * trigger_error(E_USER_ERROR), which stopped the page in the XOOPS error
+     * handler as an uncaught exception does now; PHP 8.4 deprecated that call.
+     *
+     * @param \Throwable $e the failure
+     *
+     * @return void
+     *
+     * @throws \RuntimeException the failure itself when it is one (the parse and dump
+     *                           exceptions of the library are), otherwise wrapped in one
      */
     protected static function logError($e)
     {
         if (class_exists('Xoops')) {
             \Xoops::getInstance()->events()->triggerEvent('core.exception', $e);
-        } else {
-            trigger_error($e->getMessage(), E_USER_ERROR);
+
+            return;
         }
+
+        // Passed on as it is, so a nested call (readWrapped() into loadWrapped())
+        // does not wrap the same failure twice.
+        throw $e instanceof \RuntimeException ? $e : new \RuntimeException($e->getMessage(), 0, $e);
     }
 }

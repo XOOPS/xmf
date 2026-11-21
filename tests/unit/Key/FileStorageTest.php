@@ -21,13 +21,21 @@ class FileStorageTest extends \PHPUnit\Framework\TestCase
     protected $storageDir;
 
     /**
+     * @var string private parent of the storage directory
+     */
+    protected $storageRoot;
+
+    /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
      */
     protected function setUp(): void
     {
-        $this->storageDir = sys_get_temp_dir() . '/xmf-filestorage-' . bin2hex(random_bytes(8));
-        if (!mkdir($this->storageDir, 0700)) {
+        // The storage directory sits alone in a private parent, so a test can tell
+        // whether anything was written beside it.
+        $this->storageRoot = sys_get_temp_dir() . '/xmf-filestorage-' . bin2hex(random_bytes(8));
+        $this->storageDir = $this->storageRoot . '/keys';
+        if (!mkdir($this->storageRoot, 0700) || !mkdir($this->storageDir, 0700)) {
             $this->fail('cannot create private test directory');
         }
         $this->object = new FileStorage($this->storageDir, 'fubar');
@@ -41,6 +49,7 @@ class FileStorageTest extends \PHPUnit\Framework\TestCase
     {
         @$this->object->delete($this->testKey);
         @rmdir($this->storageDir);
+        @rmdir($this->storageRoot);
     }
 
     public function testSave()
@@ -78,5 +87,59 @@ class FileStorageTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($this->object->delete($name));
         $this->assertFalse(@$this->object->delete($name));
         $this->assertFalse($this->object->exists($name));
+    }
+
+    public function testNameWithDotUnderscoreAndDigitsIsAccepted()
+    {
+        $name = 'my.module_key-2';
+        try {
+            $this->assertTrue($this->object->save($name, 'data'));
+            $this->assertSame('data', $this->object->fetch($name));
+        } finally {
+            @$this->object->delete($name);
+        }
+    }
+
+    /**
+     * @return array<string, array{mixed}>
+     */
+    public static function unusableNames(): array
+    {
+        return [
+            'parent directory'   => ['../outside'],
+            'forward slash'      => ['sub/key'],
+            'backslash'          => ['sub\\key'],
+            'drive or stream'    => ['c:key'],
+            'NUL byte'           => ["key\0"],
+            'trailing line feed' => ["key\n"],
+            'space'              => ['my key'],
+            'empty'              => [''],
+            'array'              => [['key']],
+        ];
+    }
+
+    /**
+     * @param mixed $name
+     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('unusableNames')]
+    public function testUnusableNameIsRefusedByEveryMethod($name)
+    {
+        $calls = [
+            'save'   => fn () => $this->object->save($name, 'data'),
+            'fetch'  => fn () => $this->object->fetch($name),
+            'exists' => fn () => $this->object->exists($name),
+            'delete' => fn () => $this->object->delete($name),
+        ];
+        foreach ($calls as $method => $call) {
+            try {
+                $call();
+                $this->fail($method . '() accepted the name');
+            } catch (\InvalidArgumentException $e) {
+                $this->assertSame('Invalid key name', $e->getMessage());
+            }
+        }
+        // Nothing was written, inside the storage directory or beside it.
+        $this->assertSame([], array_values(array_diff(scandir($this->storageDir), ['.', '..'])));
+        $this->assertSame(['keys'], array_values(array_diff(scandir($this->storageRoot), ['.', '..'])));
     }
 }

@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Bug Fixes
+* `Yaml`: an exception caught inside a method (text that does not parse, a value of the wrong type, a file name with a NUL byte) is thrown as a `\RuntimeException` instead of raised with `trigger_error(E_USER_ERROR)`, which PHP 8.4 deprecated. On a XOOPS 2.5 or 2.7 site the page stops with the error page as before, because the XOOPS error handler ended the request on that error; a caller can now catch the exception. The parse and dump exceptions of symfony/yaml are passed on as they are, any other failure is wrapped with the original as `getPrevious()`. A missing, unreadable or oversized file still returns `false`. **Changed**: the logged entry names the exception class and the place it was thrown, where it used to carry the bare message and point to `Yaml::logError()`; and code that runs without the XOOPS error handler (a command-line script, a test, a handler that returns from `E_USER_ERROR`) and relied on `false` after the error has to catch `\RuntimeException`
+
+### Security
+* `Key\FileStorage`: a key name may hold only letters, digits, dot, underscore and hyphen. `save()`, `fetch()`, `exists()` and `delete()` throw `\InvalidArgumentException` for any other name. The name is part of the name of a file that `fetch()` includes, and a direct call used it unchecked. Keys made through `Jwt\KeyFactory` or `Key\Basic` already had their name reduced to letters, digits, underscore and hyphen, so they keep their files; only a name with none of those characters (`'.'`), which used to share the file `…-key-.php`, is now refused
+
 ## [1.3.4-RC3] - 2026-11-20
 
 ### Bug Fixes
