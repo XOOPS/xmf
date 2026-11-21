@@ -49,14 +49,28 @@ class FileStorage implements StorageInterface
     }
 
     /**
-     * Fetch key data by name
+     * Build the file name that holds a key
      *
-     * @param string $name key name
+     * The name becomes part of a file name that fetch() includes as PHP, so only
+     * letters, digits, dot, underscore and hyphen are accepted: a name cannot
+     * hold a path separator and so cannot address another directory. The key
+     * classes ({@see KeyAbstract}) reduce a name to letters, digits, underscore
+     * and hyphen themselves; this check covers a direct call. On a file system
+     * that ignores case, names that differ only in case are the same file.
+     *
+     * @param string|int $name key name; any other type is refused
      *
      * @return string file name
+     *
+     * @throws \InvalidArgumentException on a name with any other character, or an empty one
      */
     protected function fileName($name)
     {
+        // \z, not $: a trailing line feed must not pass.
+        if ((!is_string($name) && !is_int($name)) || 1 !== preg_match('/^[A-Za-z0-9_.-]+\z/', (string) $name)) {
+            throw new \InvalidArgumentException('Invalid key name');
+        }
+
         return $this->storagePath . "/{$this->systemSecret}-key-{$name}.php";
     }
 

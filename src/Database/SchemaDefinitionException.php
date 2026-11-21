@@ -27,15 +27,16 @@ namespace Xmf\Database;
 class SchemaDefinitionException extends \RuntimeException
 {
     /**
-     * Build an exception for a missing schema definition file.
+     * Build an exception for a missing or unusable schema definition file.
      *
-     * @param string $file schema definition file path
+     * @param string          $file     schema definition file path
+     * @param \Throwable|null $previous what made the file unusable, if anything
      *
      * @return self
      */
-    public static function forFile(string $file): self
+    public static function forFile(string $file, ?\Throwable $previous = null): self
     {
-        return new self('No schema definition ' . basename($file));
+        return new self('No schema definition ' . basename($file), 0, $previous);
     }
 
     /**
