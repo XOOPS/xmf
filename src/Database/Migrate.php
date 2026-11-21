@@ -159,7 +159,12 @@ class Migrate
     public function getTargetDefinitions()
     {
         if ($this->targetDefinitions === null) {
-            $definitions = Yaml::read($this->tableDefinitionFile);
+            try {
+                $definitions = Yaml::read($this->tableDefinitionFile);
+            } catch (\RuntimeException $e) {
+                // A file that does not parse is no definition either.
+                throw SchemaDefinitionException::forFile($this->tableDefinitionFile, $e);
+            }
             if (!is_array($definitions) || $definitions === []) {
                 throw SchemaDefinitionException::forFile($this->tableDefinitionFile);
             }

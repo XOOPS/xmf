@@ -282,12 +282,36 @@ class MigrateTest extends \PHPUnit\Framework\TestCase
         }
         $this->assertSame(array(), $handler->added);
     }
+
+    public function testDefinitionFileThatDoesNotParseThrowsSchemaDefinitionException()
+    {
+        $file = tempnam(sys_get_temp_dir(), 'MIGRATETEST');
+        $this->assertNotFalse($file, 'Failed to create temp file');
+        file_put_contents($file, 'demo: [unclosed');
+        $migrate = new TestableMigrate();
+        $migrate->setTableDefinitionFile($file);
+
+        try {
+            $migrate->getTargetDefinitions();
+            $this->fail('Expected a SchemaDefinitionException.');
+        } catch (SchemaDefinitionException $e) {
+            $this->assertSame('No schema definition ' . basename($file), $e->getMessage());
+            $this->assertInstanceOf(\Symfony\Component\Yaml\Exception\ParseException::class, $e->getPrevious());
+        } finally {
+            unlink($file);
+        }
+    }
 }
 
 class TestableMigrate extends Migrate
 {
     public function __construct()
     {
+    }
+
+    public function setTableDefinitionFile(string $file): void
+    {
+        $this->tableDefinitionFile = $file;
     }
 
     public function setTargetDefinitions(array $targetDefinitions): void

@@ -58,7 +58,7 @@ class FileStorage implements StorageInterface
      * and hyphen themselves; this check covers a direct call. On a file system
      * that ignores case, names that differ only in case are the same file.
      *
-     * @param string $name key name
+     * @param string|int $name key name; any other type is refused
      *
      * @return string file name
      *

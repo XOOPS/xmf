@@ -48,7 +48,7 @@ class Yaml
      *
      * @return string|bool YAML string or false on error
      *
-     * @throws \RuntimeException when the YAML library or the file function throws, see {@see self::logError()}
+     * @throws \RuntimeException when the YAML library fails, see {@see self::logError()}
      */
     public static function dump($var, $inline = 4, $indent = 4)
     {
@@ -68,7 +68,7 @@ class Yaml
      *
      * @return array|boolean PHP array or false on error
      *
-     * @throws \RuntimeException when the YAML library or the file function throws, see {@see self::logError()}
+     * @throws \RuntimeException when the YAML library fails, see {@see self::logError()}
      */
     public static function load($yamlString)
     {
@@ -88,7 +88,7 @@ class Yaml
      *
      * @return array|false PHP array or false on error
      *
-     * @throws \RuntimeException when the YAML library or the file function throws, see {@see self::logError()}
+     * @throws \RuntimeException when the YAML library fails, see {@see self::logError()}
      */
     public static function read($yamlFile)
     {
@@ -138,18 +138,17 @@ class Yaml
      *
      * @return integer|boolean number of bytes written, or false on error
      *
-     * @throws \RuntimeException when the YAML library or the file function throws, see {@see self::logError()}
+     * @throws \RuntimeException when the YAML library fails, see {@see self::logError()}
      */
     public static function save($var, $yamlFile, $inline = 4, $indent = 4)
     {
         try {
             $yamlString = VendorYaml::dump($var, $inline, $indent);
-            $ret = file_put_contents($yamlFile, $yamlString);
         } catch (\Throwable $e) {
             static::logError($e);
-            $ret = false;
+            return false;
         }
-        return $ret;
+        return self::writeFile($yamlFile, $yamlString);
     }
 
     /**
@@ -166,7 +165,7 @@ class Yaml
      *
      * @return string|boolean YAML string or false on error
      *
-     * @throws \RuntimeException when the YAML library or the file function throws, see {@see self::logError()}
+     * @throws \RuntimeException when the YAML library fails, see {@see self::logError()}
      */
     public static function dumpWrapped($var, $inline = 4, $indent = 4)
     {
@@ -191,7 +190,7 @@ class Yaml
      *
      * @return array|boolean PHP array or false on error
      *
-     * @throws \RuntimeException when the YAML library or the file function throws, see {@see self::logError()}
+     * @throws \RuntimeException when the YAML library fails, see {@see self::logError()}
      */
     public static function loadWrapped($yamlString)
     {
@@ -235,7 +234,7 @@ class Yaml
      *
      * @return array|false PHP array or false on error
      *
-     * @throws \RuntimeException when the YAML library or the file function throws, see {@see self::logError()}
+     * @throws \RuntimeException when the YAML library fails, see {@see self::logError()}
      */
     public static function readWrapped($yamlFile)
     {
@@ -290,26 +289,57 @@ class Yaml
      *
      * @return integer|boolean number of bytes written, or false on error
      *
-     * @throws \RuntimeException when the YAML library or the file function throws, see {@see self::logError()}
+     * @throws \RuntimeException when the YAML library fails, see {@see self::logError()}
      */
     public static function saveWrapped($var, $yamlFile, $inline = 4, $indent = 4)
     {
         try {
             $yamlString = static::dumpWrapped($var, $inline, $indent);
-            $ret = file_put_contents($yamlFile, $yamlString);
         } catch (\Throwable $e) {
             static::logError($e);
-            $ret = false;
+            return false;
         }
-        return $ret;
+        // Nothing to write: dumpWrapped() gave false, and writing that would empty
+        // an existing file.
+        if (!is_string($yamlString)) {
+            return false;
+        }
+        return self::writeFile($yamlFile, $yamlString);
     }
 
     /**
-     * Report what a method caught: a failure of the YAML library, or an error
-     * thrown by the file function (a file name with a NUL byte)
+     * Write YAML text to a file
+     *
+     * A failed write is a warning and false, as a failed read is in read(). The
+     * warning names the file without its path. Whatever the file function throws
+     * (a ValueError for a file name with a NUL byte, a TypeError for one that is
+     * no string) is a failed write too; that warning names the class of the error.
+     *
+     * @param string $yamlFile   filename of YAML file
+     * @param string $yamlString text to write
+     *
+     * @return integer|false number of bytes written, or false on error
+     */
+    private static function writeFile($yamlFile, $yamlString)
+    {
+        try {
+            // PHP's own warning would carry the full path.
+            $bytes = @file_put_contents($yamlFile, $yamlString);
+        } catch (\Throwable $e) {
+            trigger_error('Failed to write YAML file (' . get_class($e) . ')', E_USER_WARNING);
+            return false;
+        }
+        if (false === $bytes) {
+            trigger_error('Failed to write YAML file: ' . basename($yamlFile), E_USER_WARNING);
+        }
+        return $bytes;
+    }
+
+    /**
+     * Report a failure of the YAML library that a method caught
      *
      * XOOPS 2.6 receives it as a core.exception event and the calling method
-     * goes on to its failure value. Everywhere else it is thrown. Before 1.3.4 it was raised with
+     * returns false. Everywhere else it is thrown. Before 1.3.4 it was raised with
      * trigger_error(E_USER_ERROR), which stopped the page in the XOOPS error
      * handler as an uncaught exception does now; PHP 8.4 deprecated that call.
      *
