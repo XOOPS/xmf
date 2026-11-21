@@ -202,4 +202,36 @@ class YamlTest extends \PHPUnit\Framework\TestCase
             }
         }
     }
+
+    public function testLoadInvalidYamlThrows()
+    {
+        $this->expectException(\RuntimeException::class);
+        Yaml::load('key: [unclosed');
+    }
+
+    public function testReadWrappedInvalidYamlThrowsTheParserExceptionOnce()
+    {
+        $tmpfname = tempnam(sys_get_temp_dir(), 'YAMLTEST');
+        $this->assertNotFalse($tmpfname, 'Failed to create temp file');
+        file_put_contents($tmpfname, "<?php __halt_compiler(); ?>\n---\nkey: [unclosed\n...\n");
+        try {
+            Yaml::readWrapped($tmpfname);
+            $this->fail('Expected a RuntimeException');
+        } catch (\RuntimeException $e) {
+            // loadWrapped() threw it; readWrapped() passes it on instead of wrapping it again.
+            $this->assertInstanceOf(\Symfony\Component\Yaml\Exception\ParseException::class, $e);
+        } finally {
+            unlink($tmpfname);
+        }
+    }
+
+    public function testFailureThatIsNotARuntimeExceptionIsWrapped()
+    {
+        try {
+            Yaml::load([]); // the parser takes a string
+            $this->fail('Expected a RuntimeException');
+        } catch (\RuntimeException $e) {
+            $this->assertInstanceOf(\TypeError::class, $e->getPrevious());
+        }
+    }
 }
